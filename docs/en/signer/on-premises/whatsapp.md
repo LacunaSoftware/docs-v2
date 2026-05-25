@@ -9,6 +9,6 @@ sidebar_position: 16
 
 Sorry, this article is not yet available in the selected language. Please choose between one of the available versions:
 
-- [Português (Brasil)](/docusaurus/docs/signer/on-premises/whatsapp)
+- [Português (Brasil)](/docs-v2/docs/signer/on-premises/whatsapp)
 
 :::

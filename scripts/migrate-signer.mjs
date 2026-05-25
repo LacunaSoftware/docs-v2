@@ -271,8 +271,8 @@ const relPathToDocSegment = relPath =>
 
 function buildUnavailablePage(title, locale, relPath) {
   const seg   = relPathToDocSegment(relPath);
-  const ptUrl = `/docusaurus/docs/signer/${seg}`;
-  const enUrl = `/docusaurus/docs/en/signer/${seg}`;
+  const ptUrl = `/docs-v2/docs/signer/${seg}`;
+  const enUrl = `/docs-v2/docs/en/signer/${seg}`;
 
   if (locale === 'pt-BR') {
     return `# ${title}\n\n:::warning Indisponível\n\nDesculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:\n\n- [English](${enUrl})\n\n:::\n`;

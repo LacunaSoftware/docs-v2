@@ -17,7 +17,7 @@ const PRODUCTS: Product[] = [
     id: 'signer',
     name: 'Signer',
     description: 'Plataforma de assinatura digital de documentos com suporte a múltiplos formatos e certificados.',
-    href: '/docusaurus/docs/signer/',
+    href: '/docs-v2/docs/signer/',
     badge: 'Disponível',
     available: true,
   },

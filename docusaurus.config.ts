@@ -52,7 +52,7 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl: 'https://github.com/LacunaSoftware/docs/edit/master/',
+          editUrl: 'https://github.com/LacunaSoftware/docs-v2/edit/main/',
         },
         blog: false,
         theme: {
@@ -64,7 +64,8 @@ const config: Config = {
 
   themeConfig: {
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'light',
+      respectPrefersColorScheme: false,
     },
     navbar: {
       title: 'Lacuna Docs',
@@ -86,7 +87,7 @@ const config: Config = {
         // Old / New documentation switch
         {
           href: 'https://docs.lacunasoftware.com/pt-br/index.html',
-          label: '← Documentação Clássica',
+          label: 'Documentação Clássica',
           position: 'right',
           className: 'navbar__link--classic',
         },

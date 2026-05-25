@@ -9,6 +9,6 @@ sidebar_position: 9
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docusaurus/docs/en/signer/on-premises/settings)
+- [English](/docs-v2/docs/en/signer/on-premises/settings)
 
 :::

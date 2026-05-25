@@ -54,20 +54,45 @@
   height: 26px;
 }
 
+/* Right-side navbar items — uniform gap */
+.navbar__items--right {
+  gap: 6px;
+}
+
 /* "Classic Docs" switch — subtle styling */
 .navbar__link--classic {
-  font-size: 0.85rem;
-  opacity: 0.75;
-  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 0.82rem;
+  opacity: 0.7;
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 4px;
   padding: 4px 10px !important;
-  margin-left: 8px;
+  margin-left: 10px;
+  white-space: nowrap;
 }
 
 .navbar__link--classic:hover {
   opacity: 1;
   border-color: #e84e0f;
   color: #e84e0f !important;
+}
+
+/* Search bar — breathing room on both sides */
+.navbar__search,
+[class*='searchBar'] {
+  margin-left: 6px;
+  margin-right: 2px;
+}
+
+/* Color mode toggle — always visible against dark navbar */
+.navbar [class*='colorModeToggle'] button,
+.navbar [class*='toggleButton'] {
+  color: var(--ifm-navbar-link-color);
+}
+
+.navbar [class*='colorModeToggle'] button:hover,
+.navbar [class*='toggleButton']:hover {
+  color: #e84e0f;
+  background: transparent;
 }
 
 /* Sidebar */

@@ -377,7 +377,7 @@ for (const { dest } of LOCALES) {
 for (const { src, dest, name } of LOCALES) {
   console.log(`\n[${name}]  ${src}`);
   console.log(`       →  ${dest}\n`);
-  await walkDir(src, dest, name);
+  await walkDir(src, dest, name); //
   console.log('');
 }
 

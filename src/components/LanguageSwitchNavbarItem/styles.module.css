@@ -1,0 +1,28 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0 4px;
+}
+
+.active {
+  color: #e84e0f;
+}
+
+.sep {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.option {
+  color: var(--ifm-navbar-link-color);
+  text-decoration: none !important;
+  opacity: 0.65;
+  transition: opacity 0.15s, color 0.15s;
+}
+
+.option:hover {
+  color: #e84e0f;
+  opacity: 1;
+}

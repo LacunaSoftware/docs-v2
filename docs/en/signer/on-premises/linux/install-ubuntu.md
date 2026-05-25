@@ -187,7 +187,7 @@ Under section **Email**:
 
 ### Open ID Connect configuration
 
-The section **Oidc** configures the OpenID Connect server, required for user management. A [GrantID](../../grant-id/index.md) subscription is required.
+The section **Oidc** configures the OpenID Connect server, required for user management. A [GrantID](../../../grant-id/index.md) subscription is required.
 
 You can either use a SaaS subscription on [grantid.com](https://grantid.com/) or run your own instance of GrantID.
 
@@ -199,7 +199,7 @@ You can either use a SaaS subscription on [grantid.com](https://grantid.com/) or
 * **AppSecret**: the *client secret* of the backend app
 * **RequireHttps** (optional): set to `false` if the OIDC server does not use HTTPS
 
-See [Configuring a SPA Application page](../../grant-id/on-premises/configure-spa-app.md) for instructions on how to obtain these values.
+See [Configuring a SPA Application page](../../../grant-id/on-premises/configure-spa-app.md) for instructions on how to obtain these values.
 
 ## Configure a *daemon*
 

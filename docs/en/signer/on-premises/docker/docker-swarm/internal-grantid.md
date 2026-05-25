@@ -1,6 +1,6 @@
 # Signer on Docker - Using a stack with GrantID
 
-The [standard Signer stack](https://cdn.lacunasoftware.com/signer/docker/signer-stack.yml) depends on an external [GrantID](../../../grant-id/index.md) service,
+The [standard Signer stack](https://cdn.lacunasoftware.com/signer/docker/signer-stack.yml) depends on an external [GrantID](../../../../grant-id/index.md) service,
 which provides OpenID Connect services for user login and registration.
 
 If you wish to run GrantID internally on the same stack as Signer, instead of the standard *signer-stack.yml* file use the file

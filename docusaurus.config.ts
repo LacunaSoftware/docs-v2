@@ -85,7 +85,7 @@ const config: Config = {
         },
         // Old / New documentation switch
         {
-          href: '/',
+          href: 'https://docs.lacunasoftware.com/pt-br/index.html',
           label: '← Documentação Clássica',
           position: 'right',
           className: 'navbar__link--classic',
@@ -109,7 +109,7 @@ const config: Config = {
           items: [
             {label: 'Site oficial',  href: 'https://www.lacunasoftware.com'},
             {label: 'Suporte',       href: 'mailto:suporte@lacunasoftware.com'},
-            {label: 'Docs clássica', href: '/'},
+            {label: 'Docs clássica', href: 'https://docs.lacunasoftware.com/pt-br/index.html'},
           ],
         },
       ],

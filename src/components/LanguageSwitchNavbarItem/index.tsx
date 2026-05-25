@@ -6,12 +6,21 @@ import styles from './styles.module.css';
 export default function LanguageSwitchNavbarItem(): ReactNode {
   const {pathname} = useLocation();
 
-  const isEn = pathname.startsWith('/docs-v2/docs/en/');
+  const isEnDocs = pathname.startsWith('/docs-v2/docs/en/');
+  const isEnHome = pathname === '/docs-v2/en/' || pathname === '/docs-v2/en';
+  const isEn = isEnDocs || isEnHome;
 
   // Build the equivalent page in the other language
-  const otherPath = isEn
-    ? pathname.replace('/docs-v2/docs/en/', '/docs-v2/docs/')
-    : pathname.replace('/docs-v2/docs/', '/docs-v2/docs/en/');
+  let otherPath: string;
+  if (isEnDocs) {
+    otherPath = pathname.replace('/docs-v2/docs/en/', '/docs-v2/docs/');
+  } else if (pathname.startsWith('/docs-v2/docs/')) {
+    otherPath = pathname.replace('/docs-v2/docs/', '/docs-v2/docs/en/');
+  } else if (isEnHome) {
+    otherPath = '/docs-v2/';
+  } else {
+    otherPath = '/docs-v2/en/';
+  }
 
   return (
     <div className={styles.wrap}>

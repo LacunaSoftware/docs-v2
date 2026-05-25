@@ -7,11 +7,11 @@ const config: Config = {
   tagline: 'Documentação para produtos Lacuna Software',
   favicon: 'img/favicon.png',
 
-  url: 'https://docs.lacunasoftware.com',
-  baseUrl: '/docusaurus/',
+  url: 'https://LacunaSoftware.github.io',
+  baseUrl: '/docs-v2/',
 
   organizationName: 'LacunaSoftware',
-  projectName: 'docs',
+  projectName: 'docs-v2',
 
   onBrokenLinks: 'warn',
   onBrokenAnchors: 'warn',

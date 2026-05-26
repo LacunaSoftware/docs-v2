@@ -777,7 +777,7 @@ Database model update: **Yes**
 
 Database model update: No
 
-- Fix bug preventing use of tags {{signerEmail}} and {{issuerCommonName}} on PAdES visual representation
+- Fix bug preventing use of tags `{{signerEmail}}` and `{{issuerCommonName}}` on PAdES visual representation
 
 
 <a name="v1-9-0" />
@@ -815,7 +815,7 @@ Database model update: No
 - Add new API to open/validate CAdES and PAdES signatures
 - Add support for new ICP-Brasil PAdES signature policies AD-RB and AD-RT
 - Add transaction history report
-- Add support for tags {{signerEmail}} and {{issuerCommonName}} on PAdES visual representation
+- Add support for tags `{{signerEmail}}` and `{{issuerCommonName}}` on PAdES visual representation
 - Add property BinaryThumbprintSHA256 to CertificateModel
 - Add support for creating users without a password (useful for application users)
 - Add warning on system status when changing the storage when there are already stored blobs

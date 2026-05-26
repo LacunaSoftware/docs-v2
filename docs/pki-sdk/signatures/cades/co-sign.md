@@ -33,7 +33,7 @@ Caso a assinatura cadesSig1 já tenha o documento assinado no encapsulated-conte
 Caso se tenha assinaturas paralelas de um mesmo documento, sem que se tenha utilizado o método
 @Lacuna.Pki.Cades.CadesSigner.SetSignatureToCoSign(System.Byte[]), também é possivel fundir as assinaturas em uma
 co-assinatura através do método
-@Lacuna.Pki.Cades.CadesSignatureEditor.MergeSignatures(System.Collections.Generic.IEnumerable{Lacuna.Pki.Cades.CadesSignature})
+`Lacuna.Pki.Cades.CadesSignatureEditor.MergeSignatures(IEnumerable<Lacuna.Pki.Cades.CadesSignature>)`
 da classe @Lacuna.Pki.Cades.CadesSignatureEditor.
 
 ## Veja também

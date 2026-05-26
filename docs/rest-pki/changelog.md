@@ -763,7 +763,7 @@ Atualização do modelo do banco de dados: **Sim**
 
 Atualização do modelo do banco de dados: Não
 
-- Correção de um erro que impedia o uso das tags {{signerEmail}} e {{issuerCommonName}} na representação visual do PAdES
+- Correção de um erro que impedia o uso das tags `{{signerEmail}}` e `{{issuerCommonName}}` na representação visual do PAdES
 
 
 <a name="v1-9-0" />
@@ -801,7 +801,7 @@ Atualização do modelo do banco de dados: Não
 - Adicionado uma nova API para abrir/validar assinaturas CAdES e PAdES
 - Adicionado suporte às novas políticas de assinatura do ICP-Brasil PAdES AD-RB e AD-RT
 - Adicionado relatório de histórico de transações
-- Adicionado suporte para as tags {{signerEmail}} e {{issuerCommonName}} na representação visual do PAdES
+- Adicionado suporte para as tags `{{signerEmail}}` e `{{issuerCommonName}}` na representação visual do PAdES
 - Adicionado a propriedade BinaryThumbprintSHA256 a CertificateModel
 - Adicionado suporte para criar usuários sem senha (útil para usuários de aplicativos)
 - Adicionado um aviso ao status do sistema ao alterar o armazenamento quando já houver blobs armazenados

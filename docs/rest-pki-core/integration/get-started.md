@@ -1,0 +1,326 @@
+# Primeiros passos para integração - Rest PKI Core
+
+Nesse artigo, você dará os primeiros passos para integrar a sua aplicação com o [Rest PKI Core](../index.md).
+
+
+## Parâmetros
+
+Para começar, você precisará dos seguintes parâmetros:
+
+* **Endpoint**: endereço da instância do Rest PKI Core a ser utilizada
+* **Chave de API**: chave de autenticação com a API
+
+Se estiver utilizando o Rest PKI Core como um serviço (SaaS), solicite seus parâmetros ao nosso [suporte ao desenvolvedor](mailto:suporte@lacunasoftware.com).
+
+Caso esteja utilizando uma [instância própria](../on-premises/index.md), o *endpoint* é o próprio endereço do painel de controle do Rest PKI, por exemplo
+`https://assinatura.suaempresa.com.br/`. Crie você mesmo uma chave de API seguindo os passos abaixo:
+
+1. Autentique-se no painel de controle da sua instância
+1. No menu lateral, clique em **Aplicações**, em seguida em **Adicionar**
+1. Preencha um **nome** para a aplicação
+1. Marque o papel `Operador` (este papel é suficiente para realizar as operações de integração mais comuns, como criar sessões de assinatura)
+1. Clique em **Criar**
+1. Na página de detalhes da aplicação, clique em **Chaves**, em seguida em **Adicionar**
+1. Preencha uma descrição qualquer para a chave e escolha uma expiração (recomenda-se escolher **Nunca expira**) e clique em **Criar**
+1. **Tome nota da chave de API exibida** pois não será possível recuperá-la mais tarde
+
+
+## Chamando a API
+
+Embora o Rest PKI Core ofereça APIs REST que podem ser facilmente chamadas, elas normalmente não são utilizadas
+diretamente. Ao invés disso, oferecemos bibliotecas para consumir os serviços do Rest PKI Core (*client libs*) em diversas
+linguagens de programação e diversos projetos de exemplos que demonstram o uso dessas bibliotecas, de modo que os
+programadores não precisem se preocupar com os detalhes envolvidos no consumo de APIs e possam codificar diretamente
+em sua linguagem preferida.
+
+Escolha uma das linguagens de programação abaixo:
+
+* [.NET](#dotnet)
+* [PHP](#php)
+* [Java](#java)
+
+Caso sua aplicação utilize outra linguagem de programação, [chame as APIs diretamente](#rest).
+
+
+<a name="dotnet" />
+
+### Chamando a API em .NET
+
+Comece adicionando o pacote de Nuget [Lacuna.RestPkiCore.Client](https://www.nuget.org/packages/Lacuna.RestPkiCore.Client/), disponível para:
+
+* .NET Standard 2.0+ (para uso em .NET Core 2, .NET Core 3, .NET 5 ou .NET 6 ou ainda em plataformas como UWP)
+* .NET Framework 4.5+
+
+#### Aplicações em ASP.NET Core
+
+Se a sua aplicação for em ASP.NET Core, adicione o código abaixo ao método `ConfigureServices()` da classe *Startup.cs* do seu projeto:
+
+```cs
+public void ConfigureServices(IServiceCollection services) {
+	...
+	services.AddRestPki().Configure(Configuration.GetSection("RestPki"));
+}
+```
+
+No arquivo de configuração *appsettings.json*, adicione a seção `RestPki`:
+
+```json
+{
+	...
+	"RestPki": {
+		"Endpoint": "SEU_ENDPOINT_AQUI",
+		"ApiKey": "SUA_CHAVE_DE_API_AQUI"
+	},
+	...
+}
+```
+
+Nas partes da aplicação que precisarem fazer chamadas à API do serviço, peça via *dependency injection* uma instância de `IRestPkiService`:
+
+```cs
+using Lacuna.RestPki.Client;
+
+public MyController : ApiController {
+
+	private readonly IRestPkiService restPkiService;
+
+	public MyController(IRestPkiService restPkiService) {
+		this.restPkiService = restPkiService;
+	}
+
+	...
+}
+```
+
+#### Aplicações em .NET convencional
+
+Caso a sua aplicação não seja em ASP.NET Core, utilize os parâmetros de **endpoint** e **chave de API** para solicitar uma implementação da interface
+`IRestPkiService` à classe estática `RestPkiServiceFactory`:
+
+```cs
+using Lacuna.RestPki.Client;
+
+public MyController : ApiController {
+
+	private readonly IRestPkiService restPkiService;
+
+	public MyController() {
+		this.restPkiService = RestPkiServiceFactory.GetService(new RestPkiOptions() {
+			Endpoint = ConfigurationManager.AppSettings["RestPkiEndpoint"],
+			ApiKey = ConfigurationManager.AppSettings["RestPkiApiKey"],
+		});
+	}
+
+	...
+}
+```
+
+No exemplo acima, o endpoint e chave de API ficariam na seção `appSettings` do arquivo *web.config* (entradas `RestPkiEndpoint` e `RestPkiApiKey` respectivamente).
+Entretanto, essa correspondência é apenas um exemplo. Os parâmetros podem ficar onde você preferir, por exemplo no banco de dados ou um arquivo de configuração JSON.
+
+#### Cultura / internacionalização (i18n)
+
+A cultura da thread atual (`Thread.CurrentThread.CurrentUICulture`) é usada para sinalizar nas chamadas ao Rest PKI Core qual a cultura que a API deve observar.
+Esse comportamento funciona bem caso a sua aplicação configure a cultura adequada na thread atual (`CurrentThread`).
+
+Caso queira, você também pode alterar esse comportamento, sobrepondo a cultura da thread atual com uma cultura fixa.
+
+Em ASP.NET Core, adicione a propriedade `CultureName` à seção de configuração do Rest PKI no arquivo *appSettings.json*:
+
+```json
+{
+	...
+	"RestPki": {
+		...,
+		"CultureName": "pt-BR"
+	},
+	...
+}
+```
+
+Em .NET convencional, altere a propriedade `CultureName` do objeto `RestPkiOptions`:
+
+```cs
+this.restPkiService = RestPkiServiceFactory.GetService(new RestPkiOptions() {
+	...,
+	CultureName = "pt-BR",
+});
+```
+
+#### Exceções
+
+As seguintes exceções podem ser lançadas nas chamadas aos métodos do `IRestPkiService`:
+
+* `RestPkiException`: erro de API (geralmente um mal uso da API que pode ser sanado adequando os parâmetros da requisição). A propriedade `Code` contém o código
+  de erro da API. Veja os [códigos de erro](error-codes.md).
+* `RestErrorException`: erro na chamada HTTP. A propriedade `StatusCode` contém o código HTTP retornado. Veja os [códigos de resposta HTTP](#http-status-codes).
+
+<a name="php" />
+
+### Chamando a API em PHP
+
+Comece adicionando o pacote do Composer [lacuna/restpkicore-client](https://packagist.org/packages/lacuna/restpkicore-client), disponível para:
+
+* PHP 5.5+ (incluindo 7.x)
+
+Para adicionar no seu projeto, coloque isso no seu arquivo `composer.json`:
+
+```json
+{
+	"require": {
+		"lacuna/restpkicore-client": "^1.0.0"
+	}
+}
+``` 
+
+Após isso, faça um `composer install` para download do pacote e e suas dependências (se você não tiver o Composer instalado, pegue [aqui](https://getcomposer.org/)).
+
+O pacote é de código aberto, hospedado no [GitHub](https://github.com/LacunaSoftware/RestPkiNgPhpClient). Sinta-se à vontade para fazer o *fork* do repositório se precisar de alguma personalização.
+
+Para obter uma implementação da interface `RestPkiServiceInterface` na sua aplicação, forneça uma instância da classe `RestPkiCoreClient`, tendo fornecido os parâmetros de **endpoint** e **chave de API** da classe `RestPkiOptions`, conforme código abaixo:
+
+```php
+use Lacuna\RestPki\RestPkiOptions;
+use Lacuna\RestPki\RestPkiCoreClient;
+use Lacuna\RestPki\RestPkiService;
+
+$options = new RestPkiOptions('RestPkiEndpoint', 'RestPkiApiKey');
+$client = new RestPkiCoreClient($options);
+$service = new RestPkiService($client);
+``` 
+
+#### Cultura / internacionalização (i18n)
+
+Caso queira, você pode alterar a cultura que a API deve observar. Para isso, forneça o parâmetro `cultureName` à sua instância do `RestPkiOptions` passado na configuração do cliente `RestPkiCoreClient`:
+
+```php
+$options = new RestPkiOptions('RestPkiEndpoint', 'RestPkiApiKey', 'pt-BR');
+``` 
+
+#### Exemplos em PHP
+
+Em nosso [repositório de exemplos](https://github.com/LacunaSoftware/PkiSuiteSamples/tree/master/php/plain/public), 
+todas as pastas terminadas em `-rest-core` contém exemplos referentes ao pacote do Composer [lacuna/restpkicore-client](https://packagist.org/packages/lacuna/restpkicore-client).
+
+<a name="java" />
+
+### Chamando a API em Java
+
+Para adicionar no seu projeto, coloque isso no seu arquivo `build.gradle` caso seu projeto utilize Gradle:
+
+```groovy
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+    compile("com.lacunasoftware.restpki:restpkicore-client:1.1.0")
+    ...
+}
+``` 
+
+Caso seu projeto utiliza Maven, coloque a seguinte dependencia no seu arquivo `pom.xml`:
+
+```xml
+<dependency>
+  <groupId>com.lacunasoftware.restpki</groupId>
+  <artifactId>restpki-core-client</artifactId>
+  <version>1.0.0</version>
+  <type>pom</type>
+</dependency>
+``` 
+
+O pacote é de código aberto, hospedado no [GitHub](https://github.com/LacunaSoftware/RestPkiNGJavaClient). Sinta-se à vontade para fazer o *fork* do repositório se precisar de alguma personalização.
+
+Para obter uma implementação da interface `RestPkiService` na sua aplicação, forneça uma instância da classe `RestPkiOptions` com os parâmetros de **endpoint** e **chave de API** preenchidos para o método `getService()` da classe `RestPkiServiceFactory`, conforme código abaixo:
+
+```java
+import com.lacunasoftware.restpki.RestPkiOptions;
+import com.lacunasoftware.restpki.RestPkiService;
+import com.lacunasoftware.restpki.RestPkiServiceFactory;
+
+RestPkiOptions options = new RestPkiOptions();
+options.setEndpoint("RestPkiEndpoint");
+options.setApiKey("RestPkiApiKey");
+RestPkiService service = RestPkiServiceFactory.getService(options);
+``` 
+
+#### Cultura / internacionalização (i18n)
+
+Caso queira, você pode alterar a cultura que a API deve observar. Para isso, forneça o parâmetro `culture` à sua instância do `RestPkiOptions` passado no método `getService()` do cliente `RestPkiServiceFactory`:
+
+```java
+RestPkiOptions options = new RestPkiOptions();
+options.setEndpoint("RestPkiEndpoint");
+options.setApiKey("RestPkiApiKey");
+options.setCulture("pt-BR");
+``` 
+
+#### Exemplos em Java
+
+Em nosso [repositório de exemplos](https://github.com/LacunaSoftware/PkiSuiteSamples/tree/master/java/springmvc), 
+todos arquivos terminados em `RestCoreController` contém exemplos referentes ao pacote Java [com.lacunasoftware.restpkicore:restpkicore-client](https://search.maven.org/artifact/com.lacunasoftware.restpki/restpkicore-client).
+
+<a name="rest" />
+
+### Chamando a API diretamente
+
+As APIs do Rest PKI Core são RESTful recebendo e retornando mensagens JSON, sendo de fácil uso em qualquer linguagem de programação moderna. Caso
+a sua aplicação não utilize nenhuma das linguagens de programação elencadas acima, opte por chamar as APIs do Rest PKI Core diretamente.
+
+Veja a [documentação da API](https://core.pki.rest/swagger).
+
+O parâmetro **endpoint** mencionado acima deve ser prefixado a todas as URLs relativas mencionadas nessa seção.
+
+Já a **chave de API** deve ser passada no header `X-Api-Key` de cada requisição:
+
+```plaintext
+X-Api-Key: yourapp|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+<a name="http-status-codes" />
+
+#### Códigos de resposta HTTP
+
+A API responde com os seguintes códigos HTTP:
+
+Código                      | Descrição
+--------------------------- | ---------
+200 (OK)                    | Requisição processada com sucesso. A resposta é diferente para cada API, consulte a [documentação da API](https://core.pki.rest/swagger) para saber o formato da resposta de cada chamada.
+400 (Bad Request)           | Erro de sintaxe na requisição. Por exemplo, um campo obrigatório não foi informado.
+401 (Unauthorized)          | A chave de API não foi fornecida ou está inválida.
+403 (Forbidden)             | A chave de API passada é válida, porém a aplicação não possui permissões suficientes para realizar a operação solicitada.
+415 (Forbidden)             | Body vazio ou inválido.
+422 (Unprocessable Entity)  | Erro de API (geralmente um mal uso da API que pode ser sanado adequando os parâmetros da requisição). O corpo da reposta é um `ErrorModel`, descrito abaixo.
+500 (Internal Server Error) | Um erro inesperado aconteceu. O campo `exceptionCode` (string) informado no corpo da resposta pode ajudar no diagnóstico do problema.
+
+#### ErrorModel
+
+Quando a API retorna o código de resposta 422 (Unprocessable Entity), significa que um erro de API ocorreu (geralmente um mal uso da API que pode ser sanado
+adequando os parâmetros da requisição). Nesse caso, o corpo da resposta é um `ErrorModel` contendo:
+
+Campo     | Tipo     | Descrição
+--------- | -------- | ---------
+`code`    | `string` | Contém o código de erro (veja os [códigos de erro](error-codes.md))
+`message` | `string` | Descrição do erro (mais adequada para ser logada, e não para ser exibida para o usuário, pois não é internacionalizada)
+
+Podemos ver abaixo um exemplo de `ErrorModel`:
+
+```json
+{
+	"code": "SignatureSessionNotFound",
+	"message": "Signature session not found: 00000000-0000-0000-0000-000000000000"
+}
+```
+
+#### Cultura / internacionalização (i18n)
+
+O request header `Accept-Language` é observado pela API do Rest PKI Core, influenciando o comportamento da API. Os seguintes códigos de cultura são suportados:
+
+* `pt-BR` (ou apenas `pt`)
+* `en-US` (ou apenas `en`)
+
+:::note
+Mensagens de erro não são afetadas por esse header e, portanto, não devem ser exibidas para o usuário, mas sim registradas no log de sistema
+:::
+

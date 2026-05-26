@@ -1,4 +1,4 @@
-import {themes as prismThemes} from 'prism-react-renderer';
+﻿import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
@@ -65,6 +65,7 @@ const config: Config = {
   themeConfig: {
     colorMode: {
       defaultMode: 'light',
+      disableSwitch: false,
       respectPrefersColorScheme: false,
     },
     navbar: {
@@ -75,18 +76,60 @@ const config: Config = {
       },
       items: [
         {
+          type: 'dropdown',
+          label: 'PKI',
+          position: 'left',
+          items: [
+            {type: 'docSidebar', sidebarId: 'pkiGuide',    label: 'Certificação Digital'},
+            {type: 'docSidebar', sidebarId: 'webPki',      label: 'Web PKI'},
+            {type: 'docSidebar', sidebarId: 'restPki',     label: 'Rest PKI'},
+            {type: 'docSidebar', sidebarId: 'restPkiCore', label: 'Rest PKI Core'},
+            {type: 'docSidebar', sidebarId: 'pkiSdk',      label: 'PKI SDK'},
+            {type: 'docSidebar', sidebarId: 'pkiExpress',  label: 'PKI Express'},
+          ],
+        },
+        {
           type: 'docSidebar',
           sidebarId: 'signer',
           position: 'left',
           label: 'Signer',
         },
         {
+          type: 'docSidebar',
+          sidebarId: 'amplia',
+          position: 'left',
+          label: 'Amplia',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'grantId',
+          position: 'left',
+          label: 'GrantID',
+        },
+        {
+          type: 'docSidebar',
+          sidebarId: 'scanner',
+          position: 'left',
+          label: 'Scanner',
+        },
+        {
+          type: 'dropdown',
+          label: 'Outros',
+          position: 'left',
+          items: [
+            {type: 'docSidebar', sidebarId: 'ampliaReg', label: 'Amplia Reg'},
+            {type: 'docSidebar', sidebarId: 'psc',       label: 'PSC'},
+            {type: 'docSidebar', sidebarId: 'tsa',       label: 'TSA'},
+            {type: 'docSidebar', sidebarId: 'digiploma', label: 'Digiploma'},
+            {type: 'docSidebar', sidebarId: 'welcome',   label: 'Bem-vindo'},
+          ],
+        },
+        {
           type: 'custom-languageSwitch',
           position: 'right',
         },
-        // Old / New documentation switch
         {
-          href: 'https://docs.lacunasoftware.com/pt-br/index.html',
+          href: '/',
           label: 'Documentação Clássica',
           position: 'right',
           className: 'navbar__link--classic',
@@ -97,12 +140,27 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Signer',
+          title: 'PKI',
           items: [
-            {label: 'Visão Geral',        to: '/docs/signer/'},
-            {label: 'Guia de Integração', to: '/docs/signer/integration-guide'},
-            {label: 'On-premises',        to: '/docs/signer/on-premises/'},
-            {label: 'Changelog',          to: '/docs/signer/changelog'},
+            {label: 'Certificação Digital', to: '/docs/pki-guide/'},
+            {label: 'Web PKI',              to: '/docs/web-pki/'},
+            {label: 'Rest PKI',             to: '/docs/rest-pki/'},
+            {label: 'Rest PKI Core',        to: '/docs/rest-pki-core/'},
+            {label: 'PKI SDK',              to: '/docs/pki-sdk/'},
+            {label: 'PKI Express',          to: '/docs/pki-express/'},
+          ],
+        },
+        {
+          title: 'Produtos',
+          items: [
+            {label: 'Signer',    to: '/docs/signer/'},
+            {label: 'Amplia',    to: '/docs/amplia/'},
+            {label: 'Amplia Reg', to: '/docs/amplia-reg/'},
+            {label: 'GrantID',   to: '/docs/grant-id/'},
+            {label: 'Scanner',   to: '/docs/scanner/'},
+            {label: 'PSC',       to: '/docs/psc/'},
+            {label: 'TSA',       to: '/docs/tsa/'},
+            {label: 'Digiploma', to: '/docs/digiploma/'},
           ],
         },
         {
@@ -110,7 +168,7 @@ const config: Config = {
           items: [
             {label: 'Site oficial',  href: 'https://www.lacunasoftware.com'},
             {label: 'Suporte',       href: 'mailto:suporte@lacunasoftware.com'},
-            {label: 'Docs clássica', href: 'https://docs.lacunasoftware.com/pt-br/index.html'},
+            {label: 'Docs clássica', href: '/'},
           ],
         },
       ],

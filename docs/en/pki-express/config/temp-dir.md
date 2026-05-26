@@ -1,0 +1,22 @@
+# Temporary directory - PKI Express
+
+PKI Express uses a temporary directory to cache Certificate Revocation Lists (CRLs), Certification Authoriry (CA) certificates, among other artifacts.
+
+By default, the temporary directory used by PKI Express is:
+
+* On Windows: `%TEMP%`
+* On Linux: `/tmp`
+
+To change the temporary directory:
+
+```sh
+pkie config --set tempDir=path
+```
+
+:::note
+The commands on this article require administrative privileges. On Linux, you may need to use `sudo` or, on Windows,
+a command prompt with elevated privileges.
+:::
+
+
+The directory **must exist and be writeable** by your user and also by the user used to run the web application (on Linux, this usually is the `www-data` user).

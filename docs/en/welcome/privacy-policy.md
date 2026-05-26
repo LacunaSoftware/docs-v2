@@ -1,0 +1,22 @@
+---
+sidebar_label: "Privacy Policy"
+sidebar_position: 3
+---
+
+# Privacy Policy
+
+* Last amended: June 16, 2020
+* Effective Date: June 16, 2020
+
+Lacuna Software Ltda (collectively, "Lacuna", "we", "us", or "our") respects your privacy. The services we offer are tools for organizations and developers to make use of digital certification and related technologies with security.
+
+This Privacy Policy describes the types of Personal Data we collect through our products and services (“Services”) and via our online presence, which include our main website at [Lacuna Software](https://lacunasoftware.com/), as well as services and websites that we enable Internet users to access, such as [Dropsigner](https://www.dropsigner.com/) (coletivamente, nossos “Sites”). This policy also describes how we use Personal Data, with whom we share it, your rights and choices, and how you can contact us about our privacy practices. This policy does not apply to third-party websites, products, or services, even if they link to our Services or Sites, and you should consider the privacy practices of those third-parties carefully.
+
+In order to facilitate referencing, our Privacy Policy is segmented by product and service, observing the specifics of each one. You can find all articles in the list below:
+
+* [Privacy Policy - Rest PKI](../rest-pki/privacy-policy.md)
+* [Privacy Policy - Web PKI](../web-pki/privacy-policy.md)
+
+## Privacy Questions / Feedback 
+
+If you have questions or concerns about Lacuna's Privacy Policy please contact us at [suporte@lacunasoftware.com](mailto:suporte@lacunasoftware.com) or EQN 102/103, Ed. Avenida 102, 2º Andar - Asa Norte, Brasília - DF, Brazil. Phone: +55 61 3030-5700.

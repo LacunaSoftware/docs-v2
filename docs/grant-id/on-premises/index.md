@@ -1,5 +1,14 @@
-# GrantID On-Premises
+﻿---
+sidebar_label: "On premises"
+sidebar_position: 1
+---
 
-Instruções de instalação e configuração do GrantID em ambiente on-premises.
+# GrantID *on premises*
 
-Para a documentação completa, acesse [docs.lacunasoftware.com](https://docs.lacunasoftware.com/pt-br/articles/grant-id/on-premises/).
+:::warning Indisponível
+
+Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
+
+- [English](/docs/en/grant-id/on-premises/)
+
+:::

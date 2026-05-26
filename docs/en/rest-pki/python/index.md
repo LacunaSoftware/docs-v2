@@ -1,0 +1,21 @@
+# Using Rest PKI on Python
+
+Rest PKI can be used on Python. To get started, see the [Python/Flask samples project](flask.md).
+
+## Client library
+
+The Python/Flask sample project uses the PyPi package [restpki-cient](https://pypi.org/project/restpki-client/) to access Rest PKI on Python applications. It supports Python 2 and Python 3.
+
+To add it to your project, add the line below to your `requirements.txt` file:
+
+```
+pkiexpress==1.10.0
+```
+
+After that, do a `pip install -r requirements.txt` to download the package and its dependencies.
+
+> If you don't have **pip** installed, get it [here](https://pip.pypa.io/en/stable/installing/)
+
+### Source code
+
+The package is open-source, hosted on [GitHub](https://github.com/LacunaSoftware/RestPkiPythonClient). Feel free to fork the package if you need to make any customizations.

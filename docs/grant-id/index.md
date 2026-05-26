@@ -1,5 +1,24 @@
+---
+sidebar_label: "GrantID"
+sidebar_position: 1
+---
+
 # GrantID
 
-GrantID é o servidor OpenID Connect da Lacuna Software.
+O GrantID adiciona segurança aos seus aplicativos com Single Sign On, múltiplos fatores de autenticação e ferramentas analíticas poderosas.
 
-Para a documentação completa, acesse [docs.lacunasoftware.com](https://docs.lacunasoftware.com/pt-br/articles/grant-id/).
+:::note
+A documentação deste sistema encontra-se em construção. Pedimos desculpas pela inconveniência. Por favor contate-nos caso
+precise de alguma informação que ainda não está documentada.
+:::
+
+
+## Principais funcionalidades
+
+* **OAuth 2.0 & OpenId Connect** - Conformidade completa com o protocolo OAuth 2.0 e a especificação OpenId Connect
+* **Single Sign On** - Integre suas aplicações e aumente a produtividade com uma identidade única para seus usuários
+
+## *On premises*
+
+O GrantID pode ser utilizado em nuvem (SaaS) em [grantid.com](https://grantid.com) ou você pode ter uma instância na sua própria
+infraestrutura ("on premises"). Veja o artigo [GrantID *on premises*](on-premises/index.md) para mais informações.

@@ -1,0 +1,31 @@
+---
+sidebar_label: "On premises"
+sidebar_position: 1
+---
+
+# Rest PKI Core *on premises*
+
+O [Rest PKI Core](../index.md) pode ser utilizado em nuvem (SaaS) no endereço [core.pki.rest](https://core.pki.rest/) ou você pode ter uma instância na sua própria
+infraestrutura ("on premises").
+
+<a name="platforms" />
+## Ambientes suportados
+
+O Rest PKI Core é compatível com os seguintes ambientes:
+
+* [Windows Server](windows-server.md)
+* [Linux](linux/index.md)
+* [Docker](docker.md)
+* Azure App Services
+
+Clique em um dos ambientes acima para obter instruções específicas de instalação e atualização.
+
+:::note
+As instruções de instalação encontram-se em construção. Se você precisar de instruções ainda indisponíveis, por favor contate-nos.
+:::
+
+
+## Veja também
+
+* [Verificando a versão instalada do Rest PKI Core](check-version.md)
+* [Histórico de versões](../changelog.md)

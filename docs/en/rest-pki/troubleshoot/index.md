@@ -1,0 +1,18 @@
+---
+sidebar_label: "Troubleshoot"
+sidebar_position: 1
+---
+
+# Trobleshooting issues with Rest PKI
+
+Here you'll find articles that can help you diagnose problems that might occur when using [Rest PKI](../index.md).
+
+:::tip
+The troubleshooting articles are targeted for **software developers**. If you are an end-user having trouble using
+one of our products, please go to our [Support Center](http://lacuna.help/) instead.
+:::
+
+
+Articles:
+
+* [Error "Could not get pending signature"](could-not-get-pending-sig.md)

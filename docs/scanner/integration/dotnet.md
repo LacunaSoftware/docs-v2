@@ -1,0 +1,164 @@
+# Guia de Integração em .NET
+
+Para integrar a sua aplicação web em .NET ao [Lacuna Scanner Service](../index.md), siga os passos descritos neste artigo.
+
+:::tip
+Antes de começar, veja a [visão geral da integração](../index.md#overview).
+:::
+
+
+Primeiramente, adicione o pacote [Lacuna.Scanner.Client](https://www.nuget.org/packages/Lacuna.Scanner.Client) ao seu projeto.
+
+:::tip
+Veja a sessão [ASP.NET Core](#aspnet-core) abaixo caso a sua aplicação utilize essa tecnologia.
+:::
+
+
+De posse do **endpoint** e da **API Key**, instancie um `ScannerClient`:
+
+```cs
+var endpoint = "...";
+var apiKey = "...";
+var scanner = new ScannerClient(endpoint, apiKey);
+```
+
+Utilize o método `CreateScanSessionAsync(string)` passando o **returnUrl** para iniciar uma sessão:
+
+```cs
+var scanSessionParams = await scanner.CreateScanSessionAsync("https://your-return-url/");
+```
+
+:::note
+Por motivos de *backward compatibility*, sessões criadas como acima (apenas com o *returnUrl*) exigem os passos de entrada de
+metadados e assinatura do documento.
+:::
+
+
+Ou, caso queira maior controle sobre as opções da sessão:
+
+```cs
+var scanSessionParams = await scanner.CreateScanSessionAsync(new CreateScanSessionRequest2() {
+	ReturnUrl = "https://your-return-url/",
+	MetadataInputEnabled = ...,
+	SignatureEnabled = ...,
+});
+```
+
+Utilize o valor retornado no campo `RedirectUrl` para redirecionar o usuário no frontend:
+
+```js
+location.href = scanSessionParams.RedirectUrl;
+```
+
+Quando detectar que o usuário voltou ao seu site (procure pelo argumento `scanSessionId` na URL), utilize o método `GetScanSessionAsync(Guid)` para obter os
+documentos digitalizados:
+
+```cs
+var scanSession = await scanner.GetScanSessionAsync(scanSessionId);
+if (scanSession.Result == ScanSessionResults.Success) {
+	var document = scanSession.Documents.First();
+	using (var srcStream = await document.OpenReadAsync()) {
+		using (var destStream = File.Create(...)) {
+			await srcStream.CopyToAsync(destStream);
+		}
+	}
+}
+```
+
+<a name="multifile" />
+## Sessões *multifile*
+
+Você pode permitir que o usuário digitalize múltiplos documentos. Para isso, passe o parâmetro `multifile: true` ao criar a sessão:
+
+```cs
+var scanSessionParams = await scanner.CreateScanSessionAsync("https://your-return-url/", multifile: true);
+```
+
+Ao final do processo, ao invés de levar em consideração apenas o primeiro documento, itere a lista de documentos digitalizados:
+
+```cs
+var scanSession = await scanner.GetScanSessionAsync(scanSessionId);
+if (scanSession.Result == ScanSessionResults.Success) {
+	foreach (var document in scanSession.Documents) {
+		...
+	}
+}
+```
+
+<a name="optional-steps" />
+## Sessões com entrada de metadados e/ou assinatura
+
+Caso deseje solicitar ao digitalizador a entrada dos metadados requeridos pela Medida Provisória 10.278/2020, preencha a propriedade `MetadataInputEnabled = true`:
+
+```cs
+var scanSessionParams = await scanner.CreateScanSessionAsync(new CreateScanSessionRequest2() {
+	ReturnUrl = "https://your-return-url/",
+	MetadataInputEnabled = true,
+});
+```
+
+:::note
+O pacote `Lacuna.Scanner.Client` deve estar na versão **1.3.0** ou superior
+:::
+
+
+Caso deseje que o digitalizador assine digitalmente o documento ao final do processo, preencha a propriedade `SignatureEnabled = true`:
+
+```cs
+var scanSessionParams = await scanner.CreateScanSessionAsync(new CreateScanSessionRequest2() {
+	ReturnUrl = "https://your-return-url/",
+	SignatureEnabled = true,
+});
+```
+
+:::tip
+Para aderir à Medida Provisória 10.278/2020, devem ser habilitados tanto a entrada de metadados quanto a assinatura do documento
+:::
+
+
+<a name="aspnet-core" />
+## ASP.NET Core
+
+Caso a sua aplicação web seja em ASP.NET Core, no método `ConfigureServices` do *startup* da sua aplicação, adicione:
+
+```cs
+public void ConfigureServices(IServiceCollection services) {
+	...
+	services.AddScanner()
+		.Configure(Configuration.GetSection("Scanner"));
+}
+```
+
+:::note
+Não utilize o pacote ~~Lacuna.Scanner.Client.AspNetCore~~. O pacote [Lacuna.Scanner.Client](https://www.nuget.org/packages/Lacuna.Scanner.Client) já
+possui tudo o que você precisa para usar o Scanner em ASP.NET Core.
+:::
+
+
+No arquivo de configuração `appsettings.json`, adicione a seção **Scanner**:
+
+```json
+...
+"Scanner": {
+	"Endpoint": "https://scn.lacunasoftware.com/",
+	"ApiKey": "..."
+},
+...
+```
+
+Nas partes da aplicação que precisarem fazer chamadas à API do serviço, peça via *dependency injection* uma instância de `IScannerService`:
+
+```cs
+using Lacuna.Scanner.Client;
+
+public MyController : ApiController {
+
+	private readonly IScannerService scanner;
+
+	public MyController(IScannerService scanner) {
+		this.scanner = scanner;
+	}
+
+	...
+}
+```

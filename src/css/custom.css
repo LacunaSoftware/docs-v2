@@ -95,6 +95,44 @@
   background: transparent;
 }
 
+/* Mobile hamburger — must be light against the dark navbar */
+.navbar__toggle {
+  color: var(--ifm-navbar-link-color);
+}
+
+/* ── Mobile sidebar ───────────────────────────────────────────────────────── */
+@media (max-width: 996px) {
+  /* Secondary section (right-side items) — stack them cleanly */
+  .navbar-sidebar__item--secondary .navbar__items {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: 8px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Each right-side item behaves like a regular menu row */
+  .navbar-sidebar__item--secondary .navbar__item {
+    width: 100%;
+    padding: 6px 16px;
+  }
+
+  /* Language switch — horizontal pill stays compact but left-aligned */
+  .navbar-sidebar__item--secondary .navbar__item:first-child {
+    padding-bottom: 4px;
+  }
+
+  /* Classic docs link — strip the border/button look on mobile */
+  .navbar-sidebar__item--secondary .navbar__link--classic {
+    border: none;
+    border-radius: 0;
+    padding: 0 !important;
+    margin-left: 0;
+    font-size: 0.9rem;
+    opacity: 0.75;
+  }
+}
+
 /* Sidebar */
 .menu__link--active {
   color: var(--ifm-color-primary);

@@ -3,7 +3,7 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
-  title: 'Lacuna Docs',
+  title: ' ',
   tagline: 'Documentação para produtos Lacuna Software',
   favicon: 'img/favicon.png',
 
@@ -69,7 +69,6 @@ const config: Config = {
       respectPrefersColorScheme: false,
     },
     navbar: {
-      title: 'Lacuna Docs',
       logo: {
         alt: 'Lacuna Software',
         src: 'img/logo.png',

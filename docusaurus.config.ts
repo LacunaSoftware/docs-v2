@@ -102,7 +102,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: '/',
+          href: 'https://docs.lacunasoftware.com/pt-br/index.html',
           label: 'Documentação Clássica',
           position: 'right',
           className: 'navbar__link--classic',

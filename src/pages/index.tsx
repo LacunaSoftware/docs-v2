@@ -131,16 +131,29 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Documentação"
-      description="Documentação técnica para produtos Lacuna Software">
+      description="Technical documentation for Lacuna Software products">
 
       <header className={styles.hero}>
         <h1 className={styles.heroTitle}>Documentação Lacuna Software</h1>
         <p className={styles.heroSubtitle}>
-          Documentação técnica para <strong>desenvolvedores</strong>
+          Bem-vindo ao docs.lacunasoftware.com, a nossa nova experiência unificada de documentação técnica.
+          <br />
+          {' '}Para suporte a usuário final, por favor visite nossa{' '}
+          <a href="https://lacuna.movidesk.com/" target="_blank" rel="noopener noreferrer" className={styles.heroLink}>
+            Central de Suporte
+          </a>.
         </p>
       </header>
 
       <main>
+        <div className={styles.productsHeader} style={{textAlign: 'center'}}>
+          <h2 className={styles.productsTitle}>
+            <Link to="/docs-v2/docs/pki-guide/" className={styles.heroLink}>
+              Soluções para certificação digital
+            </Link>
+          </h2>
+          <p className={styles.productsSubtitle}>Ou siga diretamente para a documentação de um produto específico:</p>
+        </div>
         {SECTIONS.map(section => (
           <section key={section.title} className={styles.section}>
             <p className={styles.sectionTitle}>{section.title}</p>

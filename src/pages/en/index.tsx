@@ -136,11 +136,24 @@ export default function HomeEn(): ReactNode {
       <header className={styles.hero}>
         <h1 className={styles.heroTitle}>Lacuna Software Documentation</h1>
         <p className={styles.heroSubtitle}>
-          Technical documentation for <strong>developers</strong>
+          Welcome to docs.lacunasoftware.com, our new unified technical documentation experience.
+          <br />
+          {' '}For end-user support, please visit our{' '}
+          <a href="https://lacuna.movidesk.com/" target="_blank" rel="noopener noreferrer" className={styles.heroLink}>
+            Support Center
+          </a>.
         </p>
       </header>
 
       <main>
+       <div className={styles.productsHeader} style={{textAlign: 'center'}}>
+          <h2 className={styles.productsTitle}>
+            <Link to="/docs-v2/docs/pki-guide/" className={styles.heroLink}>
+              Digital Certification Solutions
+            </Link>
+          </h2>
+          <p className={styles.productsSubtitle}>Or go directly to a specific product's documentation:</p>
+        </div>
         {SECTIONS.map(section => (
           <section key={section.title} className={styles.section}>
             <p className={styles.sectionTitle}>{section.title}</p>

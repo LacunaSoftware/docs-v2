@@ -37,7 +37,38 @@
   color: #e84e0f;
 }
 
+.heroLink {
+  color: #e84e0f;
+  text-decoration: underline;
+  text-decoration-color: rgba(232, 78, 15, 0.45);
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+
+.heroLink:hover {
+  color: #ff6a2f;
+  text-decoration-color: #ff6a2f;
+}
+
 /* ── Products section ─────────────────────────────────────────────────────── */
+
+.productsHeader {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 3.5rem 2rem 0;
+}
+
+.productsTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--ifm-heading-color);
+}
+
+.productsSubtitle {
+  font-size: 1rem;
+  color: var(--ifm-color-secondary-darkest);
+  margin: 0;
+}
 
 .section {
   max-width: 1100px;

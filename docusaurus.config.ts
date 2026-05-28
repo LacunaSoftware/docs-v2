@@ -82,18 +82,19 @@ const config: Config = {
         {type: 'docSidebar', sidebarId: 'pkiExpress',  position: 'left', label: 'PKI Express'},
         {type: 'docSidebar', sidebarId: 'signer',      position: 'left', label: 'Signer'},
         {type: 'docSidebar', sidebarId: 'amplia',      position: 'left', label: 'Amplia'},
-        {type: 'docSidebar', sidebarId: 'grantId',     position: 'left', label: 'GrantID'},
-        {type: 'docSidebar', sidebarId: 'scanner',     position: 'left', label: 'Scanner'},
+
         {
           type: 'dropdown',
           label: 'Outros',
           position: 'left',
           items: [
+            {type: 'docSidebar', sidebarId: 'welcome',   label: 'Bem-vindo'},
             {type: 'docSidebar', sidebarId: 'ampliaReg', label: 'Amplia Reg'},
             {type: 'docSidebar', sidebarId: 'psc',       label: 'PSC'},
             {type: 'docSidebar', sidebarId: 'tsa',       label: 'TSA'},
             {type: 'docSidebar', sidebarId: 'digiploma', label: 'Digiploma'},
-            {type: 'docSidebar', sidebarId: 'welcome',   label: 'Bem-vindo'},
+            {type: 'docSidebar', sidebarId: 'grantId',   label: 'GrantID'},
+            {type: 'docSidebar', sidebarId: 'scanner',   label: 'Scanner'},
           ],
         },
         {

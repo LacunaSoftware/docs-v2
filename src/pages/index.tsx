@@ -17,13 +17,13 @@ interface Section {
 
 const SECTIONS: Section[] = [
   {
-    title: 'PKI',
+    title: 'Assinatura e Certificado Digitais',
     products: [
       {
         id: 'pki-guide',
-        name: 'Certificação Digital',
-        description: 'Conceitos e guias sobre certificação digital, ICP-Brasil e infraestrutura de chaves públicas.',
-        href: '/docs-v2/docs/pki-guide/',
+        name: 'Signer',
+        description: 'Plataforma de assinatura digital de documentos com suporte a múltiplos formatos e certificados.',
+        href: '/docs-v2/docs/signer/',
       },
       {
         id: 'web-pki',
@@ -32,16 +32,16 @@ const SECTIONS: Section[] = [
         href: '/docs-v2/docs/web-pki/',
       },
       {
-        id: 'rest-pki',
-        name: 'Rest PKI',
-        description: 'API REST para assinatura digital, validação e carimbo de tempo de documentos.',
-        href: '/docs-v2/docs/rest-pki/',
-      },
-      {
         id: 'rest-pki-core',
-        name: 'Rest PKI Core',
+        name: 'RestPKICore',
         description: 'Versão moderna do Rest PKI com suporte a sessões de assinatura e biometria.',
         href: '/docs-v2/docs/rest-pki-core/',
+      },
+      {
+        id: 'pki-express',
+        name: 'PKI Express',
+        description: 'Biblioteca multiplataforma para assinatura digital em qualquer linguagem via linha de comando.',
+        href: '/docs-v2/docs/pki-express/',
       },
       {
         id: 'pki-sdk',
@@ -50,22 +50,16 @@ const SECTIONS: Section[] = [
         href: '/docs-v2/docs/pki-sdk/',
       },
       {
-        id: 'pki-express',
-        name: 'PKI Express',
-        description: 'Biblioteca multiplataforma para assinatura digital em qualquer linguagem via linha de comando.',
-        href: '/docs-v2/docs/pki-express/',
+        id: 'rest-pki',
+        name: 'Rest PKI',
+        description: 'API REST para assinatura digital, validação e carimbo de tempo de documentos.',
+        href: '/docs-v2/docs/rest-pki/',
       },
     ],
   },
   {
-    title: 'Assinatura & CA',
+    title: 'Soluções para Autoridade Certificadora',
     products: [
-      {
-        id: 'signer',
-        name: 'Signer',
-        description: 'Plataforma de assinatura digital de documentos com suporte a múltiplos formatos e certificados.',
-        href: '/docs-v2/docs/signer/',
-      },
       {
         id: 'amplia',
         name: 'Amplia',
@@ -77,23 +71,6 @@ const SECTIONS: Section[] = [
         name: 'Amplia Reg',
         description: 'Módulo de registro e validação de identidade para emissão de certificados.',
         href: '/docs-v2/docs/amplia-reg/',
-      },
-    ],
-  },
-  {
-    title: 'Outros Produtos',
-    products: [
-      {
-        id: 'grant-id',
-        name: 'GrantID',
-        description: 'Solução de identidade e controle de acesso com suporte a OpenID Connect e OAuth 2.0.',
-        href: '/docs-v2/docs/grant-id/',
-      },
-      {
-        id: 'scanner',
-        name: 'Scanner',
-        description: 'Serviço para digitalização, reconhecimento e processamento de documentos.',
-        href: '/docs-v2/docs/scanner/',
       },
       {
         id: 'psc',
@@ -107,11 +84,45 @@ const SECTIONS: Section[] = [
         description: 'Autoridade de carimbo de tempo para certificação de data e hora de documentos.',
         href: '/docs-v2/docs/tsa/',
       },
+    ],
+  },
+  {
+    title: 'Artigos',
+    products: [
+      {
+        id: 'pki-guide',
+        name: 'Certificação Digital',
+        description: 'Conceitos e guias sobre certificação digital, ICP-Brasil e infraestrutura de chaves públicas.',
+        href: '/docs-v2/docs/pki-guide/',
+      },
+    ],
+  },
+  {
+    title: 'Outros Produtos',
+    products: [
+      {
+        id: 'bem-vindo',
+        name: 'Bem-vindo',
+        description: 'Bem-vindo ao docs.lacunasoftware.com, a nossa nova experiência unificada de documentação técnica.',
+        href: '/docs-v2/docs/',
+      },
+      {
+        id: 'scanner',
+        name: 'Scanner',
+        description: 'Serviço para digitalização, reconhecimento e processamento de documentos.',
+        href: '/docs-v2/docs/scanner/',
+      },
       {
         id: 'digiploma',
         name: 'Digiploma',
         description: 'Plataforma para emissão e validação de diplomas digitais conforme padrões MEC.',
         href: '/docs-v2/docs/digiploma/',
+      },
+      {
+        id: 'grant-id',
+        name: 'GrantID',
+        description: 'Solução de identidade e controle de acesso com suporte a OpenID Connect e OAuth 2.0.',
+        href: '/docs-v2/docs/grant-id/',
       },
     ],
   },
@@ -146,14 +157,14 @@ export default function Home(): ReactNode {
       </header>
 
       <main>
-        <div className={styles.productsHeader} style={{textAlign: 'center'}}>
+        {/* <div className={styles.productsHeader} style={{textAlign: 'center'}}>
           <h2 className={styles.productsTitle}>
             <Link to="/docs-v2/docs/pki-guide/" className={styles.heroLink}>
               Soluções para certificação digital
             </Link>
           </h2>
           <p className={styles.productsSubtitle}>Ou siga diretamente para a documentação de um produto específico:</p>
-        </div>
+        </div> */}
         {SECTIONS.map(section => (
           <section key={section.title} className={styles.section}>
             <p className={styles.sectionTitle}>{section.title}</p>

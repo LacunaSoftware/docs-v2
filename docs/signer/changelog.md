@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Changelog"
-sidebar_position: 6
+sidebar_position: 5
 ---
 
 # Histórico de versões do Signer
@@ -452,7 +452,7 @@ Atualiza modelo do banco de dados: não
   * [SIG-1461] Passos não preenchidos de Assinatura eletrônica não estão bloqueando o envio da requisição
   * [SIG-1463] Documentos com caracteres especiais estão sendo enviado com nome attachment no e-mail
 
-* **Mudanças importantes**: antes de atualizar execute os passos descritos na página de [Atualização para versão 2.x](on-premises/update-20.md).
+* **Mudanças importantes**: antes de atualizar execute os passos descritos na página de [Atualização para versão 2.x](on-premises/migracao/update-20.md).
 
 Atualiza modelo do banco de dados: sim
 

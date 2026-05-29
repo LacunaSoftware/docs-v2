@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Changelog"
-sidebar_position: 6
+sidebar_position: 5
 ---
 
 # Signer 
@@ -452,7 +452,7 @@ Updates database model: no
   * [SIG-1461] Unfilled electronic signature steps are not preveting the request to be sent
   * [SIG-1463] Attachments with special characters in the name are being sent with the name attachment
 
-* **Important changes**: before updating follow the steps shown in the [Updating to version 2.x](on-premises/update-20.md) page.
+* **Important changes**: before updating follow the steps shown in the [Updating to version 2.x](on-premises/migracao/update-20.md) page.
 
 Updates database model: yes
 

@@ -1,0 +1,14 @@
+---
+sidebar_label: "Access Control"
+sidebar_position: 1
+---
+
+# Signer Access Control
+
+:::warning Unavailable
+
+Sorry, this article is not yet available in the selected language. Please choose between one of the available versions:
+
+- [Português (Brasil)](/docs-v2/docs/signer/on-premises/configuracao/access-control)
+
+:::

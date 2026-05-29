@@ -11,13 +11,13 @@ The [Signer](../index.md) can be used in the cloud (SaaS) or you can have an ins
 
 Signer is compatible with the following environments:
 
-* [Windows Server](windows/index.md)
-* [Linux](linux/index.md)
-* [Docker](docker/index.md)
-* [Azure App Services](azure/index.md)
+* [Windows Server](como-instalar/windows/index.md)
+* [Linux](como-instalar/linux/index.md)
+* [Docker](como-instalar/docker/index.md)
+* [Azure App Services](como-instalar/azure/index.md)
 
 Click on one of the environments above for specific installation and upgrade instructions.
 
 ## See too
 
-* [Preparing the database for Signer installation](prepare-database.md)
+* [Preparing the database for Signer installation](como-instalar/prepare-database.md)

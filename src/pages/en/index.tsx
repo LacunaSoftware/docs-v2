@@ -107,6 +107,12 @@ const SECTIONS: Section[] = [
         href: '/docs-v2/docs/en/',
       },
       {
+        id: 'bulk-signer',
+        name: 'Bulk Signer',
+        description: 'Solution for bulk digital document signing with support for queues and asynchronous processing.',
+        href: '/docs-v2/docs/en/bulk-signer/',
+      },
+      {
         id: 'scanner',
         name: 'Scanner',
         description: 'Service for scanning, recognition and processing of documents.',

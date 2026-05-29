@@ -74,7 +74,6 @@ const config: Config = {
         src: 'img/logo.png',
       },
       items: [
-        {type: 'docSidebar', sidebarId: 'pkiGuide',    position: 'left', label: 'Certificação Digital'},
         {type: 'docSidebar', sidebarId: 'webPki',      position: 'left', label: 'Web PKI'},
         {type: 'docSidebar', sidebarId: 'restPki',     position: 'left', label: 'Rest PKI'},
         {type: 'docSidebar', sidebarId: 'restPkiCore', position: 'left', label: 'Rest PKI Core'},
@@ -89,6 +88,7 @@ const config: Config = {
           position: 'left',
           items: [
             {type: 'docSidebar', sidebarId: 'welcome',    label: 'Bem-vindo'},
+            {type: 'docSidebar', sidebarId: 'pkiGuide', label: 'Certificação Digital'},
             {type: 'docSidebar', sidebarId: 'bulkSigner', label: 'Bulk Signer'},
             {type: 'docSidebar', sidebarId: 'ampliaReg', label: 'Amplia Reg'},
             {type: 'docSidebar', sidebarId: 'psc',       label: 'PSC'},

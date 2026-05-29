@@ -1,41 +1,59 @@
-# Website
+# Lacuna Software Docs v2
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+Documentation site for Lacuna Software products, built with [Docusaurus 3](https://docusaurus.io/).
+
+## Prerequisites
+
+- Node.js >= 20.0
 
 ## Installation
 
 ```bash
-yarn
+npm install
 ```
+
+> This installs all dependencies including `@easyops-cn/docusaurus-search-local`, which powers the offline full-text search.
 
 ## Local Development
 
 ```bash
-yarn start
+npm run start
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+Starts the dev server at **http://localhost:3000/docs-v2/**. Most content changes hot-reload without restarting.
 
-## Build
+> **Note:** The search index is **not** available in dev mode. To test search, do a full build and serve it locally (see below).
+
+## Build (with search)
 
 ```bash
-yarn build
+npm run build
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+Generates the static site into the `build/` directory. The search index is built during this step, so this is required to test search functionality.
+
+To preview the built site locally:
+
+```bash
+npm run serve
+```
+
+Serves the production build at **http://localhost:3000/docs-v2/**.
+
+## Deployed Site
+
+The production site is published to GitHub Pages and available at:
+
+**https://lacunasoftware.github.io/docs-v2/**
 
 ## Deployment
 
-Using SSH:
+Consult the github actions for more information.
 
-```bash
-USE_SSH=true yarn deploy
-```
+## Other Commands
 
-Not using SSH:
-
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
-
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+| Command | Description |
+|---|---|
+| `npm run clear` | Clear Docusaurus cache |
+| `npm run typecheck` | Run TypeScript type checking |
+| `npm run write-translations` | Extract i18n translation strings |

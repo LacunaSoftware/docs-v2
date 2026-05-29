@@ -88,7 +88,8 @@ const config: Config = {
           label: 'Outros',
           position: 'left',
           items: [
-            {type: 'docSidebar', sidebarId: 'welcome',   label: 'Bem-vindo'},
+            {type: 'docSidebar', sidebarId: 'welcome',    label: 'Bem-vindo'},
+            {type: 'docSidebar', sidebarId: 'bulkSigner', label: 'Bulk Signer'},
             {type: 'docSidebar', sidebarId: 'ampliaReg', label: 'Amplia Reg'},
             {type: 'docSidebar', sidebarId: 'psc',       label: 'PSC'},
             {type: 'docSidebar', sidebarId: 'tsa',       label: 'TSA'},
@@ -126,7 +127,8 @@ const config: Config = {
         {
           title: 'Produtos',
           items: [
-            {label: 'Signer',    to: '/docs/signer/'},
+            {label: 'Signer',      to: '/docs/signer/'},
+            {label: 'Bulk Signer', to: '/docs/bulk-signer/'},
             {label: 'Amplia',    to: '/docs/amplia/'},
             {label: 'Amplia Reg', to: '/docs/amplia-reg/'},
             {label: 'GrantID',   to: '/docs/grant-id/'},

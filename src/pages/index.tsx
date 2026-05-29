@@ -107,6 +107,12 @@ const SECTIONS: Section[] = [
         href: '/docs-v2/docs/',
       },
       {
+        id: 'bulk-signer',
+        name: 'Bulk Signer',
+        description: 'Solução para assinatura digital em massa de documentos, com suporte a filas e processamento assíncrono.',
+        href: '/docs-v2/docs/en/bulk-signer/',
+      },
+      {
         id: 'scanner',
         name: 'Scanner',
         description: 'Serviço para digitalização, reconhecimento e processamento de documentos.',

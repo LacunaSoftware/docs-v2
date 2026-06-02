@@ -8,6 +8,11 @@
 .docusaurus
 .cache-loader
 
+# .NET API reference intermediates — regenerate with `npm run docs:api`.
+# (The generated Markdown in /api-docs IS committed so CI can build without .NET.)
+/api-bin
+/api
+
 # Misc
 .DS_Store
 .env.local

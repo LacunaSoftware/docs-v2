@@ -12,7 +12,8 @@
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "docs:api": "node scripts/fetch-api-assemblies.mjs && docfx metadata docfx.json && node scripts/generate-api-docs.mjs"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.1",

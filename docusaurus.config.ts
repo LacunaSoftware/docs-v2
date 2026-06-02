@@ -44,6 +44,31 @@ const config: Config = {
         docsRouteBasePath: '/docs',
       },
     ],
+    // .NET API reference: a separate docs instance served at /api (not /docs/api).
+    // Language-neutral, not in the navbar, and excluded from search above — so it's
+    // reachable only by URL, but its own sidebar lists every namespace.
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'apiRef',
+        path: 'api-docs',
+        routeBasePath: 'api',
+        sidebarPath: './sidebarsApi.ts',
+      },
+    ],
+    // Same API content mirrored at /en/api. The reference is language-neutral, so
+    // both locales serve identical pages; the PT/EN switch just flips the URL.
+    // api-docs-en is a build-time copy of api-docs (scripts/sync-api-en.mjs) —
+    // two docs instances can't share one path, so the EN mirror gets its own.
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'apiRefEn',
+        path: 'api-docs-en',
+        routeBasePath: 'en/api',
+        sidebarPath: './sidebarsApi.ts',
+      },
+    ],
   ],
 
   presets: [

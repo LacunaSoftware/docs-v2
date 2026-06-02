@@ -1,0 +1,13 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "files": [ "*.dll" ],
+          "src": "api-bin"
+        }
+      ],
+      "dest": "api"
+    }
+  ]
+}

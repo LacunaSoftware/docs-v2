@@ -56,6 +56,19 @@ const config: Config = {
         sidebarPath: './sidebarsApi.ts',
       },
     ],
+    // Same API content mirrored at /en/api. The reference is language-neutral, so
+    // both locales serve identical pages; the PT/EN switch just flips the URL.
+    // api-docs-en is a build-time copy of api-docs (scripts/sync-api-en.mjs) —
+    // two docs instances can't share one path, so the EN mirror gets its own.
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'apiRefEn',
+        path: 'api-docs-en',
+        routeBasePath: 'en/api',
+        sidebarPath: './sidebarsApi.ts',
+      },
+    ],
   ],
 
   presets: [

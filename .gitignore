@@ -12,6 +12,8 @@
 # (The generated Markdown in /api-docs IS committed so CI can build without .NET.)
 /api-bin
 /api
+# EN mirror of /api-docs — recreated from it before every build (sync-api-en.mjs).
+/api-docs-en
 
 # Misc
 .DS_Store

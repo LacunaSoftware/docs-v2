@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "prestart": "node scripts/sync-api-en.mjs",
     "start": "docusaurus start",
+    "prebuild": "node scripts/sync-api-en.mjs",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
@@ -13,7 +15,7 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "docs:api": "node scripts/fetch-api-assemblies.mjs && docfx metadata docfx.json && node scripts/generate-api-docs.mjs"
+    "docs:api": "node scripts/fetch-api-assemblies.mjs && docfx metadata docfx.json && node scripts/generate-api-docs.mjs && node scripts/sync-api-en.mjs"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.1",

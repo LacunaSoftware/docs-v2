@@ -10,9 +10,9 @@ These instructions assume you are logged in as **root**. If you are not, run `su
 Download and extract the distribution package to its own directory, then enter it:
 
 ```sh
-curl -O https://cdn.lacunasoftware.com/grantid/grantid-5.3.0.tar.gz
-tar -xzf grantid-5.3.0.tar.gz --one-top-level
-cd grantid-5.3.0
+curl -O https://cdn.lacunasoftware.com/grantid/grantid-5.4.0.tar.gz
+tar -xzf grantid-5.4.0.tar.gz --one-top-level
+cd grantid-5.4.0
 ```
 
 Stop the services:

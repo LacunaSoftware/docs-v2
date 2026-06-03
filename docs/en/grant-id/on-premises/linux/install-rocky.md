@@ -111,9 +111,9 @@ We'll first do some initial setup, then we'll install each component.
 Download and extract the distribution package to its own directory, then enter it:
 
 ```sh
-curl -O https://cdn.lacunasoftware.com/grantid/grantid-5.3.0.tar.gz
-tar -xzf grantid-5.3.0.tar.gz --one-top-level
-cd grantid-5.3.0
+curl -O https://cdn.lacunasoftware.com/grantid/grantid-5.4.0.tar.gz
+tar -xzf grantid-5.4.0.tar.gz --one-top-level
+cd grantid-5.4.0
 ```
 
 Create a local user to run the components:

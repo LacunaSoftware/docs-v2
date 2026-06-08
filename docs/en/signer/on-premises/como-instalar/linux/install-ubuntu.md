@@ -1,4 +1,4 @@
-# Installing Signer on Ubuntu Server
+﻿# Installing Signer on Ubuntu Server
 
 To install an instance [*on premises*](../../index.md) from [Signer](../../../index.md) on Ubuntu Server, follow the steps below. For other plataforms, [click here](../../index.md).
 
@@ -90,8 +90,8 @@ Create the site folder, download and extract the binaries:
 
 ```sh
 mkdir /usr/share/lacuna-signer
-curl -O https://cdn.lacunasoftware.com/signer/signer-2.14.1.tar.gz
-tar xzf signer-2.14.1.tar.gz -C /usr/share/lacuna-signer
+curl -O https://cdn.lacunasoftware.com/signer/signer-2.14.2.tar.gz
+tar xzf signer-2.14.2.tar.gz -C /usr/share/lacuna-signer
 chmod -R a=,u+rwX,go+rX /usr/share/lacuna-signer
 ```
 
@@ -249,7 +249,7 @@ The expected output is similar to:
  Main PID: 2831 (dotnet)
     Tasks: 36 (limit: 2319)
    CGroup: /system.slice/lacuna-signer.service
-           └─2831 /usr/bin/dotnet Lacuna.Signer.Site.dll
+           â””â”€2831 /usr/bin/dotnet Lacuna.Signer.Site.dll
 
 Apr 15 22:17:50 server.patorum.com systemd[1]: Started Lacuna Signer.
 Apr 15 22:17:55 server.patorum.com lacuna-signer[2831]: info: Lacuna.Signer.Site.Startup.RecurringJobsInit[0]

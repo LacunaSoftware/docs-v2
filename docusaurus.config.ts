@@ -41,12 +41,14 @@ const config: Config = {
         language: ['pt', 'en'],
         indexDocs: true,
         indexPages: false,
-        docsRouteBasePath: '/docs',
+        // Index the main docs plus both .NET API reference instances (/api and
+        // /en/api) so the generated SDK classes are reachable from the search bar.
+        docsRouteBasePath: ['/docs', '/api', '/en/api'],
       },
     ],
     // .NET API reference: a separate docs instance served at /api (not /docs/api).
-    // Language-neutral, not in the navbar, and excluded from search above — so it's
-    // reachable only by URL, but its own sidebar lists every namespace.
+    // Language-neutral and not in the navbar, but indexed for search (above) and
+    // its own sidebar lists every namespace.
     [
       '@docusaurus/plugin-content-docs',
       {

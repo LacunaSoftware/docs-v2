@@ -1,4 +1,4 @@
-﻿# Installing Signer on Ubuntu Server
+# Installing Signer on Ubuntu Server
 
 To install an instance [*on premises*](../../index.md) from [Signer](../../../index.md) on Ubuntu Server, follow the steps below. For other plataforms, [click here](../../index.md).
 
@@ -90,8 +90,8 @@ Create the site folder, download and extract the binaries:
 
 ```sh
 mkdir /usr/share/lacuna-signer
-curl -O https://cdn.lacunasoftware.com/signer/signer-2.14.4.tar.gz
-tar xzf signer-2.14.4.tar.gz -C /usr/share/lacuna-signer
+curl -O https://cdn.lacunasoftware.com/signer/signer-2.15.0.tar.gz
+tar xzf signer-2.15.0.tar.gz -C /usr/share/lacuna-signer
 chmod -R a=,u+rwX,go+rX /usr/share/lacuna-signer
 ```
 

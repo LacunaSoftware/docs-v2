@@ -90,8 +90,8 @@ Crie a pasta do site, baixe e extraia os binários:
 
 ```sh
 mkdir /usr/share/lacuna-signer
-curl -O https://cdn.lacunasoftware.com/signer/signer-2.15.0.tar.gz
-tar xzf signer-2.15.0.tar.gz -C /usr/share/lacuna-signer
+curl -O https://cdn.lacunasoftware.com/signer/signer-2.15.1.tar.gz
+tar xzf signer-2.15.1.tar.gz -C /usr/share/lacuna-signer
 chmod -R a=,u+rwX,go+rX /usr/share/lacuna-signer
 ```
 

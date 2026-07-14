@@ -1,31 +1,27 @@
 # Histórico de versões do Rest PKI
 
-<a name="v1-33-8" />
-### 1.33.8 (2026-04-07)
+### 1.33.8 (2026-04-07) {#v1-33-8}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) com correção de loop de validação de TSL.
 
 
-<a name="v1-33-7" />
-### 1.33.7 (2026-03-05)
+### 1.33.7 (2026-03-05) {#v1-33-7}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.22.2](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-2) com correção na adição de tag T8 em PDF.
 
 
-<a name="v1-33-6" />
-### 1.33.6 (2025-11-28)
+### 1.33.6 (2025-11-28) {#v1-33-6}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.21.2](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-21-2)
 
 
-<a name="v1-33-5" />
-### 1.33.5 (2025-10-20)
+### 1.33.5 (2025-10-20) {#v1-33-5}
 
 Atualização do modelo do banco de dados: Não
 
@@ -33,8 +29,7 @@ Atualização do modelo do banco de dados: Não
 - Adiciona parâmetro `ArchiveTimestamps` no model dos detalhes das assinaturas
 
 
-<a name="v1-33-3" />
-### 1.33.3 (2025-05-02)
+### 1.33.3 (2025-05-02) {#v1-33-3}
 
 Atualização do modelo do banco de dados: Não
 
@@ -43,64 +38,56 @@ Atualização do modelo do banco de dados: Não
 - Atualização do contexto de segurança Lacuna Test (para teste e desenvolvimento apenas)
 
 
-<a name="v1-33-2" />
-### 1.33.2 (2023-05-22)
+### 1.33.2 (2023-05-22) {#v1-33-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.13.1](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-13-1)
 
 
-<a name="v1-33-0" />
-### 1.33.0 (2023-05-06)
+### 1.33.0 (2023-05-06) {#v1-33-0}
 
 Atualização do modelo do banco de dados: Não
 
 - Adiciona política de assinatura Cades: ICP-Brasil Ref. Tempo (CAdES AD-RT) without CRLs
 
 
-<a name="v1-32-2" />
-### 1.32.2 (2022-10-01)
+### 1.32.2 (2022-10-01) {#v1-32-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Melhora no suporte de autenticação via "basic authentication" com carimbadoras de tempo
 
 
-<a name="v1-32-1" />
-### 1.32.1 (2022-09-18)
+### 1.32.1 (2022-09-18) {#v1-32-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Adiciona suporte ao protocolo proprietário da carimbadora de tempo Serpro
 
 
-<a name="v1-32-0" />
-### 1.32.0 (2022-09-12)
+### 1.32.0 (2022-09-12) {#v1-32-0}
 
 Atualização do modelo do banco de dados: Não
 
 - Adiciona política de assinatura XML (NFe) com hash SHA-256
 
 
-<a name="v1-31-0" />
-### 1.31.0 (2022-09-04)
+### 1.31.0 (2022-09-04) {#v1-31-0}
 
 Atualização do modelo do banco de dados: Não
 
 - Adiciona hash do "access token" do usuário às informações de transação da API
 
 
-<a name="v1-30-1" />
-### 1.30.1 (2022-05-09)
+### 1.30.1 (2022-05-09) {#v1-30-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.11.5](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-11-5)
 
 
-<a name="v1-30-0" />
-### 1.30.0 (2021-11-28)
+### 1.30.0 (2021-11-28) {#v1-30-0}
 
 Atualização do modelo do banco de dados: Não
 
@@ -109,16 +96,14 @@ Atualização do modelo do banco de dados: Não
 - Atualiza o PKI SDK para [2.9.0](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-9-0)
 
 
-<a name="v1-27-0" />
-### 1.27.0 (2021-08-31)
+### 1.27.0 (2021-08-31) {#v1-27-0}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionar políticas de assinatura XAdES ICP-Brasil AD-RC e AD-RA
 - Atualização PKI SDK para [2.8.12](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-8-12)
 
-<a name="v1-26-7" />
-### 1.26.7 (2021-08-02)
+### 1.26.7 (2021-08-02) {#v1-26-7}
 
 Atualização do modelo do banco de dados: Não
 
@@ -126,22 +111,19 @@ Atualização do modelo do banco de dados: Não
 - Adicionar aplicação de limitador em operação de marcas de PDF
 - Atualização PKI SDK para [2.8.10](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-8-10)
 
-<a name="v1-26-6" />
-### 1.26.6 (2021-07-16)
+### 1.26.6 (2021-07-16) {#v1-26-6}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.8.9](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-8-9)
 
-<a name="v1-26-5" />
-### 1.26.5 (2021-07-08)
+### 1.26.5 (2021-07-08) {#v1-26-5}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionar tempo limite configurável no comando de criação de fatura no banco de dados
 
-<a name="v1-26-4" />
-### 1.26.4 (2021-07-04)
+### 1.26.4 (2021-07-04) {#v1-26-4}
 
 Atualização do modelo do banco de dados: Não
 
@@ -149,23 +131,20 @@ Atualização do modelo do banco de dados: Não
 - Adicioanr suporte a identidades de mais países (Argentina, Equador, Paraguai e Peru) na tag de representação visual PAdES [`{{national_id}}`](./pades-tags)
 - Adicioanr suporte a tag de dados de CPF e RG mascarados na representação visual PAdES: [`{{br_cpf_masked}} e {{br_rg_numero_masked}}`](./pades-tags)
 
-<a name="v1-26-3" />
-### 1.26.3 (2021-05-17)
+### 1.26.3 (2021-05-17) {#v1-26-3}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.8.7](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-8-7)
 - Melhora o tratamento de erros relacionados a PDFs protegidos por senha para retornar o código de status 422 em vez de 500
 
-<a name="v1-26-2" />
-### 1.26.2 (2021-03-31)
+### 1.26.2 (2021-03-31) {#v1-26-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.8.4](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-8-4)
 
-<a name="v1-26-1" />
-### 1.26.1 (2021-03-22)
+### 1.26.1 (2021-03-22) {#v1-26-1}
 
 Atualização do modelo do banco de dados: Não
 
@@ -173,65 +152,56 @@ Atualização do modelo do banco de dados: Não
 - Corrigir exceção não tratada na abertura de uma assinatura PAdES sem o valor do digest
 - Atualização PKI SDK para 2.8.1
 
-<a name="v1-26-0" />
-### 1.26.0 (2021-03-11)
+### 1.26.0 (2021-03-11) {#v1-26-0}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionar API para abertura e validação de um certificado
 
-<a name="v1-25-3" />
-### 1.25.3 (2021-02-10)
+### 1.25.3 (2021-02-10) {#v1-25-3}
 
 Atualização do modelo do banco de dados: Não
 
 - Disabilitar tasks de atualização e limites de número de transações em instâncias on-premises
 
-<a name="v1-25-2" />
-### 1.25.2 (2021-02-09)
+### 1.25.2 (2021-02-09) {#v1-25-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Alongar cronograma de execução da task de atualização de número de transações para cada 4 horas
 
-<a name="v1-25-1" />
-### 1.25.1 (2020-12-15)
+### 1.25.1 (2020-12-15) {#v1-25-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionar política "CmsPermissive" para validação de assinaturas CAdES
 
-<a name="v1-25-0" />
-### 1.25.0 (2020-12-06)
+### 1.25.0 (2020-12-06) {#v1-25-0}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionar campo "Reason" em assinaturas PAdES
 
-<a name="v1-24-3" />
-### 1.24.3 (2020-09-22)
+### 1.24.3 (2020-09-22) {#v1-24-3}
 
 Atualização do modelo do banco de dados: Não
 
 - Melhora página inicial
 
-<a name="v1-24-1" />
-### 1.24.1 (2020-09-16)
+### 1.24.1 (2020-09-16) {#v1-24-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Melhorar política de validação "Adobe Reader" para lidar com o erro "forbidden signed attribute is present"
 - Atualização PKI SDK para [2.7.8](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-7-8)
 
-<a name="v1-24-0" />
-### 1.24.0 (2020-07-09)
+### 1.24.0 (2020-07-09) {#v1-24-0}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionar campo "CertificationLevel" em assinaturas PAdES
 
-<a name="v1-23-0" />
-### 1.23.0 (2020-06-19)
+### 1.23.0 (2020-06-19) {#v1-23-0}
 
 Atualização do modelo do banco de dados: Não
 
@@ -239,16 +209,14 @@ Atualização do modelo do banco de dados: Não
 - Adicionar campo "CustomSignatureFieldName" em assinaturas PAdES
 - Atualização PKI SDK para [2.7.2](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-7-2)
 
-<a name="v1-22-1" />
-### 1.22.1 (2020-04-22)
+### 1.22.1 (2020-04-22) {#v1-22-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Melhorar tratamento do erro quando o usuário fornece um token inválido
 
 
-<a name="v1-22-0" />
-### 1.22.0 (2020-02-28)
+### 1.22.0 (2020-02-28) {#v1-22-0}
 
 Atualização do modelo do banco de dados: Não
 
@@ -258,22 +226,19 @@ Atualização do modelo do banco de dados: Não
 - Adicionar política de validação para assinaturas feitas no Adobe Reader
 - Adicionar configuração para limitar a quantidade (*throttling*) de requisições feitas à API 
 
-<a name="v1-21-1" />
-### 1.21.1 (2020-02-21)
+### 1.21.1 (2020-02-21) {#v1-21-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Atualização PKI SDK para [2.5.5](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-5-5)
 
-<a name="v1-21-0" />
-### 1.21.0 (2020-01-10)
+### 1.21.0 (2020-01-10) {#v1-21-0}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionar uma política de assinatura CAdES ICP-Brasil sem LCRs
 
-<a name="v1-20-2" />
-### 1.20.2 (2019-07-21)
+### 1.20.2 (2019-07-21) {#v1-20-2}
 
 Atualização do modelo do banco de dados: Não
 
@@ -283,8 +248,7 @@ Atualização do modelo do banco de dados: Não
 - Atualização PKI SDK para [2.5.2](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-5-2)
 
 
-<a name="v1-20-1" />
-### 1.20.1 (2019-07-04)
+### 1.20.1 (2019-07-04) {#v1-20-1}
 
 Atualização do modelo do banco de dados: Não
 
@@ -293,22 +257,19 @@ Atualização do modelo do banco de dados: Não
 - Atualização PKI SDK para [2.5.1](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-5-1)
 
 
-<a name="v1-20-0" />
-### 1.20.0
+### 1.20.0 {#v1-20-0}
 
 *Nenhuma mudança (version ignorada)*
 
 
-<a name="v1-19-1" />
-### 1.19.1 (2019-07-03)
+### 1.19.1 (2019-07-03) {#v1-19-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Melhora os trabalhos de manutenção
 
 
-<a name="v1-19-0" />
-### 1.19.0 (2019-03-15)
+### 1.19.0 (2019-03-15) {#v1-19-0}
 
 Atualização do modelo do banco de dados: Não
 
@@ -316,16 +277,14 @@ Atualização do modelo do banco de dados: Não
 - Atualização PKI SDK para [2.2.8](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-2-8)
 
 
-<a name="v1-18-5" />
-### 1.18.5 (2019-01-03)
+### 1.18.5 (2019-01-03) {#v1-18-5}
 
 Atualização do modelo do banco de dados: Não
 
 - Melhorias de desempenho no faturamento (não afeta as instalações locais)
 
 
-<a name="v1-18-4" />
-### 1.18.4 (2018-12-11)
+### 1.18.4 (2018-12-11) {#v1-18-4}
 
 Atualização do modelo do banco de dados: Não
 
@@ -333,8 +292,7 @@ Atualização do modelo do banco de dados: Não
 - Atualização PKI SDK para [2.2.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-2-3)
 
 
-<a name="v1-18-3" />
-### 1.18.3 (2018-10-23)
+### 1.18.3 (2018-10-23) {#v1-18-3}
 
 Atualização do modelo do banco de dados: Não
 
@@ -344,8 +302,7 @@ Atualização do modelo do banco de dados: Não
 - Atualização PKI SDK para [2.2.2](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-2-2), corrigindo erros na rotação das marcas PDF
 
 
-<a name="v1-18-2" />
-### 1.18.2 (2018-09-26)
+### 1.18.2 (2018-09-26) {#v1-18-2}
 
 Atualização do modelo do banco de dados: Não
 
@@ -354,8 +311,7 @@ Atualização do modelo do banco de dados: Não
   - Em todas assinaturas XML
 
 
-<a name="v1-18-1" />
-### 1.18.1 (2018-09-11)
+### 1.18.1 (2018-09-11) {#v1-18-1}
 
 Atualização do modelo do banco de dados: Não
 
@@ -363,8 +319,7 @@ Atualização do modelo do banco de dados: Não
   - Adicionado suporte para especificar a chave da API do AI, além da chave da instrumentação
 
 
-<a name="v1-18-0" />
-### 1.18.0 (2018-08-13)
+### 1.18.0 (2018-08-13) {#v1-18-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -372,8 +327,7 @@ Atualização do modelo do banco de dados: **Sim**
 - Atualização PKI SDK para [2.1.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-1-3)
 
 
-<a name="v1-17-5" />
-### 1.17.5 (2018-08-01)
+### 1.17.5 (2018-08-01) {#v1-17-5}
 
 Atualização do modelo do banco de dados: Não
 
@@ -381,8 +335,7 @@ Atualização do modelo do banco de dados: Não
 - Melhoria de usuários API
 
 
-<a name="v1-17-4" />
-### 1.17.4 (2018-07-11)
+### 1.17.4 (2018-07-11) {#v1-17-4}
 
 Atualização do modelo do banco de dados: Não
 
@@ -390,15 +343,13 @@ Atualização do modelo do banco de dados: Não
 - Melhorar a API da fatura
 
 
-<a name="v1-17-3" />
-### 1.17.3 (2018-05-24)
+### 1.17.3 (2018-05-24) {#v1-17-3}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionar link para a [política de privacidade](privacy-policy.md) na tela inicial ([GDPR](https://en.wikipedia.org/wiki/General_Data_Protection_Regulation) conformidade)
 
-<a name="v1-17-2" />
-### 1.17.2 (2018-05-15)
+### 1.17.2 (2018-05-15) {#v1-17-2}
 
 Atualização do modelo do banco de dados: Não
 
@@ -406,8 +357,7 @@ Atualização do modelo do banco de dados: Não
   - Corrigido erro de preenchimento da cadeia de certificados no PAdES
 
 
-<a name="v1-17-1" />
-### 1.17.1 (2018-05-09)
+### 1.17.1 (2018-05-09) {#v1-17-1}
 
 Atualização do modelo do banco de dados: Não
 
@@ -415,8 +365,7 @@ Atualização do modelo do banco de dados: Não
   - Melhoria na tolerância para certificados mal formados (corrigindo problemas devido a recentes certificados mal formados do SERPRO)
   - Atualização intermediação ICP-Brasil CAs
 
-<a name="v1-17-0" />
-### 1.17.0 (2018-03-29)
+### 1.17.0 (2018-03-29) {#v1-17-0}
 
 Atualização do modelo do banco de dados: Não
 
@@ -424,8 +373,7 @@ Atualização do modelo do banco de dados: Não
 - Melhorias gerais no faturamento
 
 
-<a name="v1-16-0" />
-### 1.16.0 (2017-12-12)
+### 1.16.0 (2017-12-12) {#v1-16-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -437,8 +385,7 @@ Atualização do modelo do banco de dados: **Sim**
 - Correção de pequenos bugs na API de faturas
 
 
-<a name="v1-15-2" />
-### 1.15.2 (2017-11-20)
+### 1.15.2 (2017-11-20) {#v1-15-2}
 
 Atualização do modelo do banco de dados: Não
 
@@ -450,8 +397,7 @@ Atualização do modelo do banco de dados: Não
 - Atualização Lacuna PKI SDK para 1.20.5
 
 
-<a name="v1-15-1" />
-### 1.15.1 (2017-11-16)
+### 1.15.1 (2017-11-16) {#v1-15-1}
 
 Atualização do modelo do banco de dados: Não
 
@@ -462,8 +408,7 @@ Atualização do modelo do banco de dados: Não
 - Uma exceção pode ser lançada durante a atualização do modelo de banco de dados (corrigida em 1.15.2)
 
 
-<a name="v1-15-0" />
-### 1.15.0 (2017-11-14)
+### 1.15.0 (2017-11-14) {#v1-15-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -480,8 +425,7 @@ Atualização do modelo do banco de dados: **Sim**
 - Uma exceção pode ser lançada durante a atualização do modelo de banco de dados (corrigida em 1.15.2)
 
 
-<a name="v1-14-4" />
-### 1.14.4 (2017-09-29)
+### 1.14.4 (2017-09-29) {#v1-14-4}
 
 Atualização do modelo do banco de dados: Não
 
@@ -497,8 +441,7 @@ Atualização do modelo do banco de dados: Não
 - Atualize o Lacuna PKI SDK para 1.19.4
 
 
-<a name="v1-14-3" />
-### 1.14.3 (2017-09-17)
+### 1.14.3 (2017-09-17) {#v1-14-3}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -511,8 +454,7 @@ Atualização do modelo do banco de dados: **Sim**
 - Correção de bug no carregamento da página de limites do usuário
 
 
-<a name="v1-14-2" />
-### 1.14.2 (2017-09-12)
+### 1.14.2 (2017-09-12) {#v1-14-2}
 
 Atualização do modelo do banco de dados: Não
 
@@ -523,8 +465,7 @@ Atualização do modelo do banco de dados: Não
 - A versão não pode ser instalada no PostgreSQL (corrigida na 1.14.3)
 
 
-<a name="v1-14-1" />
-### 1.14.1 (2017-09-11)
+### 1.14.1 (2017-09-11) {#v1-14-1}
 
 Atualização do modelo do banco de dados: Não
 
@@ -535,8 +476,7 @@ Atualização do modelo do banco de dados: Não
 - A versão não pode ser instalada no PostgreSQL (corrigida na 1.14.3)
 
 
-<a name="v1-14-0" />
-### 1.14.0 (2017-09-09)
+### 1.14.0 (2017-09-09) {#v1-14-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -565,8 +505,7 @@ Atualização do modelo do banco de dados: **Sim**
 - A versão não pode ser instalada no PostgreSQL (corrigida na 1.14.3)
 
 
-<a name="v1-13-3" />
-### 1.13.3 (2017-09-07)
+### 1.13.3 (2017-09-07) {#v1-13-3}
 
 Atualização do modelo do banco de dados: Não
 
@@ -575,16 +514,14 @@ Atualização do modelo do banco de dados: Não
 - Logs aprimorados para ajudar no diagnóstico de erros de parametrização de confiança
 
 
-<a name="v1-13-2" />
-### 1.13.2 (2017-08-28)
+### 1.13.2 (2017-08-28) {#v1-13-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Pequenas alterações na API de cobrança
 
 
-<a name="v1-13-0" />
-### 1.13.0 (2017-07-03)
+### 1.13.0 (2017-07-03) {#v1-13-0}
 
 Atualização do modelo do banco de dados: Não
 
@@ -593,16 +530,14 @@ Atualização do modelo do banco de dados: Não
 - Melhore as telas de transações e eventos
 
 
-<a name="v1-12-8" />
-### 1.12.8 (2017-06-27)
+### 1.12.8 (2017-06-27) {#v1-12-8}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de bug que fazia com que ACs intermediárias fossem ignoradas em APIs de assinatura abertas / validadas
 
 
-<a name="v1-12-7" />
-### 1.12.7 (2017-06-05)
+### 1.12.7 (2017-06-05) {#v1-12-7}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -610,16 +545,14 @@ Atualização do modelo do banco de dados: **Sim**
 - Correção de bug que causava erros em timestampers criados recentemente
 
 
-<a name="v1-12-6" />
-### 1.12.6 (2017-06-01)
+### 1.12.6 (2017-06-01) {#v1-12-6}
 
 Atualização do modelo do banco de dados: Não
 
 - Criação das configurações do aplicativo TimeToCompleteSignatures e TimeToCompleteAuthentications
 
 
-<a name="v1-12-5" />
-### 1.12.5 (2017-05-11)
+### 1.12.5 (2017-05-11) {#v1-12-5}
 
 Atualização do modelo do banco de dados: Não
 
@@ -628,16 +561,14 @@ Atualização do modelo do banco de dados: Não
 - Atualize o Lacuna PKI SDK para 1.16.7 para melhorar os logs de download
 
 
-<a name="v1-12-4" />
-### 1.12.4 (2017-05-05)
+### 1.12.4 (2017-05-05) {#v1-12-4}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de bug que fazia com que privilégios de execução sobre a pasta do site fossem solicitados no aplicativo
 
 
-<a name="v1-12-3" />
-### 1.12.3 (2017-05-04)
+### 1.12.3 (2017-05-04) {#v1-12-3}
 
 Atualização do modelo do banco de dados: Não
 
@@ -646,24 +577,21 @@ Atualização do modelo do banco de dados: Não
 - Correção de bug na API de assinaturas XML de abertura/validação
 
 
-<a name="v1-12-2" />
-### 1.12.2 (2017-04-26)
+### 1.12.2 (2017-04-26) {#v1-12-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de bug na autentificação do certificado com Web PKI
 
 
-<a name="v1-12-1" />
-### 1.12.1 (2017-04-26)
+### 1.12.1 (2017-04-26) {#v1-12-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de um erro na inicialização do aplicativo que poderia causar o processamento duplo de trabalhos em segundo plano
 
 
-<a name="v1-12-0" />
-### 1.12.0 (2017-04-25)
+### 1.12.0 (2017-04-25) {#v1-12-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -678,8 +606,7 @@ Atualização do modelo do banco de dados: **Sim**
 - Atualização do Lacuna PKI SDK para 1.16.6
 
 
-<a name="v1-11-4" />
-### 1.11.4 (2017-03-16)
+### 1.11.4 (2017-03-16) {#v1-11-4}
 
 Atualização do modelo do banco de dados: Não
 
@@ -688,8 +615,7 @@ Atualização do modelo do banco de dados: Não
     - Alterações na inspeção de assinatura do CAdES para lidar com registros de data e hora codificados incorretamente
 
 
-<a name="v1-11-3" />
-### 1.11.3 (2017-02-13)
+### 1.11.3 (2017-02-13) {#v1-11-3}
 
 Atualização do modelo do banco de dados: Não
 
@@ -697,24 +623,21 @@ Atualização do modelo do banco de dados: Não
 - Atualização o Lacuna PKI SDK para 1.16.2
 
 
-<a name="v1-11-2" />
-### 1.11.2 (2017-01-20)
+### 1.11.2 (2017-01-20) {#v1-11-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de bug na página de manutenção do banco de dados
 
 
-<a name="v1-11-1" />
-### 1.11.1 (2017-01-17)
+### 1.11.1 (2017-01-17) {#v1-11-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de bug nas rotas de upload e download
 
 
-<a name="v1-11-0" />
-### 1.11.0 (2017-01-17)
+### 1.11.0 (2017-01-17) {#v1-11-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -741,16 +664,14 @@ Atualização do modelo do banco de dados: **Sim**
     - Atualização do uri e o root do TSL italiano
 
 
-<a name="v1-10-1" />
-### 1.10.1 (2016-10-01)
+### 1.10.1 (2016-10-01) {#v1-10-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionado políticas PAdES padrão "Básico com certificados ICP-Brasil" e "PAdES-T com certificados ICP-Brasil"
 
 
-<a name="v1-10-0" />
-### 1.10.0 (2016-09-27)
+### 1.10.0 (2016-09-27) {#v1-10-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -758,16 +679,14 @@ Atualização do modelo do banco de dados: **Sim**
 - Melhorar o gerenciamento de usuários
 
 
-<a name="v1-9-1" />
-### 1.9.1 (2016-09-22)
+### 1.9.1 (2016-09-22) {#v1-9-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de um erro que impedia o uso das tags `{{signerEmail}}` e `{{issuerCommonName}}` na representação visual do PAdES
 
 
-<a name="v1-9-0" />
-### 1.9.0 (2016-08-25)
+### 1.9.0 (2016-08-25) {#v1-9-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -776,16 +695,14 @@ Atualização do modelo do banco de dados: **Sim**
 - Melhorar o relatório de cobrança
 
 
-<a name="v1-8-2" />
-### 1.8.2 (2016-07-19)
+### 1.8.2 (2016-07-19) {#v1-8-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de bug nas assinaturas do CAdES com registro de data e hora
 
 
-<a name="v1-8-1" />
-### 1.8.1 (2016-07-11)
+### 1.8.1 (2016-07-11) {#v1-8-1}
 
 Atualização do modelo do banco de dados: Não
 
@@ -793,8 +710,7 @@ Atualização do modelo do banco de dados: Não
 - Atualização do Lacuna PKI SDK para 1.13.1
 
 
-<a name="v1-8-0" />
-### 1.8.0 (2016-07-05)
+### 1.8.0 (2016-07-05) {#v1-8-0}
 
 Atualização do modelo do banco de dados: Não
 
@@ -811,8 +727,7 @@ Atualização do modelo do banco de dados: Não
 - Atualização o Lacuna PKI SDK para 1.13.0
 
 
-<a name="v1-7-2" />
-### 1.7.2 (2016-06-10)
+### 1.7.2 (2016-06-10) {#v1-7-2}
 
 Atualização do modelo do banco de dados: Não
 
@@ -825,16 +740,14 @@ Atualização do modelo do banco de dados: Não
 - Atualização do Lacuna PKI SDK para 1.12.2 (sem correções)
 
 
-<a name="v1-7-1" />
-### 1.7.1 (2016-06-03)
+### 1.7.1 (2016-06-03) {#v1-7-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de bug no download do certificado raiz confiável de um contexto de segurança
 
 
-<a name="v1-7-0" />
-### 1.7.0 (2016-06-03)
+### 1.7.0 (2016-06-03) {#v1-7-0}
 
 
 Atualização do modelo do banco de dados: **Sim**
@@ -852,8 +765,7 @@ Atualização do modelo do banco de dados: **Sim**
     - Adicionado suporte para certificados com alternativa rara SHA-1 com algoritmo de assinatura RSA OID (1.3.14.3.2.29)
 
 
-<a name="v1-6-4" />
-### 1.6.4 (2016-05-05)
+### 1.6.4 (2016-05-05) {#v1-6-4}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -861,8 +773,7 @@ Atualização do modelo do banco de dados: **Sim**
     - Essa alteração foi feita devido a problemas de desempenho. A próxima versão adicionará suporte para outras opções de armazenamento.
 
 
-<a name="v1-6-3" />
-### 1.6.3 (2016-05-02)
+### 1.6.3 (2016-05-02) {#v1-6-3}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -878,24 +789,21 @@ Atualização do modelo do banco de dados: **Sim**
     - Adicionada a raiz confiável do ICP-Brasil "v5"
 
 
-<a name="v1-6-2" />
-### 1.6.2 (2016-04-18)
+### 1.6.2 (2016-04-18) {#v1-6-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Adicionado suporte à representação visual do PAdES para especificar um contêiner dentro do retângulo de assinatura no qual colocar o texto
 
 
-<a name="v1-6-1" />
-### 1.6.1 (2016-02-22)
+### 1.6.1 (2016-02-22) {#v1-6-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Correção de bug que causa delay no acesso do banco de dados quando está executando no Microsoft Azure
 
 
-<a name="v1-6-0" />
-### 1.6.0 (2016-01-21)
+### 1.6.0 (2016-01-21) {#v1-6-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -904,16 +812,14 @@ Atualização do modelo do banco de dados: **Sim**
     - Melhoria na validação dos certificados para checar a extensão PathLenConstraint
 
 
-<a name="v1-5-1" />
-### 1.5.1 (2015-11-24)
+### 1.5.1 (2015-11-24) {#v1-5-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Somente mudanças estéticas
 
 
-<a name="v1-5-0" />
-### 1.5.0 (2015-11-23)
+### 1.5.0 (2015-11-23) {#v1-5-0}
 
 Atualização do modelo do banco de dados: **Sim**
 
@@ -927,32 +833,28 @@ Atualização do modelo do banco de dados: **Sim**
     - Adicionado suporte para o campo CPF do ICP-Brasil no campo "OU" do nome do sujeito com espaço após os dois pontos ("OU = CPF: xxxxxxxxxxx")
 
 
-<a name="v1-4-3" />
-### 1.4.3 (2015-11-06)
+### 1.4.3 (2015-11-06) {#v1-4-3}
 
 Atualização do modelo do banco de dados: Não
 
 - Somente mudanças estéticas
 
 
-<a name="v1-4-2" />
-### 1.4.2 (2015-11-06)
+### 1.4.2 (2015-11-06) {#v1-4-2}
 
 Atualização do modelo do banco de dados: Não
 
 - Somente mudanças estéticas
 
 
-<a name="v1-4-1" />
-### 1.4.1 (2015-10-21)
+### 1.4.1 (2015-10-21) {#v1-4-1}
 
 Atualização do modelo do banco de dados: Não
 
 - Somente mudanças estéticas
 
 
-<a name="v1-4-0" />
-### 1.4.0 (2015-10-21)
+### 1.4.0 (2015-10-21) {#v1-4-0}
 
 Atualização do modelo do banco de dados: Não
 
@@ -961,8 +863,7 @@ Atualização do modelo do banco de dados: Não
 - Correção do bug nas assinaturas PAdES
 
 
-<a name="v1-3-1" />
-### 1.3.1 (2015-10-14)
+### 1.3.1 (2015-10-14) {#v1-3-1}
 
 Atualização do modelo do banco de dados: Não
 
@@ -974,8 +875,7 @@ Atualização do modelo do banco de dados: Não
     - Correção o erro no log que fazia com que o argumento "source" tivesse um valor incorreto
 
 
-<a name="v1-3-0" />
-### 1.3.0 (2015-10-13)
+### 1.3.0 (2015-10-13) {#v1-3-0}
 
 - Primeira versão divulgada publicamente
 - Principais recursos desta versão:

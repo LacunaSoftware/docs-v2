@@ -13,8 +13,7 @@ As versões do aplicativo móvel têm o formato `MINOR.PATCH(.BUILD)`
 O terceiro número significa o número do build e não é documentado neste histórico, embora seja visível nas lojas de aplicativo (geralmente com valor `1000`, que denota o build final).
 
 
-<a name="v11-1" />
-## 11.1 (2025-10-01)
+## 11.1 (2025-10-01) {#v11-1}
 
 Versão mínima do backend: 1.2.0
 
@@ -24,8 +23,7 @@ PSC-235 Arrumar formatação de identificadores durante emissão
 
 
 
-<a name="v11-0" />
-## 11.0 (2025-09-16)
+## 11.0 (2025-09-16) {#v11-0}
 
 Versão mínima do backend: 1.2.0
 
@@ -39,8 +37,7 @@ PSC-231 Implementação de Push notifications
 
 
 
-<a name="v10-2" />
-## 10.2 (2025-09-11)
+## 10.2 (2025-09-11) {#v10-2}
 
 Versão mínima do backend: 1.2.0
 
@@ -52,8 +49,7 @@ PSC-234 Arrumar aba de contas associadas
 
 
 
-<a name="v10-1" />
-## 10.1 (2025-09-01)
+## 10.1 (2025-09-01) {#v10-1}
 
 Versão mínima do backend: 1.2.0
 
@@ -65,8 +61,7 @@ PSC-229 Atualização de SDKs
 
 
 
-<a name="v10-0" />
-## 10.0 (2025-07-25)
+## 10.0 (2025-07-25) {#v10-0}
 
 Versão mínima do backend: 1.2.0
 
@@ -76,8 +71,7 @@ PSC-229 Atualização de SDKs
 
 
 
-<a name="v8-0" />
-## 8.0 (2025-01-13)
+## 8.0 (2025-01-13) {#v8-0}
 
 Versão mínima do backend: 1.2.0
 
@@ -91,8 +85,7 @@ PSC-222 Melhoria na comunicação de certificados que deixaram de ser válidos
 
 
 
-<a name="v7-0" />
-## 7.0 (2024-07-03)
+## 7.0 (2024-07-03) {#v7-0}
 
 Versão mínima do backend: 1.2.0
 
@@ -106,8 +99,7 @@ PSC-219 Corrige configuração padrão mal ajustada
 
 
 
-<a name="v5-0" />
-## 5.0 (2024-06-13)
+## 5.0 (2024-06-13) {#v5-0}
 
 Versão mínima do backend: 1.2.0
 
@@ -125,8 +117,7 @@ PSC-217 Correção de falha no campo de mudança de número de telefone no iOS
 
 
 
-<a name="v3-0" />
-## 3.0 (2024-03-04)
+## 3.0 (2024-03-04) {#v3-0}
 
 Versão mínima do backend: 1.2.0
 
@@ -136,8 +127,7 @@ PSC-206 Funcionalidades de autorização para integração com KSPs
 
 
 
-<a name="v2-0" />
-## 2.0 (2023-06-26)
+## 2.0 (2023-06-26) {#v2-0}
 
 Versão mínima do backend: 1.2.0
 
@@ -163,7 +153,6 @@ PSC-190 Arrumar tratamento de versão mínima do app
 
 
 
-<a name="v1-1" />
-## 1.1 (2023-04-17)
+## 1.1 (2023-04-17) {#v1-1}
 
 Primeira versão disponível publicamente.

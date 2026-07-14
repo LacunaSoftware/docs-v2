@@ -1,3 +1,7 @@
+---
+slug: /signer/on-premises/linux/troubleshoot/check-logs
+---
+
 # Verificando os logs de sistema (Linux)
 
 Quanto instalado em Linux, o [Signer](../../../../index.md) escreve seus logs no *systemd journal*, uma solução para gerenciamento de logs centralizada do Linux. Para

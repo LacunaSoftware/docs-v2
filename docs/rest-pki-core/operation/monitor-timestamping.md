@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/operation/monitor-timestamping
+---
+
 # Monitoramento do provimento de carimbos de tempo - Rest PKI Core
 
 Para monitorar o provimento de carimbos de tempo na sua instância do [Rest PKI Core](../index.md), siga os passos abaixo:

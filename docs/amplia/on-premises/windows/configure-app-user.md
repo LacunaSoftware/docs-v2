@@ -39,8 +39,7 @@ Para configurar o Amplia para executar como um usuário local:
     {/* TODO: add image */}
     1. Clique em *OK*
 
-<a name="grant-admin" />
-## Adicionando o usuário do aplicativo ao grupo de Administradores
+## Adicionando o usuário do aplicativo ao grupo de Administradores {#grant-admin}
 
 Para usar o armazenamento de chaves da máquina do sistema operacional, o usuário do aplicativo deve ser adicionado ao grupo Administradores local.
 

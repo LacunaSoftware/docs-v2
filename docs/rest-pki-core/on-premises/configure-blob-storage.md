@@ -1,9 +1,13 @@
-﻿# Configuração de Blob Storage - Rest PKI Core
+﻿---
+slug: /rest-pki/core/on-premises/configure-blob-storage
+---
+
+# Configuração de Blob Storage - Rest PKI Core
 
 :::warning Indisponível
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs/en/rest-pki-core/on-premises/configure-blob-storage)
+- [English](/en-us/articles/rest-pki/core/on-premises/configure-blob-storage)
 
 :::

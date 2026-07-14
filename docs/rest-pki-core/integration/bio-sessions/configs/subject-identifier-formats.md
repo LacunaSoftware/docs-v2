@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/bio-sessions/configs/subject-identifier-formats
+---
+
 # Configuração para os formatos de identificador (SubjectIdentifier) - Rest PKI Core
 
 O `SubjectIdentifier` é um campo que vincula a sessão de biometria a uma pessoa específica que está utilizando o seu sistema.

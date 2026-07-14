@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Rest PKI Core"
 sidebar_position: 1
+slug: /rest-pki/core
 ---
 
 # Rest PKI Core

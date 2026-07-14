@@ -31,8 +31,7 @@ public static class Util {
 Entretanto, como o código de verificação desempenha um papel crucial na proteção do acesso aos seus documentos, nós
 agora oferecemos a classe `AlphaCode` para fazer a geração dos códigos.
 
-<a name="update-code" />
-## Atualizando sua aplicação para usar a classe *AlphaCode*
+## Atualizando sua aplicação para usar a classe *AlphaCode* {#update-code}
 
 :::warning
 A lógica de geração de códigos de verificação passou por uma auditoria minuciosa e recebeu importantes melhorias.

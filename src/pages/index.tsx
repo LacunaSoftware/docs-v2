@@ -23,37 +23,37 @@ const SECTIONS: Section[] = [
         id: 'pki-guide',
         name: 'Signer',
         description: 'Plataforma de assinatura digital de documentos com suporte a múltiplos formatos e certificados.',
-        href: '/docs-v2/docs/signer/',
+        href: '/articles/signer',
       },
       {
         id: 'web-pki',
         name: 'Web PKI',
         description: 'Componente para uso de certificados digitais diretamente no navegador.',
-        href: '/docs-v2/docs/web-pki/',
+        href: '/articles/web-pki',
       },
       {
         id: 'rest-pki-core',
         name: 'RestPKICore',
         description: 'Versão moderna do Rest PKI com suporte a sessões de assinatura e biometria.',
-        href: '/docs-v2/docs/rest-pki-core/',
+        href: '/articles/rest-pki/core',
       },
       {
         id: 'pki-express',
         name: 'PKI Express',
         description: 'Biblioteca multiplataforma para assinatura digital em qualquer linguagem via linha de comando.',
-        href: '/docs-v2/docs/pki-express/',
+        href: '/articles/pki-express',
       },
       {
         id: 'pki-sdk',
         name: 'PKI SDK',
         description: 'SDK .NET para operações criptográficas, assinatura e validação de certificados.',
-        href: '/docs-v2/docs/pki-sdk/',
+        href: '/articles/pki-sdk',
       },
       {
         id: 'rest-pki',
         name: 'Rest PKI',
         description: 'API REST para assinatura digital, validação e carimbo de tempo de documentos.',
-        href: '/docs-v2/docs/rest-pki/',
+        href: '/articles/rest-pki',
       },
     ],
   },
@@ -64,25 +64,25 @@ const SECTIONS: Section[] = [
         id: 'amplia',
         name: 'Amplia',
         description: 'Autoridade certificadora para emissão e gestão de certificados digitais.',
-        href: '/docs-v2/docs/amplia/',
+        href: '/articles/amplia',
       },
       {
         id: 'amplia-reg',
         name: 'Amplia Reg',
         description: 'Módulo de registro e validação de identidade para emissão de certificados.',
-        href: '/docs-v2/docs/amplia-reg/',
+        href: '/articles/amplia-reg',
       },
       {
         id: 'psc',
         name: 'PSC',
         description: 'Prestador de Serviço de Confiança para emissão de certificados em nuvem.',
-        href: '/docs-v2/docs/psc/',
+        href: '/articles/psc',
       },
       {
         id: 'tsa',
         name: 'TSA',
         description: 'Autoridade de carimbo de tempo para certificação de data e hora de documentos.',
-        href: '/docs-v2/docs/tsa/',
+        href: '/articles/tsa',
       },
     ],
   },
@@ -93,7 +93,7 @@ const SECTIONS: Section[] = [
         id: 'pki-guide',
         name: 'Certificação Digital',
         description: 'Conceitos e guias sobre certificação digital, ICP-Brasil e infraestrutura de chaves públicas.',
-        href: '/docs-v2/docs/pki-guide/',
+        href: '/articles/pki-guide',
       },
     ],
   },
@@ -104,31 +104,31 @@ const SECTIONS: Section[] = [
         id: 'bem-vindo',
         name: 'Bem-vindo',
         description: 'Bem-vindo ao docs.lacunasoftware.com, a nossa nova experiência unificada de documentação técnica.',
-        href: '/docs-v2/docs/',
+        href: '/articles/welcome',
       },
       {
         id: 'bulk-signer',
         name: 'Bulk Signer',
         description: 'Solução para assinatura digital em massa de documentos, com suporte a filas e processamento assíncrono.',
-        href: '/docs-v2/docs/en/bulk-signer/',
+        href: '/articles/bulk-signer',
       },
       {
         id: 'scanner',
         name: 'Scanner',
         description: 'Serviço para digitalização, reconhecimento e processamento de documentos.',
-        href: '/docs-v2/docs/scanner/',
+        href: '/articles/scanner',
       },
       {
         id: 'digiploma',
         name: 'Digiploma',
         description: 'Plataforma para emissão e validação de diplomas digitais conforme padrões MEC.',
-        href: '/docs-v2/docs/digiploma/',
+        href: '/articles/digiploma',
       },
       {
         id: 'grant-id',
         name: 'GrantID',
         description: 'Solução de identidade e controle de acesso com suporte a OpenID Connect e OAuth 2.0.',
-        href: '/docs-v2/docs/grant-id/',
+        href: '/articles/grant-id',
       },
     ],
   },
@@ -165,7 +165,7 @@ export default function Home(): ReactNode {
       <main>
         {/* <div className={styles.productsHeader} style={{textAlign: 'center'}}>
           <h2 className={styles.productsTitle}>
-            <Link to="/docs-v2/docs/pki-guide/" className={styles.heroLink}>
+            <Link to="/articles/pki-guide" className={styles.heroLink}>
               Soluções para certificação digital
             </Link>
           </h2>

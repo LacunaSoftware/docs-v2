@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/windows-server
+---
+
 # Rest PKI Core - Configuração no Windows Server
 
 Para instalar uma instância *on premises* do Rest PKI Core no Windows Server, primeiro baixe os binários da versão desejada. A versão mais recente disponível é fornecida no link abaixo:
@@ -22,9 +26,8 @@ Para instalar uma instância *on premises* do Rest PKI Core no Windows Server, p
 
 Se precisar de ajuda para preparar o banco de dados, [clique aqui](../prepare-database.md).
 
-<a name="install-aspnet-core" />
 
-## Instalação
+## Instalação {#install-aspnet-core}
 
 1. Instale o IIS
 1. Instale o <a href="https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-8.0.15-windows-hosting-bundle-installer" target="_blank">.NET 8.0 Hosting Bundle</a>

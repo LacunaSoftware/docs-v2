@@ -1,38 +1,50 @@
 import type {ReactNode} from 'react';
 import {useLocation} from '@docusaurus/router';
-import Link from '@docusaurus/Link';
 import styles from './styles.module.css';
 
 export default function LanguageSwitchNavbarItem(): ReactNode {
   const {pathname} = useLocation();
 
-  const isEnDocs = pathname.startsWith('/docs-v2/docs/en/');
-  const isEnApi  = pathname.startsWith('/docs-v2/en/api');
-  const isEnHome = pathname === '/docs-v2/en/' || pathname === '/docs-v2/en';
+  const isEnDocs = pathname.startsWith('/en-us/articles');
+  const isEnApi  = pathname.startsWith('/en-us/api');
+  const isEnHome = pathname === '/en-us/' || pathname === '/en-us';
   const isEn = isEnDocs || isEnApi || isEnHome;
 
-  // Build the equivalent page in the other language
+  // Build the equivalent page in the other language. Both languages use the
+  // same article paths (mirroring the classic site), so flipping the locale
+  // prefix is enough. Portuguese is canonical at the root (/articles, /api) but
+  // is also served under /pt-br/... — from there, switch straight to /en-us/...
+  //
+  // Rendered as a plain <a> (full reload), not a Docusaurus <Link>, on purpose:
+  // a few articles exist in only one language, so the naive prefix-swap can
+  // point at a page that doesn't exist in the other language. A raw anchor keeps
+  // the switch working for the common case without failing the build's
+  // broken-link check (and a full reload is fine when crossing docs instances).
   let otherPath: string;
   if (isEnApi) {
     // API reference is language-neutral: same content, just flip the URL prefix.
-    otherPath = pathname.replace('/docs-v2/en/api', '/docs-v2/api');
-  } else if (pathname.startsWith('/docs-v2/api')) {
-    otherPath = pathname.replace('/docs-v2/api', '/docs-v2/en/api');
+    otherPath = pathname.replace('/en-us/api', '/api');
+  } else if (pathname.startsWith('/pt-br/api')) {
+    otherPath = pathname.replace('/pt-br/api', '/en-us/api');
+  } else if (pathname.startsWith('/pt-br/articles')) {
+    otherPath = pathname.replace('/pt-br/articles', '/en-us/articles');
+  } else if (pathname.startsWith('/api')) {
+    otherPath = pathname.replace('/api', '/en-us/api');
   } else if (isEnDocs) {
-    otherPath = pathname.replace('/docs-v2/docs/en/', '/docs-v2/docs/');
-  } else if (pathname.startsWith('/docs-v2/docs/')) {
-    otherPath = pathname.replace('/docs-v2/docs/', '/docs-v2/docs/en/');
+    otherPath = pathname.replace('/en-us/articles', '/articles');
+  } else if (pathname.startsWith('/articles')) {
+    otherPath = pathname.replace('/articles', '/en-us/articles');
   } else if (isEnHome) {
-    otherPath = '/docs-v2/';
+    otherPath = '/';
   } else {
-    otherPath = '/docs-v2/en/';
+    otherPath = '/en-us/';
   }
 
   return (
     <div className={styles.wrap}>
       {isEn ? (
         <>
-          <Link to={otherPath} className={styles.option}>PT</Link>
+          <a href={otherPath} className={styles.option}>PT</a>
           <span className={styles.sep}>|</span>
           <span className={styles.active}>EN</span>
         </>
@@ -40,7 +52,7 @@ export default function LanguageSwitchNavbarItem(): ReactNode {
         <>
           <span className={styles.active}>PT</span>
           <span className={styles.sep}>|</span>
-          <Link to={otherPath} className={styles.option}>EN</Link>
+          <a href={otherPath} className={styles.option}>EN</a>
         </>
       )}
     </div>

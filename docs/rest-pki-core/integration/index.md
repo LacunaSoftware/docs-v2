@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Guia de Integração"
 sidebar_position: 1
+slug: /rest-pki/core/integration
 ---
 
 # Guia de Integração - Rest PKI Core

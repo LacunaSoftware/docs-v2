@@ -7,8 +7,7 @@ sidebar_position: 4
 
 {/* <a name="5.25.0" /> // ## 5.25.0 (2026-04-07) // Atualiza modelo do banco de dados: nao // ### Novas funcionalidades // ### Melhorias // ### Correções de bugs // */}
 
-<a name="5.24.0" />
-## 5.24.0 (2026-04-07)
+## 5.24.0 (2026-04-07) {#vnext}
 
 Atualiza modelo do banco de dados: não
 
@@ -26,8 +25,7 @@ ARNG-889 Flavour Brazil sempre adiciona validação de DataValid independentemen
 
 
 
-<a name="5.23.3" />
-## 5.23.3 (2026-04-07)
+## 5.23.3 (2026-04-07) {#5.23.3}
 
 Atualiza modelo do banco de dados: não
 
@@ -37,8 +35,7 @@ ARNG-894 Pedidos com pendencia no PSBio e DataValid OK não conseguem ser emitid
 
 
 
-<a name="5.23.2" />
-## 5.23.2 (2026-04-07)
+## 5.23.2 (2026-04-07) {#5.23.2}
 
 Atualiza modelo do banco de dados: não
 
@@ -48,8 +45,7 @@ ARNG-893 Resposta da Acertpix permite aprovar pedidos sem verificar validação 
 
 
 
-<a name="5.23.1" />
-## 5.23.1 (2026-04-01)
+## 5.23.1 (2026-04-01) {#5.23.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -71,8 +67,7 @@ ARNG-887 Botão de remover alerta não aparece em algumas situações
 
 
 
-<a name="5.23.0" />
-## 5.23.0 (2026-03-30)
+## 5.23.0 (2026-03-30) {#5.23.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -104,8 +99,7 @@ ARNG-874 Impedir usuário de clicar mais de uma vez no botão pra emitir certifi
 
 
 
-<a name="5.22.10" />
-## 5.22.10 (2026-03-27)
+## 5.22.10 (2026-03-27) {#5.22.10}
 
 Atualiza modelo do banco de dados: não
 
@@ -125,8 +119,7 @@ ARNG-868 Correção do envio antecipado da chave 2
 
 
 
-<a name="5.22.0" />
-## 5.22.0 (2026-03-24)
+## 5.22.0 (2026-03-24) {#5.22.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -136,8 +129,7 @@ ARNG-865 Não permitir alterar contatos (email e telefone) do titular caso certi
 
 
 
-<a name="5.21.2" />
-## 5.19.2 (2026-03-16)
+## 5.19.2 (2026-03-16) {#5.21.2}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -151,8 +143,7 @@ ARNG-860 Trazer informação de CNH no relatório de pedidos
 
 
 
-<a name="5.20.0" />
-## 5.20.0 (2026-03-18)
+## 5.20.0 (2026-03-18) {#5.20.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -174,8 +165,7 @@ ARNG-857 Algumas validações de documentos não estão aparecendo nos detalhes 
 
 
 
-<a name="5.19.5" />
-## 5.19.5 (2026-03-18)
+## 5.19.5 (2026-03-18) {#5.19.5}
 
 Atualiza modelo do banco de dados: não
 
@@ -189,8 +179,7 @@ ARNG-855 Pedidos cancelados automaticamente de forma indevida
 
 
 
-<a name="5.19.2" />
-## 5.19.2 (2026-03-16)
+## 5.19.2 (2026-03-16) {#5.19.2}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -210,8 +199,7 @@ ARNG-374 Correção de algumas rotas que não atualizavam a data de alteração 
 
 
 
-<a name="5.19.0" />
-## 5.19.0 (2026-03-11)
+## 5.19.0 (2026-03-11) {#5.19.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -237,8 +225,7 @@ ARNG-846 Corrigir testes de integração quebrados
 
 
 
-<a name="5.18.0" />
-## 5.18.0 (2026-02-25)
+## 5.18.0 (2026-02-25) {#5.18.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -260,8 +247,7 @@ ARNG-839 Reverter alteração indesejadas nos templates de email com alteração
 
 
 
-<a name="5.17.4" />
-## 5.17.4 (2026-02-19)
+## 5.17.4 (2026-02-19) {#5.17.4}
 
 Atualiza modelo do banco de dados: não
 
@@ -273,8 +259,7 @@ ARNG-836 Questionário de Validação não foi exibido na interface da Videoconf
 
 
 
-<a name="5.17.2" />
-## 5.17.2 (2026-02-18)
+## 5.17.2 (2026-02-18) {#5.17.2}
 
 Atualiza modelo do banco de dados: não
 
@@ -288,8 +273,7 @@ ARNG-833 Erro ao iniciar Videoconferência quando o fluxo é iniciado pela busca
 
 
 
-<a name="5.17.0" />
-## 5.17.0 (2026-02-13)
+## 5.17.0 (2026-02-13) {#5.17.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -317,8 +301,7 @@ ARNG-825 Exportação de pedidos não respeita filtro selecionado
 
 
 
-<a name="5.16.1" />
-## 5.16.1 (2026-02-06)
+## 5.16.1 (2026-02-06) {#5.16.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -328,8 +311,7 @@ ARNG-813 Reacrescentar a apresentação da chave 1 na videochamada
 
 
 
-<a name="5.16.0" />
-## 5.16.0 (2026-02-05)
+## 5.16.0 (2026-02-05) {#5.16.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -345,8 +327,7 @@ ARNG-811 Adicionar imagens que indicam o formato esperado da parte do documento
 
 
 
-<a name="5.15.2" />
-## 5.15.2 (2026-02-02)
+## 5.15.2 (2026-02-02) {#5.15.2}
 
 Atualiza modelo do banco de dados: não
 
@@ -356,8 +337,7 @@ ARNG-767 Adicionar cancelamento de pedido via Client
 
 
 
-<a name="5.15.0" />
-## 5.15.0 (2026-01-28)
+## 5.15.0 (2026-01-28) {#5.15.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -367,8 +347,7 @@ ARNG-772 Criar relatório completo de pedidos emitidos
 
 
 
-<a name="5.14.1" />
-## 5.14.1 (2026-01-26)
+## 5.14.1 (2026-01-26) {#5.14.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -382,8 +361,7 @@ ARNG-783 Adicionar suporte a instalação da cadeia de certificado da AC durante
 
 
 
-<a name="5.13.4" />
-## 5.13.4 (2026-01-23)
+## 5.13.4 (2026-01-23) {#5.13.4}
 
 Atualiza modelo do banco de dados: não
 
@@ -393,8 +371,7 @@ ARNG-681 Erro ao ativar audit de equipamentos na AC
 
 
 
-<a name="5.13.2" />
-## 5.13.2 (2026-01-21)
+## 5.13.2 (2026-01-21) {#5.13.2}
 
 Atualiza modelo do banco de dados: não
 
@@ -404,8 +381,7 @@ ARNG-768 Alterar o atributo de validação de email para o EmailAttribute do Lac
 
 
 
-<a name="5.13.1" />
-## 5.13.1 (2026-01-20)
+## 5.13.1 (2026-01-20) {#5.13.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -421,8 +397,7 @@ ARNG-775 Corrigir erro na criação de blob de consulta SAF
 
 
 
-<a name="5.13.0" />
-## 5.13.0 (2026-01-18)
+## 5.13.0 (2026-01-18) {#5.13.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -442,8 +417,7 @@ ARNG-770 BiometricCollectionStatus.Duplicate Não está sendo traduzido corretam
 
 
 
-<a name="5.12.3" />
-## 5.12.3 (2026-01-13)
+## 5.12.3 (2026-01-13) {#5.12.3}
 
 Atualiza modelo do banco de dados: não
 
@@ -459,8 +433,7 @@ ARNG-766 Erro ao receber Webhook do Jitsi
 
 
 
-<a name="5.12.0" />
-## 5.12.0 (2026-01-09)
+## 5.12.0 (2026-01-09) {#5.12.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -470,8 +443,7 @@ ARNG-746 Parar de exigir geolocalização durante o processo do pedido
 
 
 
-<a name="5.11.2" />
-## 5.11.2 (2026-01-08)
+## 5.11.2 (2026-01-08) {#5.11.2}
 
 Atualiza modelo do banco de dados: não
 
@@ -480,8 +452,7 @@ Atualiza modelo do banco de dados: não
 ARNG-753 Tratar o webhook do PSBio para o caso de status deletado e impedir progresso pedido caso ainda não tenha resposta da rede PSBio
 
 
-<a name="5.11.1" />
-## 5.11.1 (2026-01-05)
+## 5.11.1 (2026-01-05) {#5.11.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -495,8 +466,7 @@ ARNG-745 Corrigir caractere delimitador dos arquivos CSV exportados
 
 
 
-<a name="5.11.0" />
-## 5.11.0 (2026-01-02)
+## 5.11.0 (2026-01-02) {#5.11.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -512,8 +482,7 @@ ARNG-744 Permitir que apenas usuários de AC possam aprovar agentes de registro
 
 
 
-<a name="5.10.0" />
-## 5.10.0 (2025-12-30)
+## 5.10.0 (2025-12-30) {#5.10.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -535,8 +504,7 @@ ARNG-741 Reverter alterações de prioridades entre FaceMatch e Documentoscopia 
 
 
 
-<a name="5.9.6" />
-## 5.9.6 (2025-12-29)
+## 5.9.6 (2025-12-29) {#5.9.6}
 
 Atualiza modelo do banco de dados: não
 
@@ -552,8 +520,7 @@ ARNG-726 Falha ao iniciar gravação deixa videoconferência seguir
 
 
 
-<a name="5.9.5" />
-## 5.9.5 (2025-12-24)
+## 5.9.5 (2025-12-24) {#5.9.5}
 
 Atualiza modelo do banco de dados: não
 
@@ -563,8 +530,7 @@ ARNG-727 Erro ao confirmar pedidos com Agentes de Conferência com permissão em
 
 
 
-<a name="5.9.4" />
-## 5.9.4 (2025-12-23)
+## 5.9.4 (2025-12-23) {#5.9.4}
 
 Atualiza modelo do banco de dados: não
 
@@ -580,8 +546,7 @@ ARNG-724 Corrigir captura do nome da cidade ao realizar requisições por latitu
 
 
 
-<a name="5.9.3" />
-## 5.9.3 (2025-12-23)
+## 5.9.3 (2025-12-23) {#5.9.3}
 
 Atualiza modelo do banco de dados: não
 
@@ -591,8 +556,7 @@ ARNG-692 Configuração de timeout de geolocation
 
 
 
-<a name="5.9.2" />
-## 5.9.2 (2025-12-22)
+## 5.9.2 (2025-12-22) {#5.9.2}
 
 Atualiza modelo do banco de dados: não
 
@@ -610,8 +574,7 @@ ARNG-718 Criação de agentes de registro remove demais papéis do usuário
 
 
 
-<a name="5.9.1" />
-## 5.9.1 (2025-12-22)
+## 5.9.1 (2025-12-22) {#5.9.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -621,8 +584,7 @@ ARNG-606 Botão de reenvio de email de emissão não verifica permissões
 
 
 
-<a name="5.9.0" />
-## 5.9.0 (2025-12-19)
+## 5.9.0 (2025-12-19) {#5.9.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -640,8 +602,7 @@ ARNG-713 Chaves de API do webhook de aplicações estão expostas por tela
 
 
 
-<a name="5.8.1" />
-## 5.8.1 (2025-12-18)
+## 5.8.1 (2025-12-18) {#5.8.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -651,8 +612,7 @@ ARNG-707 Corrigir erro ao tentar acessar detalhes do usuário
 
 
 
-<a name="5.8.0" />
-## 5.8.0 (2025-12-17)
+## 5.8.0 (2025-12-17) {#5.8.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -674,8 +634,7 @@ ARNG-710 Corrigir violações de CSP e Permission Policy na integração com Jit
 
 
 
-<a name="5.7.0" />
-## 5.7.0 (2025-12-16)
+## 5.7.0 (2025-12-16) {#5.7.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -689,8 +648,7 @@ ARNG-625 Não reaproveitar consulta CNPJ
 
 
 
-<a name="5.6.0" />
-## 5.6.0 (2025-12-12)
+## 5.6.0 (2025-12-12) {#5.6.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -720,8 +678,7 @@ ARNG-691 Migração de dados da Consulti
 
 
 
-<a name="5.4.0" />
-## 5.4.0 (2025-12-05)
+## 5.4.0 (2025-12-05) {#5.4.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -735,8 +692,7 @@ ARNG-680 Melhorias de OTP
 
 
 
-<a name="5.3.0" />
-## 5.3.0 (2025-12-03)
+## 5.3.0 (2025-12-03) {#5.3.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -746,8 +702,7 @@ ARNG-682 Adicionar suporte ao MailKit
 
 
 
-<a name="5.2.1" />
-## 5.2.1 (2025-12-2)
+## 5.2.1 (2025-12-2) {#5.2.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -757,8 +712,7 @@ ARNG-678 Exigir OTP de Video Conferência
 
 
 
-<a name="5.1.2" />
-## 5.1.2 (2025-11-28)
+## 5.1.2 (2025-11-28) {#5.1.2}
 
 Atualiza modelo do banco de dados: não
 
@@ -768,8 +722,7 @@ ARNG-675 Erro ao visualizar detalhes do titular no pedido
 
 
 
-<a name="5.1.1" />
-## 5.1.1 (2025-11-26)
+## 5.1.1 (2025-11-26) {#5.1.1}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -791,8 +744,7 @@ ARNG-674 Problema pra selecionar Natureza Juridica ao editar documentos do pedid
 
 
 
-<a name="5.1.0" />
-## 5.1.0 (2025-11-24)
+## 5.1.0 (2025-11-24) {#5.1.0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -802,8 +754,7 @@ ARNG-516 Geração de recibo SAF para o dossiê
 
 
 
-<a name="5.0.0" />
-## 5.0.0 (2025-11-21)
+## 5.0.0 (2025-11-21) {#5.0.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -823,8 +774,7 @@ ARNG-672 Erro ao recuperar certificado de assinatura
 
 
 
-<a name="4.21.1" />
-## 4.21.1 (2025-11-12)
+## 4.21.1 (2025-11-12) {#4.21.1}
 
 Atualiza modelo do banco de dados: não
 
@@ -834,8 +784,7 @@ ARNG-671 Error ao criar pedido de video identificação via API
 
 
 
-<a name="4.21.0" />
-## 4.21.0 (2025-11-12)
+## 4.21.0 (2025-11-12) {#4.21.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -845,8 +794,7 @@ ARNG-610 Comando pra migrar videos para o external blob storage
 
 
 
-<a name="4.20.0" />
-## 4.20.0 (2025-11-11)
+## 4.20.0 (2025-11-11) {#4.20.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -862,8 +810,7 @@ ARNG-670 Erro ao enviar email com termo de titularidade após emissão do certif
 
 
 
-<a name="4-19-0" />
-## 4.19.0 (2025-11-05)
+## 4.19.0 (2025-11-05) {#4-19-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -877,8 +824,7 @@ ARNG-643 Adicionar seção de videoconferência na trilha de auditoria
 
 
 
-<a name="4-18-2" />
-## 4.18.2 (2025-11-04)
+## 4.18.2 (2025-11-04) {#4-18-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -888,8 +834,7 @@ ARNG-641 Alteração da logo SISP na geração de documentos
 
 
 
-<a name="4-18-1" />
-## 4.18.1 (2025-11-03)
+## 4.18.1 (2025-11-03) {#4-18-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -899,8 +844,7 @@ ARNG-644 Corrigir permissões das telas públicas da vídeo identificação
 
 
 
-<a name="4-18-0" />
-## 4.18.0 (2025-10-30)
+## 4.18.0 (2025-10-30) {#4-18-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -916,8 +860,7 @@ ARNG-639 Corrigir o Termo de titularidade para pedidos SSL Cabo Verde
 
 
 
-<a name="4-17-0" />
-## 4.17.0 (2025-10-27)
+## 4.17.0 (2025-10-27) {#4-17-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -931,8 +874,7 @@ ARNG-636 Correção do envio de SMS via Eyou
 
 
 
-<a name="4-16-0" />
-## 4.16.0 (2025-10-24)
+## 4.16.0 (2025-10-24) {#4-16-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -952,8 +894,7 @@ ARNG-633 Agente de conferência não consegue ver eventos do pedido durante conf
 
 
 
-<a name="4-15-0" />
-## 4.15.0 (2025-10-22)
+## 4.15.0 (2025-10-22) {#4-15-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -973,8 +914,7 @@ ARNG-622 Reuso de documentos/pedido pode trazer pedido de outra AR, causando err
 
 
 
-<a name="4-14-1" />
-## 4.14.1 (2025-10-21)
+## 4.14.1 (2025-10-21) {#4-14-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -988,8 +928,7 @@ ARNG-614 Certificado de equipamento de agente não habilitado permite autorizaç
 
 
 
-<a name="4-14-0" />
-## 4.14.0 (2025-10-20)
+## 4.14.0 (2025-10-20) {#4-14-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1003,8 +942,7 @@ ARNG-618 Chamar Facematch via Acertpix Lite quando hablitado
 
 
 
-<a name="v4-13-0" />
-## 4.13.0 (2025-10-14)
+## 4.13.0 (2025-10-14) {#v4-13-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1020,8 +958,7 @@ ARNG-609 Integração documentoscopia Lite Acertpix
 
 
 
-<a name="v4-12-0" />
-## 4.12.0 (2025-09-30)
+## 4.12.0 (2025-09-30) {#v4-12-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1035,8 +972,7 @@ ARNG-597 Adicionar aviso de sigilo da chave 2
 
 
 
-<a name="v4-11-0" />
-## 4.11.0 (2025-09-18)
+## 4.11.0 (2025-09-18) {#v4-11-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1066,8 +1002,7 @@ ARNG-603 Videoconferências com motivo de conferência não estão indo pra fila
 
 
 
-<a name="v4-10-0" />
-## 4.10.0 (2025-09-19)
+## 4.10.0 (2025-09-19) {#v4-10-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -1101,8 +1036,7 @@ ARNG-589 Consulta CNPJ não traz quadro societario
 
 
 
-<a name="v4-9-0" />
-## 4.9.0 (2025-09-18)
+## 4.9.0 (2025-09-18) {#v4-9-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -1118,8 +1052,7 @@ ARNG-579 Melhorar comparação de nomes na consulta CNPJ
 
 
 
-<a name="v4-8-0" />
-## 4.8.0 (2025-09-18)
+## 4.8.0 (2025-09-18) {#v4-8-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1145,8 +1078,7 @@ ARNG-565 Corrigir testes quebrados
 
 
 
-<a name="v4-7-0" />
-## 4.7.0 (2025-09-18)
+## 4.7.0 (2025-09-18) {#v4-7-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1166,8 +1098,7 @@ ARNG-553 Pedidos com certificado revogado estão dando erro nos detalhes do pedi
 
 
 
-<a name="v4-6-0" />
-## 4.6.0 (2025-09-18)
+## 4.6.0 (2025-09-18) {#v4-6-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -1187,8 +1118,7 @@ ARNG-545 Algumas dialog confirm não estão respeitando o desejo do usuário de 
 
 
 
-<a name="v4-5-0" />
-## 4.5.0 (2025-09-18)
+## 4.5.0 (2025-09-18) {#v4-5-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1204,8 +1134,7 @@ ARNG-542 Bloqueio da máquina se não houver emissão do relatório de ativos no
 
 
 
-<a name="v4-4-0" />
-## 4.4.0 (2025-07-31)
+## 4.4.0 (2025-07-31) {#v4-4-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1219,8 +1148,7 @@ ARNG-546 Atualizar bioac
 
 
 
-<a name="v4-3-0" />
-## 4.3.0 (2025-09-18)
+## 4.3.0 (2025-09-18) {#v4-3-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1248,8 +1176,7 @@ ARNG-543 Termo de titularidade em iOS abre em nova guia invés de realizar o dow
 
 
 
-<a name="v4-2-0" />
-## 4.2.0 (2025-09-18)
+## 4.2.0 (2025-09-18) {#v4-2-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1275,8 +1202,7 @@ ARNG-526 Traduções faltantes
 
 
 
-<a name="v4-1-0" />
-## 4.1.0 (2025-09-18)
+## 4.1.0 (2025-09-18) {#v4-1-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1288,8 +1214,7 @@ ARNG-497 Nova integração de Liveness com o RestPki (Widget RestBio)
 
 
 
-<a name="v4-0-7" />
-## 4.0.7 (2025-06-29)
+## 4.0.7 (2025-06-29) {#v4-0-7}
 
 Atualiza modelo do banco de dados: não
 
@@ -1307,8 +1232,7 @@ ARNG-602 Desabilitar passo de biometria enquanto a videoconferencia não for con
 
 
 
-<a name="v4-0-0" />
-## 4.0.0 (2025-06-25)
+## 4.0.0 (2025-06-25) {#v4-0-0}
 
 **Veja [Atualizando o Amplia Reg da versão 3.x para 4.0](on-premises/update-40.md)**
 
@@ -1320,8 +1244,7 @@ ARNG-500 Instrução Normativa ITI no. 31/2025
 
 
 
-<a name="v3-5-1" />
-## 3.5.1 (2025-06-09)
+## 3.5.1 (2025-06-09) {#v3-5-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1331,8 +1254,7 @@ ARNG-598 Remover instruções desnecessárias antes da videoconferência
 
 
 
-<a name="v3-5-0" />
-## 3.5.0 (2025-06-09)
+## 3.5.0 (2025-06-09) {#v3-5-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -1344,8 +1266,7 @@ videoconferência no arquivo zip do pedido
 
 
 
-<a name="v3-4-0" />
-## 3.4.0 (2025-06-05)
+## 3.4.0 (2025-06-05) {#v3-4-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1387,8 +1308,7 @@ ARNG-238 Erro ao salvar fomulário de alteração de local de atendimento
 
 
 
-<a name="v3-3-0" />
-## 3.3.0 (2025-04-04)
+## 3.3.0 (2025-04-04) {#v3-3-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1410,8 +1330,7 @@ ARNG-486 Atualizar versão do FaceTecClient
 
 
 
-<a name="v3-2-0" />
-## 3.2.0 (2025-04-04)
+## 3.2.0 (2025-04-04) {#v3-2-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1435,8 +1354,7 @@ ARNG-477 Inputs sem label
 
 
 
-<a name="v3-1-0" />
-## 3.1.0 (2025-04-04)
+## 3.1.0 (2025-04-04) {#v3-1-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1460,8 +1378,7 @@ ARNG-470 Erro no tratamento de respostas não-JSON vindas do ADSS server
 
 
 
-<a name="v3-0-0" />
-## 3.0.0 (2025-01-22)
+## 3.0.0 (2025-01-22) {#v3-0-0}
 
 **Veja [Atualizando o Amplia Reg da versão 2.x para 3.0](on-premises/update-30.md)**
 
@@ -1495,8 +1412,7 @@ ARNG-453 Texto do botão "Assinar documentos e enviar para fila de conferência"
 
 
 
-<a name="v2-8-0" />
-## 2.8.0 (2025-01-22)
+## 2.8.0 (2025-01-22) {#v2-8-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1526,8 +1442,7 @@ ARNG-466 Usuários e aplicações não possuem permissão de leitura sobre os pe
 
 
 
-<a name="v2-7-0" />
-## 2.7.0 (2024-09-28)
+## 2.7.0 (2024-09-28) {#v2-7-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1539,8 +1454,7 @@ ARNG-431 Campo IsFaturaEletronica no tipo de certificado de CV
 
 
 
-<a name="v2-6-0" />
-## 2.6.0 (2024-08-13)
+## 2.6.0 (2024-08-13) {#v2-6-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1602,8 +1516,7 @@ ARNG-417 Tela de detalhes de pedido está alertando problema pra qualquer pedido
 
 
 
-<a name="v2-5-3" />
-## 2.5.3 (2024-06-17)
+## 2.5.3 (2024-06-17) {#v2-5-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -1613,8 +1526,7 @@ ARNG-423 Números de telefones celular paraguaios com prefixo "09x7" não são a
 
 
 
-<a name="v2-5-2" />
-## 2.5.2 (2024-06-17)
+## 2.5.2 (2024-06-17) {#v2-5-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -1624,8 +1536,7 @@ ARNG-423 Números de telefones celular paraguaios com prefixo "09x7" não são a
 
 
 
-<a name="v2-5-1" />
-## 2.5.1 (2024-02-21)
+## 2.5.1 (2024-02-21) {#v2-5-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1635,8 +1546,7 @@ ARNG-430 Erro relacionado a data/timezone na criação de agente de validação 
 
 
 
-<a name="v2-5-0" />
-## 2.5.0 (2024-01-25)
+## 2.5.0 (2024-01-25) {#v2-5-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1648,8 +1558,7 @@ ARNG-317 Possibilidade de exportar para CSV as consultas de pedidos
 
 
 
-<a name="v2-4-1" />
-## 2.4.1 (2023-10-30)
+## 2.4.1 (2023-10-30) {#v2-4-1}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1669,8 +1578,7 @@ ARNG-386 Documentos como CI e foto aparecem duas vezes na tela de detalhes do pe
 
 
 
-<a name="v2-4-0" />
-## 2.4.0 (2023-10-23)
+## 2.4.0 (2023-10-23) {#v2-4-0}
 
 Idêntica a: 2.4.0 RC 2 (2023-10-23)
 
@@ -1702,8 +1610,7 @@ ARNG-377 Documento de revogação consta o AVP do pedido mesmo que outro agente 
 
 
 
-<a name="v2-3-1" />
-## 2.3.1 (2023-10-23)
+## 2.3.1 (2023-10-23) {#v2-3-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1713,8 +1620,7 @@ ARNG-381 Erro *System.ArgumentNullException: Path cannot be null. (Parameter 'pa
 
 
 
-<a name="v2-3-0" />
-## 2.3.0 (2023-10-20)
+## 2.3.0 (2023-10-20) {#v2-3-0}
 
 Idêntica a: 2.3.0 RC 3 (2023-09-22)
 
@@ -1762,8 +1668,7 @@ ARNG-370 Campo C= de certificados brasileiros está saindo com valor errado
 
 
 
-<a name="v2-2-0" />
-## 2.2.0 (2023-08-08)
+## 2.2.0 (2023-08-08) {#v2-2-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1777,8 +1682,7 @@ ARNG-342 Permitir configuração de tipo de certificado para emitir certificado 
 
 
 
-<a name="v2-1-0" />
-## 2.1.0 (2023-07-26)
+## 2.1.0 (2023-07-26) {#v2-1-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1788,8 +1692,7 @@ ARNG-341 Auto-assinatura de documentos na criação de pedido pré-aprovado
 
 
 
-<a name="v2-0-3" />
-## 2.0.3 (2023-07-11)
+## 2.0.3 (2023-07-11) {#v2-0-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -1799,8 +1702,7 @@ ARNG-340 Vídeos anexados à documentação do pedido causam erro na geração d
 
 
 
-<a name="v2-0-2" />
-## 2.0.2 (2023-07-11)
+## 2.0.2 (2023-07-11) {#v2-0-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -1810,8 +1712,7 @@ ARNG-338 Criar tipo de documento VideoConferenceRecording
 
 
 
-<a name="v2-0-1" />
-## 2.0.1 (2023-06-07)
+## 2.0.1 (2023-06-07) {#v2-0-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1825,8 +1726,7 @@ ARNG-336 Emails não estão respeitando tema `djp`
 
 
 
-<a name="v2-0-0" />
-## 2.0.0 (2023-06-02)
+## 2.0.0 (2023-06-02) {#v2-0-0}
 
 :::warning
 **Breaking change**: para permitir números de pedido definidos externamente, o campo `OrderSummary.Number` tornou-se `string`
@@ -1866,8 +1766,7 @@ ARNG-333 Colunas `NormalizedOrganizationIdentifier` e `NormalizedOrganizationNam
 
 
 
-<a name="v1-8-0" />
-## 1.8.0 (2023-04-06)
+## 1.8.0 (2023-04-06) {#v1-8-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -1889,8 +1788,7 @@ ARNG-318 Auto complete de campanha para de funcionar depois do auto preenchiment
 
 
 
-<a name="v1-7-0" />
-## 1.7.0 (2023-03-06)
+## 1.7.0 (2023-03-06) {#v1-7-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1902,8 +1800,7 @@ ARNG-316 Relatório acumulado de certificados por tipo
 
 
 
-<a name="v1-6-0" />
-## 1.6.0 (2023-03-02)
+## 1.6.0 (2023-03-02) {#v1-6-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1927,8 +1824,7 @@ ARNG-310 Query paginada sobre agentes de registro está sem ordenação
 
 
 
-<a name="v1-5-0" />
-## 1.5.0 (2023-02-07)
+## 1.5.0 (2023-02-07) {#v1-5-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1942,8 +1838,7 @@ ARNG-309 Substituir termo "suscriptor" por "titular" na localização ES
 
 
 
-<a name="v1-4-1" />
-## 1.4.1 (2023-01-11)
+## 1.4.1 (2023-01-11) {#v1-4-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1953,8 +1848,7 @@ ARNG-299 Amplia tem sua permissão negada ao realizar chamadas do procedimento d
 
 
 
-<a name="v1-4-0" />
-## 1.4.0 (2023-01-09)
+## 1.4.0 (2023-01-09) {#v1-4-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -2014,8 +1908,7 @@ ARNG-290 Configuração `Order:CloudIssueUrl` deveria ser opcional
 
 
 
-<a name="v1-3-0" />
-## 1.3.0 (2022-11-11)
+## 1.3.0 (2022-11-11) {#v1-3-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -2039,8 +1932,7 @@ ARNG-264 Mover linha com campos de empresa para baixo da linha com campos de con
 
 
 
-<a name="v1-2-0" />
-## 1.2.0 (2022-10-14)
+## 1.2.0 (2022-10-14) {#v1-2-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -2064,8 +1956,7 @@ ARNG-231 Campos se sobrepõem na tela de verificação
 
 
 
-<a name="v1-1-2" />
-## 1.1.2 (2022-09-26)
+## 1.1.2 (2022-09-26) {#v1-1-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -2074,8 +1965,7 @@ Atualiza modelo do banco de dados: não
 ARNG-228 Envio de SMS com provedor Tigo
 
 
-<a name="v1-1-1" />
-## 1.1.1 (2022-09-26)
+## 1.1.1 (2022-09-26) {#v1-1-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -2085,8 +1975,7 @@ ARNG-229 Apresentar mensagem amigável quando o certificado do agente não for e
 
 
 
-<a name="v1-1-0" />
-## 1.1.0 (2022-09-19)
+## 1.1.0 (2022-09-19) {#v1-1-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -2130,8 +2019,7 @@ ARNG-202 Checkbox de iniciar validação está aparecendo na parte de gestão
 
 
 
-<a name="v1-0-2" />
-## 1.0.2 (2022-08-17)
+## 1.0.2 (2022-08-17) {#v1-0-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -2143,8 +2031,7 @@ ARNG-160 Dados do título de eleitor não devem ser obrigatórios para certifica
 
 
 
-<a name="v1-0-1" />
-## 1.0.1 (2022-08-16)
+## 1.0.1 (2022-08-16) {#v1-0-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -2156,8 +2043,7 @@ ARNG-204 Erro na geração de documentos para certificados Brasileiros sem CNPJ
 
 
 
-<a name="v1-0-0" />
-## 1.0.0 (2022-08-15)
+## 1.0.0 (2022-08-15) {#v1-0-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -2203,7 +2089,6 @@ ARNG-194 Série de número de pedido não é levada em conta no cálculo do DV
 
 
 
-<a name="v1-0-0-rc12" />
-## 1.0.0 RC12 (2022-07-05)
+## 1.0.0 RC12 (2022-07-05) {#v1-0-0-rc12}
 
 Primeira versão disponível publicamente

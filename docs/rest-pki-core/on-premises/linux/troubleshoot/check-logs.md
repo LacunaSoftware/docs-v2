@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/linux/troubleshoot/check-logs
+---
+
 # Verificando os logs de sistema (Linux)
 
 Quanto instalado em Linux, o [Rest PKI Core](../../../index.md) escreve seus logs no *systemd journal*, uma solução para gerenciamento de logs centralizada do Linux. Para

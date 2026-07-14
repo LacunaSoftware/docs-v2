@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Personalização"
 sidebar_position: 4
+slug: /signer/on-premises/customization
 ---
 
 # Personalização do Signer

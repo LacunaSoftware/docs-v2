@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/create-sub
+---
+
 # Criação de organização - Rest PKI Core
 
 O [Rest PKI Core](../index.md) suporta múltiplas "organizações", ou "contas", cada uma tendo suas próprias aplicações, chaves de API, contextos de segurança etc.

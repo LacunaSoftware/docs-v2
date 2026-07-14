@@ -1,3 +1,7 @@
+---
+slug: /signer/on-premises/linux/install-ubuntu
+---
+
 # Instalação do Signer em Ubuntu Server
 
 Para instalar uma instância [*on premises*](../../index.md) do [Signer](../../../index.md) em Ubuntu Server, siga os passos abaixo. Para outras plataformas, [clique aqui](../../index.md).
@@ -14,9 +18,8 @@ Para instalar uma instância [*on premises*](../../index.md) do [Signer](../../.
 * **Connection string** para um [banco de dados SQL server previamente criado](../prepare-database.md)
 * (recomendado) Certificado SSL válido para o site
 
-<a name="install-aspnet-core" />
 
-## Instale o ASP.NET Core Runtime 8.0
+## Instale o ASP.NET Core Runtime 8.0 {#install-aspnet-core}
 
 :::info
 Essas instruções assumem que você está autenticado como **root**. Se você não estiver, execute `sudo su -` antes de continuar!
@@ -138,9 +141,8 @@ Se você criar um banco de dados usando características avançadas como *log sh
 :::
 
 
-<a name="encryption-key-generation" />
 
-### Configurações gerais
+### Configurações gerais {#encryption-key-generation}
 
 Gere uma chave de 256 bits para cifrar segredos armazenadas em banco de dados:
 

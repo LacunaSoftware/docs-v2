@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Atualizando para 2.x"
 sidebar_position: 1
+slug: /signer/on-premises/update-20
 ---
 
 # Atualizando o Signer da versão 1.x para 2.x

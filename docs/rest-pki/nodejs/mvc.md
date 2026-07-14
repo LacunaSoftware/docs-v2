@@ -16,8 +16,7 @@ https://github.com/LacunaSoftware/PkiSuiteSamples/tree/master/nodejs/expressmvc
 
 Esta seção lista tem onde encontrar as partes relevantes em cada amostra de recurso no projeto.
 
-<a name="auth" />
-### Autentificação com certificado digital
+### Autentificação com certificado digital {#auth}
 
 * Route: [authentication-restpki.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/nodejs/expressmvc/routes/authentication-restpki.js)
 * Views:
@@ -25,8 +24,7 @@ Esta seção lista tem onde encontrar as partes relevantes em cada amostra de re
     (JavaScript on [authentication-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/nodejs/expressmvc/public/javascripts/authentication-form.js))
   * [authentication-rest/failed.pug](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/nodejs/expressmvc/views/authentication-rest/failed.pug)
 
-<a name="pades" />
-### Assinatura PAdES com arquivo já no servidor
+### Assinatura PAdES com arquivo já no servidor {#pades}
 
 * Route: [pades-signature.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/pades-signature.js)
 * Views: 
@@ -34,49 +32,41 @@ Esta seção lista tem onde encontrar as partes relevantes em cada amostra de re
     (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/public/javascripts/signature-form.js))
   * [pades-signature-complete.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/pades-signature-complete.pug)
 
-<a name="pades-upload" />
-### Assinatura PAdES com arquivo enviado pelo usuário
+### Assinatura PAdES com arquivo enviado pelo usuário {#pades-upload}
 
 Após o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração em [upload.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/upload.js) e
 [upload.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/upload.pug)) é feito o fluxo de controle é o mesmo que na amostra [Assinatura PAdES com arquivo já no servidor](#pades),
 mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="pades-cosign" />
-### Assinatura conjunta PAdES
+### Assinatura conjunta PAdES {#pades-cosign}
 
 Após o fluxo de controle da amostra [Assinatura PAdES com arquivo já no servidor](#pades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `userfile` preenchidos.
 
-<a name="pdf-marks" />
-### Marcas PAdES
+### Marcas PAdES {#pdf-marks}
 
 Ainda não está disponível neste projeto.
 
-<a name="pades-server" />
-### Assinatura PAdES usando chave do servidor
+### Assinatura PAdES usando chave do servidor {#pades-server}
 
 * Route: [pades-signature-server-key.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/pades-signature-server-key.js)
 * View: [pades-signature-complete.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/pades-signature-complete.pug)
 
-<a name="pades-wo-client" />
-### Assinatura PAdES sem a comunicação com cliente
+### Assinatura PAdES sem a comunicação com cliente {#pades-wo-client}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-pades" />
-### Abrir/validar uma assinatura PAdES existente
+### Abrir/validar uma assinatura PAdES existente {#open-pades}
 
 * Route: [open-pades-signature.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/open-pades-signature.js)
 * View: [open-pades-signature.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/open-pades-signature.pug)
 
-<a name="print" />
-### Versão para impressão
+### Versão para impressão {#print}
 
 Após o fluxo do controle da amostra [Assinatura PAdES com arquivo já no servidor](#pades) estiver completo e o link *Download a printer-friendly version of the signed file* for clicado, o fluxo ,
 vai para web form: [printer-friendly-version.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/printer-friendly-version.js) com o arquivo de parâmetro URL `file` preenchido.
 
-<a name="cades" />
-### Assinatura CAdES com arquivo já no servidor
+### Assinatura CAdES com arquivo já no servidor {#cades}
 
 * Route: [cades-signature.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/cades-signature.js)
 * Views:  
@@ -84,32 +74,27 @@ vai para web form: [printer-friendly-version.js](https://github.com/LacunaSoftwa
     (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/public/javascripts/signature-form.js))
   * [cades-signature-complete.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/cades-signature-complete.pug)
 
-<a name="cades-upload" />
-### Assinatura CAdES com upload do arquivo pelo usuário
+### Assinatura CAdES com upload do arquivo pelo usuário {#cades-upload}
 
 Depois que o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração no [upload.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/upload.js) e [upload.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/upload.pug)) é feito 
 o fluxo de controle é o mesmo que na amostra [Assinatura CAdES com arquivo já no servidor](#cades), mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="cades-cosign" />
-### Assinatura conjunta CAdES
+### Assinatura conjunta CAdES {#cades-cosign}
 
 Após o fluxo de controle da amostra [Assinatura CAdES com arquivo já no servidor](#cades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
 
-<a name="cades-server" />
-### Assinatura CAdES usando chave do servidor
+### Assinatura CAdES usando chave do servidor {#cades-server}
 
 * Route: [cades-signature-server-key.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/cades-signature-server-key.js)
 * View: [cades-signature-complete.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/cades-signature-complete.pug)
 
-<a name="open-cades" />
-### Abrir/validar uma assinatura CAdES existente
+### Abrir/validar uma assinatura CAdES existente {#open-cades}
 
 * Route: [open-cades-signature.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/open-cades-signature.js)
 * View: [open-cades-signature.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/open-cades-signature.pug)
 
-<a name="xml-full" />
-### Assinatura XML do documento inteiro
+### Assinatura XML do documento inteiro {#xml-full}
 
 * Route: [xml-full-signature.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/xml-full-signature.js)
 * Views:
@@ -117,8 +102,7 @@ repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
     (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/public/javascripts/signature-form.js))
   * [xml-signature-complete.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/xml-signature-complete.pug)
 
-<a name="xml-element" />
-### Assinatura XML de um elemento
+### Assinatura XML de um elemento {#xml-element}
 
 * Route: [xml-element-signature.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/routes/xml-element-signature.js)
 * Views:
@@ -126,32 +110,26 @@ repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
     (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/public/javascripts/signature-form.js))
   * [xml-signature-complete.pug](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/NodeJS/mvc/views/xml-signature-complete.pug)
 
-<a name="xades-element" />
-### Assinatura XAdES de um elemento
+### Assinatura XAdES de um elemento {#xades-element}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-xml" />
-### Abrir/validar assinatura de um arquivo XML existente
+### Abrir/validar assinatura de um arquivo XML existente {#open-xml}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch" />
-### Lote de assinatura PAdES 
+### Lote de assinatura PAdES {#batch}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-optimized" />
-### Lote otimizado de assinaturas PAdES
+### Lote otimizado de assinaturas PAdES {#batch-optimized}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-cades" />
-### Lote de assinaturas CAdES
+### Lote de assinaturas CAdES {#batch-cades}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-xml-element" />
-### Lote de assinaturas XML de elementos no mesmo documento
+### Lote de assinaturas XML de elementos no mesmo documento {#batch-xml-element}
 
 Ainda não está disponível neste projeto.

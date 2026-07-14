@@ -9,6 +9,6 @@ sidebar_position: 3
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs/en/pki-guide/web-signatures/local)
+- [English](/en-us/articles/pki-guide/web-signatures/local)
 
 :::

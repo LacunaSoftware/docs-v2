@@ -1,5 +1,6 @@
 ---
 unlisted: true
+slug: /signer/on-premises/docker/docker-swarm/enable-ssl
 ---
 
 # Signer em Docker - Habilitando SSL
@@ -8,6 +9,6 @@ unlisted: true
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs-v2/docs/en/signer/on-premises/como-instalar/docker/docker-swarm/enable-ssl)
+- [English](/en-us/articles/signer/on-premises/docker/docker-swarm/enable-ssl)
 
 :::

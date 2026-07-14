@@ -1,9 +1,13 @@
-﻿# Rest PKI Core - Utilitário de linha de comando
+﻿---
+slug: /rest-pki/core/on-premises/tool
+---
+
+# Rest PKI Core - Utilitário de linha de comando
 
 :::warning Indisponível
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs/en/rest-pki-core/on-premises/tool/)
+- [English](/en-us/articles/rest-pki/core/on-premises/tool)
 
 :::

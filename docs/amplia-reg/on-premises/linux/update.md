@@ -16,9 +16,8 @@ chmod -R a=,u+rwX,go+rX /usr/share/ampliareg
 systemctl start ampliareg
 ```
 
-<a name="vnext" />
 
-## Testando a próxima versão do Amplia Reg
+## Testando a próxima versão do Amplia Reg {#vnext}
 
 Para testar a próxima versão do Amplia Reg, atualmente em estágio *Release Candidate*:
 

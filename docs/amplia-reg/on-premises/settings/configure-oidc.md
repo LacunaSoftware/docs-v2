@@ -109,9 +109,8 @@ Oidc__AppId=amplia-reg-backend
 Oidc__AppSecret=YOUR_BACKEND_APP_SECRET
 ```
 
-<a name="disable-sign-up" />
 
-## Desabilitando o cadastro de usuários
+## Desabilitando o cadastro de usuários {#disable-sign-up}
 
 Após configurar o OIDC no Amplia Reg, acesse o Amplia Reg. Como parte desse processo, você precisará se registrar, criando assim a primeira conta de usuário.
 Após criar uma conta, siga as etapas abaixo para desabilitar novos cadastros (que a partir de então serão criados exclusivamente pelo gerenciamento de usuários do Amplia Reg):

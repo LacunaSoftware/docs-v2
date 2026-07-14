@@ -1,10 +1,13 @@
+---
+slug: /rest-pki/core/integration/signature-sessions/file-validation
+---
+
 # Validação de arquivos - Sessões de assinatura
 
 Você pode validar os arquivos escolhidos pelo usuário durante as sessões de assinatura utilizando os mecanismos descritos nesse artigo.
 
-<a name="pattern" />
 
-## Regra de formação de nomes de arquivos
+## Regra de formação de nomes de arquivos {#pattern}
 
 Caso você tenha uma regra de formação para os nomes de arquivos que são aceitos, você pode configurar sua conta do Rest PKI Core para validar cada arquivo
 selecionado pelo usuário usando uma expressão regular que represente a sua regra de formação.
@@ -26,9 +29,8 @@ regra de formação
 :::
 
 
-<a name="api" />
 
-## API de validação de arquivos
+## API de validação de arquivos {#api}
 
 Também é possível configurar uma API de validação de arquivos, implementada pela sua aplicação, a ser chamada para validar cada arquivo escolhido pelo usuário.
 A sua aplicação recebe o nome do arquivo (além do *MIME type* e tamanho em bytes) e retorna se o arquivo deve ou não ser aceito (e, caso negativo, o motivo da

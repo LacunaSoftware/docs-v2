@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/file-referencing
+---
+
 # Referenciando arquivos - Rest PKI Core
 
 Existem diferentes maneiras de referenciar arquivos em chamadas à APIs do [Rest PKI Core](../index.md), por exemplo ao

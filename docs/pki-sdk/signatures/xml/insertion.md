@@ -22,8 +22,7 @@ XML, portanto não se aplica a coluna *Padrão sem um documento XML passado*
 
 Caso se queira definir um local customizado para a inclusão do elemento de assinatura, verifique a seção seguinte.
 
-<a name="custom-location" />
-## Definindo local para inclusão do elemento de assinatura
+## Definindo local para inclusão do elemento de assinatura {#custom-location}
 
 No PKI SDK, é possível customizar o local de inclusão do elemento de assinatura através do método
 @Lacuna.Pki.Xml.XmlSigner.SetSignatureElementLocation(System.String,Lacuna.Pki.Xml.NamespaceManager,Lacuna.Pki.Xml.XmlInsertionOptions)

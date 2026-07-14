@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Guia de Integração"
 sidebar_position: 2
+slug: /signer/integration-guide
 ---
 
 # Guia de Integração
@@ -32,8 +33,6 @@ Para obter uma chave de API entre em contato com o administrador da sua instânc
 
 Escolha um dos casos de uso abaixo:
 
-<a name="sign-document" />
-
 * [Assinar um documento](#sign-document)
 
 * [Como posicionar uma assinatura](#document-marks)
@@ -50,7 +49,7 @@ Escolha um dos casos de uso abaixo:
 
 * [Deletar um documento](#delete-document)
 
-### Assinar um documento
+### Assinar um documento {#sign-document}
 
 Para assinar um documento siga o passo a passo abaixo:
 
@@ -205,7 +204,6 @@ A resposta irá apresentar duas URLs:
 Uma vez obtida a URL `embedUrl`, utilize o **Widget de assinatura** para exibir a página de assinatura do Signer na sua aplicação.
 A página [Assinatura embutida](embedded-signature.md) descreve como utilizar o *Widget*.
 
-<a name="check-document" />
 Para mais detalhes sobre esse caso de uso, veja nossos exemplos no github:
 
 * [C#](https://github.com/LacunaSoftware/SignerSamples/blob/master/dotnet/console/Console/Scenarios/EmbeddedSignatureScenario.cs)
@@ -216,10 +214,9 @@ Para mais detalhes sobre esse caso de uso, veja nossos exemplos no github:
 
 * [Node.js](https://github.com/LacunaSoftware/SignerSamples/blob/master/nodejs/scenarios/embeddedSignatureScenario.ts)
 
-<a name="document-marks" />
 
 
-### Como pré-posicionar uma assinatura no documento
+### Como pré-posicionar uma assinatura no documento {#document-marks}
 
 Durante a criação de um documento, é possível posicionar as assinaturas de cada usuário em um determinado local deste mesmo documento. Todas as definições de atributos 
 são feitas durante a criação do  `flowAction`. Há opções para definir a localização da assinatura em uma página, bem como a pagina na qual deseja pré-posicionar uma assinatura.
@@ -234,7 +231,7 @@ Para mais detalhes sobre esse caso de uso, veja nossos exemplos no github:
 
 * [Node.js](https://github.com/LacunaSoftware/SignerSamples/blob/master/nodejs/scenarios/createDocumentWithPositionedSignaturesScenario.ts)
 
-### Verificar o status de um documento
+### Verificar o status de um documento {#check-document}
 
 Para verificar o status de um documento é preciso conhecer o seu ID. Em seguida, basta fazer uma chamada à [API de Detalhes do Documento](https://www.dropsigner.com/swagger/index.html#operations-Documents-get_api_documents__id_):
 
@@ -280,7 +277,6 @@ acesse a tela da Organização e registre a URL desejada na opção **Integraç�
 
 ![Webhook](/images/signer/org-webhook.png)
 
-<a name="document-reminders" />
 Para mais detalhes sobre esses casos de uso, veja nossos exemplos no github:
 
 * [C#](https://github.com/LacunaSoftware/SignerSamples/blob/master/dotnet/console/Console/Scenarios/CheckDocumentStatusScenario.cs)
@@ -293,7 +289,7 @@ Para mais detalhes sobre esses casos de uso, veja nossos exemplos no github:
 
 
 
-### Enviar lembretes de assinatura
+### Enviar lembretes de assinatura {#document-reminders}
 
 Uma vez verificado o status de um participante, conforme mostrado no caso de uso de [Verificação de status](#check-document),
 você pode enviar lembretes periódicos para participantes do fluxo que ainda não completaram uma ação usando a [API de Envio de Lembretes](https://www.dropsigner.com/swagger/index.html#operations-Documents-get_api_documents__id_).
@@ -308,7 +304,6 @@ POST /api/notifications/flow-action-reminder
 }
 ```
 
-<a name="validate-signatures" />
 Para mais detalhes sobre esse caso de uso, veja nossos exemplos no github:
 
 * [C#](https://github.com/LacunaSoftware/SignerSamples/blob/master/dotnet/console/Console/Scenarios/NotifyFlowParticipantsScenario.cs)
@@ -319,9 +314,8 @@ Para mais detalhes sobre esse caso de uso, veja nossos exemplos no github:
 
 * [Node.js](https://github.com/LacunaSoftware/SignerSamples/blob/master/nodejs/scenarios/notifyFlowParticipantsScenario.ts)
 
-<a name="download-document" />
 
-### Download das versões de um documento
+### Download das versões de um documento {#download-document}
 
 A partir do momento que um documento foi criado, é possível fazer o download de diferentes tipos de versões deste mesmo documento (de acordo com o estágio no qual ele se encontra). Caso queira fazer o download do documento, utilize a [API de Download de Documentos](https://www.dropsigner.com/swagger/index.html#operations-Documents-get_api_documents__id__content).
 
@@ -338,7 +332,7 @@ As opções disponíveis para download são:
 
 Existem dois métodos com seus respectivos tipos de retorno de dados: O primeiro retornará uma `Stream` de dados referente ao documento e o segundo retornará o documento em um vetor de `bytes[]`.
 
-<a name="download-document" />
+<a id="download-document" />
 
 Para mais detalhes sobre esse caso de uso, veja nossos exemplos no github:
 
@@ -350,9 +344,8 @@ Para mais detalhes sobre esse caso de uso, veja nossos exemplos no github:
 
 * [Node.js](https://github.com/LacunaSoftware/SignerSamples/blob/master/nodejs/scenarios/downloadDocumentVersionScenario.ts)
 
-<a name="list-documents"/>
 
-### Listar documentos
+### Listar documentos {#list-documents}
 
 É possível listar os documentos de acordo com padrões e necessidades diferentes. O parametros utilizados estão listados na [API de Listagem de Documentos](https://www.dropsigner.com/swagger/index.html#operations-Documents-get_api_documents). Os tipos de listas que podem ser retornadas estão identificados abaixo:
 
@@ -371,7 +364,7 @@ Para mais detalhes sobre esse caso de uso, veja nossos exemplos no github:
 
 * [Node.js](https://github.com/LacunaSoftware/SignerSamples/blob/master/nodejs/scenarios/listDocumentScenario.ts)
 
-### Validar assinaturas de um documento
+### Validar assinaturas de um documento {#validate-signatures}
 
 Você pode validar as assinaturas de um documento de duas formas: com a **chave de validação do documento** (caso ele tenha sido assinado nesta instância do Signer) ou com o **arquivo
 assinado**.
@@ -456,9 +449,7 @@ Serão retornados os dados de cada uma das assinaturas encontradas no documento.
 	}
 ]
 ```
-### Deletar documento
-
-<a name="delete-document"></a>
+### Deletar documento {#delete-document}
 
 Para deletar um documento você precisa ter acesso ao ID deste mesmo documento e fazer um chamada do tipo `DELETE`. 
 

@@ -20,9 +20,8 @@ Antes de começar, leia a seção [Planejamento antes da instalação](../index.
 * (recomendado) Certificado SSL válido para o domínio de acesso ao painel de controle
 * **Connection string** para um [banco de dados SQL Server ou PostgreSQL criado previamente](../prepare-database.md)
 
-<a name="install-aspnet-core" /> {/* TODO: move this to a better place once proper instructions are written */}
 
-## Instalação
+## Instalação {#install-aspnet-core}
 
 1. Instale IIS
 1. https://aka.ms/dotnetcore-3-1-windowshosting
@@ -85,9 +84,7 @@ Lembre-se de conceder acesso total ao usuário do aplicativo na pasta de log.
 :::
 
 
-### Configurações *General*
-
-<a name="encryption-key-generation" /> {/* This anchor actually belongs a bit farther below, placing it here is a workaround */}
+### Configurações *General* {#encryption-key-generation}
 
 Na seção **General**:
 

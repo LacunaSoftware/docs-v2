@@ -20,7 +20,7 @@ npm install
 npm run start
 ```
 
-Starts the dev server at **http://localhost:3000/docs-v2/**. Most content changes hot-reload without restarting.
+Starts the dev server at **http://localhost:3000/**. Most content changes hot-reload without restarting.
 
 > **Note:** The search index is **not** available in dev mode. To test search, do a full build and serve it locally (see below).
 
@@ -38,13 +38,30 @@ To preview the built site locally:
 npm run serve
 ```
 
-Serves the production build at **http://localhost:3000/docs-v2/**.
+Serves the production build at **http://localhost:3000/**.
+
+## URL scheme
+
+Routing mirrors the classic DocFX site (docs.lacunasoftware.com):
+
+| Content | Route |
+|---|---|
+| Portuguese articles (`docs/`) | `/articles/<path>` (also aliased at `/pt-br/articles/<path>`) |
+| English articles (`docs-en/`) | `/en-us/articles/<path>` |
+| .NET API reference | `/api/<path>` and `/en-us/api/<path>` |
+
+With `trailingSlash: false`, each page is emitted as a flat `<path>.html` file, so
+classic links ending in `.html` keep working. Articles that were reorganized into
+new folders (e.g. `signer/on-premises/configuracao/`) carry a `slug:` in their
+front matter pinning them to their classic URL. There is no automatic language
+detection or redirect — language switching is manual via the navbar.
 
 ## Deployed Site
 
-The production site is published to GitHub Pages and available at:
-
-**https://lacunasoftware.github.io/docs-v2/**
+The production site is published via GitHub Pages / GitHub Actions (see
+`.github/workflows/deploy.yml`). The site is built for **https://docs.lacunasoftware.com**
+(baseUrl `/`) — under a different host prefix (e.g. `github.io/docs-v2/`) asset
+paths will not resolve.
 
 ## Deployment
 

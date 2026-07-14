@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Integração para administração"
 sidebar_position: 1
+slug: /signer/on-premises/administration
 ---
 
 # APIs de Administração

@@ -48,8 +48,7 @@ Caso a chamada falhe, o erro informado deve ajudar no diagnóstico do problema.
 Caso a chamada seja bem-sucedida, retornando um XML similar ao mostrado acima, realize na máquina onde está sendo observado o erro
 o procedimento descrito na seção abaixo.
 
-<a name="debug-chrome" />
-## Diagnóstico da extensão no Chrome
+## Diagnóstico da extensão no Chrome {#debug-chrome}
 
 :::note
 Caso o problema só ocorra em outros navegadores que não o Chrome, veja instruções no final do artigo
@@ -87,8 +86,7 @@ Os detalhes do erro da chamada de rede ao Rest PKI devem indicar a causa do prob
 * Caso você esteja usando a instância padrão do Rest PKI em `https://pki.rest/`: verifique o código de erro. Provavelmente o acesso ao Rest PKI está sendo
   bloqueado pelo firewall da rede do usuário em questão. Se for o caso, entre em contato com o responsável pela rede em questão.
 
-<a name="debug-firefox" />
-## Diagnóstico da extensão no Firefox
+## Diagnóstico da extensão no Firefox {#debug-firefox}
 
 Para diagnosticar falhas na comunicação do Web PKI com o Rest PKI no Firefox, siga os passos abaixo:
 

@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/client-tool/sign
+---
+
 # Comando do utilitário cliente: **sign**
 
 ## Nome

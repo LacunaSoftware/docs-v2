@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/linux
+---
+
 # Setup do Rest PKI Core em Linux
 
 O [Rest PKI Core](../../index.md) pode ser instalado nas seguintes distribuições de Linux:

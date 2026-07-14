@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Preparando o banco de dados"
 sidebar_position: 5
+slug: /signer/on-premises/prepare-database
 ---
 
 # Preparando o banco de dados para instalação do Signer

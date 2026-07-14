@@ -1,14 +1,14 @@
 ---
 sidebar_label: "Zoom"
 sidebar_position: 2
+slug: /signer/on-premises/zoom
 ---
 
 # Integração com Zoom no Signer
 
 O Signer permite integração com [Zoom](https://zoom.us/) para realizar e armazenar videoconferências relacionadas a documentos.
 
-<a name="account-config" />
-## Configuração da conta
+## Configuração da conta {#account-config}
 
 Para esta integração é preciso de uma conta do Zoom com plano igual ou superior ao Profissional.
 
@@ -28,8 +28,7 @@ com aquele usuário terão o vídeo salvo na nuvem.
 :::
 
 
-<a name="credentials" />
-## Obtenção de credenciais
+## Obtenção de credenciais {#credentials}
 
 Para habilitar a integração no assinador é preciso obter uma credencial que permite que o Assinador chame as APIs do Zoom.
 Para isso siga o procedimento abaixo:
@@ -61,8 +60,7 @@ Para isso siga o procedimento abaixo:
 1. Copie as informações necessárias para a integração: `AccountId`, `ClientId`, e `ClientSecret`.
 ![Zoom S2S App Credentials](/images/signer/zoom-credentials.png)
 
-<a name="operation" />
-## Funcionamento
+## Funcionamento {#operation}
 
 Para criar uma conferência, acesse a tela de detalhes de um documento e clique no botão iniciar conferência:
 

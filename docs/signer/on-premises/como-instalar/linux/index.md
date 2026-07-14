@@ -1,3 +1,7 @@
+---
+slug: /signer/on-premises/linux
+---
+
 # Setup do Signer em Linux
 
 O [Signer](../../../index.md) pode ser instalado nas seguintes distribuições de Linux:

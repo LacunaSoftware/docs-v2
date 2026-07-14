@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/signature-sessions/background-processing
+---
+
 # Processamento em background - Sessões de assinatura
 
 Por padrão, o Rest PKI Core fará com que o usuário aguarde que os documentos sejam processados antes de enviá-lo de volta à sua aplicação. Se você quiser oferecer

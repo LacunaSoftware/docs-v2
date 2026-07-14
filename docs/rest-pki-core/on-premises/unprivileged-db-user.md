@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/unprivileged-db-user
+---
+
 # Operando o Rest PKI Core sem ser *owner* do banco de dados
 
 O [Rest PKI Core](../index.md) pode operar de duas maneiras em relação ao acesso do banco de dados:

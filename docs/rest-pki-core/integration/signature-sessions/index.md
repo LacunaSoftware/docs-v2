@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/signature-sessions
+---
+
 # Sessões de assinatura - Rest PKI Core
 
 **Sessões de assinatura** são uma funcionalidade do [Rest PKI Core](../../index.md) que permitem que seus usuários assinem documentos digitalmente sem que você
@@ -194,9 +198,8 @@ Em Java, a view de Spring seria algo como:
 </ul>
 ```
 
-<a name="predefined-documents" />
 
-## Pré-definindo os documentos a serem assinados
+## Pré-definindo os documentos a serem assinados {#predefined-documents}
 
 As sessões que criamos até aqui solicitam que o usuário faça upload dos documentos a serem assinados. Você pode alternativamente especificar os documentos
 que devem ser assinador no momento da criação da sessão. Nesse caso, o usuário não poderá fazer upload de documentos, podendo apenas assinar os documentos
@@ -327,9 +330,8 @@ Outra forma de lidar com esse problema é optar pelo **Fluxo com webhook** (veja
 :::
 
 
-<a name="webhook-flow" />
 
-## Fluxo com webhook
+## Fluxo com webhook {#webhook-flow}
 
 No fluxo padrão descrito acima, a sua aplicação toma conhecimento dos documentos assinados quando o usuário é redirecionado de volta com a *query parameter*
 `signatureSessionId` adicionada à URL.

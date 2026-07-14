@@ -5,7 +5,7 @@
  *
  * Output:
  *   pt-BR  →  docs/signer/
- *   en     →  docs/en/signer/
+ *   en     →  docs-en/signer/
  */
 
 import fs from 'fs/promises';
@@ -17,7 +17,7 @@ const REPO = path.resolve(SITE, '..');
 
 const LOCALES = [
   { src: `${REPO}/docs.pt-br/articles/signer`, dest: `${SITE}/docs/signer`,    name: 'pt-BR' },
-  { src: `${REPO}/docs.en-us/articles/signer`, dest: `${SITE}/docs/en/signer`, name: 'en'    },
+  { src: `${REPO}/docs.en-us/articles/signer`, dest: `${SITE}/docs-en/signer`, name: 'en'    },
 ];
 
 const SKIP_DIRS = new Set(['includes', 'images']);
@@ -271,8 +271,11 @@ const relPathToDocSegment = relPath =>
 
 function buildUnavailablePage(title, locale, relPath) {
   const seg   = relPathToDocSegment(relPath);
-  const ptUrl = `/docs-v2/docs/signer/${seg}`;
-  const enUrl = `/docs-v2/docs/en/signer/${seg}`;
+  // Classic-site route scheme: pt at /articles, en at /en-us/articles. Note:
+  // articles that carry a `slug:` override (see the folder reorganizations)
+  // are served at their slug, not their file path — check before rerunning.
+  const ptUrl = `/articles/signer/${seg}`;
+  const enUrl = `/en-us/articles/signer/${seg}`;
 
   if (locale === 'pt-BR') {
     return `# ${title}\n\n:::warning Indisponível\n\nDesculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:\n\n- [English](${enUrl})\n\n:::\n`;

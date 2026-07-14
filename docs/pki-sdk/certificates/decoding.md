@@ -45,8 +45,7 @@ No entanto, para carregar a cadeia de certificados no momento da codificação, 
 para o método Decode(), de forma a auxiliar o SDK a construir a cadeia de certificados. Para melhor compreensão desta
 funcionalidade, verifique a seção a seguir: [Cadeia do certificate](#chain)
 
-<a name="chain" />
-## Cadeia do certificado
+## Cadeia do certificado {#chain}
 
 Ao carregar um certificado utilizando os métodos `Lacuna.Pki.PKCertificate.Decode(System.Byte[],Lacuna.Pki.Stores.ICertificateStore)` ou
 `Lacuna.Pki.PKCertificate.Decode(System.String,Lacuna.Pki.Stores.ICertificateStore)`, o SDK automaticamente tentará montar a cadeia do 

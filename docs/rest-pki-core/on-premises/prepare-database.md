@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/prepare-database
+---
+
 # Preparando o banco de dados para instalação do Rest PKI Core
 
 Para instalar uma [instância *on premises*](index.md) do [Rest PKI Core](../index.md), você vai precisar de uma *connection string* para um dos seguintes SGBDs:
@@ -5,9 +9,8 @@ Para instalar uma [instância *on premises*](index.md) do [Rest PKI Core](../ind
 * [SQL Server](#sql-server)
 * [PostgreSQL](#postgres)
 
-<a name="sql-server" />
 
-## SQL Server
+## SQL Server {#sql-server}
 
 Para usar o SQL Server, você precisará de um banco de dados com:
 
@@ -65,9 +68,8 @@ o valor após `Data Source=` deve ser alterado.
 :::
 
 
-<a name="postgres" />
 
-## PostgreSQL
+## PostgreSQL {#postgres}
 
 A partir da [versão 1.12.0](../changelog.md#v1-12-0) do Rest PKI Core, também é suportado o uso de PostgreSQL. Qualquer uma das versões do PostgreSQL dentro do período
 de suporte oficial também é suportada ([o que, no momento, significa versão 11 ou superior](https://www.postgresql.org/support/versioning/)).

@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/linux/install-ubuntu
+---
+
 # Instalação do Rest PKI Core em Ubuntu Server
 
 Para instalar uma instância [*on premises*](../index.md) do [Rest PKI Core](../../index.md) em Ubuntu Server, siga os passos abaixo. Para outras plataformas, [clique aqui](../index.md).
@@ -10,9 +14,8 @@ Para instalar uma instância [*on premises*](../index.md) do [Rest PKI Core](../
 * Licença de uso da biblioteca **PKI SDK** (em formato binário/Base64)
 * Licença de uso do componente **Web PKI** (em formato binário/Base64)
 
-<a name="install-aspnet-core" />
 
-## Instale o ASP.NET Core Runtime 6.0
+## Instale o ASP.NET Core Runtime 6.0 {#install-aspnet-core}
 
 :::info
 Essas instruções assumem que você está autenticado como **root**. Se você não estiver, execute `sudo su -` antes de continuar!
@@ -140,7 +143,7 @@ Edite o arquivo de configuração para configurar sua instância do Rest PKI Cor
 nano /etc/restpkicore/appsettings.conf
 ```
 
-<a name="encryption-key-generation" />
+<a id="encryption-key-generation" />
 
 Na seção `[General]`, para preencher o parâmetro `EncryptionKey` gere uma chave de 256 bits para cifrar dados sensíveis armazenados no banco de dados:
 

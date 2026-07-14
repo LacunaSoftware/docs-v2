@@ -5,9 +5,8 @@ Para instalar uma [instância *on premises*](index.md) do [Amplia Reg](../index.
 * [SQL Server](#sql-server)
 * [PostgreSQL](#postgres)
 
-<a name="sql-server" />
 
-## SQL Server
+## SQL Server {#sql-server}
 
 Para usar SQL Server, você vai precisar de um banco de dados com:
 
@@ -65,9 +64,8 @@ o valor após `Data Source=` deve ser alterado.
 :::
 
 
-<a name="postgres" />
 
-## PostgreSQL
+## PostgreSQL {#postgres}
 
 A partir da [versão 1.6.0](../changelog.md#v1-6-0) do Amplia reg, também é suportado o uso de PostgreSQL. Qualquer uma das versões do PostgreSQL dentro do período
 de suporte oficial também é suportada ([o que, no momento, significa versão 11 ou superior](https://www.postgresql.org/support/versioning/)).

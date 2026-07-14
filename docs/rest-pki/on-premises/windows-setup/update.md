@@ -20,7 +20,7 @@ Como o pacote não contém arquivos chamados AppSettings.config e Connections.co
 
 Caso seja exibida a tela inicial com o título "REST PKI on premises", o processo estará concluído.
 
-<a name="db-update" />
+<a id="db-update" />
 Caso o sistema esteja configurado para realizar atualizações manuais ao modelo do banco de dados, poderá ser necessário um procedimento adicional para atualizar o banco de dados.
 
 :::note

@@ -3,7 +3,7 @@
 A API do Lacuna Scanner é um REST com mensagens em formato JSON, facilmente chamada em qualquer linguagem de programação com suporte a realizar chamadas HTTP.
 
 :::tip
-Antes de começar, veja a [visão geral da integração](../index.md#overview).
+Antes de começar, veja a [visão geral da integração](../index.md).
 :::
 
 
@@ -61,8 +61,7 @@ O link retornado pode ser acessado sem autenticação, ou seja, pode ser usado e
 :::
 
 
-<a name="multifile" />
-## Sessões *multifile*
+## Sessões *multifile* {#multifile}
 
 Você pode permitir que o usuário digitalize múltiplos documentos. Para isso, passe o parâmetro `"multifile": true` ao criar a sessão:
 
@@ -76,8 +75,7 @@ POST /api/v2/scan-sessions
 
 Ao final do processo, ao invés de levar em consideração apenas o primeiro documento, itere a lista de documentos digitalizados.
 
-<a name="optional-steps" />
-## Sessões com entrada de metadados e/ou assinatura
+## Sessões com entrada de metadados e/ou assinatura {#optional-steps}
 
 Caso deseje solicitar ao digitalizador a entrada dos metadados requeridos pela Medida Provisória 10.278/2020, passe o parâmetro `"metadataInputEnabled": true`:
 

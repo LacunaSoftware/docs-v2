@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/rib
+---
+
 {/* This article is intentionally excluded from the TOC */}
 {/* There are no plans to translate this article, therefore code snippets are in-file (instead of being stored elsewhere and referenced, to allow reuse) */}
 

@@ -15,49 +15,42 @@ Nenhuma atualização desnecessária será exigida de usuários com versões suf
 
 Se o parâmetro não for passado, o padrão é exigir a [API 1.3](#v1-3).
 
-<a name="changelog" />
-## Histórico de versões da API
+## Histórico de versões da API {#changelog}
 
-<a name="v1-8-2" />
-### 1.8.2 (2023-11-23)
+### 1.8.2 (2023-11-23) {#v1-8-2}
 
 Desde lib [2.16.3](../update.md)
 
 - Melhoria no método [`importCertificate`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#importcertificate) suportando múltiplas chamadas
 
 
-<a name="v1-8-1" />
-### 1.8.1 (2022-12-17)
+### 1.8.1 (2022-12-17) {#v1-8-1}
 
 - Adiciona métodos [encrypt](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#encrypt) e [decrypt](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#decrypt)
 - Adiciona Extended Key Usage info ao [CertificateModel](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html)
 - Adiciona o parâmetro  `nonExportableKey` ao método [generateSoftwareRsaKeyPair](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#generatesoftwarersakeypair)
 
 
-<a name="v1-7-2" />
-### 1.7.2 (2022-07-03)
+### 1.7.2 (2022-07-03) {#v1-7-2}
 
 - Adiciona suporte a respostas sem limite de tamanho do App
 - Adiciona campos de PKI internacionais no [CertificateModel](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html): [`PkiArgentinaModel`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.pkiargentinamodel.html), [`PkiEcuadorModel`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.pkiecuadormodel.html), [`PkiParaguayModel`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.pkiparaguaymodel.html), [`PkiPeruModel`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.pkiperumodel.html)
 - Adiciona campos no [CertificateModel](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html): `certificatePolicies`, `subjectDN`, `issuerDN`
 
 
-<a name="v1-6-1" />
-### 1.6.1 (2020-05-23)
+### 1.6.1 (2020-05-23) {#v1-6-1}
 
 - Adiciona comando [`downloadToFolder`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#downloadtofolder)&ast; com suporte forçado a TLS 1.2
 
 
-<a name="v1-6" />
-### 1.6 (2019-10-13)
+### 1.6 (2019-10-13) {#v1-6}
 
 - Adiciona métodos [`keySignData`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#keysigndata) e [`keySignHash`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#keysignhash) para assinatura com Id de chave privada gerada.
 - Adiciona o parâmetro `privateKeyId` ao resultado da geração de par de chaves [`GenerateKeyPairResponse`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.generatekeypairresponse.html).
 - Corrige bug na resposta do método [`sendAuthenticatedRequest`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#sendauthenticatedrequest) quando o *payload* retornado não possui a propriedade `Content-Length` no *Header*.
 
 
-<a name="v1-5-2" />
-### 1.5.2 (2019-07-19)
+### 1.5.2 (2019-07-19) {#v1-5-2}
 
 - Adiciona opção de retorno do conteúdo do documento assinado nos comandos de assinatura local sem limite de 1MB: [`returnContent`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/enums/_lacuna_web_pki_d_.lacunawebpki.outputmodes.html#returncontent)
 - Adiciona nível de validação do certificado do assinante nos comandos de assinatura local: [`CertificateValidationLevels`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/enums/_lacuna_web_pki_d_.lacunawebpki.certificatevalidationlevels.html)
@@ -65,22 +58,19 @@ Desde lib [2.16.3](../update.md)
 - Adiciona controle do ciclo de vida da aplicação nativa no método `init`: [`useDomainNativePool`](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init)
 
 
-<a name="v1-5" />
-### 1.5 (2018-11-27)
+### 1.5 (2018-11-27) {#v1-5}
 
 - Adiciona comando mais eficiente de assinatura de lote: [`signHashBatch`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#signhashbatch)
 - Adiciona licença v3
 - Adiciona integração com _mobile_
 
 
-<a name="v1-4-1" />
-### 1.4.1 (2018-06-15)
+### 1.4.1 (2018-06-15) {#v1-4-1}
 
 - Corrige *bug* de *buffer* vazio no comando [`sendAuthenticatedRequest`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#sendauthenticatedrequest)&ast;
 
 
-<a name="v1-4" />
-### 1.4 (2018-02-23)
+### 1.4 (2018-02-23) {#v1-4}
 
 - Adiciona funcionalidades de assinatura local de XML:
 	- [`signFullXml`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#signfullxml)&ast;
@@ -92,15 +82,13 @@ Desde lib [2.16.3](../update.md)
 	- [`userMessage`](https://docs.lacunasoftware.com/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.exceptionmodel.html#usermessage)
 
 
-<a name="v1-3" />
-### 1.3 (2017-11-10)
+### 1.3 (2017-11-10) {#v1-3}
 
 - Adiciona gerenciador de erro com objeto de exceção mais detalhado:
 	- [`fail`](https://docs.lacunasoftware.com/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.promise.html#fail)
 
 
-<a name="v1-2" />
-### 1.2 (2017-06-19)
+### 1.2 (2017-06-19) {#v1-2}
 
 - Adiciona funcionalidades para emissão de certificado digital em repositório local e via PKCS#11:
 	- [`generateSoftwareRsaKeyPair`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#generatesoftwarersakeypair)
@@ -110,8 +98,7 @@ Desde lib [2.16.3](../update.md)
 	- [`importTokenCertificate`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#importtokencertificate)
 
 
-<a name="v1-1" />
-### 1.1 (2016-08-19)
+### 1.1 (2016-08-19) {#v1-1}
 
 - Adiciona licença v2
 - Adiciona funcionalidades para assinatura local:
@@ -125,8 +112,7 @@ Desde lib [2.16.3](../update.md)
 	- [`openCades`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#opencades)&ast;
 
 
-<a name="v1-0" />
-### 1.0 (2015-04-28)
+### 1.0 (2015-04-28) {#v1-0}
 
 - Adiciona funcionalidades básicas:
 	- [`init`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init)

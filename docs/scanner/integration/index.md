@@ -33,8 +33,7 @@ A sua aplicação então faz uma chamada à API do serviço para obter o documen
 
 ![Demo step 4](/images/scanner/demo-4.png)
 
-<a name="overview" />
-## Visão geral
+## Visão geral {#overview}
 
 O procedimento se inicia com a sua aplicação criando uma **sessão de digitalização**, passando o **returnUrl** &ndash; a URL à qual o usuário deve ser
 levado de volta ao final do processo. A sua aplicação recebe de volta o **redirectUrl** &ndash; a URL à qual o usuário deve ser levado para iniciar o

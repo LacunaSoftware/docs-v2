@@ -31,8 +31,7 @@ ou ainda quando sendo utilizado em conjunto com o Rest PKI em nuvem (nesse caso,
 
 Para mais informações sobre a diferença entre os formatos de licença, veja a seção abaixo.
 
-<a name="formats" />
-## Formatos de licença
+## Formatos de licença {#formats}
 
 Você receberá a licença em dois formatos, como abaixo:
 

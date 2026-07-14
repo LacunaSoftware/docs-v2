@@ -141,7 +141,7 @@ As assinaturas realizadas com o código acima terão o resultado esperado confor
 
   O parâmetro `text` suporta o uso de *tags* que o PKI Express substitui pelas informações contidas no certificado. 
 
-  <a name="pades-tags" />
+  <a id="pades-tags" />
   * *Tags* genéricas:
 
     Tag               | Valor

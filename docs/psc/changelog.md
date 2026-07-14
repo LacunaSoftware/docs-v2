@@ -5,9 +5,7 @@ sidebar_position: 3
 
 # Histórico de versões do Lacuna PSC
 
-<a name="vnext" />
-<a name="v1-5-0" />
-## 1.5.0 (próxima versão)
+## 1.5.0 (próxima versão) {#vnext}
 
 Atualiza modelo do banco de dados: não
 
@@ -21,8 +19,7 @@ PSC-226 Autorização de uso via web não respeita lifetime solicitado
 
 
 
-<a name="v1-4-2" />
-## 1.4.2 (2024-05-07)
+## 1.4.2 (2024-05-07) {#v1-4-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -32,8 +29,7 @@ PSC-215 Conserta janelas de diálogo introduzidas na atualização anterior
 
 
 
-<a name="v1-4-1" />
-## 1.4.1 (2024-04-25)
+## 1.4.1 (2024-04-25) {#v1-4-1}
 
 Atualiza modelo do banco de dados: sim
 
@@ -47,8 +43,7 @@ PSC-204 Atualização da Lacuna SPA para versão 3.0
 
 
 
-<a name="v1-3-1" />
-## 1.3.1 (2024-03-11)
+## 1.3.1 (2024-03-11) {#v1-3-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -62,8 +57,7 @@ PSC-107 Melhoria no tratamento da validade das sessões de uso de certificados
 
 
 
-<a name="v1-2-5" />
-## 1.2.5 (2023-12-21)
+## 1.2.5 (2023-12-21) {#v1-2-5}
 
 Atualiza modelo do banco de dados: não
 
@@ -73,8 +67,7 @@ PSC-208 Página com instruções para exclusão de conta
 
 
 
-<a name="v1-2-4" />
-## 1.2.4 (2023-12-13)
+## 1.2.4 (2023-12-13) {#v1-2-4}
 
 Atualiza modelo do banco de dados: não
 
@@ -84,8 +77,7 @@ PSC-207 API de descoberta de certificado não retornava certificados no formato 
 
 
 
-<a name="v1-2-1" />
-## 1.2.1 (2023-07-11)
+## 1.2.1 (2023-07-11) {#v1-2-1}
 
 ### Melhorias
 
@@ -93,8 +85,7 @@ PSC-192 Política de privacidade em formato HTML
 
 
 
-<a name="v1-2-0" />
-## 1.2.0 (2023-07-11)
+## 1.2.0 (2023-07-11) {#v1-2-0}
 
 Versão idêntica a: 1.2.0 RC 3
 
@@ -112,8 +103,7 @@ PSC-180 Suporte a armazenamento de blobs em banco de dados
 
 
 
-<a name="v1-1-2" />
-## 1.1.2 (2023-06-02)
+## 1.1.2 (2023-06-02) {#v1-1-2}
 
 Versão idêntica a: 1.1.2 RC 1
 
@@ -133,8 +123,7 @@ PSC-186 Problemas na emissão quando link é gerado contendo número de pedido f
 
 
 
-<a name="v1-1-1" />
-## 1.1.1 (2023-04-11)
+## 1.1.1 (2023-04-11) {#v1-1-1}
 
 Versão idêntica a: 1.1.1 RC 1
 
@@ -160,8 +149,7 @@ PSC-171 Tela de emissão via web não permite digitação de nenhuma das duas se
 
 
 
-<a name="v1-1-0" />
-## 1.1.0 (2023-03-10)
+## 1.1.0 (2023-03-10) {#v1-1-0}
 
 Versão idêntica a: 1.1.0 RC 2
 
@@ -189,8 +177,7 @@ PSC-159 Configuração de opções disponíveis para salvar lembrete de PIN/PUK 
 
 
 
-<a name="v1-0-0" />
-## 1.0.0 (2023-03-20)
+## 1.0.0 (2023-03-20) {#v1-0-0}
 
 Versão idêntica a: 1.1.0 RC 9
 

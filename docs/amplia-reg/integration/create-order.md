@@ -64,9 +64,8 @@ Em seguida, chame uma das APIs de criação de pedido dependendo do formato de c
 
 Consulte-nos caso precise de documentação para criação de outros formatos de certificado.
 
-<a name="brazil" />
 
-## Criação de pedido de certificado padrão ICP-Brasil
+## Criação de pedido de certificado padrão ICP-Brasil {#brazil}
 
 Criação de pedido de certificado padrão ICP-Brasil em .NET:
 

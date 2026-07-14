@@ -19,8 +19,7 @@ podem ser utilizadas, sendo recomendada a configuração de atualizações **aut
 opção **2** (sistema com permissões de **leitura e escrita apenas** no banco de dados), o sistema deve ser
 obrigatoriamente configurado para efetuar atualizações no banco de dados **manualmente**.
 
-<a name="config" />
-## Configuração do modo de atualização
+## Configuração do modo de atualização {#config}
 
 A configuração do modo de atualização -- manual ou automática -- é feita no arquivo `AppSettings.config`, no item `AutoUpdateDatabase`.
 
@@ -41,8 +40,7 @@ Caso a configuração seja omitida, assume-se atualização **manual** (que não
 :::
 
 
-<a name="manual-update" />
-## Atualização manual do banco de dados
+## Atualização manual do banco de dados {#manual-update}
 
 Caso ao atualizar o Rest PKI apareça a mensagem "HTTP Error 503.0 - The server is currently undergoing maintenance. Please try again later.", isso significa que é preciso atualizar o banco de dados manualmente.
 

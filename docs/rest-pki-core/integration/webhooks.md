@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/webhooks
+---
+
 # Webhooks - Rest PKI Core
 
 Você pode configurar sua conta no [Rest PKI Core](../index.md) para que sua aplicação seja notificada receba notificações de eventos. Os seguintes eventos são

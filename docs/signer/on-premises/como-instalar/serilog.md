@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Configuração do Serilog"
 sidebar_position: 6
+slug: /signer/on-premises/serilog
 ---
 
 # Configuração do Serilog
@@ -9,6 +10,6 @@ sidebar_position: 6
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs-v2/docs/en/signer/on-premises/como-instalar/serilog)
+- [English](/en-us/articles/signer/on-premises/serilog)
 
 :::

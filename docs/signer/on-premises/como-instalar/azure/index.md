@@ -1,3 +1,7 @@
+---
+slug: /signer/on-premises/azure
+---
+
 # Signer - Setup em Azure App Services
 
 Para instalar uma instância [*on premises*](../../index.md) do [Signer](../../../index.md) em um [Azure App Service](https://docs.microsoft.com/azure/app-service/overview),

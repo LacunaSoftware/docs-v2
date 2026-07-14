@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/bio-sessions/authentication
+---
+
 # Autenticação facial (1:1 Authentication) - Rest PKI Core
 
 - Compara o rosto capturado em tempo real com uma biometria previamente cadastrada, confirmando se o usuário é realmente quem afirma ser.

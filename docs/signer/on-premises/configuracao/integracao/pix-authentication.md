@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Autenticação Pix"
 sidebar_position: 1
+slug: /signer/on-premises/pix-authentication
 ---
 
 # Autenticação com Pix no Signer
@@ -9,8 +10,7 @@ O Signer permite a realização de assinaturas eletrônica autenticando o usuár
 
 Para a geração dos QR codes Pix, é utilizada a integração com as APIs do [Gerencianet](https://gerencianet.com.br/).
 
-<a name="account-config" />
-## Configuração da conta
+## Configuração da conta {#account-config}
 
 Para esta integração é preciso de uma conta do Gerencianet. Você pode abrir uma conta nova baixando o aplicativo deles no Google Play ou App Store.
 

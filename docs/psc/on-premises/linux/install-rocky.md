@@ -13,9 +13,8 @@ Para instalar uma instância [*on premises*](../index.md) do [Lacuna PSC](../../
 * **Entrada de DNS** criada anteriormente para o site
 * **Connection string** para um [banco de dados SQL Server ou PostgreSQL criado previamente](../prepare-database.md)
 
-<a name="install-aspnet-core" />
 
-## Instale o ASP.NET Core Runtime 6.0
+## Instale o ASP.NET Core Runtime 6.0 {#install-aspnet-core}
 
 :::info
 Essas instruções assumem que você está autenticado como **root**. Se você não estiver, execute `sudo su -` antes de continuar!

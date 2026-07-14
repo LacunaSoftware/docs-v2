@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/client-tool/allocate-keys
+---
+
 # Comando do utilitário cliente: **allocate-keys**
 
 ## Nome

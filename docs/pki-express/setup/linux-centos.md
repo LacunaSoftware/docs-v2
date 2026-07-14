@@ -3,7 +3,7 @@
 Para instalar o PKI Express no CentOS, Oracle Linux ou Fedora você precisará de uma licença de uso. Caso ainda não tenha uma licença, [solicite uma licença de teste](https://www.lacunasoftware.com/pt/home/purchase).
 
 De posse do arquivo de licença (**LacunaPkiLicense.config**), siga os passos abaixo:
-## Instalando o PKI Express
+## Instalando o PKI Express {#install}
 
 Baixe o pacote do PKI Express e extraia para a pasta de destino:
 
@@ -34,8 +34,7 @@ Se a ativação automática falhar, siga as instruções no artigo [Ativação m
 :::
 
 
-<a name="update" />
-## Atualização
+## Atualização {#update}
 
 Para atualizar o PKI Express, apenas baixe o novo pacote e extraia para a pasta de destino:
 

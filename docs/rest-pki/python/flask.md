@@ -16,87 +16,72 @@ https://github.com/LacunaSoftware/PkiSuiteSamples/tree/master/python/flask
 
 Esta seção mostra onde encontrar partes relevantes em cada amostra de recurso do projeto.
 
-<a name="auth" />
-### Autentificação com certificação digital
+### Autentificação com certificação digital {#auth}
 
 * View: [authentication_rest.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/authentication_rest.py)
 * Templates:
   * [index.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/authentication_rest/index.html) (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/static/js/signature-form.js))
   * [complete.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/authentication_rest/complete.html)
 
-<a name="pades" />
-### Assinatura PAdES com arquivo já no servidor
+### Assinatura PAdES com arquivo já no servidor {#pades}
 
 * View: [pades_signature_rest.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/pades_signature_rest.py)
 * Templates:
   * [index.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/pades_signature_rest/index.html) (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/static/js/signature-form.js))
   * [complete.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/pades_signature_rest/complete.html)
 
-<a name="pades-upload" />
-### Assinatura PAdES com arquivo enviado pelo usuário
+### Assinatura PAdES com arquivo enviado pelo usuário {#pades-upload}
 
 Após o upload do arquivo (implementado apenas para demonstração na view [server_files.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/server_files.py) e template [index.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/server_files/index.html)) o fluxo de controle é o mesmo que na amostra [Assinatura PAdES com arquivo já no servidor](#pades), mas com o parâmetro URL `userfile` preenchido.
 
-<a name="pades-cosign" />
-### Co-assinatura PAdES
+### Co-assinatura PAdES {#pades-cosign}
 
 Após o fluxo de controle da amostra [Assinatura PAdES com arquivo já no servidor](#pades) for concluído e o link *Co-assinatura com outro certificado* for clicado, o mesmo fluxo de controle é repetido, mas agora com o parâmetro URL `userfile` preenchido.
 
-<a name="pdf-marks" />
-### Marcas PAdES
+### Marcas PAdES {#pdf-marks}
 
 Não avaliado neste projeto ainda.
 
-<a name="pades-server" />
-### Assinatura PAdES usando chave do servidor
+### Assinatura PAdES usando chave do servidor {#pades-server}
 
 Não avaliado neste projeto ainda.
 
-<a name="pades-wo-client" />
-### Assinatura PAdES sem comunicação do cliente
+### Assinatura PAdES sem comunicação do cliente {#pades-wo-client}
 
 Não avaliado neste projeto ainda.
 
-<a name="open-pades" />
-### Abrir/Validar uma assinatura PAdES existente
+### Abrir/Validar uma assinatura PAdES existente {#open-pades}
 
 Não avaliado neste projeto ainda.
 
-<a name="print" />
-### Versão para impressão
+### Versão para impressão {#print}
 
 Não avaliado neste projeto ainda.
 
-<a name="cades" />
-### Assinatura CAdES com arquivo já no servidor
+### Assinatura CAdES com arquivo já no servidor {#cades}
 
 * View: [cades_signature_rest.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/cades_signature_rest.py)
 * Templates:
   * [index.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/cades_signature_rest/index.html) (JavaScript em [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/static/js/signature-form.js))
   * [complete.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/cades_signature_rest/complete.html)
 
-<a name="cades-upload" />
-### Assinatura CAdES com arquivo enviado pelo usuário
+### Assinatura CAdES com arquivo enviado pelo usuário {#cades-upload}
 
 Após o upload do arquivo (implementado apenas para demonstração na view [server_files.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/server_files.py) e template [index.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/server_files/index.html)) o fluxo de controle é o mesmo que na amostra [Assinatura CAdES com arquivo já no servidor](#cades), mas com o parâmetro URL `userfile` preenchido.
 
-<a name="cades-cosign" />
-### Co-assinatura CAdES
+### Co-assinatura CAdES {#cades-cosign}
 
 Após o fluxo de controle da amostra [Assinatura CAdES com arquivo já no servidor](#cades) for concluído e o link *Co-assinatura com outro certificado* for clicado, o mesmo fluxo de controle é repetido, mas agora com o parâmetro URL `cmsfile` preenchido.
 
-<a name="cades-server" />
-### Assinatura CAdES usando chave do servidor
+### Assinatura CAdES usando chave do servidor {#cades-server}
 
 Não avaliado neste projeto ainda.
 
-<a name="open-cades" />
-### Abrir/Validar uma assinatura CAdES existente
+### Abrir/Validar uma assinatura CAdES existente {#open-cades}
 
 Não avaliado neste projeto ainda.
 
-<a name="xml-full" />
-### Assinatura XML de um documento inteiro 
+### Assinatura XML de um documento inteiro {#xml-full}
 
 * View: [xml_signature_rest.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/xml_signature_rest.py)
 * Templates:
@@ -104,37 +89,31 @@ Não avaliado neste projeto ainda.
   (JavaScript em [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/static/js/signature-form.js))
   * [complete.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/xml_signature_rest/complete.html)
 
-<a name="xml-element" />
-### Assinatura XML de um elemento
+### Assinatura XML de um elemento {#xml-element}
 
 * View: [xml_signature_rest.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/xml_signature_rest.py)
 * Templates:
   * [index.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/xml_nfe_signature_rest/index.html) (JavaScript em [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/static/js/signature-form.js))
   * [complete.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/xml_nfe_signature_rest/complete.html)
 
-<a name="xades-element" />
-### Assinatura XadES de um elemento
+### Assinatura XadES de um elemento {#xades-element}
 
 Não avaliado neste projeto ainda.
 
-<a name="batch" />
-### Lote de assinaturas PAdES
+### Lote de assinaturas PAdES {#batch}
 
 * View: [batch_pades_signature_rest.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/batch_pades_signature_rest.py)
 * Template: [index.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/batch_pades_signature_rest/index.html) (JavaScript em [batch-signature-rest-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/static/js/batch-signature-rest-form.js)) 
 
-<a name="batch-optimized" />
-### Lote otimizado de assinatura PAdES
+### Lote otimizado de assinatura PAdES {#batch-optimized}
 
 Não avaliado neste projeto ainda.
 
-<a name="batch-cades" />
-### Lote de assinaturas CAdES
+### Lote de assinaturas CAdES {#batch-cades}
 
 * View: [batch_cades_signature_rest.py](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/views/batch_cades_signature_rest.py)
 * Template: [index.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/templates/batch_cades_signature_rest/index.html) (JavaScript em [batch-signature-rest-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/python/flask/sample/static/js/batch-signature-rest-form.js))
 
-<a name="batch-xml-element" />
-### Lote de assinaturas XML de elementos do mesmo documento
+### Lote de assinaturas XML de elementos do mesmo documento {#batch-xml-element}
 
 Não avaliado neste projeto ainda.

@@ -1,3 +1,7 @@
+---
+slug: /signer/on-premises/linux/update
+---
+
 # Atualização do Signer em Linux
 
 Para atualizar sua [instância *on premises*](../../index.md) do [Signer](../../../index.md), siga os passos abaixo:

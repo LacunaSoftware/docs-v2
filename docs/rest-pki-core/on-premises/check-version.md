@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/check-version
+---
+
 # Verificando a versão instalada do Rest PKI Core
 
 Para verificar a versão que está instalada da sua instância [*on premises*](index.md) do [Rest PKI Core](../index.md),

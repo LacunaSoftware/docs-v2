@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/docker
+---
+
 # Setup do Rest PKI Core em Docker
 
 Para instalar uma instância [*on premises*](index.md) do [Rest PKI Core](../index.md) em Docker, siga os passos abaixo. Para outros ambientes, [clique aqui](index.md#platforms).

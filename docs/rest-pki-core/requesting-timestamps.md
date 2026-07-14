@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/requesting-timestamps
+---
+
 # Solicitando carimbos de tempo ao Rest PKI Core
 
 Você pode utilizar uma instância do [Rest PKI Core](index.md) como provedor de carimbos de tempo

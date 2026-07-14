@@ -40,9 +40,8 @@ Escolha uma das linguagens de programação abaixo:
 Caso sua aplicação utilize outra linguagem de programação, [chame as APIs diretamente](#rest).
 
 
-<a name="dotnet" />
 
-### Chamando a API em .NET
+### Chamando a API em .NET {#dotnet}
 
 Comece adicionando o pacote de Nuget [Lacuna.AmpliaRegNg.Client](https://www.nuget.org/packages/Lacuna.AmpliaRegNg.Client/).
 
@@ -155,9 +154,8 @@ As seguintes exceções podem ser lançadas nas chamadas aos métodos do `IAmpli
   de erro da API. Veja os [códigos de erro](error-codes.md).
 * `RestErrorException`: erro na chamada HTTP. A propriedade `StatusCode` contém o código HTTP retornado. Veja os [códigos de resposta HTTP](#http-status-codes).
 
-<a name="rest" />
 
-### Chamando a API diretamente
+### Chamando a API diretamente {#rest}
 
 As APIs do Amplia Reg são RESTful recebendo e retornando mensagens JSON, sendo de fácil uso em qualquer linguagem de programação moderna. Caso
 a sua aplicação não utilize nenhuma das linguagens de programação elencadas acima, opte por chamar as APIs do Amplia Reg diretamente.
@@ -178,9 +176,8 @@ Caso por algum motivo, você também pode passar a chave de API no header `Autho
 Authorization: ApiKey yourapp|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-<a name="http-status-codes" />
 
-#### Códigos de resposta HTTP
+#### Códigos de resposta HTTP {#http-status-codes}
 
 A API responde com os seguintes códigos HTTP:
 

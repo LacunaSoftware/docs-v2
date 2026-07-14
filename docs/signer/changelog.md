@@ -5,8 +5,7 @@ sidebar_position: 5
 
 # Histórico de versões do Signer
 
-<a name="v2-17-0" />
-### 2.17.0 (2026-07-13)
+### 2.17.0 (2026-07-13) {#v2-17-0}
 
 * Melhorias
   * [SIG-1861] Adicionado campo opcional `timestampEnabled` na criação de documentos via API, permitindo sobrescrever por documento a configuração de carimbo de tempo da organização
@@ -18,8 +17,7 @@ sidebar_position: 5
 
 Atualiza modelo de banco de dados: sim (migração: `ElectronicSignatureConfigForSubscription`, `DocumentTimestampEnabled`)
 
-<a name="v2-16-1" />
-### 2.16.1 (2026-07-06)
+### 2.16.1 (2026-07-06) {#v2-16-1}
 
 * Melhorias
   * [SIG-1478] Bloqueia o download de um documento após ele ter sido recusado, evitando que documentos recusados circulem como se fossem válidos e assinados; as configurações de download foram movidas para uma seção de configuração dedicada `DocumentDownload`
@@ -31,8 +29,7 @@ Atualiza modelo de banco de dados: sim (migração: `ElectronicSignatureConfigFo
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-16-0" />
-### 2.16.0 (2026-07-02)
+### 2.16.0 (2026-07-02) {#v2-16-0}
 
 * Melhorias
   * [SIG-1796] Nova tela de gestão de notas fiscais (NFSe) no módulo de cobrança: listagem administrativa com status (sucesso, em processamento, erro, cancelado), visão detalhada, filtros de busca, coluna de ID da nota, filtro por conta pessoal, reemissão de notas com falha, envio por e-mail e download de PDF/XML
@@ -44,8 +41,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-15-1" />
-### 2.15.1 (2026-06-29)
+### 2.15.1 (2026-06-29) {#v2-15-1}
 
 * Melhorias
   * [SIG-1298] Gera os relatórios da listagem de documentos de forma assíncrona, em jobs de segundo plano para grandes volumes, enviando um link de download por e-mail para evitar timeouts e consumo excessivo de memória
@@ -56,8 +52,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-15-0" />
-### 2.15.0 (2026-06-26)
+### 2.15.0 (2026-06-26) {#v2-15-0}
 
 * Melhorias
   * [SIG-1787] Adiciona relatório de Termos de Uso listando os usuários que aceitaram os termos, com nome, data/hora e versão aceita, com filtro por versão e envio por e-mail
@@ -69,8 +64,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-14-4" />
-### 2.14.4 (2026-06-15)
+### 2.14.4 (2026-06-15) {#v2-14-4}
 
 * Melhorias
   * [SIG-1810] Corrige atribuição do mês da invoice para usar o fuso horário configurado na instância (BRT) em vez de UTC, evitando que documentos criados no fim do último dia do mês sejam cobrados no mês seguinte
@@ -83,8 +77,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-14-3" />
-### 2.14.3 (2026-06-09)
+### 2.14.3 (2026-06-09) {#v2-14-3}
 
 * Correções de bugs
   * [SIG-1808] Corrige cartão de crédito não sendo salvo quando cadastrado como método de pagamento padrão no checkout Iugu
@@ -94,8 +87,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-14-2" />
-### 2.14.2 (2026-06-08)
+### 2.14.2 (2026-06-08) {#v2-14-2}
 
 * Correções de bugs
   * Corrigida aplicação de máscara para identificadores exibidos na área privada
@@ -103,8 +95,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-14-1" />
-### 2.14.1 (2026-06-05)
+### 2.14.1 (2026-06-05) {#v2-14-1}
 
 * Correções de bugs
   * [SIG-1788] Corrigido o registro de certificados para tratamento correto da comparação com os identificadores do usuário
@@ -113,8 +104,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-14-0" />
-### 2.14.0 (2026-06-03)
+### 2.14.0 (2026-06-03) {#v2-14-0}
 
 * Melhorias
   * [SIG-1709] Conversão de documentos para PDF/A: conversão de uploads para PDF/A na criação de documentos, geração de documentos, assinatura única e modelos (formulários), com seleção de perfil PDF/A e integração com o PdfService
@@ -127,8 +117,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: sim (migração: `PdfA`)
 
-<a name="v2-13-3" />
-### 2.13.3 (2026-06-01)
+### 2.13.3 (2026-06-01) {#v2-13-3}
 
 * Melhorias
   * [SIG-744] Retorno do uso de armazenamento da organização no webhook de fechamento de fatura
@@ -141,8 +130,7 @@ Atualiza modelo de banco de dados: sim (migração: `PdfA`)
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-13-2" />
-### 2.13.2 (2026-05-25)
+### 2.13.2 (2026-05-25) {#v2-13-2}
 
 * Melhorias
   * Adicionada configuração para desabilitar o job de sincronização de identificadores em background
@@ -153,16 +141,14 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-13-1" />
-### 2.13.1 (2026-05-22)
+### 2.13.1 (2026-05-22) {#v2-13-1}
 
 * Correções de bugs
   * Corrigida normalização de identificadores de contatos
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-13-0" />
-### 2.13.0 (2026-05-22)
+### 2.13.0 (2026-05-22) {#v2-13-0}
 
 * Melhorias
   * [SIG-1695] Permite que administradores configurem a ordem de prioridade dos provedores de notificação por canal (SMS e e-mail), com fallback automático em caso de falha
@@ -178,8 +164,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: sim (migrações: `ElectronicSignatureBioSessions`, `NotificationProviders`)
 
-<a name="v2-12-1" />
-### 2.12.1 (2026-05-05)
+### 2.12.1 (2026-05-05) {#v2-12-1}
 
 * Correções de bugs
   * Corrigida falha no tratamento de pontuação na pesquisa de contatos
@@ -187,8 +172,7 @@ Atualiza modelo de banco de dados: sim (migrações: `ElectronicSignatureBioSess
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-12-0" />
-### 2.12.0 (2026-04-30)
+### 2.12.0 (2026-04-30) {#v2-12-0}
 
 * Melhorias
   * [SIG-1646] Gerenciamento de base de contatos externos com pesquisa avançada
@@ -199,8 +183,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: sim (migração: `SubscriptionContacts`)
 
-<a name="v2-11-1" />
-### 2.11.1 (2026-04-24)
+### 2.11.1 (2026-04-24) {#v2-11-1}
 
 * Melhorias
   * Flag para desabilitar a sincronização de identificadores no GrantID
@@ -211,16 +194,14 @@ Atualiza modelo de banco de dados: sim (migração: `SubscriptionContacts`)
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-11-0" />
-### 2.11.0 (2026-04-16)
+### 2.11.0 (2026-04-16) {#v2-11-0}
 
 * Melhorias
   * [SIG-1570] Suporte a múltiplos identificadores por usuário
 
 Atualiza modelo de banco de dados: sim (migration: `MultipleIdentifiers`)
 
-<a name="v2-10-0" />
-### 2.10.0 (2026-04-16)
+### 2.10.0 (2026-04-16) {#v2-10-0}
 
 * Melhorias
   * [SIG-1601] Suporte ao CNPJ alfanumérico
@@ -228,8 +209,7 @@ Atualiza modelo de banco de dados: sim (migration: `MultipleIdentifiers`)
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-9-2" />
-### 2.9.2 (2026-04-14)
+### 2.9.2 (2026-04-14) {#v2-9-2}
 
 * Melhorias
   * Criação do tema gmc
@@ -237,8 +217,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-9-1" />
-### 2.9.1 (2026-04-09)
+### 2.9.1 (2026-04-09) {#v2-9-1}
 
 * Melhorias
   * [SIG-1690] Nova configuração para modo monotônico do dashboard
@@ -248,8 +227,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-9-0" />
-### 2.9.0 (2026-04-02)
+### 2.9.0 (2026-04-02) {#v2-9-0}
 
 * Melhorias
   * [SIG-1669] Opção para incluir QR Code de assinatura no corpo do e-mail de lembrete
@@ -260,16 +238,14 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: sim (migration: `NotificationDocument`)
 
-<a name="v2-8-1" />
-### 2.8.1 (2026-03-30)
+### 2.8.1 (2026-03-30) {#v2-8-1}
 
 * Correções de bugs
   * [SIG-1507] Validação de campo de telefone no formulário de modelo falha em dispositivos móveis
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-8-0" />
-### 2.8.0 (2026-03-25)
+### 2.8.0 (2026-03-25) {#v2-8-0}
 
 * Melhorias
   * [SIG-1586] Redesign visual do dashboard
@@ -280,8 +256,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: sim (migration: `IdRC`)
 
-<a name="v2-7-0" />
-### 2.7.0 (2026-03-16)
+### 2.7.0 (2026-03-16) {#v2-7-0}
 
 * Melhorias
   * [SIG-1612] Opção para solicitar CPF de um dos signatários na validação na área pública
@@ -289,16 +264,14 @@ Atualiza modelo de banco de dados: sim (migration: `IdRC`)
 
 Atualiza modelo de banco de dados: sim
 
-<a name="v2-6-2" />
-### 2.6.2 (2026-02-27)
+### 2.6.2 (2026-02-27) {#v2-6-2}
 
 * Correções de bugs
   * [SIG-1641] Perda de acesso a documentos dentro de pastas para usuários autorizados
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-6-1" />
-### 2.6.1 (2026-02-24)
+### 2.6.1 (2026-02-24) {#v2-6-1}
 
 * Melhorias
   * [SIG-1622] Modificar layout da navegação das pastas
@@ -310,8 +283,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-6-0" />
-### 2.6.0 (2026-02-09)
+### 2.6.0 (2026-02-09) {#v2-6-0}
 
 * Melhorias
   * [SIG-636] Permitir adicionar número de celular na edição de fluxo
@@ -322,8 +294,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-5-2" />
-### 2.5.2 (2026-01-27)
+### 2.5.2 (2026-01-27) {#v2-5-2}
 
 * Melhorias
   * [SIG-1604] Remoção de assinaturas existentes na geração de envelopes, com aviso prévio na criação do documento
@@ -334,16 +305,14 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-5-1" />
-### 2.5.1 (2026-01-22)
+### 2.5.1 (2026-01-22) {#v2-5-1}
 
 * Melhorias
   * [SIG-1580] Botões no dashboard redirecionam para a página de documentos com o filtro selecionado
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-5-0" />
-### 2.5.0 (2026-01-22)
+### 2.5.0 (2026-01-22) {#v2-5-0}
 
 * Melhorias
   * [SIG-1580] Nova visualização de documentos no dashboard
@@ -351,32 +320,28 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-11" />
-### 2.4.11 (2026-01-19)
+### 2.4.11 (2026-01-19) {#v2-4-11}
 
 * Correções de bugs
   * [SIG-1541] Erro ao consultar documento em pasta via integração por API
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-10" />
-### 2.4.10 (2026-01-06)
+### 2.4.10 (2026-01-06) {#v2-4-10}
 
 * Correções de bugs
   * [SIG-1574] Continuação do ajuste na submissão de documentos para assinatura, corrigindo cenários adicionais não cobertos na versão 2.4.9
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-9" />
-### 2.4.9 (2026-01-05)
+### 2.4.9 (2026-01-05) {#v2-4-9}
 
 * Correções de bugs
   * [SIG-1574] Submissão de documentos para assinatura não funciona corretamente em alguns casos
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-8" />
-### 2.4.8 (2025-12-30)
+### 2.4.8 (2025-12-30) {#v2-4-8}
 
 * Melhorias
   * [SIG-1548] Mostrar prévia de assinatura na assinatura digital e na Assinatura Única
@@ -388,24 +353,21 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-7" />
-### 2.4.7 (2025-12-18)
+### 2.4.7 (2025-12-18) {#v2-4-7}
 
 * Correções de bugs
   * [SIG-1547] Erro de *call stack overflow* ao submeter determinados modelos DOCX
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-6" />
-### 2.4.6 (2025-12-17)
+### 2.4.6 (2025-12-17) {#v2-4-6}
 
 * Correções de bugs
   * [SIG-1075] Ativar remoção de Javascript dos PDFs submetidos para criação de documento
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-5" />
-### 2.4.5 (2025-12-17)
+### 2.4.5 (2025-12-17) {#v2-4-5}
 
 * Correções de bugs
   * [SIG-1542] Títulos personalizados da organização não carregam quando a organização já está selecionada no momento de abertura da página de criação do documento
@@ -418,16 +380,14 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-4" />
-### 2.4.4 (2025-12-05)
+### 2.4.4 (2025-12-05) {#v2-4-4}
 
 * Melhorias
   * [SIG-1532] Enviar e-mails por SMTP utilizando MailKit
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-3" />
-### 2.4.3 (2025-11-17)
+### 2.4.3 (2025-11-17) {#v2-4-3}
 
 * Correções de bugs
   * [SIG-1537] Ajuste na Assinatura Única para assinatura sem posicionamento da representação visual
@@ -437,8 +397,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-2" />
-### 2.4.2 (2025-11-08)
+### 2.4.2 (2025-11-08) {#v2-4-2}
 
 * Melhorias
   * [SIG-1529] Atualizar lacuna-facetec-client para a versão 2.1.0
@@ -446,16 +405,14 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-1" />
-### 2.4.1 (2025-11-07)
+### 2.4.1 (2025-11-07) {#v2-4-1}
 
 * Correções de bugs
   * [SIG-1535] Ajuste de tamanho da fonte da representação visual no front-end
 
 Atualiza modelo de banco de dados: não
 
-<a name="v2-4-0" />
-### 2.4.0 (2025-10-28)
+### 2.4.0 (2025-10-28) {#v2-4-0}
 
 * Melhorias
   * [SIG-858] Definir Regras de assinatura para mais participantes
@@ -475,8 +432,7 @@ Atualiza modelo de banco de dados: não
 
 Atualiza modelo de banco de dados: sim
 
-<a name="v2-3-0" />
-### 2.3.0 (2025-09-25)
+### 2.3.0 (2025-09-25) {#v2-3-0}
 
 * Melhorias
   * [SIG-1482] Enviar notificação direta ao compartilhar link via WhatsApp
@@ -499,16 +455,14 @@ Atualiza modelo de banco de dados: sim
 
 Atualiza modelo de banco de dados: sim
 
-<a name="v2-2-1" />
-### 2.2.1 (2025-08-07)
+### 2.2.1 (2025-08-07) {#v2-2-1}
 
 * Correções de bugs
   * [SIG-1488] Erro ao selecionar o modelo para criar/gerar documentos
 
 Atualiza modelo do banco de dados: não
 
-<a name="v2-2-0" />
-### 2.2.0 (2025-08-06)
+### 2.2.0 (2025-08-06) {#v2-2-0}
 
 * Melhorias
   * [SIG-580] Permitir habilitar/desabilitar ou trocar tipo da assinatura eletrônica na edição de fluxo
@@ -541,8 +495,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 :::
 
 
-<a name="v2-1-1" />
-### 2.1.1 (2025-06-30)
+### 2.1.1 (2025-06-30) {#v2-1-1}
 
 * Correções de bugs
   * [SIG-1470] Notificação de código de verificação não está utilizando personalização de e-mail da organização
@@ -551,8 +504,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 
 Atualiza modelo do banco de dados: não
 
-<a name="v2-1-0" />
-### 2.1.0 (2025-06-12)
+### 2.1.0 (2025-06-12) {#v2-1-0}
 
 * Melhorias
   * [SIG-405] Permitir posicionar assinaturas ao fazer upload de nova versão do documento
@@ -567,16 +519,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v2-0-1" />
-### 2.0.1 (2025-05-26)
+### 2.0.1 (2025-05-26) {#v2-0-1}
 
 * Correções de bugs
   * [SIG-1465] Corrigir botão da home page padrão
 
 Atualiza modelo do banco de dados: não
 
-<a name="v2-0-0" />
-### 2.0.0 (2025-05-21)
+### 2.0.0 (2025-05-21) {#v2-0-0}
 
 * Melhorias
   * [SIG-1429] Atualizar versão do SPA
@@ -603,16 +553,14 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 :::
 
 
-<a name="v1-80-1" />
-### 1.80.1 (2025-04-22)
+### 1.80.1 (2025-04-22) {#v1-80-1}
 
 * Correções de bugs
   * [SIG-1458] Uso elevado do BlobStorage em assinaturas em lote
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-80-0" />
-### 1.80.0 (2025-04-15)
+### 1.80.0 (2025-04-15) {#v1-80-0}
 
 * Novas funcionalidades
   * [SIG-1382] Assinatura com autenticação por selfie e documento de identificação
@@ -627,8 +575,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-79-0" />
-### 1.79.0 (2025-03-13)
+### 1.79.0 (2025-03-13) {#v1-79-0}
 
 * Melhorias
   * [SIG-1162] Relatório de faturas por organizações/contas pessoais
@@ -647,16 +594,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-78-1" />
-### 1.78.1 (2025-02-27)
+### 1.78.1 (2025-02-27) {#v1-78-1}
 
 * Correções de bugs
   * [SIG-1443] Incompatibilidade com SQL Server mais antigo que o 2017
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-78-0" />
-### 1.78.0 (2025-02-25)
+### 1.78.0 (2025-02-25) {#v1-78-0}
 
 * Novas funcionalidades
   * [SIG-1403] Adicionar webhook de exclusão de documentos
@@ -686,8 +631,7 @@ e atualize para a versão 1.78.1 ou mais nova.
 :::
 
 
-<a name="v1-77-0" />
-### 1.77.0 (2025-01-23)
+### 1.77.0 (2025-01-23) {#v1-77-0}
 
 * Novas funcionalidades
   * [SIG-1365] Configuração por documento para desabilitar envio de notificações
@@ -721,8 +665,7 @@ se possui a configuração `ASPNETCORE_ENVIRONMENT` definida com valor `Azure` e
 :::
 
 
-<a name="v1-76-0" />
-### 1.76.0 (2024-12-04)
+### 1.76.0 (2024-12-04) {#v1-76-0}
 
 * Novas funcionalidades
   * [SIG-1357] Envio de tokens de autenticação via SMSToken
@@ -753,24 +696,21 @@ se possui a configuração `ASPNETCORE_ENVIRONMENT` definida com valor `Azure` e
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-75-2" />
-### 1.75.2 (2024-09-17)
+### 1.75.2 (2024-09-17) {#v1-75-2}
 
 * Correções de bugs
   * [SIG-1364] Não está sendo possível assinar o termo de uso com assinatura eletrônica 
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-75-1" />
-### 1.75.1 (2024-09-12)
+### 1.75.1 (2024-09-12) {#v1-75-1}
 
 * Melhorias
   * [SIG-1358] Configuração para desabilitar a exibição evidências de assinatura na tela de validação pública
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-75-0" />
-### 1.75.0 (2024-09-12)
+### 1.75.0 (2024-09-12) {#v1-75-0}
 
 * Novas funcionalidades
   * [SIG-1330] Integração com FaceTec 3d-liveness (apenas para testes internos)
@@ -787,8 +727,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-74-1" />
-### 1.74.1 (2024-08-08)
+### 1.74.1 (2024-08-08) {#v1-74-1}
 
 * Melhorias
   * [SIG-1331] Otimizar desempenho da listagem de documentos da organização
@@ -799,8 +738,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-73-0" />
-### 1.73.0 (2024-07-30)
+### 1.73.0 (2024-07-30) {#v1-73-0}
 
 * Melhorias
   * [SIG-1316] Permitir que o observador visualize anexos na página de observação externa
@@ -811,8 +749,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-72-1" />
-### 1.72.1 (2024-07-03)
+### 1.72.1 (2024-07-03) {#v1-72-1}
 
 * Melhorias
   * [SIG-1049] Definir ordem de assinatura pelos números da etapa
@@ -820,8 +757,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-72-0" />
-### 1.72.0 (2024-07-03)
+### 1.72.0 (2024-07-03) {#v1-72-0}
 
 * Melhorias
   * [SIG-1213] Novas opções de personalização de emails por organização
@@ -844,8 +780,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 
 
 
-<a name="v1-71-0" />
-### 1.71.0 (2024-05-24)
+### 1.71.0 (2024-05-24) {#v1-71-0}
 
 * Novas funcionalidades
   * [SIG-1230] Integração para assinatura com certificado em nuvem via protocolo CSC
@@ -867,8 +802,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-70-0" />
-### 1.70.0 (2024-04-16)
+### 1.70.0 (2024-04-16) {#v1-70-0}
 
 * Novas funcionalidades
   * [SIG-1194] Permitir adicionar ID da organização como Request Tag de chamadas à Datavalid
@@ -881,8 +815,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-69-1" />
-### 1.69.1 (2024-04-02)
+### 1.69.1 (2024-04-02) {#v1-69-1}
 
 * Novas funcionalidades
   * [SIG-1183] Múltiplas marcas de assinatura na assinatura simples
@@ -898,8 +831,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-68-1" />
-### 1.68.1 (2024-03-06)
+### 1.68.1 (2024-03-06) {#v1-68-1}
 
 * Correções de bugs
   * [SIG-1186] Versão para impressão de documento assinado com assinatura única aparece sem signatários
@@ -907,8 +839,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-68-0" />
-### 1.68.0 (2024-03-05)
+### 1.68.0 (2024-03-05) {#v1-68-0}
 
 * Novas funcionalidades
   * [SIG-949] Documento simples - documento composto por assinaturas eletrônicas e que seja validado no ITI
@@ -924,8 +855,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-67-0" />
-### 1.67.0 (2023-12-19)
+### 1.67.0 (2023-12-19) {#v1-67-0}
 
 * Novas funcionalidades
   * [SIG-1087] Permitir visualização do anexo ao clicar sobre o ícone
@@ -941,8 +871,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-66-0" />
-### 1.66.0 (2023-11-13)
+### 1.66.0 (2023-11-13) {#v1-66-0}
 
 * Novas funcionalidades
   * [SIG-1157] Permitir adicionar link de cancelar recebimento nas notificações enviadas por e-mail
@@ -963,8 +892,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-65-0" />
-### 1.65.0 (2023-10-11)
+### 1.65.0 (2023-10-11) {#v1-65-0}
 
 * Novas funcionalidades
   * [SIG-1106] Configuração para definir como obrigatória a seleção de pastas na criação do documento
@@ -978,16 +906,14 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-64-1" />
-### 1.64.1 (2023-10-02)
+### 1.64.1 (2023-10-02) {#v1-64-1}
 
 * Correções de bugs
   * [SIG-1140] Email de boas-vindas enviado mais de uma vez aos usuário após assinatura de documentos
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-64-0" />
-### 1.64.0 (2023-09-28)
+### 1.64.0 (2023-09-28) {#v1-64-0}
 
 * Novas funcionalidades
   * [SIG-700] Adicionar novos tipos de representação visual de assinatura
@@ -1011,8 +937,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 :::
 
 
-<a name="v1-63-0" />
-### 1.63.0 (2023-08-28)
+### 1.63.0 (2023-08-28) {#v1-63-0}
 
 * Novas funcionalidades
   * [SIG-948] Permitir baixar/exibir o arquivo na validação de documentos externos P7S 
@@ -1036,8 +961,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-62-0" />
-### 1.62.0 (2023-08-10)
+### 1.62.0 (2023-08-10) {#v1-62-0}
 
 * Novas funcionalidades
   * [SIG-1085] Adição de campo para pesquisar por documentos em Eventos e tela de eventos da Organização
@@ -1054,16 +978,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-61-1" />
-### 1.61.1 (2023-08-04)
+### 1.61.1 (2023-08-04) {#v1-61-1}
 
 * Correções de bugs
   * [SIG-1130] Não está sendo possível editar o email de um participante no fluxo.
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-61-0" />
-### 1.61.0 (2023-08-02)
+### 1.61.0 (2023-08-02) {#v1-61-0}
 
 * Melhorias
   * [SIG-974] Permitir adicionar participantes no fluxo após o documento concluído
@@ -1083,8 +1005,7 @@ Esta versão marca o início da migração do conteúdo das notificações do ba
 :::
 
 
-<a name="v1-60-0" />
-### 1.60.0 (2023-07-17)
+### 1.60.0 (2023-07-17) {#v1-60-0}
 
 * Novas funcionalidades
   * [SIG-1112] Exibir versão original no documento para a assinatura quando o Manifesto Simplificado estiver ativado
@@ -1102,8 +1023,7 @@ Esta versão marca o início da migração do conteúdo das notificações do ba
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-59-0" />
-### 1.59.0 (2023-07-03)
+### 1.59.0 (2023-07-03) {#v1-59-0}
 
 * Melhorias
   * [SIG-1092] Adicionar tema djp (deep-jungle-princeton)
@@ -1123,8 +1043,7 @@ Se você utiliza a integração com o Zoom, configure as credenciais Server to S
 :::
 
 
-<a name="v1-58-3" />
-### 1.58.3 (2023-06-19)
+### 1.58.3 (2023-06-19) {#v1-58-3}
 
 * Melhorias
   * [SIG-1102] Aderir a novas políticas de mensagens do Whatsapp
@@ -1135,24 +1054,21 @@ Se você utiliza a integração com o Zoom, configure as credenciais Server to S
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-58-2" />
-### 1.58.2 (2023-05-30)
+### 1.58.2 (2023-05-30) {#v1-58-2}
 
 * Correções de bugs
   * [SIG-1097] Não é possível assinar na assinatura única
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-58-1" />
-### 1.58.1 (2023-05-25)
+### 1.58.1 (2023-05-25) {#v1-58-1}
 
 * Melhorias
   * [SIG-1094] Adição do tema dim palatinate blue
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-58-0" />
-### 1.58.0 (2023-05-25)
+### 1.58.0 (2023-05-25) {#v1-58-0}
 
 * Novas funcionalidades
   * [SIG-1073] Suporte à Cédula de Identidad do Paraguai
@@ -1173,8 +1089,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 :::
 
 
-<a name="v1-57-0" />
-### 1.57.0 (2023-04-24)
+### 1.57.0 (2023-04-24) {#v1-57-0}
 
 * Novas funcionalidades
   * [SIG-1028] Desativar/ativar carimbo de tempo por organização
@@ -1191,8 +1106,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-56-0" />
-### 1.56.0 (2023-03-27)
+### 1.56.0 (2023-03-27) {#v1-56-0}
 
 * Novas funcionalidades
   * [SIG-350] Notificação de assinaturas para Whatsapp
@@ -1206,8 +1120,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-55-0" />
-### 1.55.0 (2023-03-03)
+### 1.55.0 (2023-03-03) {#v1-55-0}
 
 * Melhorias
   * [SIG-798] Enviar múltiplos documentos com fluxo específico por documento
@@ -1221,8 +1134,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-54-0" />
-### 1.54.0 (2023-02-17)
+### 1.54.0 (2023-02-17) {#v1-54-0}
 
 * Novas funcionalidades
   * [SIG-1032] Push notification para assinatura/aprovação pendente no app Web PKI
@@ -1237,8 +1149,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-53-0" />
-### 1.53.0 (2023-02-02)
+### 1.53.0 (2023-02-02) {#v1-53-0}
 
 * Novas funcionalidades
   * [SIG-819] Novo sistema de cobrança
@@ -1256,8 +1167,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-52-1" />
-### 1.52.1 (2023-01-18)
+### 1.52.1 (2023-01-18) {#v1-52-1}
 
 * Novas funcionalidades
   * [SIG-978] Criar tema Silver Eerie Black
@@ -1267,8 +1177,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-52-0" />
-### 1.52.0 (2023-01-10)
+### 1.52.0 (2023-01-10) {#v1-52-0}
 
 * Novas funcionalidades
   * [SIG-743] Adicionar configuração deixar pré-posicionamento das assinaturas do signatário como padrão na criação de documentos
@@ -1281,8 +1190,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-51-0" />
-### 1.51.0 (2022-12-08)
+### 1.51.0 (2022-12-08) {#v1-51-0}
 
 * Novas funcionalidades
   * [SIG-978] Criar tema yale blue yellow
@@ -1298,8 +1206,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-50-0" />
-### 1.50.0 (2022-11-16)
+### 1.50.0 (2022-11-16) {#v1-50-0}
 
 * Novas funcionalidades
   * [SIG-445] Adicionar tags ao documento para consulta
@@ -1315,8 +1222,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-49-2" />
-### 1.49.2 (2022-11-01)
+### 1.49.2 (2022-11-01) {#v1-49-2}
 
 * Melhorias
   * [SIG-998] Adicionar configuração para carregamento de menu por meio de iframe
@@ -1326,8 +1232,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-49-1" />
-### 1.49.1 (2022-11-01)
+### 1.49.1 (2022-11-01) {#v1-49-1}
 
 * Melhorias
   * [SIG-982] Permitir importação de documentos concluídos entre instâncias
@@ -1337,8 +1242,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-49-0" />
-### 1.49.0 (2022-10-18)
+### 1.49.0 (2022-10-18) {#v1-49-0}
 
 * Melhorias
   * [SIG-975] Não exibir botão para fazer login abaixo do ícone após assinar um documento se opção de esconder links na área pública estiver habilitada
@@ -1352,8 +1256,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-48-1" />
-### 1.48.1 (2022-09-15)
+### 1.48.1 (2022-09-15) {#v1-48-1}
 
 * Melhorias
   * [SIG-967] Criar configuração para não fazer discovery de certificado em nuvem
@@ -1363,8 +1266,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-48-0" />
-### 1.48.0 (2022-09-06)
+### 1.48.0 (2022-09-06) {#v1-48-0}
 
 * Novas funcionalidades
   * [SIG-938] Envio automático de lembretes de assinatura para documentos pendentes
@@ -1381,8 +1283,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-47-0" />
-### 1.47.0 (2022-08-18)
+### 1.47.0 (2022-08-18) {#v1-47-0}
 
 * Novas funcionalidades
   * [SIG-915] Configuração para nome do remetente do email vir de acordo com a organização
@@ -1400,16 +1301,14 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-46-1" />
-### 1.46.1 (2022-08-01)
+### 1.46.1 (2022-08-01) {#v1-46-1}
 
 * Correções de bugs
   * [SIG-946] Erro ao assinar com certificado em nuvem.
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-46-0" />
-### 1.46.0 (2022-07-29)
+### 1.46.0 (2022-07-29) {#v1-46-0}
 
 * Novas funcionalidades
   * [SIG-943] Criação e validação de documentos de saúde (prescrição, atestado etc)
@@ -1430,8 +1329,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-45-0" />
-### 1.45.0 (2022-06-30)
+### 1.45.0 (2022-06-30) {#v1-45-0}
 
 * Novas funcionalidades
   * [SIG-904] Permitir especificar que assinatura só pode ser realizada com certificado PF
@@ -1451,8 +1349,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-44-1" />
-### 1.44.1 (2022-06-15)
+### 1.44.1 (2022-06-15) {#v1-44-1}
 
 * Melhorias
   * [SIG-917] Melhorias na assinatura embutida
@@ -1467,8 +1364,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-44-0" />
-### 1.44.0 (2022-06-03)
+### 1.44.0 (2022-06-03) {#v1-44-0}
 
 * Novas funcionalidades
   * [SIG-898] Adequar o sistema para inserção de chat com script personalizado
@@ -1484,8 +1380,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-43-3" />
-### 1.43.3 (2022-05-19)
+### 1.43.3 (2022-05-19) {#v1-43-3}
 
 * Correções de bugs
   * [SIG-896] Usuário redirecionado para página de login após assinatura embutida
@@ -1497,16 +1392,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-43-2" />
-### 1.43.2 (2022-05-09)
+### 1.43.2 (2022-05-09) {#v1-43-2}
 
 * Correções de bugs
   * [SIG-893] Assinaturas ADRA e ADRC inválidas por conta de LCR com formatação errada publicada pelo ITI
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-43-1" />
-### 1.43.1 (2022-05-04)
+### 1.43.1 (2022-05-04) {#v1-43-1}
 
 * Novas funcionalidades
   * [SIG-887] Permitir forçar política de assinatura de PDFs para padrão ICP Brasil
@@ -1519,8 +1412,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-43-0" />
-### 1.43.0 (2022-04-29)
+### 1.43.0 (2022-04-29) {#v1-43-0}
 
 * Novas funcionalidades
   * [SIG-619] Permitir importação de documentos assinados em outros sistemas
@@ -1548,8 +1440,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 :::
 
 
-<a name="v1-42-0" />
-### 1.42.0 (2022-04-11)
+### 1.42.0 (2022-04-11) {#v1-42-0}
 
 * Novas funcionalidades
   * [SIG-859] Definir título do signatário na Assinatura Única
@@ -1563,8 +1454,7 @@ Antes de atualizar para esta versão, garanta que sua licença suporta versões 
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-41-0" />
-### 1.41.0 (2022-03-20)
+### 1.41.0 (2022-03-20) {#v1-41-0}
 
 * Melhorias
   * [SIG-835] Melhorias nas restrições de uploads
@@ -1578,8 +1468,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-40-0" />
-### 1.40.0 (2022-03-20)
+### 1.40.0 (2022-03-20) {#v1-40-0}
 
 * Melhorias
   * [SIG-308] Melhorar caso de uso de usuário que precisa assinar documento duas (ou mais) vezes com papéis diferentes na mesma etapa
@@ -1589,8 +1478,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-39-1" />
-### 1.39.1 (2022-03-20)
+### 1.39.1 (2022-03-20) {#v1-39-1}
 
 * Melhorias
   * [SIG-822] Adicionar tema eminence-cornflower-blue
@@ -1598,8 +1486,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-39-0" />
-### 1.39.0 (2021-12-13)
+### 1.39.0 (2021-12-13) {#v1-39-0}
 
 * Novas funcionalidades
   * [SIG-722] Permitir definir posicionamento das marcas da versão para impressão por organização
@@ -1619,8 +1506,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-38-0" />
-### 1.38.0 (2021-11-11)
+### 1.38.0 (2021-11-11) {#v1-38-0}
 
 * Novas funcionalidades
   * [SIG-723] Permitir solicitar acesso aos administradores no sistema fechado
@@ -1637,8 +1523,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-37-0" />
-### 1.37.0 (2021-10-21)
+### 1.37.0 (2021-10-21) {#v1-37-0}
 
 * Novas funcionalidades
   * [SIG-774] Permitir configurar métodos de pagamento disponíveis na integração com a iugu
@@ -1657,8 +1542,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-36-0" />
-### 1.36.0 (2021-10-06)
+### 1.36.0 (2021-10-06) {#v1-36-0}
 
 * Novas funcionalidades
   * [SIG-769] Rota para redirecionar para o cadastro
@@ -1682,8 +1566,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-35-0" />
-### 1.35.0 (2021-09-15)
+### 1.35.0 (2021-09-15) {#v1-35-0}
 
 * Novas funcionalidades
   * [SIG-752] Permitir definir por instância qual o versão do documento é enviada na notificação de conclusão
@@ -1701,8 +1584,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-34-0" />
-### 1.34.0 (2021-08-20)
+### 1.34.0 (2021-08-20) {#v1-34-0}
 
 * Novas funcionalidades
   * [SIG-740] Adicionar configuração que permita notificar ações pendentes nas assinaturas em lote
@@ -1722,8 +1604,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-33-1" />
-### 1.33.1 (2021-07-30)
+### 1.33.1 (2021-07-30) {#v1-33-1}
 
 * Melhorias
   * [SIG-736] Atualizar biblioteca de gerenciamento de blobs do Azure
@@ -1733,8 +1614,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-33-0" />
-### 1.33.0 (2021-07-22)
+### 1.33.0 (2021-07-22) {#v1-33-0}
 
 * Novas funcionalidades
   * [SIG-418] Exibir Histórico de alterações nos detalhes do documento
@@ -1760,8 +1640,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-32-0" />
-### 1.32.0 (2021-06-25)
+### 1.32.0 (2021-06-25) {#v1-32-0}
 
 * Novas funcionalidades
   * [SIG-670] Assinatura eletrônica com PIX
@@ -1776,16 +1655,14 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-31-1" />
-### 1.31.1 (2021-06-08)
+### 1.31.1 (2021-06-08) {#v1-31-1}
 
 * Correções de bugs
   * [SIG-691] Botão de compartilhar link de aprovação deve levar à área privada
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-31-0" />
-### 1.31.0 (2021-06-08)
+### 1.31.0 (2021-06-08) {#v1-31-0}
 
 * Novas funcionalidades
   * [SIG-688] Criar temas international orange green e onyx carrot orange
@@ -1805,8 +1682,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-30-0" />
-### 1.30.0 (2021-05-25)
+### 1.30.0 (2021-05-25) {#v1-30-0}
 
 * Melhorias
   * [SIG-659] Tentar obter carimbo automaticamente após falha ao contatar a carimbadora
@@ -1822,8 +1698,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-29-0" />
-### 1.29.0 (2021-04-27)
+### 1.29.0 (2021-04-27) {#v1-29-0}
 
 * Novas funcionalidades
   * [SIG-638] Integração para realização de videoconferências com Zoom
@@ -1839,8 +1714,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-28-0" />
-### 1.28.0 (2021-04-06)
+### 1.28.0 (2021-04-06) {#v1-28-0}
 
 * Novas funcionalidades
   * [SIG-555] Tornar escolha da posição de assinatura obrigatória
@@ -1859,8 +1733,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-27-0" />
-### 1.27.0 (2021-03-25)
+### 1.27.0 (2021-03-25) {#v1-27-0}
 
 * Novas funcionalidades
   * [SIG-614] Geração de nota fiscal de serviço (NFS-e)
@@ -1881,8 +1754,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-26-1" />
-### 1.26.1 (2021-02-18)
+### 1.26.1 (2021-02-18) {#v1-26-1}
 
 * Correções de bugs
   * [SIG-616] Nome do arquivo é obrigatório ao fazer upload por API
@@ -1891,8 +1763,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-26-0" />
-### 1.26.0 (2021-02-11)
+### 1.26.0 (2021-02-11) {#v1-26-0}
 
 * Melhorias
   * [SIG-605] Atualizar Sink do New Relic para melhorar registro de exceções
@@ -1900,16 +1771,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-25-0" />
-### 1.25.0 (2021-02-03)
+### 1.25.0 (2021-02-03) {#v1-25-0}
 
 * Melhorias
   * [SIG-602] - Melhoria no Suporte a AWS S3
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-24-3" />
-### 1.24.3 (2021-01-28)
+### 1.24.3 (2021-01-28) {#v1-24-3}
 
 * Melhorias
   * [SIG-599] - Não enviar email de convite se o documento for criado desativando as notificações
@@ -1919,24 +1788,21 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-24-2" />
-### 1.24.2 (2021-01-18)
+### 1.24.2 (2021-01-18) {#v1-24-2}
 
 * Correções de bugs
   * [SIG-598] - Erro ao visualizar tela de criação de documento sem estar em nenhuma organização no modo Fechado
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-24-1" />
-### 1.24.1 (2021-01-15)
+### 1.24.1 (2021-01-15) {#v1-24-1}
 
 * Correções de bugs
   * [SIG-597] - Tematização incorreta da mensagem de posicionamento de assinatura
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-24-0" />
-### 1.24.0 (2021-01-14)
+### 1.24.0 (2021-01-14) {#v1-24-0}
 
 * Novas funcionalidades
   * [SIG-463] - Exibir assinatura eletrônica como primeira opção
@@ -1955,8 +1821,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-23-0" />
-### 1.23.0 (2021-01-07)
+### 1.23.0 (2021-01-07) {#v1-23-0}
 
 * Novas funcionalidades
   * [SIG-430] - Assinatura eletronica com Selfie
@@ -1971,8 +1836,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-22-0" />
-### 1.22.0 (2020-12-17)
+### 1.22.0 (2020-12-17) {#v1-22-0}
 
 * Novas funcionalidades
   * [SIG-144] - Exibir evidências de assinatura eletronica
@@ -1994,16 +1858,14 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-21-0" />
-### 1.21.0 (2020-12-03)
+### 1.21.0 (2020-12-03) {#v1-21-0}
 
 * Novas funcionalidades
   * [SIG-217] - Remover obrigatoriedade de CPF
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-20-0" />
-### 1.20.0 (2020-11-27)
+### 1.20.0 (2020-11-27) {#v1-20-0}
 
 * Novas funcionalidades
   * [SIG-477] - Integração com Securiti para automatização de solicitações da LGPD
@@ -2017,8 +1879,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-19-0" />
-### 1.19.0 (2020-11-18)
+### 1.19.0 (2020-11-18) {#v1-19-0}
 
 * Melhorias
   * [SIG-468] - Permitir criação de Subpastas
@@ -2033,8 +1894,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-18-0" />
-### 1.18.0 (2020-11-05)
+### 1.18.0 (2020-11-05) {#v1-18-0}
 
 * Novas funcionalidades
   * [SIG-483] - Bloqueio de uso enquanto informações de faturamento não estiverem preenchidas
@@ -2046,8 +1906,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-17-0" />
-### 1.17.0 (2020-10-28)
+### 1.17.0 (2020-10-28) {#v1-17-0}
 
 * Melhorias
   * [SIG-437] - Permitir editar fluxo mesmo com Manifesto Simplificado habilitado
@@ -2056,16 +1915,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-16-1" />
-### 1.16.1 (2020-10-23)
+### 1.16.1 (2020-10-23) {#v1-16-1}
 
 * Melhorias
   * [SIG-534] - Criar perfil de administração de faturamento
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-16-0" />
-### 1.16.0 (2020-10-22)
+### 1.16.0 (2020-10-22) {#v1-16-0}
 
 * Melhorias
   * [SIG-484] - Envio dos dados de faturamento no Webhook de fechamento de fatura
@@ -2078,16 +1935,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-15-1" />
-### 1.15.1 (2020-10-21)
+### 1.15.1 (2020-10-21) {#v1-15-1}
 
 * Correções de bugs
   * [SIG-529] - Tela de acesso restrito não aparece se os perfis básicos estiverem configurados
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-15-0" />
-### 1.15.0 (2020-10-08)
+### 1.15.0 (2020-10-08) {#v1-15-0}
 
 * Novas funcionalidades
   * [SIG-520] - API para download direto das versões do documento
@@ -2099,8 +1954,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-14-0" />
-### 1.14.0 (2020-09-30)
+### 1.14.0 (2020-09-30) {#v1-14-0}
 
 * Melhorias
   * [SIG-427] - Notificar criador do documento na conclusão
@@ -2112,8 +1966,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-13-0" />
-### 1.13.0 (2020-09-23)
+### 1.13.0 (2020-09-23) {#v1-13-0}
 
 * Melhorias
   * [SIG-366] - Permitir reprovar na ação de aprovação
@@ -2129,8 +1982,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-12-0" />
-### 1.12.0 (2020-09-14)
+### 1.12.0 (2020-09-14) {#v1-12-0}
 
 * Novas funcionalidades
   * [SIG-462] - Adicionar perfis para habilitar/restringir criação de documentos e organizações
@@ -2145,16 +1997,14 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-11-0" />
-### 1.11.0 (2020-09-02)
+### 1.11.0 (2020-09-02) {#v1-11-0}
 
 * Melhorias
   * [SIG-397] - Integração com Certificados em nuvem
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-10-4" />
-### 1.10.4 (2020-08-31)
+### 1.10.4 (2020-08-31) {#v1-10-4}
 
 * Novas funcionalidades
   * [SIG-455] - Implementar tema persian-plum-sand
@@ -2164,8 +2014,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-10-3" />
-### 1.10.3 (2020-08-26)
+### 1.10.3 (2020-08-26) {#v1-10-3}
 
 * Novas funcionalidades
   * [SIG-429] - Inserir texto indicativo para Baixar APP QRCode
@@ -2173,8 +2022,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-10-2" />
-### 1.10.2 (2020-08-25)
+### 1.10.2 (2020-08-25) {#v1-10-2}
 
 * Novas funcionalidades
   * [SIG-449] - Criar tema viridian green yellow
@@ -2185,8 +2033,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-10-1" />
-### 1.10.1 (2020-08-21)
+### 1.10.1 (2020-08-21) {#v1-10-1}
 
 * Novas funcionalidades
   * [SIG-435] - Criar tema oxford-blue-green
@@ -2197,8 +2044,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-10-0" />
-### 1.10.0 (2020-08-19)
+### 1.10.0 (2020-08-19) {#v1-10-0}
 
 * Melhorias
   * [SIG-382] - Associar Aplicações a pastas
@@ -2216,8 +2062,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-9-1" />
-### 1.9.1 (2020-07-23)
+### 1.9.1 (2020-07-23) {#v1-9-1}
 
 * Correções de bugs
   * [SIG-396] - String não traduzida nas configurações de pasta
@@ -2225,8 +2070,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-9-0" />
-### 1.9.0 (2020-07-23)
+### 1.9.0 (2020-07-23) {#v1-9-0}
 
 * Novas funcionalidades
   * [SIG-378] - Procedimento para recuperação de documentos excluídos
@@ -2241,8 +2085,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-8-0" />
-### 1.8.0 (2020-07-16)
+### 1.8.0 (2020-07-16) {#v1-8-0}
 
 * Novas funcionalidades
   * [SIG-364] - Tipos de documentos para receitas médicas
@@ -2259,8 +2102,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-7-0" />
-### 1.7.0 (2020-07-02)
+### 1.7.0 (2020-07-02) {#v1-7-0}
 
 * Correções de bugs
   * [SIG-370] - Parâmetro ticket sendo exibido na documentação da API de upload
@@ -2275,24 +2117,21 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-6-2" />
-### 1.6.2 (2020-06-25)
+### 1.6.2 (2020-06-25) {#v1-6-2}
 
 * Correções de bugs
   * [SIG-377] - Erro ao abrir detalhes de documento com observador que não está no fluxo
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-6-1" />
-### 1.6.1 (2020-06-24)
+### 1.6.1 (2020-06-24) {#v1-6-1}
 
 * Melhorias
   * [SIG-374] - Adicionar tema metallic-seaweed-emerald (MSE)
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-6-0" />
-### 1.6.0 (2020-06-24)
+### 1.6.0 (2020-06-24) {#v1-6-0}
 
 * Novas funcionalidades
   * [SIG-349] - Carregar tela de criação de documento com upload já realizado
@@ -2316,8 +2155,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-5-0" />
-### 1.5.0 (2020-06-15)
+### 1.5.0 (2020-06-15) {#v1-5-0}
 
 * Novas funcionalidades
   * [SIG-331] - Enviar email para todos participantes do fluxo após a conclusão do documento
@@ -2336,16 +2174,14 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v1-4-1" />
-### 1.4.1 (2020-06-08)
+### 1.4.1 (2020-06-08) {#v1-4-1}
 
 * Correções de bugs
   * [SIG-313] - Internacionalização errada (en) no email de aprovar e assinar
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-4-0" />
-### 1.4.0 (2020-06-08)
+### 1.4.0 (2020-06-08) {#v1-4-0}
 
 * Novas funcionalidades
   * [SIG-216] - Permitir configuração de instância dos detalhes da Versão para impressão
@@ -2365,8 +2201,7 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: sim
 
 
-<a name="v1-3-2" />
-### 1.3.2 (2020-05-15)
+### 1.3.2 (2020-05-15) {#v1-3-2}
 
 * Correções de bugs
   * [SIG-310] - Exceções lançadas ao logar caracteres especiais gerados pelo PKI SDK
@@ -2374,16 +2209,14 @@ Atualiza modelo do banco de dados: sim
 Atualiza modelo do banco de dados: não
 
 
-<a name="v1-3-1" />
-### 1.3.1 (2020-05-05)
+### 1.3.1 (2020-05-05) {#v1-3-1}
 
 * Correções de bugs
   * [SIG-309] - Esconder opção de download em lote até atualização do Web PKI
 
 Atualiza modelo do banco de dados: não
 
-<a name="v1-3-0" />
-### 1.3.0 (2020-05-05)
+### 1.3.0 (2020-05-05) {#v1-3-0}
 
 * Novas funcionalidades
   * [SIG-178] - Download em lote
@@ -2409,8 +2242,7 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: **sim**
 
 
-<a name="v1-2-0" />
-### 1.2.0 (2020-04-29)
+### 1.2.0 (2020-04-29) {#v1-2-0}
 
 * Novas funcionalidades
   * [SIG-284] - Permitir subir um arquivo para ser validado na tela de validação do documento

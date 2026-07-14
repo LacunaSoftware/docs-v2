@@ -54,8 +54,7 @@ instância do Rest PKI:
    1. SSL com autenticação mútua: veja a [seção abaixo](#ssl-mutual-auth)
 1. Clique no botão **Testar**. Caso apareça a mensagem "O teste foi bem sucedido", a configuração está OK.
 
-<a name="ssl-mutual-auth" />
-## Autenticação via SSL/TLS com autenticação mútua
+## Autenticação via SSL/TLS com autenticação mútua {#ssl-mutual-auth}
 
 Para utilizar um provedor de carimbos de tempo que exija autenticação via SSL/TLS com autenticação mútua, você precisa
 primeiro importar o certificado fornecido pelo provedor no repositório de certificados do Windows, na pasta Personal do

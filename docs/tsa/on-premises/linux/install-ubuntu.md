@@ -9,9 +9,8 @@ Para instalar uma instância [*on premises*](../index.md) do [Lacuna TSA](../../
 * Licença do **[PKI SDK](../../../pki-sdk/index.md)** (no formato Base64)
 * Certificado da autoridade de carimbo de tempo (em formato PKCS#12 ou em uma instância do **[Amplia](../../../amplia/index.md)**)
 
-<a name="install-aspnet-core" />
 
-## Instale o ASP.NET Core Runtime 6.0
+## Instale o ASP.NET Core Runtime 6.0 {#install-aspnet-core}
 
 :::info
 Essas instruções assumem que você está autenticado como **root**. Se você não estiver, execute `sudo su -` antes de continuar!

@@ -5,8 +5,7 @@ sidebar_position: 3
 
 # Histórico de versões - Lacuna TSA
 
-<a name="v1-2-1" />
-## 1.2.1 (2024-08-01)
+## 1.2.1 (2024-08-01) {#v1-2-1}
 
 ### Correções de bugs
 
@@ -16,8 +15,7 @@ Corrigido batimento entre política presente na solicitação de carimbo e a con
 
 
 
-<a name="v1-2-0" />
-## 1.2.0 (2023-05-10)
+## 1.2.0 (2023-05-10) {#v1-2-0}
 
 ### Melhorias
 
@@ -25,8 +23,7 @@ Sincronização com servidor NTP melhorada com monitoramento de atraso ou adiant
 
 
 
-<a name="v1-1-0" />
-## 1.1.0 (2023-05-10)
+## 1.1.0 (2023-05-10) {#v1-1-0}
 
 ### Novas funcionalidades
 
@@ -34,7 +31,6 @@ Adicionado suporte a sincronização com servidor NTP com monitoramento de atras
 
 
 
-<a name="v1-0-0" />
-## 1.0.0 (2023-05-10)
+## 1.0.0 (2023-05-10) {#v1-0-0}
 
 Primeira versão disponível publicamente

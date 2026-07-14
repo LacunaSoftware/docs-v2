@@ -1,5 +1,6 @@
 ---
 unlisted: true
+slug: /signer/on-premises/docker/docker-swarm/persistent-data
 ---
 
 # Signer em Docker - Dados persistentes (recomendações de backup)
@@ -8,6 +9,6 @@ unlisted: true
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs-v2/docs/en/signer/on-premises/como-instalar/docker/docker-swarm/persistent-data)
+- [English](/en-us/articles/signer/on-premises/docker/docker-swarm/persistent-data)
 
 :::

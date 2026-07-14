@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Controle de acesso"
 sidebar_position: 1
+slug: /signer/on-premises/access-control
 ---
 
 # Controle de acesso do Signer

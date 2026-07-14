@@ -1,8 +1,6 @@
 # Histórico de versões do Amplia
 
-<a name="vnext" />
-<a name="v4-22-0" />
-## 4.22.0 (próxima versão)
+## 4.22.0 (próxima versão) {#vnext}
 
 Atualiza modelo do banco de dados: não
 
@@ -12,8 +10,7 @@ AMP-390 Configuração para emitir certificados de AC com número de série alea
 
 
 
-<a name="v4-21-0" />
-## 4.21.0 (2026-04-16)
+## 4.21.0 (2026-04-16) {#v4-21-0}
 
 Idêntica a: 4.21.0 RC 2 (2026-01-27)
 
@@ -35,8 +32,7 @@ AMP-389 API de geração de chaves no processo de emissão de *managed certifica
 
 
 
-<a name="v4-20-0" />
-## 4.20.0 (2026-01-14)
+## 4.20.0 (2026-01-14) {#v4-20-0}
 
 Idêntica a: 4.20.0 RC 1 (2026-01-07)
 
@@ -52,8 +48,7 @@ AMP-385 Evento de IdnComputed está salvando IDN raw
 
 
 
-<a name="v4-19-0" />
-## 4.19.0 (2026-01-07)
+## 4.19.0 (2026-01-07) {#v4-19-0}
 
 Idêntica a: 4.19.0 RC 2 (2025-11-17)
 
@@ -65,8 +60,7 @@ AMP-355 Certificados podem ser emitidos com início da validade anterior à do e
 
 
 
-<a name="v4-18-0" />
-## 4.18.0 (2025-11-12)
+## 4.18.0 (2025-11-12) {#v4-18-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -76,8 +70,7 @@ AMP-378 Tratar key store partitions bloqueadas antes da hora
 
 
 
-<a name="v4-17-1" />
-## 4.17.1 (2025-11-05)
+## 4.17.1 (2025-11-05) {#v4-17-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -87,8 +80,7 @@ AMP-377 Comando `check-key-store-partitions-lock` para verificar estado de bloqu
 
 
 
-<a name="v4-17-0" />
-## 4.17.0 (2025-11-05)
+## 4.17.0 (2025-11-05) {#v4-17-0}
 
 Idêntica a: 4.17.0 RC 4 (2025-09-29)
 
@@ -102,8 +94,7 @@ AMP-376 Adicionar número do pedido na confirmação de remoção das partiçõe
 
 
 
-<a name="v4-16-0" />
-## 4.16.0 (2025-09-19)
+## 4.16.0 (2025-09-19) {#v4-16-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -113,8 +104,7 @@ AMP-374 Comando `repair-blobs` para corrigir blobs corrompidos
 
 
 
-<a name="v4-15-1" />
-## 4.15.1 (2025-09-08)
+## 4.15.1 (2025-09-08) {#v4-15-1}
 
 Idêntica a: 4.15.1 RC 4 (2025-09-03)
 
@@ -126,8 +116,7 @@ AMP-373 Erros no comando `check-blobs`
 
 
 
-<a name="v4-15-0" />
-## 4.15.0 (2025-09-01)
+## 4.15.0 (2025-09-01) {#v4-15-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -139,8 +128,7 @@ AMP-372 Comando `check-blobs` para verificar integridade dos blobs
 
 
 
-<a name="v4-14-0" />
-## 4.14.0 (2025-08-12)
+## 4.14.0 (2025-08-12) {#v4-14-0}
 
 Idêntica a: 4.14.0 RC 2 (2025-08-12)
 
@@ -162,8 +150,7 @@ AMP-368 Telefones com prefixo `+1 (305)` são recusados como não sendo de celul
 
 
 
-<a name="v4-13-0" />
-## 4.13.0 (2025-07-23)
+## 4.13.0 (2025-07-23) {#v4-13-0}
 
 Idêntica a: 4.13.0 RC 4 (2025-05-30)
 
@@ -179,8 +166,7 @@ AMP-367 Suporte \(experimental\) a integração com Prometheus
 
 
 
-<a name="v4-12-0" />
-## 4.12.0 (2025-07-23)
+## 4.12.0 (2025-07-23) {#v4-12-0}
 
 Idêntica a: 4.12.0 RC 2 (2025-02-03)
 
@@ -194,8 +180,7 @@ AMP-360 Adequações para o certificado de sello electronico do certificado PY
 
 
 
-<a name="v4-11-0" />
-## 4.11.0 (2025-01-22)
+## 4.11.0 (2025-01-22) {#v4-11-0}
 
 Idêntica a: 4.11.0 RC 2 (2024-11-06)
 
@@ -209,8 +194,7 @@ AMP-361 Melhorias à integração com provedores de envio de SMS
 
 
 
-<a name="v4-10-0" />
-## 4.10.0 (2024-10-24)
+## 4.10.0 (2024-10-24) {#v4-10-0}
 
 Idêntica a: 4.10.0 RC 4 (2024-09-13)
 
@@ -224,8 +208,7 @@ AMP-356 Ajustes nos campos Unique Identifier e Organization Identifier de certif
 
 
 
-<a name="v4-9-0" />
-## 4.9.0 (2024-08-13)
+## 4.9.0 (2024-08-13) {#v4-9-0}
 
 Idêntica a: 4.9.0 RC 11 (2024-05-10)
 
@@ -259,8 +242,7 @@ AMP-351 Erro "Could not place a lock on the resource 'hangfire:lock:recurring-jo
 
 
 
-<a name="v4-8-1" />
-## 4.8.1 (2024-04-30)
+## 4.8.1 (2024-04-30) {#v4-8-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -270,8 +252,7 @@ AMP-350 Erro "Cannot write DateTime with Kind=UTC..." ao criar pedido de certifi
 
 
 
-<a name="v4-8-0" />
-## 4.8.0 (2024-02-27)
+## 4.8.0 (2024-02-27) {#v4-8-0}
 
 Idêntica a: 4.8.0 RC 5 (2024-02-27)
 
@@ -295,8 +276,7 @@ AMP-341 Integer overflow ao setar um `CertificateManagement:OperationSessionTime
 
 
 
-<a name="v4-7-0" />
-## 4.7.0 (2023-12-20)
+## 4.7.0 (2023-12-20) {#v4-7-0}
 
 Idêntica a: 4.7.0 RC 2 (2023-11-01)
 
@@ -312,8 +292,7 @@ AMP-331 Melhorar integração com Amplia Reg para casos de certificados organiza
 
 
 
-<a name="v4-6-1" />
-## 4.6.1 (2023-09-06)
+## 4.6.1 (2023-09-06) {#v4-6-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -329,8 +308,7 @@ AMP-324 Erro *JsonReaderException: Bad JSON escape sequence*
 
 
 
-<a name="v4-6-0" />
-## 4.6.0 (2023-08-30)
+## 4.6.0 (2023-08-30) {#v4-6-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -348,8 +326,7 @@ AMP-327 Suporte a variável de ambiente STANDBY \(para instalação em Azure App
 
 
 
-<a name="v4-5-4" />
-## 4.5.4 (2023-08-04)
+## 4.5.4 (2023-08-04) {#v4-5-4}
 
 Atualiza modelo do banco de dados: não
 
@@ -359,8 +336,7 @@ AMP-311 Atualizar pacote de envio de SMS para permitir configurar um `MessagingS
 
 
 
-<a name="v4-5-3" />
-## 4.5.3 (2023-08-04)
+## 4.5.3 (2023-08-04) {#v4-5-3}
 
 Atualiza modelo do banco de dados: não†
 
@@ -372,19 +348,17 @@ AMP-319 Algumas migrations passadas não podem ser aplicadas em SQL Server pré-
 
 
 
-<a name="v4-5-2" />
-## 4.5.2 (2023-07-05)
+## 4.5.2 (2023-07-05) {#v4-5-2}
 
 Atualiza modelo do banco de dados: não
 
 ### Correções de bugs
 
-AMP-310 Consulta de horário OTP não está sendo repassada a key stores Dinamo (introduzido na [v4.4.0](#4-4-0))
+AMP-310 Consulta de horário OTP não está sendo repassada a key stores Dinamo (introduzido na [v4.4.0](#v4-4-0))
 
 
 
-<a name="v4-5-1" />
-## 4.5.1 (2023-06-29)
+## 4.5.1 (2023-06-29) {#v4-5-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -394,8 +368,7 @@ AMP-309 Campos com string vazia no SubjectName causam erro na emissão do certif
 
 
 
-<a name="v4-5-0" />
-## 4.5.0 (2023-06-14)
+## 4.5.0 (2023-06-14) {#v4-5-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -405,8 +378,7 @@ AMP-306 Campo `ExtendedKeyUsageCritical` em certificados personalizados
 
 
 
-<a name="v4-4-0" />
-## 4.4.0 (2023-06-02)
+## 4.4.0 (2023-06-02) {#v4-4-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -430,8 +402,7 @@ AMP-305 Adicionar traduções para o metadado de número do RG vindo do PMCert
 
 
 
-<a name="v4-3-0" />
-## 4.3.0 (2023-05-19)
+## 4.3.0 (2023-05-19) {#v4-3-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -451,8 +422,7 @@ AMP-296 Suporte a armazenamento de blobs em banco de dados
 
 
 
-<a name="v4-2-0" />
-## 4.2.0 (2023-05-19)
+## 4.2.0 (2023-05-19) {#v4-2-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -472,8 +442,7 @@ AMP-291 APIs de emissão de certificado em nuvem não permitem que o Amplia fiqu
 
 
 
-<a name="v4-1-0" />
-## 4.1.0 (2023-03-02)
+## 4.1.0 (2023-03-02) {#v4-1-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -497,8 +466,7 @@ AMP-288 Codificar cédula de identidade no campo Unique Identifier para certific
 
 
 
-<a name="v4-0-4" />
-## 4.0.4 (2023-02-03)
+## 4.0.4 (2023-02-03) {#v4-0-4}
 
 Atualiza modelo do banco de dados: não
 
@@ -508,8 +476,7 @@ AMP-286 Extensão ExtendedKeyUsage em certificados PY não está marcada como cr
 
 
 
-<a name="v4-0-3" />
-## 4.0.3 (2023-01-09)
+## 4.0.3 (2023-01-09) {#v4-0-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -519,8 +486,7 @@ AMP-280 Erro ao gerar QR Code para emissão em Docker
 
 
 
-<a name="v4-0-2" />
-## 4.0.2 (2023-01-09)
+## 4.0.2 (2023-01-09) {#v4-0-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -530,8 +496,7 @@ AMP-277 Mostrar ID nos detalhes da CA e do template
 
 
 
-<a name="v4-0-1" />
-## 4.0.1 (2022-12-30)
+## 4.0.1 (2022-12-30) {#v4-0-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -541,8 +506,7 @@ AMP-276 Melhorar integração com HSM Dinamo
 
 
 
-<a name="v4-0-0" />
-## 4.0.0 (2022-12-27)
+## 4.0.0 (2022-12-27) {#v4-0-0}
 
 **Veja [Atualizando o Amplia da versão 3.x para 4.0](on-premises/update-40.md)**
 
@@ -584,8 +548,7 @@ AMP-269 Última CRL não é encontrada caso o nome da AC tenha letras em caixa a
 
 
 
-<a name="v3-15-2" />
-## 3.15.2 (2022-10-10)
+## 3.15.2 (2022-10-10) {#v3-15-2}
 
 Melhorias:
 
@@ -599,8 +562,7 @@ Atualiza modelo do banco de dados: não
 
 
 
-<a name="v3-15-1" />
-## 3.15.1 (2022-09-23)
+## 3.15.1 (2022-09-23) {#v3-15-1}
 
 Melhorias:
 
@@ -612,8 +574,7 @@ Atualiza modelo do banco de dados: não
 
 
 
-<a name="v3-15-0" />
-## 3.15.0 (2022-06-13)
+## 3.15.0 (2022-06-13) {#v3-15-0}
 
 Novas funcionalidades:
 
@@ -627,8 +588,7 @@ Atualiza modelo do banco de dados: não
 
 
 
-<a name="v3-14-0" />
-## 3.14.0 (2022-04-29)
+## 3.14.0 (2022-04-29) {#v3-14-0}
 
 Novas funcionalidades:
 
@@ -649,8 +609,7 @@ Melhorias:
 Atualiza modelo do banco de dados: **sim**
 
 
-<a name="v3-13-2" />
-## 3.13.2 (2021-12-16)
+## 3.13.2 (2021-12-16) {#v3-13-2}
 
 Correções de bugs:
 
@@ -659,8 +618,7 @@ Correções de bugs:
 Updates database model: no
 
 
-<a name="v3-13-1" />
-## 3.13.1 (2021-12-05)
+## 3.13.1 (2021-12-05) {#v3-13-1}
 
 Novas funcionalidades:
 
@@ -676,8 +634,7 @@ Melhorias:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-12-0" />
-## 3.12.0 (2021-04-27)
+## 3.12.0 (2021-04-27) {#v3-12-0}
 
 Novas funcionalidades:
 
@@ -686,8 +643,7 @@ Novas funcionalidades:
 Atualiza modelo do banco de dados: **sim**
 
 
-<a name="v3-11-0" />
-## 3.11.0 (2021-03-25)
+## 3.11.0 (2021-03-25) {#v3-11-0}
 
 Melhorias:
 
@@ -697,8 +653,7 @@ Melhorias:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-10-2" />
-## 3.10.2 (2021-03-21)
+## 3.10.2 (2021-03-21) {#v3-10-2}
 
 Melhorias:
 
@@ -711,8 +666,7 @@ Correções de bugs:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-10-1" />
-## 3.10.1 (2021-03-15)
+## 3.10.1 (2021-03-15) {#v3-10-1}
 
 Correções de bugs:
 
@@ -721,8 +675,7 @@ Correções de bugs:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-10-0" />
-## 3.10.0 (2021-02-08)
+## 3.10.0 (2021-02-08) {#v3-10-0}
 
 Novas funcionalidades:
 
@@ -740,8 +693,7 @@ Correções de bugs:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-9-6" />
-## 3.9.6 (2020-11-26)
+## 3.9.6 (2020-11-26) {#v3-9-6}
 
 Melhorias:
 
@@ -759,8 +711,7 @@ Correções de bugs:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-9-5" />
-## 3.9.5 (2020-10-20)
+## 3.9.5 (2020-10-20) {#v3-9-5}
 
 Correção de bug:
 
@@ -769,8 +720,7 @@ Correção de bug:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-9-4" />
-## 3.9.4 (2020-10-08)
+## 3.9.4 (2020-10-08) {#v3-9-4}
 
 Correção de bug:
 
@@ -779,8 +729,7 @@ Correção de bug:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-9-3" />
-## 3.9.3 (2020-09-30)
+## 3.9.3 (2020-09-30) {#v3-9-3}
 
 Correção de bug:
 
@@ -789,8 +738,7 @@ Correção de bug:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-9-2" />
-## 3.9.2 (2020-09-03)
+## 3.9.2 (2020-09-03) {#v3-9-2}
 
 Melhorias:
 
@@ -808,16 +756,14 @@ Correções de bugs:
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-9-1" />
-## 3.9.1 (2020-08-05)
+## 3.9.1 (2020-08-05) {#v3-9-1}
 
 * Correção de bug: [AMP-178] - Tela fica em branco após login no Internet Explorer
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-9-0" />
-## 3.9.0 (2020-08-04)
+## 3.9.0 (2020-08-04) {#v3-9-0}
 
 Novas funcionalidades:
 
@@ -831,16 +777,14 @@ Melhorias:
 Atualiza modelo do banco de dados: **sim**
 
 
-<a name="v3-8-4" />
-## 3.8.4 (2020-07-22)
+## 3.8.4 (2020-07-22) {#v3-8-4}
 
 * [AMP-177] - Adicionar tema *Dark cerulean & Green* (`dcg`)
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-8-3" />
-## 3.8.3 (2020-07-21)
+## 3.8.3 (2020-07-21) {#v3-8-3}
 
 * [AMP-173] - Não gerar preemptivamente o arquivo na API de obter link para download do termo de titularidade
 * Correção de bug: [AMP-174] - Tela de emissão fica em "loading" indefinidamente
@@ -848,8 +792,7 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-8-2" />
-## 3.8.2 (2020-07-10)
+## 3.8.2 (2020-07-10) {#v3-8-2}
 
 * Correções de bugs
   * [AMP-175] - Logs de aplicação de nível *Information* estão sendo escritos para o log de sistema por padrão no Linux e em Docker
@@ -858,16 +801,14 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-8-1" />
-## 3.8.1 (2020-06-24)
+## 3.8.1 (2020-06-24) {#v3-8-1}
 
 * Correção de bug: Ao aceitar a oferta para emitir o certificado no celular, o QR Code não aparece
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-8-0" />
-## 3.8.0 (2020-06-24)
+## 3.8.0 (2020-06-24) {#v3-8-0}
 
 * Implementado *soft delete* de pedidos de certificado
 * Adicionada API para atualizar pedidos de certificado
@@ -877,8 +818,7 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: **sim**
 
 
-<a name="v3-7-5" />
-## 3.7.5 (2020-06-23)
+## 3.7.5 (2020-06-23) {#v3-7-5}
 
 * Otimizado armazenamento de histórico de execuções de rotinas em background
 * Adicionado argumento `--heavy` ao comando [update-db](on-premises/tool/update-db.md)
@@ -886,8 +826,7 @@ Atualiza modelo do banco de dados: **sim**
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-7-4" />
-## 3.7.4 (2020-06-19)
+## 3.7.4 (2020-06-19) {#v3-7-4}
 
 * Correções de bugs
   * Provider de logs para o event log está causando erros em Azure App Service
@@ -896,8 +835,7 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-7-3" />
-## 3.7.3 (2020-06-05)
+## 3.7.3 (2020-06-05) {#v3-7-3}
 
 * Adicionado tema *Green & Dark coral* (`gdc`)
 * Correção de bug
@@ -906,24 +844,21 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-7-2" />
-## 3.7.2 (2020-06-03)
+## 3.7.2 (2020-06-03) {#v3-7-2}
 
 * Remover acentos de mensagens de SMS
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-7-1" />
-## 3.7.1 (2020-05-21)
+## 3.7.1 (2020-05-21) {#v3-7-1}
 
 * Melhorados *labels* de telefone e "pedido para usuário (HSM em nuvem)"
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-7-0" />
-## 3.7.0 (2020-05-06)
+## 3.7.0 (2020-05-06) {#v3-7-0}
 
 * Adicionado suporte a proteção de chaves com PIN em HSMs Dinamo
 * Adicionado filtro por `keyMedia` na API para obter pedidos de certificado pendentes para um usuário
@@ -932,16 +867,14 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-6-0" />
-## 3.6.0 (2020-05-01)
+## 3.6.0 (2020-05-01) {#v3-6-0}
 
 * Adicionada integração com HSMs Dinamo via comunicação proprietária
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-5-0" />
-## 3.5.0 (2020-04-14)
+## 3.5.0 (2020-04-14) {#v3-5-0}
 
 * Sistema migrado para ASP.NET Core 3.1 (versão LTS, suportada até dez/2022)
 
@@ -950,8 +883,7 @@ Veja [Atualizando o Amplia da versão 3.0-3.4 para 3.5](on-premises/update-35.md
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-4-0" />
-## 3.4.0 (2020-03-27)
+## 3.4.0 (2020-03-27) {#v3-4-0}
 
 * Adicionada possibilidade de assinar digitalmente o Termo de Titularidade contendo a chave pública do certificado durante o processo de emissão
 * Adicionada data de nascimento ao formulário de criação de pedido ICP-Brasil
@@ -966,8 +898,7 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: **sim**
 
 
-<a name="v3-3-0" />
-## 3.3.0 (2019-03-17)
+## 3.3.0 (2019-03-17) {#v3-3-0}
 
 * Adicionada possibilidade de configuração da extensão *certification policies* nos modelos de certificado
 * Adicionado novo papel: *Agente de Registro* (pode apenas criar pedidos de certificado e revogar certificados)
@@ -982,8 +913,7 @@ Atualiza modelo do banco de dados: **sim**
 Atualiza modelo do banco de dados: **sim**
 
 
-<a name="v3-2-0" />
-## 3.2.0 (2019-03-10)
+## 3.2.0 (2019-03-10) {#v3-2-0}
 
 * Dashboard internacionalizado (português e inglês)
 * Adicionado suporte a armazenamento de chaves de usuários finais protegidas por PIN ("HSM cloud")
@@ -999,8 +929,7 @@ Atualiza modelo do banco de dados: **sim**
 Atualiza modelo do banco de dados: **sim**
 
 
-<a name="v3-1-0" />
-## 3.1.0 (2019-02-22)
+## 3.1.0 (2019-02-22) {#v3-1-0}
 
 * Integração com servidor de OpenID Connect passa a ser opcional
 * Adicionado [utilitário de linha de comando](on-premises/tool/index.md) com:
@@ -1012,8 +941,7 @@ Atualiza modelo do banco de dados: **sim**
 Atualiza modelo do banco de dados: não
 
 
-<a name="v3-0-0" />
-## 3.0.0 (2019-02-06)
+## 3.0.0 (2019-02-06) {#v3-0-0}
 
 * Dashboard completamente refatorado
 * Adicionado suporte à realização de operações no dashboard que antes só podiam ser feitas via API:
@@ -1028,40 +956,35 @@ Atualiza modelo do banco de dados: **sim**
 Mudanças de configuração: veja [Atualizando o Amplia da versão 2.16 para 3.0](on-premises/update-30.md)
 
 
-<a name="v2-16-1" />
-## 2.16.1 (2019-12-12)
+## 2.16.1 (2019-12-12) {#v2-16-1}
 
 * Adicionada opção de configurar um *alias* para o tipo de entidade em templates de certificado do tipo *PrivateID*
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v2-16-0" />
-## 2.16.0 (2019-12-10)
+## 2.16.0 (2019-12-10) {#v2-16-0}
 
 * Adicionado certificado de atributo tipo *PrivateID* (para carteiras de identidade de entidades de classe)
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v2-15-2" />
-## 2.15.2 (2019-12-04)
+## 2.15.2 (2019-12-04) {#v2-15-2}
 
 * Alterado modelo de configuração para Linux para logar para a pasta */var/log/amplia*
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v2-15-1" />
-## 2.15.1 (2019-09-12)
+## 2.15.1 (2019-09-12) {#v2-15-1}
 
 * Melhorias ao certificado de chave pública tipo *Cnb* (funcionalidade específica para um cliente)
 
 Atualiza modelo do banco de dados: não
 
 
-<a name="v2-15-0" />
-## 2.15.0 (2019-08-10)
+## 2.15.0 (2019-08-10) {#v2-15-0}
 
 * Adicionado suporte a [instalação em Linux](on-premises/linux/index.md)
 * Adicionado suporte a armazenamento de chaves de AC no banco de dados
@@ -1084,8 +1007,7 @@ Mudanças de configuração:
 {/* TODO: add link to EncryptionKey generation instructions */}
 
 
-<a name="v2-14-1" />
-## 2.14.1 (2019-06-13)
+## 2.14.1 (2019-06-13) {#v2-14-1}
 
 * Correções de bugs
   * Pesquisa textual nos certificados e pedidos não estava funcionando com termos parciais
@@ -1095,8 +1017,7 @@ Atualiza modelo do banco de dados: não
 
 Mudanças de configuração: nenhuma
 
-<a name="v2-14-0" />
-## 2.14.0 (2019-06-11)
+## 2.14.0 (2019-06-11) {#v2-14-0}
 
 * Interface para ver e desbloquear pedidos bloqueados
 * Tela de criação do pedido adaptada para solicitar CA, Template e telefone celular
@@ -1106,8 +1027,7 @@ Atualiza modelo do banco de dados: não
 
 Mudanças de configuração: nenhuma
 
-<a name="v2-13-0" />
-## 2.13.0 (2019-05-09)
+## 2.13.0 (2019-05-09) {#v2-13-0}
 
 * Adicionada possiblidade de configurar e-mails enviados pelo sistema (tema e imagens)
 * Criada API para envio de SMS com link para emissão
@@ -1120,8 +1040,7 @@ Mudanças de configuração:
 * `General:Theme` (opcional)
   * Valores válidos: vazio (padrão) ou `Teal`
 
-<a name="v2-12-1" />
-## 2.12.1 (2019-04-18)
+## 2.12.1 (2019-04-18) {#v2-12-1}
 
 * PKI SDK atualizado para versão [2.4.0](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-4-0)
 * Correções de bugs
@@ -1132,8 +1051,7 @@ Atualiza modelo do banco de dados: não
 
 Mudanças de configuração: nenhuma
 
-<a name="v2-12-0" />
-## 2.12.0 (2019-03-21)
+## 2.12.0 (2019-03-21) {#v2-12-0}
 
 * Emissão de certificado em celular
 
@@ -1148,8 +1066,7 @@ Mudanças de configuração
   * `PkiSuite:MobileIOSStoreUri`
   * `PkiSuite:MobileAndroidStoreUri`
 
-<a name="v2-11-1" />
-## 2.11.1 (2019-02-26)
+## 2.11.1 (2019-02-26) {#v2-11-1}
 
 * Adicionada validação de endereço de e-mail na criação de pedidos de certificados tipo ICP-Brasil (`PkiBrazil`)
 * PKI SDK atualizado para versão [2.3.0](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-3-0) (RTM)
@@ -1158,8 +1075,7 @@ Atualiza modelo do banco de dados: não
 
 Mudanças de configuração: nenhuma
 
-<a name="v2-11-0" />
-## 2.11.0 (2019-02-15)
+## 2.11.0 (2019-02-15) {#v2-11-0}
 
 * Adicionado suporte a certificados para blockchain [IBM Hyperledger](https://www.ibm.com/blockchain/hyperledger)
 * Adicionado suporte a curvas elípticas (ECC)
@@ -1175,8 +1091,7 @@ Atualiza modelo do banco de dados: não
 
 Mudanças de configuração: nenhuma
 
-<a name="v2-10-3" />
-## 2.10.3 (2019-01-21)
+## 2.10.3 (2019-01-21) {#v2-10-3}
 
 * Melhorias à configuração de envio de SMS
 * PKI SDK atualizado para versão [2.2.6](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-2-6)
@@ -1191,8 +1106,7 @@ Mudanças de configuração
 * Novas configurações do Twilio: pode-se especificar `SMS:AccountSid` e `SMS:AuthToken` ao invés de especificar `SMS:TwilioBasicCredential`
   * A antiga configuração `SMS:TwilioBasicCredential` ainda é suportada para fins de *backward compatibility*
 
-<a name="v2-10-2" />
-## 2.10.2 (2019-01-17)
+## 2.10.2 (2019-01-17) {#v2-10-2}
 
 * ASP.NET Core atualizado para 2.2
 * Novo arquivo de configuração para hospedagem em IIS (appsettings.iis.json)
@@ -1202,8 +1116,7 @@ Atualiza modelo do banco de dados: não
 
 Mudanças de configuração: nenhuma
 
-<a name="v2-10-1" />
-## 2.10.1 (2019-01-14)
+## 2.10.1 (2019-01-14) {#v2-10-1}
 
 * Corrigido bug que causava erro na emissão de certificado quando o Web PKI não estava instalado
 
@@ -1211,7 +1124,6 @@ Atualiza modelo do banco de dados: não
 
 Mudanças de configuração: nenhuma
 
-<a name="v2-10-0" />
-## 2.10.0 (2019-01-10)
+## 2.10.0 (2019-01-10) {#v2-10-0}
 
 * Primeira versão disponível para instalação *on-premises*

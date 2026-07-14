@@ -16,8 +16,7 @@ https://github.com/LacunaSoftware/RestPkiSamples/tree/master/CSharp/WebForms
 
 Esta seção lista tem onde encontrar as partes relevantes em cada amostra de recurso no projeto.
 
-<a name="auth" />
-### Autentificação com certificado digital
+### Autentificação com certificado digital {#auth}
 
 * Web Forms: 
 	* [Authentication.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Authentication.aspx)
@@ -28,8 +27,7 @@ Esta seção lista tem onde encontrar as partes relevantes em cada amostra de re
 		* [AuthenticationFail.aspx.cs](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/AuthenticationFail.aspx.cs)
 * JavaScript: [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Scripts/signature-form.js)
 
-<a name="pades" />
-### Assinatura PAdES com arquivo já no servidor
+### Assinatura PAdES com arquivo já no servidor {#pades}
 
 * Web Forms:
 	* [PadesSignature.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/PadesSignature.aspx)
@@ -39,21 +37,18 @@ Esta seção lista tem onde encontrar as partes relevantes em cada amostra de re
 * JavaScript: [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Scripts/signature-form.js)
 
 
-<a name="pades-upload" />
-### Assinatura PAdES com arquivo enviado pelo usuário
+### Assinatura PAdES com arquivo enviado pelo usuário {#pades-upload}
 
 Após o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração em [Upload.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Upload.aspx) e e no seu *code-behind*
 [Upload.aspx.cs](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Upload.aspx.cs)) é feito o fluxo de controle é o mesmo que na amostra [PAdES signature with file already on server](#pades),
 mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="pades-cosign" />
-### Assinatura conjunta PAdES
+### Assinatura conjunta PAdES {#pades-cosign}
 
 Após o fluxo de controle da amostra [Assinatura PAdES com arquivo já no servidor](#pades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `userfile` preenchidos.
 
-<a name="pdf-marks" />
-### Marcas PAdES
+### Marcas PAdES {#pdf-marks}
 
 Esse recurso é demonstrado como uma configuração opcional no  [Assinatura PAdES com arquivo já no servidor](#pades), amostra que por padrão começa comentada. Para ativá-lo, remova o 
 comentário da linha a seguir [PadesSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/PadesSignature.aspx.cs):
@@ -70,23 +65,19 @@ Tente mudar o argumento para a função `getPdfMark()`para ver diferentes config
 O código relevante está no arquivo [PadesVisualElements](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/PadesVisualElements.cs), 
 função `getPdfMark()`.
 
-<a name="pades-server" />
-### Assinatura PAdES usando chave do servidor
+### Assinatura PAdES usando chave do servidor {#pades-server}
 
 Ainda não está disponível neste projeto.
 
-<a name="pades-wo-client" />
-### Assinatura PAdES sem a comunicação com cliente
+### Assinatura PAdES sem a comunicação com cliente {#pades-wo-client}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-pades" />
-### Abrir/validar uma assinatura PAdES existente
+### Abrir/validar uma assinatura PAdES existente {#open-pades}
 
 Ainda não está disponível neste projeto.
 
-<a name="print" />
-### Versão para impressão
+### Versão para impressão {#print}
 
 Após o fluxo de controle da amostra [PAdES signature with the file already on server](#pades) estar completo e o link *Download a printer-friendly version of the signed file* for clicado,
 o fluxo vai para web form: [PrinterFriendlyVersion.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/PrinterFriendlyVersion.aspx)
@@ -95,8 +86,7 @@ e o code-behind [PrinterFriendlyVersion.aspx.cs](https://github.com/LacunaSoftwa
 O PDF gerado contém links para web form: [Check.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Check.aspx)
 e para o code-behind [Check.aspx.cs](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Check.aspx.cs), que mostra detalhes da assinaturas.
 
-<a name="cades" />
-### Assinatura CAdES com arquivo já no servidor
+### Assinatura CAdES com arquivo já no servidor {#cades}
 
 * Web Forms:
 	* [CadesSignature.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/CadesSignature.aspx)
@@ -105,36 +95,30 @@ e para o code-behind [Check.aspx.cs](https://github.com/LacunaSoftware/RestPkiSa
 		* [CadesSignatureInfo.aspx.cs](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/CadesSignatureInfo.aspx.cs)
 * JavaScript: [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Scripts/signature-form.js)
 
-<a name="cades-upload" />
-### Assinatura CAdES com upload do arquivo pelo usuário
+### Assinatura CAdES com upload do arquivo pelo usuário {#cades-upload}
 
 Depois que o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração no [Upload.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Upload.aspx))
 e o code-behind [Upload.aspx.cs](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Upload.aspx.cs é feito 
 o fluxo de controle é o mesmo que na amostra [CAdES signature with file already on server](#cades), mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="cades-cosign" />
-### Assinatura conjunta CAdES
+### Assinatura conjunta CAdES {#cades-cosign}
 
 Após o fluxo de controle da amostra [CAdES signature with file already on server](#cades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
 
-<a name="cades-server" />
-### Assinatura CAdES usando chave do servidor
+### Assinatura CAdES usando chave do servidor {#cades-server}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-cades" />
-### Abrir/validar uma assinatura CAdES existente
+### Abrir/validar uma assinatura CAdES existente {#open-cades}
 
 Ainda não está disponível neste projeto.
 
-<a name="xml-full" />
-### Assinatura XML do documento inteiro
+### Assinatura XML do documento inteiro {#xml-full}
 
 Ainda não está disponível neste projeto.
 
-<a name="xml-element" />
-### Assinatura XML de um elemento
+### Assinatura XML de um elemento {#xml-element}
 
 * Web Forms:
 	* [XmlElementSignature.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/XmlElementSignature.aspx)
@@ -143,36 +127,30 @@ Ainda não está disponível neste projeto.
 		* [XmlElementSignatureInfo.aspx.cs](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/XmlElementSignatureInfo.aspx.cs)
 * JavaScript: [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Scripts/signature-form.js)
 
-<a name="xades-element" />
-### Assinatura XAdES de um elemento
+### Assinatura XAdES de um elemento {#xades-element}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-xml" />
-### Abrir/validar assinatura de um arquivo XML existente
+### Abrir/validar assinatura de um arquivo XML existente {#open-xml}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch" />
-### Lote de assinatura PAdES 
+### Lote de assinatura PAdES {#batch}
 
 * Web Form: [BatchSignature.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/BatchSignature.aspx)
 	* [BatchSignature.aspx.cs](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/BatchSignature.aspx.cs)
 * JavaScript: [batch-signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Scripts/batch-signature-form.js)
 
-<a name="batch-optimized" />
-### Lote otimizado de assinaturas PAdES
+### Lote otimizado de assinaturas PAdES {#batch-optimized}
 
 * Web Form: [BatchSignatureOptimized.aspx](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/BatchSignatureOptimized.aspx)
 	* [BatchSignatureOptimized.aspx.cs](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/BatchSignatureOptimized.aspx.cs)
 * JavaScript: [batch-signature-optimized-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/WebForms/WebForms/Scripts/batch-signature-optimized-form.js)
 
-<a name="batch-cades" />
-### Lote de assinaturas CAdES
+### Lote de assinaturas CAdES {#batch-cades}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-xml-element" />
-### Lote de assinaturas XML de elementos no mesmo documento
+### Lote de assinaturas XML de elementos no mesmo documento {#batch-xml-element}
 
 Ainda não está disponível neste projeto.

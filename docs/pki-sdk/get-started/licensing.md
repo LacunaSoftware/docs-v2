@@ -12,8 +12,7 @@ Existem 3 maneiras de se carregar a licença. A maneira mais recomendada depende
 * Para aplicações **web**, o método mais recomendado é colocar o [arquivo LacunaPKILicense.config no diretório da DLL](#side-loaded-file)
 * Para aplicações **desktop**, o método mais recomendado é setar a licença [Programaticamente](#programmatically)
 
-<a name="side-loaded-file" />
-## Arquivo LacunaPKILicense.config no diretório da DLL
+## Arquivo LacunaPKILicense.config no diretório da DLL {#side-loaded-file}
 
 O SDK busca automaticamente o arquivo .config da licença junto à sua DLL (Lacuna.Pki.dll). Portanto, basta que o arquivo `LacunaPKILicense.config` seja copiado durante a compilação para o mesmo local da DLL.
 
@@ -41,8 +40,7 @@ Outra opção é incluir no arquivo `Web.config` ou `App.config` do seu site ou 
 </appSettings>
 ```
 
-<a name="programmatically" />
-## Programaticamente
+## Programaticamente {#programmatically}
 
 A licença pode ser carregada programaticamente fazendo uma chamada ao método @Lacuna.Pki.PkiConfig.LoadLicense(System.Byte[]) passando o valor decodificado da licença em Base64, preferencialmente no código de inicialização do seu site ou aplicação:
 

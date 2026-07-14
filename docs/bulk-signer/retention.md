@@ -9,6 +9,6 @@ sidebar_position: 11
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs-v2/docs/en/bulk-signer/retention)
+- [English](/en-us/articles/bulk-signer/retention)
 
 :::

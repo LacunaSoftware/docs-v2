@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Integração com Whatsapp"
 sidebar_position: 5
+slug: /signer/on-premises/whatsapp
 ---
 
 # Integração com Whatsapp

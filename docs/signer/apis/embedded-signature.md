@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Assinatura Embutida"
 sidebar_position: 3
+slug: /signer/embedded-signature
 ---
 
 # Integração com Assinatura embutida

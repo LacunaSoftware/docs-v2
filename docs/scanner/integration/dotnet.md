@@ -3,7 +3,7 @@
 Para integrar a sua aplicação web em .NET ao [Lacuna Scanner Service](../index.md), siga os passos descritos neste artigo.
 
 :::tip
-Antes de começar, veja a [visão geral da integração](../index.md#overview).
+Antes de começar, veja a [visão geral da integração](../index.md).
 :::
 
 
@@ -65,8 +65,7 @@ if (scanSession.Result == ScanSessionResults.Success) {
 }
 ```
 
-<a name="multifile" />
-## Sessões *multifile*
+## Sessões *multifile* {#multifile}
 
 Você pode permitir que o usuário digitalize múltiplos documentos. Para isso, passe o parâmetro `multifile: true` ao criar a sessão:
 
@@ -85,8 +84,7 @@ if (scanSession.Result == ScanSessionResults.Success) {
 }
 ```
 
-<a name="optional-steps" />
-## Sessões com entrada de metadados e/ou assinatura
+## Sessões com entrada de metadados e/ou assinatura {#optional-steps}
 
 Caso deseje solicitar ao digitalizador a entrada dos metadados requeridos pela Medida Provisória 10.278/2020, preencha a propriedade `MetadataInputEnabled = true`:
 
@@ -116,8 +114,7 @@ Para aderir à Medida Provisória 10.278/2020, devem ser habilitados tanto a ent
 :::
 
 
-<a name="aspnet-core" />
-## ASP.NET Core
+## ASP.NET Core {#aspnet-core}
 
 Caso a sua aplicação web seja em ASP.NET Core, no método `ConfigureServices` do *startup* da sua aplicação, adicione:
 

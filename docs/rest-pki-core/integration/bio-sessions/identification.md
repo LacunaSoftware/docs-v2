@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/bio-sessions/identification
+---
+
 # Identificação facial (1:N Identification)  - Rest PKI Core
 
  - Busca o rosto capturado em uma base de cadastros para descobrir a quem ele pertence.

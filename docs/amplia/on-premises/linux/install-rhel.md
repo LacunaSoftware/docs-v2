@@ -30,9 +30,8 @@ Antes de começar, certifique-se de que seu sistema esteja [registrado e inscrit
 * (recomendado) Certificado SSL válido para o domínio de acesso ao painel de controle
 * **Connection string** para um [banco de dados SQL Server ou PostgreSQL criado previamente](../prepare-database.md)
 
-<a name="install-aspnet-core" />
 
-## Instale o ASP.NET Core Runtime 3.1
+## Instale o ASP.NET Core Runtime 3.1 {#install-aspnet-core}
 
 :::info
 Essas instruções assumem que você está autenticado como **root**. Se você não estiver, execute `sudo su -` antes de continuar!
@@ -138,7 +137,7 @@ Edite o arquivo de configuração para configurar sua instância do Amplia:
 nano /etc/amplia/appsettings.conf
 ```
 
-<a name="encryption-key-generation" />
+<a id="encryption-key-generation" />
 
 Na seção `[General]`, para preencher o parâmetro `EncryptionKey` gere uma chave de 256 bits para cifrar dados sensíveis armazenados no banco de dados:
 
@@ -320,7 +319,7 @@ touch /etc/opt/rh/rh-nginx116/nginx/conf.d/amplia.conf
 nano /etc/opt/rh/rh-nginx116/nginx/conf.d/amplia.conf
 ```
 
-Digite o seguinte, substituindo o valor do item `server_name` pelo domínio de acesso ao painel de controle (veja [Domínio de acesso ao painel de controle](../../index.md#dashboard-domain)):
+Digite o seguinte, substituindo o valor do item `server_name` pelo domínio de acesso ao painel de controle (veja [Domínio de acesso ao painel de controle](../index.md#dashboard-domain)):
 
 ```nginx
 server {

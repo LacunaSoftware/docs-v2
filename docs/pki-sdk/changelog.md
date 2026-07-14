@@ -9,6 +9,6 @@ sidebar_position: 9
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs/en/pki-sdk/changelog)
+- [English](/en-us/articles/pki-sdk/changelog)
 
 :::

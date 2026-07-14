@@ -4,6 +4,6 @@
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs/en/pki-express/nodejs/trusting-in-custom-certificates)
+- [English](/en-us/articles/pki-express/nodejs/trusting-in-custom-certificates)
 
 :::

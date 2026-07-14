@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/client-tool
+---
+
 # Utilitário cliente do Rest PKI
 
 O **utilitário cliente do Rest PKI** é um aplicativo de linha de comando para assinar documentos, entre outras operações, em aplicativos desktop utilizando o 

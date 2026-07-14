@@ -1,8 +1,123 @@
+---
+slug: /rest-pki/core/changelog
+---
+
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+## 4.3.1 (2026-07-08) {#v4-3-1}
+
+Atualiza modelo do banco de dados: não
+
+### Novas funcionalidades
+
+RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+### Melhorias
+
+RPNG-765 Atualizar para o SPA 7.3, adicionando telemetria de desempenho de runtime ao Microsoft Application Insights
+
+### Correções de bugs
+
+RPNG-766 Corrigir um erro raro que podia ocorrer ao usar as APIs de autenticação legadas
+
+## 4.2.6 (2026-07-07) {#v4-2-6}
+
+Atualiza modelo do banco de dados: não
+
+### Novas funcionalidades
+
+RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+## 4.1.7 (2026-07-07) {#v4-1-7}
+
+Atualiza modelo do banco de dados: não
+
+### Novas funcionalidades
+
+RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+## 4.0.6 (2026-07-07) {#v4-0-6}
+
+Atualiza modelo do banco de dados: não
+
+### Novas funcionalidades
+
+RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+## 3.4.4 (2026-07-07) {#v3-4-4}
+
+Atualiza modelo do banco de dados: não
+
+### Novas funcionalidades
+
+RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+## 4.3.0 (2026-06-25) {#v4-3-0}
+
+Atualiza modelo do banco de dados: **sim**
+
+### Novas funcionalidades
+
+RPNG-323 RPNG-681 RPNG-682 RPNG-683 Adicionar captura de geolocalização nas sessões de biometria
+
+RPNG-419 Adicionar suporte ao Lacuna FaceTecServer 3.0+
+
+RPNG-503 Configurações da página de sessão biométrica
+
+RPNG-574 Configurações de limites de transação por subscription (SysAdmin)
+
+RPNG-594 Páginas de configuração de identificações biométricas
+
+RPNG-610 Adicionar botão para remover a imagem da logo
+
+RPNG-623 RPNG-711 Adicionar botão de resetar para os padrões do sistema em cada seção das configurações
+
+### Melhorias
+
+RPNG-389 RPNG-722 Otimizar listagem de dados utilizando paginação por cursor
+
+RPNG-501 Exibir os dados de OCR do FaceTec ID Scan no dashboard
+
+RPNG-535 Aplicar limites de transação para todos os tipos de transação
+
+RPNG-605 RPNG-679 Melhorar APIs do dashboard
+
+RPNG-613 Adicionar traduções para falhas de cadastro biométrico e do cadastro em lote
+
+RPNG-620 Adicionar informações de PDF/A na validação pública de documentos
+
+RPNG-625 Adicionar nomes completos dos novos temas
+
+RPNG-641 Atualizar o FaceTec browser SDK para v9.7.115
+
+RPNG-649 Melhorar o botão que informa a subscription atual
+
+RPNG-689 Adicionar tradução para a frase "Todas as organizações"
+
+### Correções de bugs
+
+RPNG-538 Erro "User not found" ao abrir a tela de detalhes do usuário
+
+RPNG-644 Filtro por aplicação na tabela de transações não funcionava
+
+RPNG-655 Transação duplicada na conclusão de autenticação com certificado (legado)
+
+RPNG-702 FaceMaps antigos não eram excluídos após autenticação biométrica
+
+
+## 4.2.5 (2026-06-24) {#v4-2-5}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+RPNG-716 Atualizações dos SDKs da FaceTec
+
+
 <a name="v4-2-4" />
-## 4.2.4 (2026-04-28)
+
+## 4.2.4 (2026-04-28) {#v4-2-4}
 
 Atualiza modelo do banco de dados: não
 
@@ -11,8 +126,7 @@ Atualiza modelo do banco de dados: não
 RPNG-636 Adicionar configuração para desabilitar upload na página pública de validação de documentos
 
 
-<a name="v4-2-3" />
-## 4.2.3 (2026-04-21)
+## 4.2.3 (2026-04-21) {#v4-2-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -21,8 +135,7 @@ Atualiza modelo do banco de dados: não
 RPNG-624 Erro no processamento de Liveness quando há baixa qualidade da imagem na captura anterior
 
 
-<a name="v4-2-2" />
-## 4.2.2 (2026-04-18)
+## 4.2.2 (2026-04-18) {#v4-2-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -31,8 +144,7 @@ Atualiza modelo do banco de dados: não
 RPNG-622 Problemas de compatibilidade na configuração de limite de upload da API
 
 
-<a name="v4-2-1" />
-## 4.2.1 (2026-04-18)
+## 4.2.1 (2026-04-18) {#v4-2-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -41,8 +153,7 @@ Atualiza modelo do banco de dados: não
 RPNG-621 Adicionar SubjectIdentifier para sessões de captura de documento de identidade
 
 
-<a name="v4-2-0" />
-## 4.2.0 (2026-04-16)
+## 4.2.0 (2026-04-16) {#v4-2-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -51,8 +162,7 @@ Atualiza modelo do banco de dados: não
 RPNG-438 RPNG-611 Adicionar suporte a conversão e validação de PDF/As
 
 
-<a name="v4-1-6" />
-## 4.1.6 (2026-04-16)
+## 4.1.6 (2026-04-16) {#v4-1-6}
  
 Updates database model: no
 
@@ -61,8 +171,7 @@ Updates database model: no
 RPNG-616 Página de configurações da subscription lança erros depois de ter sido fechada
 
 
-<a name="v4-1-5" />
-## 4.1.5 (2026-04-16)
+## 4.1.5 (2026-04-16) {#v4-1-5}
 
 Atualiza modelo do banco de dados: não
 
@@ -71,8 +180,7 @@ Atualiza modelo do banco de dados: não
 RPNG-617 Melhorar matcher de número de identidade das vídeo identificações
 
 
-<a name="v4-1-4" />
-## 4.1.4 (2026-04-16)
+## 4.1.4 (2026-04-16) {#v4-1-4}
 
 Atualiza modelo do banco de dados: não
 
@@ -81,8 +189,7 @@ Atualiza modelo do banco de dados: não
 RPNG-615 Adicionar rota para obter detalhes de sessões FortFace
 
 
-<a name="v4-1-3" />
-## 4.1.3 (2026-04-15)
+## 4.1.3 (2026-04-15) {#v4-1-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -91,8 +198,7 @@ Atualiza modelo do banco de dados: não
 RPNG-612 Aumentar limite máximo configurável para tamanho de uploads
 
 
-<a name="v4-1-2" />
-## 4.1.2 (2026-04-09)
+## 4.1.2 (2026-04-09) {#v4-1-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -105,8 +211,7 @@ RPNG-607 Política Adobe Reader para geração de assinatura
 RPNG-608 Atualização de bibliotecas de assinatura
 
 
-<a name="v3-7-2" />
-## 3.7.2 (2026-04-09)
+## 3.7.2 (2026-04-09) {#v3-7-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -115,8 +220,7 @@ Atualiza modelo do banco de dados: não
 RPNG-608 Atualização de bibliotecas de assinatura
 
 
-<a name="v3-4-3" />
-## 3.4.3 (2026-04-07)
+## 3.4.3 (2026-04-07) {#v3-4-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -125,8 +229,7 @@ Atualiza modelo do banco de dados: não
 RPNG-608 Atualização de bibliotecas de assinatura
 
 
-<a name="v4-1-1" />
-## 4.1.1 (2026-04-06)
+## 4.1.1 (2026-04-06) {#v4-1-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -134,8 +237,7 @@ Atualiza modelo do banco de dados: não
 
 RPNG-606 Atualização do SDK da Fortface para v2.4.3
 
-<a name="v4-1-0" />
-## 4.1.0 (2026-04-01)
+## 4.1.0 (2026-04-01) {#v4-1-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -170,8 +272,7 @@ RPNG-603 Atualizações dos SDKs da FaceTec
 RPNG-567 Listagem paginada de Subjects da subscription via ClientLib
 
 
-<a name="v4-0-5" />
-## 4.0.5 (2026-03-20)
+## 4.0.5 (2026-03-20) {#v4-0-5}
 
 Atualiza modelo do banco de dados: não
 
@@ -180,8 +281,7 @@ Atualiza modelo do banco de dados: não
 RPNG-547, RPNG-582 Adicionar suporte ao sistema de CNPJs alfanuméricos
 
 
-<a name="v3-7-1" />
-## 3.7.1 (2026-03-20)
+## 3.7.1 (2026-03-20) {#v3-7-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -196,8 +296,7 @@ RPNG-540 Configuração de sistema para usar apenas a língua padrão
 RPNG-533 TypeError durante a listagem de certificados do Web PKI
 
 
-<a name="v4-0-4" />
-## 4.0.4 (2026-03-18)
+## 4.0.4 (2026-03-18) {#v4-0-4}
 
 Atualiza modelo do banco de dados: não
 
@@ -206,8 +305,7 @@ Atualiza modelo do banco de dados: não
 RPNG-576 Atualização do FortFace SDK para v2.4.2
 
 
-<a name="v4-0-3" />
-## 4.0.3 (2026-03-16)
+## 4.0.3 (2026-03-16) {#v4-0-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -216,8 +314,7 @@ Atualiza modelo do banco de dados: não
 RPNG-566 Problemas com atualização do FortFace SDK para v2.4.1
 
 
-<a name="v4-0-2" />
-## 4.0.2 (2026-03-12)
+## 4.0.2 (2026-03-12) {#v4-0-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -232,8 +329,7 @@ RPNG-570 Atualização do FortFace SDK para v2.4.1
 RPNG-566 Rotas de completar sessões exigindo subscription
 
 
-<a name="v4-0-1" />
-## 4.0.1 (2026-03-10)
+## 4.0.1 (2026-03-10) {#v4-0-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -242,8 +338,7 @@ Atualiza modelo do banco de dados: não
 RPNG-563 Problema com injeção de dependências do BusinessService
 
 
-<a name="v4-0-0" />
-## 4.0.0 (2026-03-09)
+## 4.0.0 (2026-03-09) {#v4-0-0}
 
 :::warning
 Veja [Atualizando o Rest PKI Core da versão 3.x para 4.0](on-premises/update-40.md)
@@ -341,8 +436,7 @@ RPNG-539 Formulário de configuração da Subscription marcado com unsaved chang
 RPNG-542 Telas não atualizam ao trocar de subscription
 
 
-<a name="v3-7-0" />
-## 3.7.0 (2025-11-26)
+## 3.7.0 (2025-11-26) {#v3-7-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -351,8 +445,7 @@ Atualiza modelo do banco de dados: **sim**
 RPNG-453 Melhorar fotos de enrollment com liveness FortFace
 
 
-<a name="v3-6-2" />
-## 3.6.2 (2025-11-24)
+## 3.6.2 (2025-11-24) {#v3-6-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -367,8 +460,7 @@ RPNG-428 Atualizar SDKs da FortFace
 RPNG-454 Adicionar InteractionMethod no BioSessionModel para BioDashBoard
 
 
-<a name="v3-6-1" />
-## 3.6.1 (2025-11-20)
+## 3.6.1 (2025-11-20) {#v3-6-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -376,8 +468,7 @@ Atualiza modelo do banco de dados: não
 
 RPNG-320 Carregamento de dados de sessões FaceTec legadas
 
-<a name="v3-6-0" />
-## 3.6.0 (2025-11-20)
+## 3.6.0 (2025-11-20) {#v3-6-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -393,8 +484,7 @@ RPNG-460 Adicionar ferramentas para extração de fotos das sessões de liveness
 
 RPNG-446 Dashboard - Adicionar campos faltantes de FaceTecSession
 
-<a name="v3-5-2" />
-## 3.5.2 (2025-11-20)
+## 3.5.2 (2025-11-20) {#v3-5-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -402,8 +492,7 @@ Atualiza modelo do banco de dados: não
 
 RPNG-457 Problemas com configuração de provedor de identidade externa da Subscription
 
-<a name="v3-5-0" />
-## 3.5.0 (2025-11-17)
+## 3.5.0 (2025-11-17) {#v3-5-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -443,8 +532,7 @@ RPNG-357 Não existe mensagem de erro amigável quando outro app está usando a 
 
 RPNG-409 Problemas na customização de cores FaceTec IdScan
 
-<a name="v3-4-0" />
-## 3.4.0 (2025-10-28)
+## 3.4.0 (2025-10-28) {#v3-4-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -472,8 +560,7 @@ RPNG-285 Ajustes de permissões
 
 RPNG-388 Erro de constraint duplicada ao salvar certificados
 
-<a name="v3-3-0" />
-## 3.3.0 (2025-10-16)
+## 3.3.0 (2025-10-16) {#v3-3-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -513,8 +600,7 @@ RPNG-376 Inconsistência na configuração do limite de tentativas de liveness n
 
 {/* RPNG-378 Correção interna de comando de migração SQL */}
 
-<a name="v3-2-1" />
-## 3.2.1 (2025-08-27)
+## 3.2.1 (2025-08-27) {#v3-2-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -526,8 +612,7 @@ RPNG-367 Atualizar certificados da cadeia de testes v3
 
 RPNG-365 Garantir build com última imagem do AspNet
 
-<a name="v3-2-0" />
-## 3.2.0 (2025-08-22)
+## 3.2.0 (2025-08-22) {#v3-2-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -553,8 +638,7 @@ RPNG-355 Erro `BadRequest` ao tentar utilizar AWS S3 em alguns cenários
 
 
 
-<a name="v3-1-1" />
-## 3.1.1 (2025-07-24)
+## 3.1.1 (2025-07-24) {#v3-1-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -568,8 +652,7 @@ RPNG-341 Imagem para ARM64 não está escutando na porta 80 após atualização 
 
 
 
-<a name="v3-1-0" />
-## 3.1.0 (2025-07-24)
+## 3.1.0 (2025-07-24) {#v3-1-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -579,8 +662,7 @@ RPNG-297 Sessões de biometria
 
 
 
-<a name="v3-0-1" />
-## 3.0.1 (2025-06-25)
+## 3.0.1 (2025-06-25) {#v3-0-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -598,8 +680,7 @@ RPNG-315 Erro `BlobNotFoundException` em certos blobs da pasta `signedfiles`
 
 
 
-<a name="v3-0-0" />
-## 3.0.0 (2025-06-16)
+## 3.0.0 (2025-06-16) {#v3-0-0}
 
 :::warning
 Veja [Atualizando o Rest PKI Core da versão 2.x para 3.0](on-premises/update-30.md)
@@ -628,8 +709,7 @@ RPNG-296 Detalhes da validação do certificado na página de validação de doc
 
 
 
-<a name="v2-5-0" />
-## 2.5.0 (2025-04-11)
+## 2.5.0 (2025-04-11) {#v2-5-0}
 
 Idêntica a: 2.5.0 RC 7 (2025-04-11)
 
@@ -659,8 +739,7 @@ RPNG-286 Marcas de validação específicas para caso paisagem \(variante *onr*\
 
 
 
-<a name="v2-4-5" />
-## 2.4.5 (2025-12-03)
+## 2.4.5 (2025-12-03) {#v2-4-5}
 
 Atualiza modelo do banco de dados: não
 
@@ -670,8 +749,7 @@ RPNG-277 Coluna `DateCompleted` não é preenchida quando uma sessão de assinat
 
 
 
-<a name="v2-4-4" />
-## 2.4.4 (2024-10-02)
+## 2.4.4 (2024-10-02) {#v2-4-4}
 
 Atualiza modelo do banco de dados: não
 
@@ -681,8 +759,7 @@ RPNG-271 Melhorar desempenho de chamadas simples repetidas muitas vezes por clie
 
 
 
-<a name="v2-4-3" />
-## 2.4.3 (2024-09-25)
+## 2.4.3 (2024-09-25) {#v2-4-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -692,8 +769,7 @@ RPNG-291 Problemas de retrocompatibilidade na API de adicionar marcas a PDFs
 
 
 
-<a name="v2-4-2" />
-## 2.4.2 (2024-07-26)
+## 2.4.2 (2024-07-26) {#v2-4-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -703,8 +779,7 @@ RPNG-269 Erro 500 ao realizar assinar de PDF com política `PkiBrazil.AdrTempo`
 
 
 
-<a name="v2-4-1" />
-## 2.4.1 (2024-07-25)
+## 2.4.1 (2024-07-25) {#v2-4-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -714,8 +789,7 @@ RPNG-290 Erro de compatibilidade com SQL Server 2012 \(uso de função `TRIM()`\
 
 
 
-<a name="v2-4-0" />
-## 2.4.0 (2024-07-25)
+## 2.4.0 (2024-07-25) {#v2-4-0}
 
 Idêntica a: 2.4.0 RC 1 (2024-06-15)
 
@@ -737,8 +811,7 @@ RPNG-264 Metadados do documento não aparecem na página de validação \(varian
 
 
 
-<a name="v2-3-0" />
-## 2.3.0 (2024-06-06)
+## 2.3.0 (2024-06-06) {#v2-3-0}
 
 Idêntica a: 2.3.0 RC 1 (2024-05-17)
 
@@ -750,8 +823,7 @@ RPNG-259 CNS e Cartório por subscription \(variante *onr*\)
 
 
 
-<a name="v2-2-2" />
-## 2.2.2 (2024-05-04)
+## 2.2.2 (2024-05-04) {#v2-2-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -761,8 +833,7 @@ RPNG-261 Erro NullReferenceException ao solicitar carimbo via TSP
 
 
 
-<a name="v2-2-1" />
-## 2.2.1 (2024-05-01)
+## 2.2.1 (2024-05-01) {#v2-2-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -772,8 +843,7 @@ RPNG-260 URLs relativas de upload em chamadas à API ainda não são aceitas em 
 
 
 
-<a name="v2-2-0" />
-## 2.2.0 (2024-04-30)
+## 2.2.0 (2024-04-30) {#v2-2-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -820,8 +890,7 @@ RPNG-253 Pedido de carimbo de tempo não registra duração em caso de erro no p
 RPNG-254 Consulta a chamadas de provedor de carimbo de tempo não utiliza o índice adequado
 
 
-<a name="v2-1-3" />
-## 2.1.3 (2024-04-10)
+## 2.1.3 (2024-04-10) {#v2-1-3}
 
 Atualiza modelo do banco de dados: não
 
@@ -831,8 +900,7 @@ RPNG-240 Usar timestamp tier padrão no caso de uma política com carimbo ser us
 
 
 
-<a name="v2-1-2" />
-## 2.1.2 (2024-03-14)
+## 2.1.2 (2024-03-14) {#v2-1-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -842,8 +910,7 @@ RPNG-231 Inconformidades nos códigos de retorno declarados no Swagger
 
 
 
-<a name="v2-1-1" />
-## 2.1.1 (2024-01-24)
+## 2.1.1 (2024-01-24) {#v2-1-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -861,8 +928,7 @@ RPNG-208 Propriedade `signatureResult.getFile().url` retorna uma URL absoluta (e
 
 
 
-<a name="v2-1-0" />
-## 2.1.0 (2024-01-15)
+## 2.1.0 (2024-01-15) {#v2-1-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -890,8 +956,7 @@ RPNG-232 Aplicação está exigindo claim de CPF desnecessariamente
 
 
 
-<a name="v2-0-2" />
-## 2.0.2 (2023-11-09)
+## 2.0.2 (2023-11-09) {#v2-0-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -901,8 +966,7 @@ RPNG-220 Ignorar erros de comunicação com o Amplia caso `AttributeCertificateI
 
 
 
-<a name="v2-0-1" />
-## 2.0.1 (2023-11-08)
+## 2.0.1 (2023-11-08) {#v2-0-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -912,8 +976,7 @@ RPNG-217 Erro "CryptographicException: The payload was invalid" ao consultar ses
 
 
 
-<a name="v2-0-0" />
-## 2.0.0 (2023-10-30)
+## 2.0.0 (2023-10-30) {#v2-0-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -933,8 +996,7 @@ RPNG-198 API de validação de assinaturas não respeita configuração `General
 
 
 
-<a name="v1-13-1" />
-## 1.13.1 (2023-10-17)
+## 1.13.1 (2023-10-17) {#v1-13-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -944,8 +1006,7 @@ RPNG-212 Alterar texto da marca de validação \(variante *onr*\)
 
 
 
-<a name="v2.0.0-rc16" />
-## 2.0.0 RC 16 (2023-09-12)
+## 2.0.0 RC 16 (2023-09-12) {#v2.0.0-rc16}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -969,8 +1030,7 @@ RPNG-209 Multipart upload não está funcionando
 
 
 
-<a name="v2.0.0-rc08" />
-## 2.0.0 RC 8 (2023-06-30)
+## 2.0.0 RC 8 (2023-06-30) {#v2.0.0-rc08}
 
 :::warning
 Antes de atualizar para esta versão, garanta que sua licença do PKI SDK suporta versões lançadas até 2023-06-27.
@@ -997,8 +1057,7 @@ RPNG-196 Erro "Wrong last certificate on Pades signature"
 
 
 
-<a name="v2.0.0-rc07" />
-## 2.0.0 RC 7 (2023-05-30)
+## 2.0.0 RC 7 (2023-05-30) {#v2.0.0-rc07}
 
 :::warning
 Antes de atualizar para esta versão, garanta que sua licença do PKI SDK suporta versões lançadas até 2022-10-19.
@@ -1031,8 +1090,7 @@ RPNG-190 Erro "cannot access a closed file" usando blob storage tipo AwsS3
 
 
 
-<a name="v1-13-0" />
-## 1.13.0 (2023-03-14)
+## 1.13.0 (2023-03-14) {#v1-13-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1046,8 +1104,7 @@ RPNG-169 Completar atualização para SPA 2.6
 
 
 
-<a name="v1-12-2" />
-## 1.12.2 (2023-02-28)
+## 1.12.2 (2023-02-28) {#v1-12-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -1057,8 +1114,7 @@ RPNG-173 API de obter detalhes de um documento pelo ID não está permitindo ace
 
 
 
-<a name="v1-12-1" />
-## 1.12.1 (2023-01-05)
+## 1.12.1 (2023-01-05) {#v1-12-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1068,8 +1124,7 @@ RPNG-164 Melhorar configuração em Linux
 
 
 
-<a name="v1-12-0" />
-## 1.12.0 (2022-12-13)
+## 1.12.0 (2022-12-13) {#v1-12-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1087,8 +1142,7 @@ RPNG-152 Não é possível adicionar raízes confiáveis na tela de criação do
 
 
 
-<a name="v1-11-0" />
-## 1.11.0 (2022-11-14)
+## 1.11.0 (2022-11-14) {#v1-11-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1098,8 +1152,7 @@ RPNG-154 Criar configuração de margens esquerda e superior na marcação de PD
 
 
 
-<a name="v1-10-2" />
-## 1.10.2 (2022-05-03)
+## 1.10.2 (2022-05-03) {#v1-10-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -1109,8 +1162,7 @@ RPNG-149 Permitir forçar política de assinatura de PDFs para padrão ICP Brasi
 
 
 
-<a name="v1-10-1" />
-## 1.10.1 (2022-04-23)
+## 1.10.1 (2022-04-23) {#v1-10-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1120,8 +1172,7 @@ RPNG-148 Erro ao utilizar contexto de segurança personalizado
 
 
 
-<a name="v1-10-0" />
-## 1.10.0 (2022-04-23)
+## 1.10.0 (2022-04-23) {#v1-10-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1137,8 +1188,7 @@ RPNG-147 Permitir configurar se PDFs serão marcados
 
 
 
-<a name="v1-9-0" />
-## 1.9.0 (2022-03-29)
+## 1.9.0 (2022-03-29) {#v1-9-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -1150,8 +1200,7 @@ RPNG-141 Gerenciamento de contextos de segurança da interface web
 
 
 
-<a name="v1-8-0" />
-## 1.8.0 (2022-02-25)
+## 1.8.0 (2022-02-25) {#v1-8-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1161,8 +1210,7 @@ RPNG-10 [Requisitos de certificados](integration/signature-sessions/certificate-
 
 
 
-<a name="v1-7-0" />
-## 1.7.0 (2022-01-25)
+## 1.7.0 (2022-01-25) {#v1-7-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1182,8 +1230,7 @@ RPNG-144 Imagens da sessão de assinatura ficam quebradas na volta do login com 
 
 
 
-<a name="v1-6-0" />
-## 1.6.0 (2021-12-08)
+## 1.6.0 (2021-12-08) {#v1-6-0}
 
 Atualiza modelo do banco de dados: não
 
@@ -1197,8 +1244,7 @@ RPNG-139 Melhorar informações fornecidas sobre o certificado do assinante no `
 
 
 
-<a name="v1-5-1" />
-## 1.5.1 (2021-11-23)
+## 1.5.1 (2021-11-23) {#v1-5-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1208,8 +1254,7 @@ RPNG-140 Erro ao tentar usar root password authentication
 
 
 
-<a name="v1-5-0" />
-## 1.5.0 (2021-09-30)
+## 1.5.0 (2021-09-30) {#v1-5-0}
 
 Atualiza modelo do banco de dados: **sim**
 
@@ -1239,8 +1284,7 @@ RPNG-130 Adicionada variante *onr*
 
 
 
-<a name="v1-4-2" />
-## 1.4.2 (2021-08-24)
+## 1.4.2 (2021-08-24) {#v1-4-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -1254,8 +1298,7 @@ RPNG-125 Erro no upload segmentado
 
 
 
-<a name="v1-4-1" />
-## 1.4.1 (2021-08-24)
+## 1.4.1 (2021-08-24) {#v1-4-1}
 
 Atualiza modelo do banco de dados: não
 
@@ -1273,7 +1316,6 @@ RPNG-123 Retries de processamentos de assinaturas falham após certo tempo trans
 
 
 
-<a name="v1-4-0" />
-## 1.4.0 (2021-08-11)
+## 1.4.0 (2021-08-11) {#v1-4-0}
 
 * Primeira versão disponível publicamente

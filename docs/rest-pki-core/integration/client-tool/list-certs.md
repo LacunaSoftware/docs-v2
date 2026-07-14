@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/client-tool/list-certs
+---
+
 # Comando do utilitário cliente: **list-certs**
 
 ## Nome

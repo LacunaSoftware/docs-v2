@@ -16,8 +16,7 @@ https://github.com/LacunaSoftware/PkiSuiteSamples/tree/master/dotnet/mvc
 
 Esta seção lista tem onde encontrar as partes relevantes em cada amostra de recurso no projeto.
 
-<a name="auth" />
-### Autentificação com certificado digital
+### Autentificação com certificado digital {#auth}
 
 * Controller: [AuthenticationRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/AuthenticationRestController.cs)
 * Views:
@@ -26,8 +25,7 @@ Esta seção lista tem onde encontrar as partes relevantes em cada amostra de re
   * [AuthenticationRest/Failed.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/AuthenticationRest/Failed.cshtml)
   * [AuthenticationRest/Success.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/AuthenticationRest/Success.cshtml)
 
-<a name="pades" />
-### Assinatura PAdES com arquivo já no servidor
+### Assinatura PAdES com arquivo já no servidor {#pades}
 
 * Controller: [PadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/PadesSignatureRestController.cs)
 * Views: 
@@ -35,21 +33,18 @@ Esta seção lista tem onde encontrar as partes relevantes em cada amostra de re
   (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Content/js/signature-form.js))
   * [PadesSignatureRest/SignatureInfo.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/PadesSignatureRest/SignatureInfo.cshtml)
 
-<a name="pades-upload" />
-### Assinatura PAdES com arquivo enviado pelo usuário
+### Assinatura PAdES com arquivo enviado pelo usuário {#pades-upload}
 
 Após o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração em [UploadController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/UploadController.cs) e
 [Upload/Index.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/Upload/Index.cshtml)) é feito o fluxo de controle é o mesmo que na amostra [PAdES signature with file already on server](#pades),
 mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="pades-cosign" />
-### Assinatura conjunta PAdES
+### Assinatura conjunta PAdES {#pades-cosign}
 
 Após o fluxo de controle da amostra [Assinatura PAdES com arquivo já no servidor](#pades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `userfile` preenchidos.
 
-<a name="pdf-marks" />
-### Marcas PAdES
+### Marcas PAdES {#pdf-marks}
 
 Esse recurso é demonstrado como uma configuração opcional no  [Assinatura PAdES com arquivo já no servidor](#pades), amostra que por padrão começa comentada. Para ativá-lo, remova o 
 comentário da linha a seguir [PadesSignatureController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/PadesSignatureRestController.cs):
@@ -66,8 +61,7 @@ Tente mudar o argumento para a função `getPdfMark()`para ver diferentes config
 O código relevante está no arquivo [PadesVisualElements](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Classes/PadesVisualElements.cs), 
 função `getPdfMark()`.
 
-<a name="pades-wo-client" />
-### Assinatura PAdES sem a comunicação com cliente
+### Assinatura PAdES sem a comunicação com cliente {#pades-wo-client}
 
 * Controller: [PadesSignatureWithoutDirectCommunicationControlller](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/MVC/SampleSite/Controllers/PadesSignatureWithoutDirectCommunicationController.cs)
 * Views:
@@ -77,19 +71,16 @@ função `getPdfMark()`.
   (JavaScript on [signature-complete-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/MVC/SampleSite/Content/js/signature-complete-form.js))
   * [PadesSignatureWithoutDirectCommunication/SignatureInfo.cshtml](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/MVC/SampleSite/Views/PadesSignatureWithoutDirectCommunication/SignatureInfo.cshtml)
 
-<a name="open-pades" />
-### Abrir/validar uma assinatura PAdES existente
+### Abrir/validar uma assinatura PAdES existente {#open-pades}
 
 * Controller: [OpenPadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/OpenPadesSignatureRestController.cs)
 * View: [OpenPadesSignatureRest/Index.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/OpenPadesSignatureRest/Index.cshtml)
 
-<a name="print" />
-### Versão para impressão
+### Versão para impressão {#print}
 
 * Controller: [PrinterFriendlyPadesRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/PrinterFriendlyPadesRestController.cs)
 
-<a name="cades" />
-### Assinatura CAdES com arquivo já no servidor
+### Assinatura CAdES com arquivo já no servidor {#cades}
 
 * Controller: [CadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/CadesSignatureRestController.cs)
 * Views: 
@@ -97,28 +88,24 @@ função `getPdfMark()`.
   (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Content/js/signature-form.js))
   * [CadesSignatureRest/SignatureInfo.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/CadesSignatureRest/SignatureInfo.cshtml)
 
-<a name="cades-upload" />
-### Assinatura CAdES com upload do arquivo pelo usuário
+### Assinatura CAdES com upload do arquivo pelo usuário {#cades-upload}
 
 Depois que o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração no [UploadController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/UploadController.cs)
  e
 [Upload/Index.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/Upload/Index.cshtml)) é feito 
 o fluxo de controle é o mesmo que na amostra [CAdES signature with file already on server](#cades), mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="cades-cosign" />
-### Assinatura conjunta CAdES
+### Assinatura conjunta CAdES {#cades-cosign}
 
 Após o fluxo de controle da amostra [CAdES signature with file already on server](#cades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
 
-<a name="open-cades" />
-### Abrir/validar uma assinatura CAdES existente
+### Abrir/validar uma assinatura CAdES existente {#open-cades}
 
 * Controller: [OpenCadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/OpenCadesSignatureRestController.cs)
 * View: [OpenCadesSignatureRest/Index.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/OpenCadesSignatureRest/Index.cshtml)
 
-<a name="xml-full" />
-### Assinatura XML do documento inteiro
+### Assinatura XML do documento inteiro {#xml-full}
 
 * Controller: [XmlSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/XmlSignatureRestController.cs)
 * Views: 
@@ -126,8 +113,7 @@ repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
   (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Content/js/signature-form.js))
   * [XmlSignatureRest/SignatureInfo.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/XmlSignatureRest/SignatureInfo.cshtml)
 
-<a name="xml-element" />
-### Assinatura XML de um elemento
+### Assinatura XML de um elemento {#xml-element}
 
 * Controller: [XmlNFeSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/XmlNFeSignatureRestController.cs)
 * Views: 
@@ -135,34 +121,29 @@ repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
   (JavaScript on [signature-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Content/js/signature-form.js))
   * [XmlNFeSignatureRest/SignatureInfo.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/XmlNFeSignatureRest/SignatureInfo.cshtml)
 
-<a name="open-xml" />
-### Abrir/validar assinatura de um arquivo XML existente
+### Abrir/validar assinatura de um arquivo XML existente {#open-xml}
 
 * Controller: [OpenXmlSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/OpenXmlSignatureRestController.cs)
 * View: [OpenXmlSignatureRest/Index.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/OpenXmlSignatureRest/Index.cshtml)
 
-<a name="batch" />
-### Lote de assinatura PAdES 
+### Lote de assinatura PAdES {#batch}
 
 * Controller: [BatchPadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/BatchPadesSignatureRestController.cs)
 * View: [BatchPadesSignatureRest/Index.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/BatchPadesSignatureRest/Index.cshtml)
   (JavaScript on [batch-signature-rest-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Content/js/batch-signature-rest-form.js))
 
-<a name="batch-optimized" />
-### Lote otimizado de assinaturas PAdES
+### Lote otimizado de assinaturas PAdES {#batch-optimized}
 
 * Controller: [BatchSignatureOptimizedController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/MVC/SampleSite/Controllers/BatchSignatureOptimizedController.cs)
 * View: [BatchSignatureOptimized/Index.cshtml](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/MVC/SampleSite/Views/BatchSignatureOptimized/Index.cshtml)
   (JavaScript on [batch-signature-optimized-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/MVC/SampleSite/Content/js/batch-signature-optimized-form.js))
 
-<a name="batch-cades" />
-### Lote de assinaturas CAdES
+### Lote de assinaturas CAdES {#batch-cades}
 
 * Controller: [BatchCadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Controllers/BatchCadesSignatureRestController.cs)
 * View: [BatchCadesSignatureRest/Index.cshtml](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Views/BatchCadesSignatureRest/Index.cshtml)
   (JavaScript on [batch-signature-rest-form.js](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/mvc/PkiSuiteAspNetMvcSample/Content/js/batch-signature-rest-form.js))
 
-<a name="batch-xml-element" />
-### Lote de assinaturas XML de elementos no mesmo documento
+### Lote de assinaturas XML de elementos no mesmo documento {#batch-xml-element}
 
 Ainda não está disponível neste projeto.

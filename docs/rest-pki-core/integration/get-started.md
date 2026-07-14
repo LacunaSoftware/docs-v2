@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/get-started
+---
+
 # Primeiros passos para integração - Rest PKI Core
 
 Nesse artigo, você dará os primeiros passos para integrar a sua aplicação com o [Rest PKI Core](../index.md).
@@ -42,9 +46,8 @@ Escolha uma das linguagens de programação abaixo:
 Caso sua aplicação utilize outra linguagem de programação, [chame as APIs diretamente](#rest).
 
 
-<a name="dotnet" />
 
-### Chamando a API em .NET
+### Chamando a API em .NET {#dotnet}
 
 Comece adicionando o pacote de Nuget [Lacuna.RestPkiCore.Client](https://www.nuget.org/packages/Lacuna.RestPkiCore.Client/), disponível para:
 
@@ -155,9 +158,8 @@ As seguintes exceções podem ser lançadas nas chamadas aos métodos do `IRestP
   de erro da API. Veja os [códigos de erro](error-codes.md).
 * `RestErrorException`: erro na chamada HTTP. A propriedade `StatusCode` contém o código HTTP retornado. Veja os [códigos de resposta HTTP](#http-status-codes).
 
-<a name="php" />
 
-### Chamando a API em PHP
+### Chamando a API em PHP {#php}
 
 Comece adicionando o pacote do Composer [lacuna/restpkicore-client](https://packagist.org/packages/lacuna/restpkicore-client), disponível para:
 
@@ -202,9 +204,8 @@ $options = new RestPkiOptions('RestPkiEndpoint', 'RestPkiApiKey', 'pt-BR');
 Em nosso [repositório de exemplos](https://github.com/LacunaSoftware/PkiSuiteSamples/tree/master/php/plain/public), 
 todas as pastas terminadas em `-rest-core` contém exemplos referentes ao pacote do Composer [lacuna/restpkicore-client](https://packagist.org/packages/lacuna/restpkicore-client).
 
-<a name="java" />
 
-### Chamando a API em Java
+### Chamando a API em Java {#java}
 
 Para adicionar no seu projeto, coloque isso no seu arquivo `build.gradle` caso seu projeto utilize Gradle:
 
@@ -261,9 +262,8 @@ options.setCulture("pt-BR");
 Em nosso [repositório de exemplos](https://github.com/LacunaSoftware/PkiSuiteSamples/tree/master/java/springmvc), 
 todos arquivos terminados em `RestCoreController` contém exemplos referentes ao pacote Java [com.lacunasoftware.restpkicore:restpkicore-client](https://search.maven.org/artifact/com.lacunasoftware.restpki/restpkicore-client).
 
-<a name="rest" />
 
-### Chamando a API diretamente
+### Chamando a API diretamente {#rest}
 
 As APIs do Rest PKI Core são RESTful recebendo e retornando mensagens JSON, sendo de fácil uso em qualquer linguagem de programação moderna. Caso
 a sua aplicação não utilize nenhuma das linguagens de programação elencadas acima, opte por chamar as APIs do Rest PKI Core diretamente.
@@ -278,9 +278,8 @@ Já a **chave de API** deve ser passada no header `X-Api-Key` de cada requisiç�
 X-Api-Key: yourapp|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-<a name="http-status-codes" />
 
-#### Códigos de resposta HTTP
+#### Códigos de resposta HTTP {#http-status-codes}
 
 A API responde com os seguintes códigos HTTP:
 

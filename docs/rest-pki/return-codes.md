@@ -49,8 +49,7 @@ As operações do REST PKI apresentam um conjunto de códigos de retorno que pod
 | InvalidCades                  | Arquivo p7s fornecido não é válido                                             |
 | InvalidToken                  | Token de assinatura fornecido não é válido                                     |
 
-<a name="val-errors" />
-### Erros de validação
+### Erros de validação {#val-errors}
 
 Erros de validação ocorrem durante assinaturas ou autenticações ou podem ser retornados nos *endpoints* de validação de assinatura.
 

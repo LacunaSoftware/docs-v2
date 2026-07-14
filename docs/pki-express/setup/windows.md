@@ -55,7 +55,6 @@ esteja instalado.
 :::
 
 
-<a name="update" />
-## Atualização
+## Atualização {#update}
 
 Para atualizar o PKI Express, apenas baixe a nova versão e execute o instalador.

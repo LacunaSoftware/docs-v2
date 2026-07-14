@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Guia de operação"
 sidebar_position: 1
+slug: /rest-pki/core/operation
 ---
 
 # Guia de Operação - Rest PKI Core

@@ -4,8 +4,7 @@ Para instalar o PKI Express no Red Hat Enterprise Linux você precisará de uma 
 
 De posse do arquivo de licença (**LacunaPkiLicense.config**), siga os passos abaixo:
 
-<a name="install" />
-## Instalando o PKI Express
+## Instalando o PKI Express {#install}
 
 Baixe o pacote do PKI Express e extraia para a pasta de destino:
 
@@ -36,8 +35,7 @@ Se a ativação automática falhar, siga as instruções no artigo [Ativação m
 :::
 
 
-<a name="update" />
-## Atualização
+## Atualização {#update}
 
 Para atualizar o PKI Express, apenas baixe o novo pacote e extraia para a pasta de destino:
 

@@ -16,9 +16,8 @@ chmod -R a=,u+rwX,go+rX /usr/share/amplia
 systemctl start amplia
 ```
 
-<a name="vnext" />
 
-## Testando a próxima versão do Amplia
+## Testando a próxima versão do Amplia {#vnext}
 
 Para testar a próxima versão do Amplia, atualmente em estágio de *Release Candidate*:
 

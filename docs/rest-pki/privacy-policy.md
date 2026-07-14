@@ -71,8 +71,7 @@ Compartilhamos informações com os provedores de serviços, conforme exigido po
 
 Também processamos e compartilhamos informações de maneira agregada e não identificada, onde as informações são compartilhadas como parte de um relatório estatístico e não contêm informações pessoais.
 
-<a name="security" />
-## Segurança
+## Segurança {#security}
 
 A segurança de suas informações pessoais é importante para nós. Implementamos medidas adequadas para proteger as informações pessoais enviadas a nós, durante a transmissão e depois que elas são recebidas. A Lacuna Software Ltda toma medidas para garantir que todo o código-fonte, arquivos e dados permaneçam privados e confidenciais. Devido à natureza sensível do código-fonte, levamos isso muito a sério e o tornamos nossa principal preocupação para todos os clientes. Restringimos o acesso às informações pessoais aos funcionários, contratados e agentes da Lacuna que precisam conhecer essas informações para operar, desenvolver ou melhorar nosso serviço. Esses indivíduos estão sujeitos a obrigações de confidencialidade e podem estar sujeitos a disciplina, incluindo rescisão e processo criminal, se não cumprirem essas obrigações. Se você tiver alguma dúvida sobre a segurança de suas informações pessoais, entre em contato conosco através das informações de contato abaixo.
 

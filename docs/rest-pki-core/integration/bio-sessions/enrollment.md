@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/bio-sessions/enrollment
+---
+
 # Cadastro biométrico (Enrollment)  - Rest PKI Core
 
 - Realiza o registro biométrico do usuário no sistema por meio de uma captura facial com prova de vida (liveness). 

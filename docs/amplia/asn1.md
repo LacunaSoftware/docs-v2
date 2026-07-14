@@ -1,3 +1,7 @@
+---
+slug: /asn1
+---
+
 # Estruturas ASN.1 proprietárias
 
 O OID 1.3.6.1.4.1 representa o [registro de empresas privadas](https://www.iana.org/assignments/enterprise-numbers) no Internet Assigned Numbers Authority (IANA):
@@ -12,8 +16,7 @@ A Lacuna Software está registrada sob o número 46332, sendo portanto dona do O
 id-lacuna OBJECT IDENTIFIER ::= { id-pen-iana 46332 }
 ```
 
-<a name="cert-atts" />
-## 1. Atributos de certificados de atributo
+## 1. Atributos de certificados de atributo {#cert-atts}
 
 A subárvore `1.3.6.1.4.1.46332.1` é reservada para atributos a serem utilizados em certificados de atributo:
 
@@ -21,8 +24,7 @@ A subárvore `1.3.6.1.4.1.46332.1` é reservada para atributos a serem utilizado
 id-lacuna-cert-atts OBJECT IDENTIFIER ::= { id-lacuna 1 }
 ```
 
-<a name="holder-photo-att" />
-### 1.1. Atributo *Holder Photo*
+### 1.1. Atributo *Holder Photo* {#holder-photo-att}
 
 O OID `1.3.6.1.4.1.46332.1.1` identifica o atributo `LacunaHolderPhotoAttribute`:
 
@@ -38,8 +40,7 @@ LacunaHolderPhotoAttribute ::= SEQUENCE {
 LacunaHolderPhotoAttVersion ::= INTEGER { v1(0) }
 ```
 
-<a name="access-identity-types" />
-## 2. Tipos de identificação
+## 2. Tipos de identificação {#access-identity-types}
 
 A subárvore `1.3.6.1.4.1.46332.2` é reservada para identificar estruturas `OtherName`s utilizadas em atributos de Identificação de Acesso (conforme descrito no
 [DOC-ICP 16.01](https://www.iti.gov.br/images/repositorio/legislacao/documentos-principais/16.1/DOC-ICP-16.01_Versao_1.1.pdf) item 3.7.1.2 e na
@@ -51,8 +52,7 @@ id-lacuna-access-identity-types OBJECT IDENTIFIER ::= { id-lacuna 2 }
 
 Estruturas `OtherName` identificadas com OIDs dessa subárvore possuem valor codificado como `PrintableString` exceto se explicitamente especificado no OID.
 
-<a name="crc-number" />
-### 2.1. Número de registro no CRC
+### 2.1. Número de registro no CRC {#crc-number}
 
 O OID `1.3.6.1.4.1.46332.2.1` identifica o número de registro no CRC (Conselho Regional de Contabilidade) do titular do certificado:
 
@@ -60,8 +60,7 @@ O OID `1.3.6.1.4.1.46332.2.1` identifica o número de registro no CRC (Conselho 
 id-crc-number OBJECT IDENTIFIER ::= { id-lacuna-access-identity-types 1 }
 ```
 
-<a name="certificate-policies" />
-## 3. Políticas de Certificado
+## 3. Políticas de Certificado {#certificate-policies}
 
 A subárvore `1.3.6.1.4.1.46332.3` é reservada para **Políticas de Certificado**.
 
@@ -93,8 +92,7 @@ A subárvore `1.3.6.1.4.1.46332.3.4` identifica as políticas de certificados ad
 * `1.3.6.1.4.1.46332.3.4.2`: certificados cuja chave privada é gerada em dispositivo móvel do titular
 * `1.3.6.1.4.1.46332.3.4.3`: certificados cuja chave privada é gerada em dispositivo criptográfico (token USB ou *smartcard*) do titular
 
-<a name="tsa-policies" />
-## 4. Políticas de TSA (Time Stamping Authority)
+## 4. Políticas de TSA (Time Stamping Authority) {#tsa-policies}
 
 A subárvore `1.3.6.1.4.1.46332.4` é reservada para **Políticas de TSA** (*Time Stamping Authority*).
 

@@ -1,6 +1,7 @@
 ---
 sidebar_label: "On premises"
 sidebar_position: 1
+slug: /rest-pki/core/on-premises
 ---
 
 # Rest PKI Core *on premises*
@@ -8,8 +9,7 @@ sidebar_position: 1
 O [Rest PKI Core](../index.md) pode ser utilizado em nuvem (SaaS) no endereço [core.pki.rest](https://core.pki.rest/) ou você pode ter uma instância na sua própria
 infraestrutura ("on premises").
 
-<a name="platforms" />
-## Ambientes suportados
+## Ambientes suportados {#platforms}
 
 O Rest PKI Core é compatível com os seguintes ambientes:
 

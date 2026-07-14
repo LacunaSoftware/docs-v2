@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/error-codes
+---
+
 # Códigos de erro - Rest PKI Core
 
 Alguns dos códigos de erro de API retornados pelo Rest PKI Core estão elencados abaixo:

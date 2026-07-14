@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/bio-sessions/liveness
+---
+
 # Prova de vida (Liveness) - Rest PKI Core
 
 - Verifica se há uma pessoa real presente do outro lado da tela, detectando tentativas de fraude com fotos, vídeos ou máscaras.

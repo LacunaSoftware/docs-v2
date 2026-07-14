@@ -18,8 +18,7 @@ O *Adobe Reader* é instalado com a configuração padrão de confiar apenas em 
 confiáveis. Por esse motivo, assinaturas feitas com alguns certificados podem ser interpretadas como não confiáveis em
 *Adobe Readers* com a configuração padrão, por exemplo certificados da cadeia V5 da ICP-Brasil e certificados que não atendam regras de políticas registradas na lista do *Adobe reader*.
 
-<a name="icp-brasil-v2" />
-### ICP-Brasil AC Raiz V2
+### ICP-Brasil AC Raiz V2 {#icp-brasil-v2}
 
 O certificado da AC Raiz da ICP-Brasil V2 passou a fazer parte das raízes confiáveis da Adobe (AATL).
 
@@ -38,8 +37,7 @@ Vale destacar que qualquer medida individual para contornar esta validação ter
 Geralmente orientamos os usuários a configurarem seus leitores para aceitar também a lista de certificados raízes do
 Windows. O link contém um passo-a-passo de como fazer essa configuração: [Ativar confiança do Adobe nas raízes do Windows](https://docs.lacunasoftware.com/en-us/content/configuring-windows-roots-on-adobe-reader/)
 
-<a name="icp-brasil-v5" />
-### ICP-Brasil AC Raiz V5
+### ICP-Brasil AC Raiz V5 {#icp-brasil-v5}
 
 Como abordado no [tópico anterior](#icp-brasil-v2), apenas o certificado AC Raiz V2, com restrições, foi adicionado à lista de confiança da Adobe.
 O certificado AC Raiz V5 da ICP-Brasil, por padrão, não é confiado pelo Adobe nem pelos sistema operacional, portanto, inicialmente, as assinaturas realizadas com certificados da cadeia V5 não serão validados com sucesso.

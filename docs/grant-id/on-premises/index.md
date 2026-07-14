@@ -9,6 +9,6 @@ sidebar_position: 1
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs/en/grant-id/on-premises/)
+- [English](/en-us/articles/grant-id/on-premises)
 
 :::

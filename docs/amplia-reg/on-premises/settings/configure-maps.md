@@ -8,9 +8,8 @@ apenas para fins históricos.
 
 O [Amplia Reg](../index.md) ~~usa~~ anteriormente usava a [Google Maps Embed API](https://developers.google.com/maps/documentation/embed/get-started) para exibir geolocalizações.
 
-<a name="gen-key" />
 
-## Gerar uma chave da API Google Maps Embed
+## Gerar uma chave da API Google Maps Embed {#gen-key}
 
 1. Autentique-se na [Maps Embed API](https://console.cloud.google.com/apis/library/maps-embed-backend.googleapis.com)
 1. Clique no **seletor de projeto** no menu superior e selecione um projeto existente ou crie um novo

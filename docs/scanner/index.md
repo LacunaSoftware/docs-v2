@@ -3,7 +3,7 @@ sidebar_label: "Scanner"
 sidebar_position: 1
 ---
 
-# Lacuna Scanner Service
+# Lacuna Scanner Service {#overview}
 
 O **Lacuna Scanner Service** é um microsserviço que possibilita que você adicione digitalização de documentos à sua aplicação web existente
 com as seguintes caracterísicas:

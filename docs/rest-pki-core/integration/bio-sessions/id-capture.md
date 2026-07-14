@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/bio-sessions/id-capture
+---
+
 # Captura de documento (IdentificationDocumentCapture)  - Rest PKI Core
 
 - Realiza a captura da imagem de um documento de identificação, incluindo frente, verso e recorte da imagem do rosto.

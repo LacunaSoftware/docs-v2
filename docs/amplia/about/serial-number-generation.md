@@ -4,6 +4,6 @@
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs/en/amplia/about/serial-number-generation)
+- [English](/en-us/articles/amplia/about/serial-number-generation)
 
 :::

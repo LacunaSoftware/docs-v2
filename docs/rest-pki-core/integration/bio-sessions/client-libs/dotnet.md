@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/bio-sessions/client-libs/dotnet
+---
+
 # Sessões de biometria - Rest PKI Core - Client Lib .NET/C#
 
 Antes de explorar os casos de uso, é necessário configurar a biblioteca do Rest PKI Core em sua aplicação. Os exemplos abaixo utilizam **.NET 10** (ou superior).

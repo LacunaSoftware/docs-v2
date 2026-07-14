@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "prestart": "node scripts/sync-api-en.mjs",
+    "prestart": "node scripts/sync-mirrors.mjs",
     "start": "docusaurus start",
-    "prebuild": "node scripts/sync-api-en.mjs",
+    "prebuild": "node scripts/sync-mirrors.mjs",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
@@ -15,11 +15,12 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "docs:api": "node scripts/fetch-api-assemblies.mjs && docfx metadata docfx.json && node scripts/generate-api-docs.mjs && node scripts/sync-api-en.mjs"
+    "docs:api": "node scripts/fetch-api-assemblies.mjs && docfx metadata docfx.json && node scripts/generate-api-docs.mjs && node scripts/sync-mirrors.mjs"
   },
   "dependencies": {
     "@docusaurus/core": "3.10.1",
     "@docusaurus/faster": "3.10.1",
+    "@docusaurus/plugin-client-redirects": "^3.10.1",
     "@docusaurus/preset-classic": "3.10.1",
     "@easyops-cn/docusaurus-search-local": "^0.55.1",
     "@mdx-js/react": "^3.0.0",

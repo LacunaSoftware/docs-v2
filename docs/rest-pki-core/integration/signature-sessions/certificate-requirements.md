@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/signature-sessions/certificate-requirements
+---
+
 # Requisitos de certificados - Sessões de assinatura
 
 Para restringir os certificados que o usuário poderá escolher durante uma [sessão de assinatura](index.md), especifique uma lista de
@@ -48,15 +52,13 @@ Se você precisar de um requisito diferente, contate-nos
 :::
 
 
-<a name="crypto-device" />
-### CryptoDevice
+### CryptoDevice {#crypto-device}
 
 Use o requisito `CryptoDevice` para permitir apenas o uso de certificados cuja chave privada é protegida por dispositivo criptográfico (tipicamente
 token ou smartcard). Em outras palavras, fica vedado o uso de certificados A1, podendo apenas serem utilizados certificados A3 ou A4. Este requisito
 não recebe argumento.
 
-<a name="cpf" />
-### Cpf
+### Cpf {#cpf}
 
 Use o requisito `Cpf` para restringir o usuário a utilizar apenas certificados com um determinado CPF. Passe o CPF no argumento, com ou sem pontuação
 (mas *com* zeros à esquerda).

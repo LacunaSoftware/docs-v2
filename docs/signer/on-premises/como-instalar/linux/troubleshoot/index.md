@@ -1,3 +1,7 @@
+---
+slug: /signer/on-premises/linux/troubleshoot
+---
+
 # Resolução de problemas do Signer (Linux)
 
 Problemas comuns:

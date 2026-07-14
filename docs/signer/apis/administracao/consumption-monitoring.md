@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Monitoramento de consumo"
 sidebar_position: 2
+slug: /signer/on-premises/consumption-monitoring
 ---
 
 # Monitoramento de consumo
@@ -40,8 +41,7 @@ Escolha um dos casos de uso abaixo:
 
 * [Obter totais de documentos](#obter-totais-docs)
 
-<a name="gerar-relatorio-docs" />
-### Gerar relatório de documentos
+### Gerar relatório de documentos {#gerar-relatorio-docs}
 
 Para obter um relatório Excel de todos os documentos criados num determinado período, utilize a chamada `POST /api/reports/documents/date`:
 
@@ -65,8 +65,7 @@ Como resposta é enviada um caminho para download do relatório gerado (é preci
 }
 ```
 
-<a name="obter-totais-docs" />
-### Obter totais de documentos
+### Obter totais de documentos {#obter-totais-docs}
 
 Para obter um relatório Excel de todos os documentos criados num determinado período, utilize a chamada `POST /api/documents/date`:
 

@@ -16,36 +16,31 @@ https://github.com/LacunaSoftware/PkiSuiteSamples/tree/master/dotnet/spa
 
 Esta seção lista tem onde encontrar as partes relevantes em cada amostra de recurso no projeto.
 
-<a name="auth" />
-### Autentificação com certificado digital
+### Autentificação com certificado digital {#auth}
 
 * API Controller: [AuthenticationRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/Controllers/AuthenticationRestController.cs)
 * Componente SPA (TypeScript): [authentication-rest.component.ts](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/authentication-rest/authentication-rest.component.ts)
 * Template SPA (HTML): [authentication-rest.component.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/authentication-rest/authentication-rest.component.html)
 
-<a name="pades" />
-### Assinatura PAdES com arquivo já no servidor
+### Assinatura PAdES com arquivo já no servidor {#pades}
 
 * API Controller: [PadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/Controllers/PadesSignatureRestController.cs)
 * Componente SPA (TypeScript): [pades-signature-rest.component.ts](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/pades-signature-rest/pades-signature-rest.component.ts)
 * Template SPA (HTML): [pades-signature-rest.component.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/pades-signature-rest/pades-signature-rest.component.html)
 
-<a name="pades-upload" />
-### Assinatura PAdES com arquivo enviado pelo usuário
+### Assinatura PAdES com arquivo enviado pelo usuário {#pades-upload}
 
 Após o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração em [upload.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/AspNetCore/CoreWebApp/wwwroot/controllers/upload.js),
 template [upload.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/AspNetCore/CoreWebApp/wwwroot/views/upload.html) 
 and API Controller [UploadController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/AspNetCore/CoreWebApp/Controllers/UploadController.cs)) é feito o fluxo de controle é o mesmo que na amostra [PAdES signature with file already on server](#pades),
 mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="pades-cosign" />
-### Assinatura conjunta PAdES
+### Assinatura conjunta PAdES {#pades-cosign}
 
 Após o fluxo de controle da amostra [Assinatura PAdES com arquivo já no servidor](#pades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `userfile` preenchidos.
 
-<a name="pdf-marks" />
-### Marcas PAdES
+### Marcas PAdES {#pdf-marks}
 
 Esse recurso é demonstrado como uma configuração opcional no  [Assinatura PAdES com arquivo já no servidor](#pades), amostra que por padrão começa comentada. Para ativá-lo, remova o 
 comentário da linha a seguir [PadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/Controllers/PadesSignatureRestController.cs):
@@ -62,37 +57,31 @@ Tente mudar o argumento para a função `getPdfMark()`para ver diferentes config
 O código relevante está no arquivo [PadesVisualElements](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/Classes/PadesVisualElements.cs), 
 função `getPdfMark()`.
 
-<a name="pades-server" />
-### Assinatura PAdES usando chave do servidor
+### Assinatura PAdES usando chave do servidor {#pades-server}
 
 Ainda não está disponível neste projeto.
 
-<a name="pades-wo-client" />
-### Assinatura PAdES sem a comunicação com cliente
+### Assinatura PAdES sem a comunicação com cliente {#pades-wo-client}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-pades" />
-### Abrir/validar uma assinatura PAdES existente
+### Abrir/validar uma assinatura PAdES existente {#open-pades}
 
 * API Controller: [OpenPadesRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/Controllers/OpenPadesRestController.cs)
 * Componente SPA (TypeScript): [open-pades-rest.component.ts](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/open-pades-rest/open-pades-rest.component.ts)
 * Template SPA (HTML): [open-pades-rest.component.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/open-pades-rest/open-pades-rest.component.html)
 
-<a name="print" />
-### Versão para impressão
+### Versão para impressão {#print}
 
 Ainda não está disponível neste projeto.
 
-<a name="cades" />
-### Assinatura CAdES com arquivo já no servidor
+### Assinatura CAdES com arquivo já no servidor {#cades}
 
 * API Controller: [CadesSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/Controllers/CadesSignatureRestController.cs)
 * Componente SPA (TypeScript): [cades-signature-rest.component.ts](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/cades-signature-rest/cades-signature-rest.component.ts)
 * Template SPA (HTML): [cades-signature-rest.component.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/cades-signature-rest/cades-signature-rest.component.html)
 
-<a name="cades-upload" />
-### Assinatura CAdES com upload do arquivo pelo usuário
+### Assinatura CAdES com upload do arquivo pelo usuário {#cades-upload}
 
 * Ainda não está disponível neste projeto, mas você pode consultar esta implementação antiga no [Rest PKI Samples](https://github.com/LacunaSoftware/RestPkiSamples):
 
@@ -100,62 +89,51 @@ Depois que o upload do arquivo (que é grosseiramente implementado apenas para f
 and API Controller [UploadController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/CSharp/AspNetCore/CoreWebApp/Controllers/UploadController.cs)) é feito 
 o fluxo de controle é o mesmo que na amostra [CAdES signature with file already on server](#cades), mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="cades-cosign" />
-### Assinatura conjunta CAdES
+### Assinatura conjunta CAdES {#cades-cosign}
 
 Após o fluxo de controle da amostra [CAdES signature with file already on server](#cades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
 
-<a name="cades-server" />
-### Assinatura CAdES usando chave do servidor
+### Assinatura CAdES usando chave do servidor {#cades-server}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-cades" />
-### Abrir/validar uma assinatura CAdES existente
+### Abrir/validar uma assinatura CAdES existente {#open-cades}
 
 Ainda não está disponível neste projeto.
 
-<a name="xml-full" />
-### Assinatura XML do documento inteiro
+### Assinatura XML do documento inteiro {#xml-full}
 
 * API Controller: [XmlSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/Controllers/XmlSignatureRestController.cs)
 * Componente SPA (TypeScript): [xml-signature-rest.component.ts](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/xml-signature-rest/xml-signature-rest.component.ts)
 * Template SPA (HTML): [xml-signature-rest.component.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/xml-signature-rest/xml-signature-rest.component.html)
 
-<a name="xml-element" />
-### Assinatura XML de um elemento
+### Assinatura XML de um elemento {#xml-element}
 
 * API Controller: [XmlNFeSignatureRestController](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/Controllers/XmlNFeSignatureRestController.cs)
 * Componente SPA (TypeScript): [xml-nfe-signature-rest.component.ts](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/xml-nfe-signature-rest/xml-nfe-signature-rest.component.ts)
 * Template SPA (HTML): [xml-nfe-signature-rest.component.html](https://github.com/LacunaSoftware/PkiSuiteSamples/blob/master/dotnet/spa/PkiSuiteAspNetSpaSample/ClientApp/src/app/components/xml-nfe-signature-rest/xml-nfe-signature-rest.component.html)
 
-<a name="xades-element" />
-### Assinatura XAdES de um elemento
+### Assinatura XAdES de um elemento {#xades-element}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-xml" />
-### Abrir/validar assinatura de um arquivo XML existente
+### Abrir/validar assinatura de um arquivo XML existente {#open-xml}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch" />
-### Lote de assinatura PAdES 
+### Lote de assinatura PAdES {#batch}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-optimized" />
-### Lote otimizado de assinaturas PAdES
+### Lote otimizado de assinaturas PAdES {#batch-optimized}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-cades" />
-### Lote de assinaturas CAdES
+### Lote de assinaturas CAdES {#batch-cades}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-xml-element" />
-### Lote de assinaturas XML de elementos no mesmo documento
+### Lote de assinaturas XML de elementos no mesmo documento {#batch-xml-element}
 
 Ainda não está disponível neste projeto.

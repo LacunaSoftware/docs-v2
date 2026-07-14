@@ -20,9 +20,8 @@ Antes de começar, leia a seção [Planejamento antes da instalação](../index.
 * (recomendado) Certificado SSL válido para o domínio de acesso ao painel de controle
 * **Connection string** para um [banco de dados SQL Server ou PostgreSQL criado previamente](../prepare-database.md)
 
-<a name="install-aspnet-core" />
 
-## Instale o ASP.NET Core Runtime 6.0
+## Instale o ASP.NET Core Runtime 6.0 {#install-aspnet-core}
 
 :::info
 Essas instruções assumem que você está autenticado como **root**. Se você não estiver, execute `sudo su -` antes de continuar!
@@ -147,15 +146,13 @@ sigilosas armazenadas no arquivo de configuração dos demais usuários da máqu
 :::
 
 
-## Configure o Amplia
+## Configure o Amplia {#encryption-key-generation}
 
 Edite o arquivo de configuração para configurar sua instância do Amplia:
 
 ```sh
 nano /etc/amplia/appsettings.conf
 ```
-
-<a name="encryption-key-generation" />
 
 Na seção `[General]`, para preencher o parâmetro `EncryptionKey` gere uma chave de 256 bits para cifrar dados sensíveis armazenados no banco de dados:
 
@@ -283,7 +280,7 @@ touch /etc/nginx/sites-available/amplia
 nano /etc/nginx/sites-available/amplia
 ```
 
-Digite o seguinte, substituindo o valor do item `server_name` pelo domínio de acesso ao painel de controle (veja [Domínio de acesso ao painel de controle](../../index.md#dashboard-domain)):
+Digite o seguinte, substituindo o valor do item `server_name` pelo domínio de acesso ao painel de controle (veja [Domínio de acesso ao painel de controle](../index.md#dashboard-domain)):
 
 ```nginx
 server {

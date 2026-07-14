@@ -1,7 +1,6 @@
 # Histórico de versões do GrantID
 
-<a name="v5-4-0" />
-### 5.4.0 (2026-05-28)
+### 5.4.0 (2026-05-28) {#v5-4-0}
 
 * Melhorias
   * [LI-448] Atualizar PKI SDK
@@ -9,16 +8,14 @@
 
 Atualiza modelo do banco de dados: não
 
-<a name="v5-3-0" />
-### 5.3.0 (2026-01-30)
+### 5.3.0 (2026-01-30) {#v5-3-0}
 
 * Melhorias
   * [LI-447] Permitir integração com Gov BR com endpoint personalizado
 
 Atualiza modelo do banco de dados: não
 
-<a name="v5-2-0" />
-### 5.2.0 (2025-11-25)
+### 5.2.0 (2025-11-25) {#v5-2-0}
 
 * Melhorias
   * [LI-443] Remover links quebrados e desnecessários da documentação
@@ -30,8 +27,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v5-1-0" />
-### 5.1.0 (2025-07-11)
+### 5.1.0 (2025-07-11) {#v5-1-0}
 
 * Melhorias
   * [LI-438] Permitir configurar o tempo de expiração do Identity Token
@@ -43,8 +39,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v5-0-1" />
-### 5.0.1 (2025-04-24)
+### 5.0.1 (2025-04-24) {#v5-0-1}
 
 * Correções de bugs
   * [LI-436] Erro na configuração padrão de Serilog para ambiente Azure
@@ -52,8 +47,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v5-0-0" />
-### 5.0.0 (2025-03-27)
+### 5.0.0 (2025-03-27) {#v5-0-0}
 
 * Melhorias
   * [LI-435] Atualização para NET 8
@@ -72,8 +66,7 @@ adicione a configuração `Application__SqlServerCompatibilityLevel` com valor `
 :::
 
 
-<a name="v4-11-0" />
-### 4.11.0 (2025-03-19)
+### 4.11.0 (2025-03-19) {#v4-11-0}
 
 * Novas funcionalidades
   * [LI-420] Permitir habilitar Recaptcha por subscription
@@ -96,8 +89,7 @@ Se você utiliza login com certificado digital, antes de atualizar para esta ver
 :::
 
 
-<a name="v4-10-0" />
-### 4.10.0 (2024-11-04)
+### 4.10.0 (2024-11-04) {#v4-10-0}
 
 * Novas funcionalidades
   * [LI-424] Adicionar Claims com informações do emissor do certificado utilizado para login
@@ -108,8 +100,7 @@ Se você utiliza login com certificado digital, antes de atualizar para esta ver
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-9-0" />
-### 4.9.0 (2024-06-25)
+### 4.9.0 (2024-06-25) {#v4-9-0}
 
 * Novas funcionalidades
   * [LI-419] Permitir bloquear login com usuário e senha
@@ -125,8 +116,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v4-8-0" />
-### 4.8.0 (2024-05-03)
+### 4.8.0 (2024-05-03) {#v4-8-0}
 
 * Melhorias
   * [LI-414] Aumentar segurança de parâmetros contra HTML Injection
@@ -135,8 +125,7 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-7-0" />
-### 4.7.0 (2024-04-18)
+### 4.7.0 (2024-04-18) {#v4-7-0}
 
 * Melhorias
   * [LI-410] Atualizar bibliotecas javascript
@@ -145,8 +134,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-6-0" />
-### 4.6.0 (2023-11-06)
+### 4.6.0 (2023-11-06) {#v4-6-0}
 
 * Novas funcionalidades
   * [LI-401] Integração com Gov BR
@@ -162,8 +150,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-5-0" />
-### 4.5.0 (2023-05-25)
+### 4.5.0 (2023-05-25) {#v4-5-0}
 
 * Novas funcionalidades
   * [LI-399] API para exclusão de usuários
@@ -173,16 +160,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-4-0" />
-### 4.4.0 (2023-05-16)
+### 4.4.0 (2023-05-16) {#v4-4-0}
 
 * Melhorias
   * [LI-398] Adicionar suporte a novos provedores de SMS (Amazon e Tigo)
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-3-0" />
-### 4.3.0 (2023-04-25)
+### 4.3.0 (2023-04-25) {#v4-3-0}
 
 * Novas funcionalidades
   * [LI-392] Login com LDAP
@@ -194,8 +179,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v4-2-2" />
-### 4.2.2 (2023-02-14)
+### 4.2.2 (2023-02-14) {#v4-2-2}
 
 * Melhorias
   * [LI-389] Permitir configuração do *signing certificate* diretamente por conteúdo do PFX (útil em Docker)
@@ -205,32 +189,28 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-2-1" />
-### 4.2.1 (2023-02-07)
+### 4.2.1 (2023-02-07) {#v4-2-1}
 
 * Melhorias
   * [LI-391] Adicionar exemplo de configuração de PostgreSQL ao modelo de arquivo de configuração do Identity Service
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-2-0" />
-### 4.2.0 (2023-01-26)
+### 4.2.0 (2023-01-26) {#v4-2-0}
 
 * Melhorias
   * [LI-388] Suporte a PostgreSQL
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v4-1-0" />
-### 4.1.0 (2022-12-28)
+### 4.1.0 (2022-12-28) {#v4-1-0}
 
 * Melhorias
   * [LI-387] Adicionada configuração para exibir apenas certificados tendo o *key usage* `DigitalSignature`
 
 Atualiza modelo do banco de dados: não
 
-<a name="v4-0-3" />
-### 4.0.3 (2022-12-07)
+### 4.0.3 (2022-12-07) {#v4-0-3}
 
 * Melhorias
   * [LI-377] Suporte a .NET 6
@@ -242,16 +222,14 @@ Requer uma licença atualizada do PKI SDK.
 :::
 
 
-<a name="v3-30-1" />
-### 3.30.1 (2022-07-11)
+### 3.30.1 (2022-07-11) {#v3-30-1}
 
 * Novas funcionalidades
   * [LI-377] Adicionar claim com thumbprint do certificado ao fazer login com certificado digital
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-30-0" />
-### 3.30.0 (2022-07-07)
+### 3.30.0 (2022-07-07) {#v3-30-0}
 
 * Melhorias
   * [LI-375] Atualizar lista de provedores de SMS compatíveis
@@ -262,8 +240,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-29-0" />
-### 3.29.0 (2022-06-06)
+### 3.29.0 (2022-06-06) {#v3-29-0}
 
 * Novas funcionalidades
   * [LI-372] Adicionar APIs para validação de Email por código
@@ -274,8 +251,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-28-0" />
-### 3.28.0 (2022-05-06)
+### 3.28.0 (2022-05-06) {#v3-28-0}
 
 * Melhorias
   * [LI-370] Corrigir textos de telas
@@ -285,16 +261,14 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-27-1" />
-### 3.27.1 (2021-09-12)
+### 3.27.1 (2021-09-12) {#v3-27-1}
 
 * Melhorias
   * [LI-365] Melhorar uso do certificado em nuvem no mobile
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-27-0" />
-### 3.27.0 (2021-09-12)
+### 3.27.0 (2021-09-12) {#v3-27-0}
 
 * Novas funcionalidades
   * [LI-362] Permitir controlar duração da autenticação
@@ -304,8 +278,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-26-0" />
-### 3.26.0 (2021-09-01)
+### 3.26.0 (2021-09-01) {#v3-26-0}
 
 * Novas funcionalidades
   * [LI-361] Permitir personalizar HTML dos emails enviados
@@ -316,8 +289,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-25-1" />
-### 3.25.1 (2021-07-01)
+### 3.25.1 (2021-07-01) {#v3-25-1}
 
 * Melhorias
   * [LI-358] Suportar tipos alternativos de autenticação com AWS S3
@@ -325,8 +297,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-25-0" />
-### 3.25.0 (2021-02-03)
+### 3.25.0 (2021-02-03) {#v3-25-0}
 
 * Melhorias
   * [LI-355] - Atualizar Serilog/Sinks e Blob Storage
@@ -340,8 +311,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-<a name="v3-24-0" />
-### 3.24.0 (2020-12-29)
+### 3.24.0 (2020-12-29) {#v3-24-0}
 
 * Novas funcionalidades
   * [LI-350] - Adicionar política de senha nas telas que definem senha
@@ -349,16 +319,14 @@ Atualiza modelo do banco de dados: sim
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-23-1" />
-### 3.23.1 (2020-12-29)
+### 3.23.1 (2020-12-29) {#v3-23-1}
 
 * Correções de bugs
   * [LI-348] - Eventos de login com certificado digital não estão sendo registrados
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-23-0" />
-### 3.23.0 (2020-08-20)
+### 3.23.0 (2020-08-20) {#v3-23-0}
 
 * Novas funcionalidades
   * [LI-341] - Adicionar configuração para possibilitar assinatura com certificados com revocation status unknown
@@ -369,8 +337,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-<a name="v3-22-0" />
-### 3.22.0 (2020-06-29)
+### 3.22.0 (2020-06-29) {#v3-22-0}
 
 * Melhorias
   * [LI-339] - Permitir configurar pais padrão para os formulários de telefone
@@ -378,8 +345,7 @@ Atualiza modelo do banco de dados: não
 Atualiza modelo do banco de dados: sim
 
 
-<a name="v3-21-0" />
-### 3.21.0 (2020-06-08)
+### 3.21.0 (2020-06-08) {#v3-21-0}
 
 * Correções de bugs
   * [LI-330] - Update de Username de usuário não está acontecendo

@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/on-premises/linux/update
+---
+
 # Atualização do Rest PKI Core em Linux
 
 Para atualizar sua [instância *on premises*](../index.md) do [Rest PKI Core](../../index.md), siga os passos abaixo:

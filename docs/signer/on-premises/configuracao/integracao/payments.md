@@ -1,6 +1,7 @@
 ---
 sidebar_label: "Pagamentos"
 sidebar_position: 3
+slug: /signer/on-premises/payments
 ---
 
 # Pagamentos no Signer
@@ -205,7 +206,7 @@ Em seguida gere a chave na opção "Chaves":
 
 ### Operação via Gateway de pagamentos iugu
 
-À partir da versão [1.27.0](../../../changelog#1270-2021-03-25), é possível integrar o Signer diretamente com o Gateway de Pagamentos da [iugu](https://www.iugu.com/). Desta forma, 
+À partir da versão [1.27.0](../../../changelog.md#v1-27-0), é possível integrar o Signer diretamente com o Gateway de Pagamentos da [iugu](https://www.iugu.com/). Desta forma, 
 depois que uma fatura é fechada, os próprios usuários/organizações podem realizar o pagamento com cartão de crédito, boleto bancário ou Pix.
 
 #### Configuração no painel de controle da iugu
@@ -277,7 +278,7 @@ cada um dos métodos de pagamentos listados, marcando a opção "Ativo" e clican
 
 #### Configuração no Signer
 
-Usuários e organizações que já tinham dados de faturamento cadastrados antes da versão [1.27.0](../../../changelog#1270-2021-03-25), precisarão informar os dados novamente para que 
+Usuários e organizações que já tinham dados de faturamento cadastrados antes da versão [1.27.0](../../../changelog.md#v1-27-0), precisarão informar os dados novamente para que 
 sejam realizadas novas validações das informações conforme necessidades da iugu.
 
 ![Billing address error message](/images/signer/invoices-billing-address-error-message.png)
@@ -347,7 +348,7 @@ Uma forma de verificar se a cobrança automática está agendada, é consultar n
 #### Modo de teste
 
 Sua instância pode ser configurada para o modo de teste a fim de testar a integração e as credenciais da iugu. Para isso utilize as credenciais do ambiente de teste lembrando
-de definir nas [configurações da instância](../settings#iugu-settings) a opção de teste também.
+de definir nas [configurações da instância](../settings.md) a opção de teste também.
 
 No modo de teste, apenas cartões de créditos de teste podem ser utilizados conforme definido na página [Usar cartões em modo teste](https://support.iugu.com/hc/pt-br/articles/212456346-Usar-cart%C3%B5es-de-teste-em-modo-de-teste).
 

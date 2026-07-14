@@ -62,13 +62,11 @@ mais de um certificado com o mesmo nome (em outras palavras, não use apenas `re
 :::
 
 
-<a name="validation" />
-## Validação de certificados
+## Validação de certificados {#validation}
 
 Essa seção foi movida para um artigo separado: [Pré-validação de certificados](cert-validation.md)
 
-<a name="sort" />
-## Ordenação
+## Ordenação {#sort}
 
 Essa seção foi removida porque o Web PKI agora retorna automaticamente a lista de certificados ordenada pelo `subjectName`.
 

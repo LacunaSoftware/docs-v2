@@ -3,7 +3,7 @@
 Para integrar a sua aplicação web em PHP ao [Lacuna Scanner Service](../index.md), siga os passos descritos neste artigo.
 
 :::tip
-Antes de começar, veja a [visão geral da integração](../index.md#overview).
+Antes de começar, veja a [visão geral da integração](../index.md).
 :::
 
 

@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/signature-sessions/document-metadata
+---
+
 # Metadados de documentos - Sessões de assinatura
 
 Ao criar uma [sessão de assinatura](index.md), é possível especificar uma coleção de metadados a serem associados aos documentos

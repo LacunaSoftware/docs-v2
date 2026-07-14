@@ -22,8 +22,7 @@ Este projeto é somente para **Java 6**. Para Java 7+, veja o projeto [Spring MV
 
 Esta seção lista tem onde encontrar as partes relevantes em cada amostra de recurso no projeto.
 
-<a name="auth" />
-### Autentificação com certificado digital
+### Autentificação com certificado digital {#auth}
 
 * Controller: [AuthenticationController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/AuthenticationController.java)
 * Views:
@@ -32,8 +31,7 @@ Esta seção lista tem onde encontrar as partes relevantes em cada amostra de re
 	* [authentication-success.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/authentication-success.html)
 	* [authentication-failed.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/authentication-failed.html)
 
-<a name="pades" />
-### Assinatura PAdES com arquivo já no servidor
+### Assinatura PAdES com arquivo já no servidor {#pades}
 
 * Controller: [PadesSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/PadesSignatureController.java)
 * Views:
@@ -41,20 +39,17 @@ Esta seção lista tem onde encontrar as partes relevantes em cada amostra de re
     (Javascript on [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/static/js/signature-form.js))
   * [pades-signature-info.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/pades-signature-info.html)
 
-<a name="pades-upload" />
-### Assinatura PAdES com arquivo enviado pelo usuário
+### Assinatura PAdES com arquivo enviado pelo usuário {#pades-upload}
 
 Após o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração em [UploadController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/UploadController.java)) é feito o fluxo de controle é o mesmo que na amostra [Assinatura PAdES com arquivo já no servidor](#pades),
 mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="pades-cosign" />
-### Assinatura conjunta PAdES
+### Assinatura conjunta PAdES {#pades-cosign}
 
 Após o fluxo de controle da amostra [Assinatura PAdES com arquivo já no servidor](#pades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `userfile` preenchidos.
 
-<a name="pdf-marks" />
-### Marcas PAdES
+### Marcas PAdES {#pdf-marks}
 
 Esse recurso é demonstrado como uma configuração opcional no  [Assinatura PAdES com arquivo já no servidor](#pades), amostra que por padrão começa comentada. Para ativá-lo, remova o 
 comentário da linha a seguir [PadesSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/PadesSignatureController.java):
@@ -71,29 +66,24 @@ Tente mudar o argumento para a função `getPdfMark()`para ver diferentes config
 O código relevante está no arquivo [PadesVisualElements](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/util/PadesVisualElements.java), 
 função `getPdfMark()`.
 
-<a name="pades-server" />
-### Assinatura PAdES usando chave do servidor
+### Assinatura PAdES usando chave do servidor {#pades-server}
 
 Ainda não está disponível neste projeto.
 
-<a name="pades-wo-client" />
-### Assinatura PAdES sem a comunicação com cliente
+### Assinatura PAdES sem a comunicação com cliente {#pades-wo-client}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-pades" />
-### Abrir/validar uma assinatura PAdES existente
+### Abrir/validar uma assinatura PAdES existente {#open-pades}
 
 * Controller: [OpenPadesSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/OpenPadesSignatureController.java)
 * View: [open-pades-signature.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/open-pades-signature.html)
 
-<a name="print" />
-### Versão para impressão
+### Versão para impressão {#print}
 
 Ainda não está disponível neste projeto.
 
-<a name="cades" />
-### Assinatura CAdES com arquivo já no servidor
+### Assinatura CAdES com arquivo já no servidor {#cades}
 
 * Controller: [CadesSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/CadesSignatureController.java)
 * Views:
@@ -101,31 +91,26 @@ Ainda não está disponível neste projeto.
   (Javascript on [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/static/js/signature-form.js))
   * [cades-signature-info.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/cades-signature-info.html)
 
-<a name="cades-upload" />
-### Assinatura CAdES com upload do arquivo pelo usuário
+### Assinatura CAdES com upload do arquivo pelo usuário {#cades-upload}
 
 Depois que o upload do arquivo (que é grosseiramente implementado apenas para fins de demonstração no [UploadController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/UploadController.java) é feito 
 o fluxo de controle é o mesmo que na amostra [CAdES signature with file already on server](#cades), mas com parâmetro de URL `userfile` preenchidos.
 
-<a name="cades-cosign" />
-### Assinatura conjunta CAdES
+### Assinatura conjunta CAdES {#cades-cosign}
 
 Após o fluxo de controle da amostra [CAdES signature with file already on server](#cades) está concluído e o link *Co-sign with another certificate* é clicado, o mesmo fluxo de controle é 
 repetido, mas agora com parâmetro de URL `cmsfile` preenchidos.
 
-<a name="cades-server" />
-### Assinatura CAdES usando chave do servidor
+### Assinatura CAdES usando chave do servidor {#cades-server}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-cades" />
-### Abrir/validar uma assinatura CAdES existente
+### Abrir/validar uma assinatura CAdES existente {#open-cades}
 
 * Controller: [OpenCadesSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/OpenCadesSignatureController.java)
 * View: [open-cades-signature.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/open-cades-signature.html)
 
-<a name="xml-full" />
-### Assinatura XML do documento inteiro
+### Assinatura XML do documento inteiro {#xml-full}
 
 * Controller: [XmlSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/XmlSignatureController.java)
 * Views:
@@ -133,8 +118,7 @@ Ainda não está disponível neste projeto.
   (Javascript on [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/static/js/signature-form.js))
   * [xml-signature-info.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/xml-signature-info.html)
 
-<a name="xml-element" />
-### Assinatura XML de um elemento
+### Assinatura XML de um elemento {#xml-element}
 
 * Controller: [XmlSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/XmlSignatureController.java)
 * Views:
@@ -142,35 +126,29 @@ Ainda não está disponível neste projeto.
   (Javascript on [signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/static/js/signature-form.js))
   * [xml-signature-info.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/xml-signature-info.html)
 
-<a name="xades-element" />
-### Assinatura XAdES de um elemento
+### Assinatura XAdES de um elemento {#xades-element}
 
 Ainda não está disponível neste projeto.
 
-<a name="open-xml" />
-### Abrir/validar assinatura de um arquivo XML existente
+### Abrir/validar assinatura de um arquivo XML existente {#open-xml}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch" />
-### Lote de assinatura PAdES 
+### Lote de assinatura PAdES {#batch}
 
 * Controller: [BatchSignatureController](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/java/sample/controller/BatchSignatureController.java)
 * View: [batch-signature.html](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/templates/batch-signature.html)
   * Javascript: [batch-signature-form.js](https://github.com/LacunaSoftware/RestPkiSamples/blob/master/Java/spring-mvc-java6/src/main/resources/static/js/batch-signature-form.js)
 
 
-<a name="batch-optimized" />
-### Lote otimizado de assinaturas PAdES
+### Lote otimizado de assinaturas PAdES {#batch-optimized}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-cades" />
-### Lote de assinaturas CAdES
+### Lote de assinaturas CAdES {#batch-cades}
 
 Ainda não está disponível neste projeto.
 
-<a name="batch-xml-element" />
-### Lote de assinaturas XML de elementos no mesmo documento
+### Lote de assinaturas XML de elementos no mesmo documento {#batch-xml-element}
 
 Ainda não está disponível neste projeto.

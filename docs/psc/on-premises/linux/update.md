@@ -16,9 +16,8 @@ chmod -R a=,u+rwX,go+rX /usr/share/lacuna-psc
 systemctl start lacuna-psc
 ```
 
-<a name="vnext" />
 
-## Testando a próxima versão do Lacuna PSC
+## Testando a próxima versão do Lacuna PSC {#vnext}
 
 Para testar a próxima versão do Lacuna PSC, atualmente em estágio *Release Candidate*:
 

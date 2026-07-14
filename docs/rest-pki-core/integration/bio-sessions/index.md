@@ -1,3 +1,7 @@
+---
+slug: /rest-pki/core/integration/bio-sessions
+---
+
 # Sessões de biometria - Rest PKI Core
 
 **Sessões de biometria** são uma funcionalidade do [Rest PKI Core](../../index.md) que permitem que seus usuários realizem operações biométricas, tais como prova de vida (Liveness), cadastro, autenticação e identificação facial, além de capturas de documentos de identidade.

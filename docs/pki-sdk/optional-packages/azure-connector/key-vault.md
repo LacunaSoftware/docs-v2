@@ -87,8 +87,7 @@ signer.ComputeSignature();
 var signedPdf = signer.GetPadesSignature();
 ```
 
-<a name="aspnet-core" />
-## ASP.NET Core
+## ASP.NET Core {#aspnet-core}
 
 Caso a sua aplicação web seja em ASP.NET Core, adicione o seguinte código ao método `ConfigureServices` do *startup* da sua aplicação:
 
@@ -143,8 +142,7 @@ signer.ComputeSignature();
 var signedPdf = signer.GetPadesSignature();
 ```
 
-<a name="external-cert" />
-## Usando certificados apenas com chave armazenada em Key Vault
+## Usando certificados apenas com chave armazenada em Key Vault {#external-cert}
 
 Você pode optar por armazenar em Azure Key Vault apenas as chaves dos certificados, armazenando na sua aplicação a parte pública dos certificados (arquivos .cer/.crt/.pem)
 correspondente às chaves.

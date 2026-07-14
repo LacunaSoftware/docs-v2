@@ -9,6 +9,6 @@ sidebar_position: 2
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/docs/en/pki-guide/signatures)
+- [English](/en-us/articles/pki-guide/signatures)
 
 :::

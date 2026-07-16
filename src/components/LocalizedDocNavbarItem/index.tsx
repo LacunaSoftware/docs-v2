@@ -1,5 +1,6 @@
 import type {ReactNode} from 'react';
 import {useLocation} from '@docusaurus/router';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import DefaultNavbarItem from '@theme/NavbarItem/DefaultNavbarItem';
 import DropdownNavbarItem from '@theme/NavbarItem/DropdownNavbarItem';
 
@@ -11,18 +12,29 @@ import DropdownNavbarItem from '@theme/NavbarItem/DropdownNavbarItem';
 // link target from the CURRENT path's prefix instead, so the top nav keeps you
 // in the same language as you move between products (the sidebar already does).
 
-// Derive the "<lang>/articles" base from the current pathname.
-function articlesBase(pathname: string): string {
-  if (pathname === '/en-us' || pathname.startsWith('/en-us/')) return '/en-us/articles';
-  if (pathname === '/pt-br' || pathname.startsWith('/pt-br/')) return '/pt-br/articles';
+// The router's pathname includes the site baseUrl (Docusaurus bakes it into
+// routes rather than using a router basename). Strip it so language detection
+// works under any baseUrl (e.g. '/' on the domain, '/docs-v2/' on GitHub Pages).
+function useRelPath(): string {
+  const {pathname} = useLocation();
+  const {siteConfig: {baseUrl}} = useDocusaurusContext();
+  return pathname.startsWith(baseUrl) ? `/${pathname.slice(baseUrl.length)}` : pathname;
+}
+
+// Derive the "<lang>/articles" base (baseUrl-relative — DefaultNavbarItem's Link
+// prepends the baseUrl) from the current path.
+function articlesBase(rel: string): string {
+  if (rel === '/en-us' || rel.startsWith('/en-us/')) return '/en-us/articles';
+  if (rel === '/pt-br' || rel.startsWith('/pt-br/')) return '/pt-br/articles';
   return '/articles';
 }
 
-// Highlight the item on its product's pages in any language. `rest-pki` needs a
+// Highlight the item on its product's pages in any language. Not anchored to the
+// start, so it matches regardless of the baseUrl prefix. `rest-pki` needs a
 // negative lookahead so it doesn't also light up on `rest-pki/core` pages.
 function activeBaseRegex(docId: string): string {
   const notCore = docId === 'rest-pki' ? '(?!/core)' : '';
-  return `^(/(en-us|pt-br))?/articles/${docId}${notCore}(/|$)`;
+  return `(?:^|/)(?:en-us/|pt-br/)?articles/${docId}${notCore}(/|$)`;
 }
 
 interface DocLinkProps {
@@ -32,11 +44,11 @@ interface DocLinkProps {
 }
 
 export function LocalizedDocNavbarItem({docId, ...props}: DocLinkProps): ReactNode {
-  const {pathname} = useLocation();
+  const rel = useRelPath();
   return (
     <DefaultNavbarItem
       {...props}
-      to={`${articlesBase(pathname)}/${docId}`}
+      to={`${articlesBase(rel)}/${docId}`}
       activeBaseRegex={activeBaseRegex(docId)}
     />
   );
@@ -48,8 +60,7 @@ interface DocDropdownProps {
 }
 
 export function LocalizedDocDropdownNavbarItem({items, ...props}: DocDropdownProps): ReactNode {
-  const {pathname} = useLocation();
-  const base = articlesBase(pathname);
+  const base = articlesBase(useRelPath());
   const resolved = items.map(({docId, label}) => ({
     label,
     to: `${base}/${docId}`,

@@ -37,23 +37,16 @@ const ptBrMirrorPlugins: PluginConfig[] = includePtBrMirror
     ]
   : [];
 
-// baseUrl / url are environment-driven so the SAME source builds for two hosts:
-//   • Production (default): served at the root of docs.lacunasoftware.com, so
-//     baseUrl '/' — this is what gives the classic URL parity (/en-us/articles/…).
-//   • GitHub Pages preview: served under lacunasoftware.github.io/docs-v2/, so
-//     the deploy workflow sets DOCS_BASE_URL=/docs-v2/ and DOCS_URL=…github.io.
-// A non-root baseUrl works because the custom nav/footer/language-switch
-// components resolve links relative to it (they strip it off useLocation()).
-const siteUrl = process.env.DOCS_URL ?? 'https://docs.lacunasoftware.com';
-const baseUrl = process.env.DOCS_BASE_URL ?? '/';
-
 const config: Config = {
   title: ' ',
   tagline: 'Documentação para produtos Lacuna Software',
   favicon: 'img/favicon.png',
 
-  url: siteUrl,
-  baseUrl,
+  // Served as a GitHub Pages project site at lacunasoftware.github.io/docs-v2/,
+  // so baseUrl must be the repository path. The nav/footer/language-switch
+  // components resolve their links relative to this baseUrl.
+  url: 'https://lacunasoftware.github.io',
+  baseUrl: '/docs-v2/',
 
   organizationName: 'LacunaSoftware',
   projectName: 'docs-v2',

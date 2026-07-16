@@ -24,17 +24,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Deployed to the custom domain docs.lacunasoftware.com, served at the
-      # domain ROOT — so the build uses the default baseUrl '/' and
-      # url https://docs.lacunasoftware.com (see docusaurus.config.ts). That root
-      # serving is what gives the classic URL parity (/en-us/articles/…). The
-      # custom domain is pinned for GitHub Pages by static/CNAME.
-      #
-      # To instead preview on the default GitHub Pages project URL
-      # (https://lacunasoftware.github.io/docs-v2/), delete static/CNAME and add:
-      #     env:
-      #       DOCS_BASE_URL: /docs-v2/
-      #       DOCS_URL: https://lacunasoftware.github.io
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -5,6 +5,14 @@ slug: /rest-pki/core/changelog
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+## 4.3.2 (2026-07-13) {#v4-3-2}
+
+Updates database model: no
+
+### Bug fixes
+
+RPNG-770 Replayed certificate-authentication requests were not reported with a distinct nonce-reuse error
+
 ## 4.3.1 (2026-07-08) {#v4-3-1}
 
 Updates database model: no

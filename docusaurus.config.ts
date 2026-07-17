@@ -230,13 +230,7 @@ const config: Config = {
         {
           type: 'custom-languageSwitch',
           position: 'right',
-        },
-        {
-          href: 'https://docs.lacunasoftware.com/pt-br/index.html',
-          label: 'Documentação Clássica',
-          position: 'right',
-          className: 'navbar__link--classic',
-        },
+        }
       ],
     },
     footer: {

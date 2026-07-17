@@ -5,6 +5,14 @@ slug: /rest-pki/core/changelog
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+## 4.3.2 (2026-07-13) {#v4-3-2}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+RPNG-770 Requisições de autenticação por certificado repetidas não eram reportadas com um erro distinto de reuso de nonce
+
 ## 4.3.1 (2026-07-08) {#v4-3-1}
 
 Atualiza modelo do banco de dados: não

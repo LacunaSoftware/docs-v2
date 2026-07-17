@@ -46,7 +46,7 @@ const config: Config = {
   // so baseUrl must be the repository path. The nav/footer/language-switch
   // components resolve their links relative to this baseUrl.
   url: 'https://lacunasoftware.github.io',
-  baseUrl: '/docs-v2/',
+  baseUrl: '/',
 
   organizationName: 'LacunaSoftware',
   projectName: 'docs-v2',

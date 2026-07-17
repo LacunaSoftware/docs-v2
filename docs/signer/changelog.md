@@ -499,7 +499,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-:::warning
+:::caution
 A partir desta versão, a licença do PKI SDK passa a ser validada na inicialização da aplicação e, caso não esteja válida, a inicialização
 será interrompida.
 :::
@@ -557,7 +557,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: sim
 
-:::warning
+:::caution
 A partir desta versão foi alterada a versão mínima exigida do SQL Server para o SQL Server 2016 (13.x). Para reverter a compatibilidade para o SQL Server 2014, 
 adicione a configuração `SqlServer__CompatibilityLevel` com valor `120`.
 :::
@@ -640,7 +640,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-:::warning
+:::caution
 Esta versão é compatível apenas com o SQL Server 2017 ou mais novo. Se você estiver utilizando uma versão mais antiga do SQL Server, por favor pule esta versão
 e atualize para a versão 1.78.1 ou mais nova.
 :::
@@ -668,7 +668,7 @@ e atualize para a versão 1.78.1 ou mais nova.
 
 Atualiza modelo do banco de dados: sim
 
-:::warning
+:::caution
 Esta versão é compatível apenas com o SQL Server 2017 ou mais novo. Se você estiver utilizando uma versão mais antiga do SQL Server, por favor pule esta versão
 e atualize para a versão 1.78.1 ou mais nova.
 :::

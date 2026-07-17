@@ -500,7 +500,7 @@ Updates database model: no
 
 Updates database model: no
 
-:::warning
+:::caution
 Starting this version, the PKI SDK license is validated at application startup and, if it is not valid, the startup will be aborted.
 :::
 
@@ -557,7 +557,7 @@ Updates database model: no
 
 Updates database model: yes
 
-:::warning
+:::caution
 Starting this version the SQL Server minimum version was updated to SQL Server 2016 (13.x). To revert the compatibility to SQL Server 2014, 
 add the setting `SqlServer__CompatibilityLevel` with value `120`.
 :::
@@ -640,7 +640,7 @@ Updates database model: no
 
 Updates database model: no
 
-:::warning
+:::caution
 This version is only compatible with SQL Server 2017 or newer. If you are using an older version of SQL Server, please skip this version and update
 to version 1.78.1 or newer.
 :::
@@ -668,7 +668,7 @@ to version 1.78.1 or newer.
 
 Updates database model: yes
 
-:::warning
+:::caution
 This version is only compatible with SQL Server 2017 or newer. If you are using an older version of SQL Server, please skip this version and update
 to version 1.78.1 or newer.
 :::

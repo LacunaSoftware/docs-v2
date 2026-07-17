@@ -370,7 +370,7 @@ This is important
 :::
 
 
-:::warning
+:::caution
 Proceed with caution
 :::
 

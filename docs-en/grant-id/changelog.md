@@ -60,7 +60,7 @@ Updates database model: no
 
 Updates database model: no
 
-:::warning
+:::caution
 Starting this version the SQL Server minimum version was updated to SQL Server 2016 (13.x). To revert the compatibility to SQL Server 2014, 
 add the setting `Application__SqlServerCompatibilityLevel` with value `120`.
 :::

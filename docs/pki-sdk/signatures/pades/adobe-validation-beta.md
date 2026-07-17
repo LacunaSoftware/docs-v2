@@ -44,7 +44,7 @@ O certificado AC Raiz V5 da ICP-Brasil, por padrão, não é confiado pelo Adobe
 
 Devido ao fato do certificado da AC Raiz V5 não ser distibuído oficialmente por nenhum repositório de confiança padrão, para validação dos certificados sob ela, deve-se incluir manualmente esta raiz como confiável em seu sistema ou rede. Antes, veja o alerta abaixo:
 
-:::warning
+:::caution
 Incluir **manualmente** certificados raízes em repositórios de confiança de sistemas é uma operação **crítica de segurança** e **desaconselhada** pela Lacuna Software.
 Caso seja o desejado, solicite o auxílio do profissional de infraestrutura e segurança responsável sobre esta ação.
 :::

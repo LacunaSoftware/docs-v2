@@ -60,7 +60,7 @@ Atualiza modelo do banco de dados: não
 
 Atualiza modelo do banco de dados: não
 
-:::warning
+:::caution
 A partir desta versão foi alterada a versão mínima exigida do SQL Server para o SQL Server 2016 (13.x). Para reverter a compatibilidade para o SQL Server 2014, 
 adicione a configuração `Application__SqlServerCompatibilityLevel` com valor `120`.
 :::

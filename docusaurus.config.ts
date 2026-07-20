@@ -176,11 +176,16 @@ const config: Config = {
           routeBasePath: 'articles',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/LacunaSoftware/docs-v2/edit/main/',
+          admonitions: {
+            keywords: ['caution'],
+            extendDefaults: true,
+          },
         },
         blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
+
       } satisfies Preset.Options,
     ],
   ],

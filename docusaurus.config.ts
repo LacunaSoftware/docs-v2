@@ -66,6 +66,13 @@ const config: Config = {
     },
   },
 
+  // Re-apply #hash scrolling after the layout settles. On a hard load Docusaurus
+  // leaves the initial hash scroll to the browser, which fires against the
+  // pre-hydration layout — on long pages (e.g. the Signer changelog) the anchor
+  // then shifts thousands of pixels down and the page stays near the top. See
+  // the module for details.
+  clientModules: [require.resolve('./src/clientModules/anchorScrollFix.js')],
+
   // No Docusaurus i18n and no automatic locale detection/redirect — languages
   // are served as plain routes, mirroring the classic site:
   //   pt-BR → /articles/signer/...            (also aliased at /pt-br/articles/...)

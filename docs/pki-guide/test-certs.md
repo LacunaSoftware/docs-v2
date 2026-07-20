@@ -15,7 +15,7 @@ A ICP de testes da Lacuna Software nunca deve ser aceita em ambiente de produ√ß√
 
 <br />
 <center>
-**[Baixar certificados para testes](https://docs.lacunasoftware.com/pt-br/content/test-certs.zip)**
+**[Baixar certificados para testes](pathname:///pt-br/content/test-certs.zip)**
 </center>
 <br />
 

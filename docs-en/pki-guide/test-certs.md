@@ -15,7 +15,7 @@ The Lacuna Test PKI should never be trusted in a production environment!
 
 <br />
 <center>
-**[Download test certificates](https://docs.lacunasoftware.com/en-us/content/test-certs.zip)**
+**[Download test certificates](pathname:///en-us/content/test-certs.zip)**
 </center>
 <br />
 

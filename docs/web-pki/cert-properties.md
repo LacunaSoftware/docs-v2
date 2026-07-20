@@ -2,7 +2,7 @@
 
 Ao chamar a função `listCertificates()`, o seu callback recebe um array com os certificados disponíveis na máquina do usuário.
 Cada elemento do array retornado é um objeto do tipo
-[CertificateModel](https://docs.lacunasoftware.com/pt-br/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html)
+[CertificateModel](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html)
 contendo informações sobre o certificado:
 
 ```javascript
@@ -55,4 +55,4 @@ de modo que é seguro fazer algo como `if (cert.pkiBrazil.cpf) { ... }` sem risc
 
 
 Para obter uma lista completa das propriedades disponíveis em cada elemento do array, veja o guia da API para o tipo
-[CertificateModel](https://docs.lacunasoftware.com/pt-br/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html).
+[CertificateModel](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html).

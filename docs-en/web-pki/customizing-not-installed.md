@@ -17,7 +17,7 @@ specific way so that, once the installation is completed, the user is redirected
 
 It is however possible to customize that behavior. For instance, you might want to display a message to the user explaining the problem and informing him that he
 will be redirected to the installation page before actually doing so. In order to do that, you must use the extensive syntax of the `init()` method (refer to the
-[method's documentation](https://docs.lacunasoftware.com/pt-br/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init) for further details) and pass a callback on the `notInstalled`
+[method's documentation](pathname:///content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init) for further details) and pass a callback on the `notInstalled`
 argument.
 
 ```javascript
@@ -39,4 +39,4 @@ installed, outdated or the user is using an unsupported browser).
 
 At some point you should redirect the user to the installation page. In order to do that, call the `redirectToInstallPage()` method, as shown above. For
 more information about the arguments passed to the `notInstalled` callback, please refer to the
-[method's documentation](https://docs.lacunasoftware.com/pt-br/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init).
+[method's documentation](pathname:///content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init).

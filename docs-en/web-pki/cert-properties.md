@@ -2,7 +2,7 @@
 
 When you call the function `listCertificates()`, your callback receives an array with the available certificates on
 the user's machine. Each item on that array is an object of type
-[CertificateModel](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html)
+[CertificateModel](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html)
 having several properties with information about the certificate:
 
 ```javascript
@@ -56,4 +56,4 @@ Therefore, statements such as `if (cert.pkiBrazil.cpf) { ... }` are safe from ex
 
 
 For a complete list of the properties available, see the API Reference for the type
-[CertificateModel](https://docs.lacunasoftware.com/en-us/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html).
+[CertificateModel](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.certificatemodel.html).

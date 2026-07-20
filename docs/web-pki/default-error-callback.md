@@ -1,7 +1,7 @@
 # Callback de erro padrão
 
 Embora seja possível registrar callbacks de erro específicos em cada chamada assíncrona, se você vai sempre empregar a mesma lógica quando um erro ocorrer,
-é mais prático registrar um **callback de erro padrão** ao chamar o método [`init()`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init):
+é mais prático registrar um **callback de erro padrão** ao chamar o método [`init()`](pathname:///content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init):
 
 ```javascript
 pki.init({
@@ -25,6 +25,6 @@ uma exceção é lançada.
 
 ## Veja também
 
-* [Documentação do parâmetro `userMessage`](https://docs.lacunasoftware.com/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.exceptionmodel.html#usermessage) (disponível desde a [versão 1.4 da API](api-reference/versions.md#v1-4))
-* [Documentação do *callback* de erro FailCallback](https://docs.lacunasoftware.com/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.failcallback.html) (disponível desde a [versão 1.3 da API](api-reference/versions.md#v1-3))
-* [Documentação da classe Promise](https://docs.lacunasoftware.com/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.promise.html)
+* [Documentação do parâmetro `userMessage`](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.exceptionmodel.html#usermessage) (disponível desde a [versão 1.4 da API](api-reference/versions.md#v1-4))
+* [Documentação do *callback* de erro FailCallback](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.failcallback.html) (disponível desde a [versão 1.3 da API](api-reference/versions.md#v1-3))
+* [Documentação da classe Promise](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.promise.html)

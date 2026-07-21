@@ -278,7 +278,6 @@ const config: Config = {
           items: [
             {label: 'Site oficial',  href: 'https://www.lacunasoftware.com'},
             {label: 'Suporte',       href: 'mailto:suporte@lacunasoftware.com'},
-            {label: 'Docs clássica', href: '/'},
           ],
         },
       ],

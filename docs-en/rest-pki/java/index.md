@@ -72,7 +72,7 @@ dependencies {
 ### API Reference
 
 {/* Direct link to avoid DocFX warning */}
-See the package [javadoc](https://docs.lacunasoftware.com/en-us/content/javadocs/restpki-client/).
+See the package [javadoc](pathname:///en-us/content/javadocs/restpki-client/).
 
 :::note
 The javadoc is actually for the Java 7+ version of the library, but the APIs of both packages are almost identical.

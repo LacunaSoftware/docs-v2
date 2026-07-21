@@ -7,7 +7,7 @@ O *Adobe Reader*, em configuração padrão, não validará assinaturas nos caso
 * Assinantes com certificado da cadeia **V5** da ICP-Brasil
 
 Ações para validar:
-1. [Ativar confiança do Adobe nas raízes do Windows](https://docs.lacunasoftware.com/en-us/content/configuring-windows-roots-on-adobe-reader/)
+1. [Ativar confiança do Adobe nas raízes do Windows](pathname:///en-us/content/configuring-windows-roots-on-adobe-reader/)
 1. Reiniciar o Adobe
 
 Vale destacar que qualquer ação individual para contornar esta validação terá efeito apenas local, na conta do usuário.
@@ -35,7 +35,7 @@ No caso de uma nova Autoridade Certificadora ser homologada pelo ITI, existe a p
 Vale destacar que qualquer medida individual para contornar esta validação terá efeito apenas local, na conta do usuário.
 
 Geralmente orientamos os usuários a configurarem seus leitores para aceitar também a lista de certificados raízes do
-Windows. O link contém um passo-a-passo de como fazer essa configuração: [Ativar confiança do Adobe nas raízes do Windows](https://docs.lacunasoftware.com/en-us/content/configuring-windows-roots-on-adobe-reader/)
+Windows. O link contém um passo-a-passo de como fazer essa configuração: [Ativar confiança do Adobe nas raízes do Windows](pathname:///en-us/content/configuring-windows-roots-on-adobe-reader/)
 
 ### ICP-Brasil AC Raiz V5 {#icp-brasil-v5}
 

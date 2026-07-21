@@ -70,7 +70,7 @@ dependencies {
 
 ## Referência API
 
-Veja este pacote [javadoc](https://docs.lacunasoftware.com/en-us/content/javadocs/restpki-client/)
+Veja este pacote [javadoc](pathname:///en-us/content/javadocs/restpki-client/)
 
 :::note
 O javadoc é, na verdade, para a versão Java 7+ da biblioteca, mas as APIs de ambos os pacotes são quase idênticas.

@@ -7,6 +7,32 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.4.1 (2026-07-20) {#v4-4-1}
+
+Updates database model: no
+
+* Bug fixes
+
+  * [RPNG-785] Video identification recording produced an empty file on Safari/iOS
+
+
+### 4.4.0 (2026-07-20) {#v4-4-0}
+
+Updates database model: **yes**
+
+* New features
+
+  * [RPNG-771] Best-effort geolocation capture for biometric sessions
+
+* Improvements
+
+  * [RPNG-695] Add translated failure reasons to session details
+
+* Bug fixes
+
+  * [RPNG-701] Document data shown for sessions without ID Scan
+
+
 ### 4.3.2 (2026-07-13) {#v4-3-2}
 
 Updates database model: no

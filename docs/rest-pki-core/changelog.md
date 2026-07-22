@@ -8,6 +8,32 @@ sidebar_position: 5
 {/* <a name="vnext" /> */}
 
 
+### 4.4.1 (2026-07-20) {#v4-4-1}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-785] Gravação de vídeo na Identificação em Vídeo gerava um arquivo vazio no Safari/iOS
+
+
+### 4.4.0 (2026-07-20) {#v4-4-0}
+
+Atualiza modelo do banco de dados: **sim**
+
+* Novas funcionalidades
+
+  * [RPNG-771] Captura de geolocalização best-effort nas sessões de biometria
+
+* Melhorias
+
+  * [RPNG-695] Adicionar tradução dos motivos de falha nas sessões de biometria
+
+* Correções de bugs
+
+  * [RPNG-701] Dados do documento apareciam em sessões sem ID Scan
+
+
 ### 4.3.2 (2026-07-13) {#v4-3-2}
 
 Atualiza modelo do banco de dados: não

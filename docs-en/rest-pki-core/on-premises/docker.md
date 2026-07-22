@@ -42,13 +42,13 @@ template to fill in the image's settings.
 To fill the `General__EncryptionKey` setting, generate a 256-bit key to encrypt sensitive data stored on the database:
 
 ```sh
-docker run lacunasoftware/restpkicore:4.1 -- gen-enc-key
+docker run lacunasoftware/restpkicore:4.3 -- gen-enc-key
 ```
 
 To fill the `General__RootPasswordHash` setting, choose a strong password for root access to the dashboard and hash it:
 
 ```sh
-docker run -i lacunasoftware/restpkicore:4.1 -- hash-root-pass
+docker run -i lacunasoftware/restpkicore:4.3 -- hash-root-pass
 ```
 
 ## Exposed ports
@@ -113,7 +113,7 @@ BlobStorage__Path=/var/app
 Now, let's run the container with the configuration file, mounting the volume `restpkicore_data` on `/var/app` and exposing the app (which listens on port 80) on the host's port 8080:
 
 ```sh
-docker run --name restpkicore --env-file restpkicore.env -v restpkicore_data:/var/app -p 8080:80 -d lacunasoftware/restpkicore:4.1
+docker run --name restpkicore --env-file restpkicore.env -v restpkicore_data:/var/app -p 8080:80 -d lacunasoftware/restpkicore:4.3
 ```
 
 :::tip

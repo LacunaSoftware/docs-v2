@@ -2,6 +2,18 @@
 slug: /rest-pki/core/integration/bio-sessions
 ---
 
+<!--
+TODO:
+The sidebar items ordering for this section is not good,
+we need to move "folders" to above, and add:
+
+sidebar_label: With a better name, like instead of "Prova de vida (Liveness) - Rest PKI Core" we could only say "Prova de vida"
+sidebar_position: X -> define in a way that the docs get more organized
+
+Also revise every doc section of restpkicore to find possible ordering improvements and label addition.
+
+-->
+
 # Sessões de biometria - Rest PKI Core
 
 **Sessões de biometria** são uma funcionalidade do [Rest PKI Core](../../index.md) que permitem que seus usuários realizem operações biométricas, tais como prova de vida (Liveness), cadastro, autenticação e identificação facial, além de capturas de documentos de identidade.

@@ -7,6 +7,44 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+<!--
+TODO:
+(All changes requested must apply to both enlgish and portuguese docs.)
+We want to better organize Rest Pki Core changelog.
+
+Let's use the following sintax
+
+-------------------------
+
+### 4.3.2 (2026-07-13) {#v4-3-2}
+
+* Correções de bugs
+  * [RPNG-770] Requisições de autenticação por certificado repetidas não eram reportadas com um erro distinto de reuso de nonce.
+
+### 4.3.1 (2026-07-08) {#v4-3-1}
+
+* Novas funcionalidades
+
+  * [RPNG-762] Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição.
+
+  ... and so on
+
+### 4.2.6 (2026-07-07) {#v4-2-6}
+
+...
+
+----------------------------
+
+We will also add [patch] note to all post-released versions (those that were released after a new minor was already in place)
+
+For example: 3.4.4 was released after 3.5.X was already released.
+
+### 3.4.4 (2026-07-07) [patch] {#v3-4-4}
+
+...
+
+-->
+
 ## 4.3.2 (2026-07-13) {#v4-3-2}
 
 Atualiza modelo do banco de dados: não

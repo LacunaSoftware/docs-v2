@@ -1,4 +1,6 @@
 ﻿---
+sidebar_label: "Biometric Enrollment"
+sidebar_position: 4
 slug: /rest-pki/core/integration/bio-sessions/enrollment
 ---
 

@@ -1,4 +1,6 @@
 ---
+sidebar_label: "Captura de documento"
+sidebar_position: 5
 slug: /rest-pki/core/integration/bio-sessions/id-capture
 ---
 

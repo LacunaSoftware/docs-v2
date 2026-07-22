@@ -1,4 +1,6 @@
 ﻿---
+sidebar_label: "Livenes"
+sidebar_position: 7
 slug: /rest-pki/core/integration/bio-sessions/liveness
 ---
 

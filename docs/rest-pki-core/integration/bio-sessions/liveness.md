@@ -1,4 +1,6 @@
 ---
+sidebar_label: "Prova de vida"
+sidebar_position: 7
 slug: /rest-pki/core/integration/bio-sessions/liveness
 ---
 

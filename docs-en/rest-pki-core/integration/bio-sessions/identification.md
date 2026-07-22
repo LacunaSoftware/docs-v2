@@ -1,4 +1,6 @@
 ﻿---
+sidebar_label: "Biometric Identification"
+sidebar_position: 6
 slug: /rest-pki/core/integration/bio-sessions/identification
 ---
 

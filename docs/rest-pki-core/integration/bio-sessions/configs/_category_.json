@@ -1,4 +1,5 @@
 {
   "label": "Configs",
-  "key": "rest-pki-core/integration/bio-sessions/configs"
+  "key": "rest-pki-core/integration/bio-sessions/configs",
+  "position": 2
 }

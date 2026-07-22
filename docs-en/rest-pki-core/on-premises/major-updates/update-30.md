@@ -1,6 +1,7 @@
 ---
 slug: /rest-pki/core/on-premises/update-30
 sidebar_position: 1
+sidebar_label: "Update from 2.x to 3.0"
 ---
 
 # Update Rest PKI Core from 2.x to 3.0

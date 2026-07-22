@@ -1,5 +1,6 @@
 ---
 sidebar_position: 11
+sidebar_label: "Preparing a database"
 slug: /rest-pki/core/on-premises/prepare-database
 ---
 

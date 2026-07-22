@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "update-db"
 slug: /rest-pki/core/on-premises/tool/update-db
 ---
 

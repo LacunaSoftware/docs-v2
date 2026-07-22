@@ -1,4 +1,5 @@
 ---
+sidebar_label: "gen-enc-key"
 slug: /rest-pki/core/on-premises/tool/gen-enc-key
 ---
 

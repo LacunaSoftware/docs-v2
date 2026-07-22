@@ -1,5 +1,6 @@
 ﻿---
 sidebar_position: 3
+sidebar_label: "Installation on Rocky Linux"
 slug: /rest-pki/core/on-premises/linux/install-rocky
 ---
 

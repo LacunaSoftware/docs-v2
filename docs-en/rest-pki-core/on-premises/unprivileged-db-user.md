@@ -1,5 +1,6 @@
 ---
 sidebar_position: 12
+sidebar_label: "Running without db_owner privileges"
 slug: /rest-pki/core/on-premises/unprivileged-db-user
 ---
 

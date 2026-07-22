@@ -1,6 +1,7 @@
 ---
 slug: /rest-pki/core/on-premises/update-40
 sidebar_position: 2
+sidebar_label: "Update from 3.x to 4.0"
 ---
 
 # Update Rest PKI Core from 3.x to 4.0

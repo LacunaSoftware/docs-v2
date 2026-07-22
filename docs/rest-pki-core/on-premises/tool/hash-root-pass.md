@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "hash-root-pass"
 slug: /rest-pki/core/on-premises/tool/hash-root-pass
 ---
 

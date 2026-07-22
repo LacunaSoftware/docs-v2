@@ -9,6 +9,11 @@ sidebar_label: "Metadados de documentos"
 Ao criar uma [sessão de assinatura](index.md), é possível especificar uma coleção de metadados a serem associados aos documentos
 criados durante a sessão. Metadados são especificados por um *nome* e uma coleção de *valores*.
 
+:::warning
+Esta operação requer no mínimo a versão **4.2.2** da biblioteca cliente `Lacuna.RestPkiCore.Client`. Certifique-se de
+atualizar o pacote antes de utilizá-la.
+:::
+
 Em .NET:
 
 ```cs

@@ -9,6 +9,11 @@ sidebar_label: "PDF/A conversion"
 As of version 4.2.0, Rest PKI Core can automatically convert a PDF document to the **PDF/A** format (a long-term archiving
 standard) right after signing. To enable it, set `ConvertToPdfA = true` on `PdfSignatureOptions`.
 
+:::warning
+This operation requires at least version **4.2.2** of the client library `Lacuna.RestPkiCore.Client`. Make sure to update
+the package before using it.
+:::
+
 :::note
 This feature requires a PDF/A conversion service to be enabled and properly configured on your Rest PKI Core instance
 beforehand. If the service is not available, the call will fail with an `ApiException` (code `PdfAConversionNotAvailable`)

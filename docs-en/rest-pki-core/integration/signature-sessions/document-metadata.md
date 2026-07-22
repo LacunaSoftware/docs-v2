@@ -9,6 +9,11 @@ sidebar_label: "Document metadata"
 When creating a [signature session](index.md), you may specify a set of metadata to be associated to each document created during
 the session. Metadata are specified by a *name* and have one or more *values*.
 
+:::warning
+This operation requires at least version **4.2.2** of the client library `Lacuna.RestPkiCore.Client`. Make sure to update
+the package before using it.
+:::
+
 In .NET:
 
 ```cs

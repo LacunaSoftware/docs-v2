@@ -4,7 +4,7 @@ slug: /rest-pki/core/integration/signature-sessions/pdf-a-conversion
 sidebar_label: "PDF/A conversion"
 ---
 
-# PDF/A conversion - Sessões de assinatura
+# PDF/A conversion - Signature sessions
 
 As of version 4.2.0, Rest PKI Core can automatically convert a PDF document to the **PDF/A** format (a long-term archiving
 standard) right after signing. To enable it, set `ConvertToPdfA = true` on `PdfSignatureOptions`.

@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "Logs"
 slug: /rest-pki/core/on-premises/logging
 ---
 

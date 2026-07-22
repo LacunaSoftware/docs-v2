@@ -1,4 +1,5 @@
 ---
+sidebar_label: "Primeiros passos para integração"
 slug: /rest-pki/core/integration/get-started
 ---
 

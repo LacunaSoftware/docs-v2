@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "Subject identifier formats configuration"
 slug: /rest-pki/core/integration/bio-sessions/configs/subject-identifier-formats
 ---
 

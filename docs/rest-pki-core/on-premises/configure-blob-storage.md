@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "Configuração de Blob Storage"
 slug: /rest-pki/core/on-premises/configure-blob-storage
 ---
 

@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "Monitoring timestamping"
 slug: /rest-pki/core/operation/monitor-timestamping
 ---
 

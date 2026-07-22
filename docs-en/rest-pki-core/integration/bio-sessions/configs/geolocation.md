@@ -1,4 +1,5 @@
 ---
+sidebar_label: "Geolocation configuration"
 slug: /rest-pki/core/integration/bio-sessions/configs/geolocation
 ---
 

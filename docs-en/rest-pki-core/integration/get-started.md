@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "Get started on integration"
 slug: /rest-pki/core/integration/get-started
 ---
 

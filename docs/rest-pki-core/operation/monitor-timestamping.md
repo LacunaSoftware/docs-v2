@@ -1,11 +1,7 @@
 ---
+sidebar_label: "Monitoramento do provimento de carimbos de tempo"
 slug: /rest-pki/core/operation/monitor-timestamping
 ---
-
-<!--
-TODO: default titles are too big (they are good for the page <hX> header but not for the sidebar_label)
-Please check all rest pki core docs and remove redundant "Rest Pki Core" string from titles by adding sidebar_label on --- .... ---- docusauros file prefix.
--->
 
 # Monitoramento do provimento de carimbos de tempo - Rest PKI Core
 

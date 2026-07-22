@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "Verificações de vulnerabilidades"
 slug: /rest-pki/core/on-premises/vulnerabilities
 ---
 

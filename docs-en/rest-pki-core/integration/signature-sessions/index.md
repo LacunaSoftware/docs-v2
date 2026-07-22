@@ -1,4 +1,5 @@
 ---
+sidebar_label: "Signature sessions"
 slug: /rest-pki/core/integration/signature-sessions
 ---
 

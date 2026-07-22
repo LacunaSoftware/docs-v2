@@ -1,4 +1,5 @@
 ﻿---
+sidebar_label: "Configuração de OpenID Connect"
 slug: /rest-pki/core/on-premises/configure-oidc
 ---
 

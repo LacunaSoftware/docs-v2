@@ -352,7 +352,7 @@ Atualiza modelo do banco de dados: não
 ### 4.0.0 (2026-03-09) {#v4-0-0}
 
 :::warning
-Veja [Atualizando o Rest PKI Core da versão 3.x para 4.0](on-premises/update-40.md)
+Veja [Atualizando o Rest PKI Core da versão 3.x para 4.0](on-premises/major-updates/update-40.md)
 :::
 
 
@@ -694,7 +694,7 @@ Atualiza modelo do banco de dados: não
 ### 3.0.0 (2025-06-16) {#v3-0-0}
 
 :::warning
-Veja [Atualizando o Rest PKI Core da versão 2.x para 3.0](on-premises/update-30.md)
+Veja [Atualizando o Rest PKI Core da versão 2.x para 3.0](on-premises/major-updates/update-30.md)
 :::
 
 

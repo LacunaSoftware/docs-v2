@@ -351,7 +351,7 @@ Updates database model: no
 ### 4.0.0 (2026-03-09) {#v4-0-0}
 
 :::warning
-See [Update Rest PKI Core from 3.x to 4.0](on-premises/update-40.md)
+See [Update Rest PKI Core from 3.x to 4.0](on-premises/major-updates/update-40.md)
 :::
 
 
@@ -693,7 +693,7 @@ Updates database model: no
 ### 3.0.0 (2025-06-16) {#v3-0-0}
 
 :::warning
-See [Update Rest PKI Core from 2.x to 3.0](on-premises/update-30.md)
+See [Update Rest PKI Core from 2.x to 3.0](on-premises/major-updates/update-30.md)
 :::
 
 

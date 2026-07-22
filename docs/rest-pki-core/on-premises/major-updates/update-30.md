@@ -1,5 +1,6 @@
 ﻿---
 slug: /rest-pki/core/on-premises/update-30
+sidebar_position: 1
 ---
 
 # Atualizando o Rest PKI Core da versão 2.x para 3.0

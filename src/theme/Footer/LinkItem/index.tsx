@@ -3,6 +3,7 @@ import {useLocation} from '@docusaurus/router';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import OriginalLinkItem from '@theme-original/Footer/LinkItem';
 import type {Props} from '@theme/Footer/LinkItem';
+import {localizeFooterText} from '@site/src/theme/footerLocale';
 
 // Keep footer product links in the current language, like the navbar. Footer
 // items are configured once (pointing at the canonical Portuguese /articles/…);
@@ -23,7 +24,14 @@ export default function LinkItem(props: Props): ReactNode {
   const {pathname} = useLocation();
   const {siteConfig: {baseUrl}} = useDocusaurusContext();
   const rel = pathname.startsWith(baseUrl) ? `/${pathname.slice(baseUrl.length)}` : pathname;
+  const isEn = rel === '/en-us' || rel.startsWith('/en-us/');
   const {item} = props;
-  const localized = item.to ? {...item, to: localizeTo(item.to, rel)} : item;
+  // Localize both the destination (keep the reader's language) and the visible
+  // label ("Produtos" → "Products", "Suporte" → "Support", …) on English pages.
+  const localized = {
+    ...item,
+    to: localizeTo(item.to, rel),
+    label: localizeFooterText(item.label as string, isEn) as typeof item.label,
+  };
   return <OriginalLinkItem {...props} item={localized} />;
 }

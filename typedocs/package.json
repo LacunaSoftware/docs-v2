@@ -1,0 +1,12 @@
+{
+  "name": "docs-v2-typedocs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generates the Web PKI TypeScript API reference (TypeDoc) into docs-v2/static",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "typedoc": "^0.10.0"
+  }
+}

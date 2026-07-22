@@ -1,7 +1,7 @@
 # Default fail callback
 
 Although you can register specific fail callbacks on each asynchronous call, if you're always going to apply the same logic when an error occurs, it's better
-to register a **default fail callback** when calling the [`init()`](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init) method:
+to register a **default fail callback** when calling the [`init()`](pathname:///content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html#init) method:
 
 ```javascript
 pki.init({
@@ -25,6 +25,6 @@ registered, an exception is thrown.
 
 ## See also
 
-* [`userMessage` parameter documentation](https://docs.lacunasoftware.com/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.exceptionmodel.html#usermessage) (available since [API version 1.4](api-reference/versions.md#v1-4))
-* [FailCallback documentation](https://docs.lacunasoftware.com/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.failcallback.html) (available since [API version 1.3](api-reference/versions.md#v1-3))
-* [Promise class documentation](https://docs.lacunasoftware.com/content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.promise.html)
+* [`userMessage` parameter documentation](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.exceptionmodel.html#usermessage) (available since [API version 1.4](api-reference/versions.md#v1-4))
+* [FailCallback documentation](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.failcallback.html) (available since [API version 1.3](api-reference/versions.md#v1-3))
+* [Promise class documentation](pathname:///content/typedocs/web-pki/interfaces/_lacuna_web_pki_d_.promise.html)

@@ -43,4 +43,4 @@ e sistemas como Mac OS X, Linux, Android e iOS.
 ## Veja também
 
 * [Sistemas suportados](https://docs.lacunasoftware.com/articles/web-pki/browser-support)
-* [Guia da API](https://docs.lacunasoftware.com/content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki)
+* [Guia da API](pathname:///content/typedocs/web-pki/classes/_lacuna_web_pki_d_.lacunawebpki.html)

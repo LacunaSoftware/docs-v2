@@ -147,3 +147,31 @@
 .prism-code {
   font-size: 0.88rem;
 }
+
+/* ── Admonitions ──────────────────────────────────────────────────────────── */
+
+/* Note — light-blue scheme built around #D9EDF7 (the panel background where the
+   text sits). The default theme renders `note` with the grey `alert--secondary`
+   palette; we override the Infima alert variables on the note container so the
+   background, border, heading, body text and icon all read as one blue family.
+   The `.alert` base rule consumes these variables (background-color, color and
+   border all resolve from them). Selector is `.alert.theme-admonition-note`
+   (two classes, specificity 0,2,0) so it outranks Infima's single-class
+   `.alert--secondary` which sets the same variables. The text/icon colour
+   derives from `--ifm-alert-foreground-color`, chosen dark enough to stay
+   readable (>4.5:1) on the light background. */
+.alert.theme-admonition-note {
+  --ifm-alert-background-color: #d9edf7;
+  --ifm-alert-background-color-highlight: rgba(36, 90, 120, 0.12);
+  --ifm-alert-foreground-color: #245a78;
+  --ifm-alert-border-color: #a6d5ea;
+}
+
+/* Dark mode — a #D9EDF7 panel would glare against the dark page, so invert the
+   scheme: deep teal-blue background with light-blue text, same hue family. */
+[data-theme='dark'] .alert.theme-admonition-note {
+  --ifm-alert-background-color: #12303f;
+  --ifm-alert-background-color-highlight: rgba(166, 213, 234, 0.1);
+  --ifm-alert-foreground-color: #cfe8f4;
+  --ifm-alert-border-color: #2c5f7c;
+}

@@ -24,7 +24,7 @@ Para instalar uma instância *on premises* do Rest PKI Core no Windows Server, p
 * Banco de dados com collation `Latin1_General_100_CI_AI` ou `Latin1_General_CI_AI`.
 * Credenciais correspondentes a um usuário com função `db_owner`.
 
-Se precisar de ajuda para preparar o banco de dados, [clique aqui](../prepare-database.md).
+Se precisar de ajuda para preparar o banco de dados, [clique aqui](prepare-database.md).
 
 
 ## Instalação {#install-aspnet-core}

@@ -8,6 +8,32 @@ sidebar_position: 5
 {/* <a name="vnext" /> */}
 
 
+### 4.4.1 (2026-07-20) {#v4-4-1}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-785] Gravação de vídeo na Identificação em Vídeo gerava um arquivo vazio no Safari/iOS
+
+
+### 4.4.0 (2026-07-20) {#v4-4-0}
+
+Atualiza modelo do banco de dados: **sim**
+
+* Novas funcionalidades
+
+  * [RPNG-771] Captura de geolocalização best-effort nas sessões de biometria
+
+* Melhorias
+
+  * [RPNG-695] Adicionar tradução dos motivos de falha nas sessões de biometria
+
+* Correções de bugs
+
+  * [RPNG-701] Dados do documento apareciam em sessões sem ID Scan
+
+
 ### 4.3.2 (2026-07-13) {#v4-3-2}
 
 Atualiza modelo do banco de dados: não
@@ -219,7 +245,7 @@ Atualiza modelo do banco de dados: não
 
 * Melhorias
 
-  * [RPNG-608] Atualização de bibliotecas de assinatura
+  * [RPNG-608] Atualização PKI SDK para [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) com correção do loop de validação de TSL
 
 
 ### 3.7.2 (2026-04-09) [patch] {#v3-7-2}
@@ -228,7 +254,7 @@ Atualiza modelo do banco de dados: não
 
 * Melhorias
 
-  * [RPNG-608] Atualização de bibliotecas de assinatura
+  * [RPNG-608] Atualização PKI SDK para [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) com correção do loop de validação de TSL
 
 
 ### 3.4.3 (2026-04-07) [patch] {#v3-4-3}
@@ -237,7 +263,7 @@ Atualiza modelo do banco de dados: não
 
 * Melhorias
 
-  * [RPNG-608] Atualização de bibliotecas de assinatura
+  * [RPNG-608] Atualização PKI SDK para [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) com correção do loop de validação de TSL
 
 
 ### 4.1.1 (2026-04-06) {#v4-1-1}
@@ -563,7 +589,7 @@ Atualiza modelo do banco de dados: **sim**
 
   * [RPNG-151] Adicionar traduções para espanhol
 
-  * [RPNG-414] Atualização de bibliotecas de assinatura
+  * [RPNG-414] Atualização PKI SDK para [2.21.0](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-21-0)
 
 * Correções de bugs
 

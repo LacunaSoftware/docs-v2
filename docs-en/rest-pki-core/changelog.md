@@ -7,6 +7,32 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.4.1 (2026-07-20) {#v4-4-1}
+
+Updates database model: no
+
+* Bug fixes
+
+  * [RPNG-785] Video identification recording produced an empty file on Safari/iOS
+
+
+### 4.4.0 (2026-07-20) {#v4-4-0}
+
+Updates database model: **yes**
+
+* New features
+
+  * [RPNG-771] Best-effort geolocation capture for biometric sessions
+
+* Improvements
+
+  * [RPNG-695] Add translated failure reasons to session details
+
+* Bug fixes
+
+  * [RPNG-701] Document data shown for sessions without ID Scan
+
+
 ### 4.3.2 (2026-07-13) {#v4-3-2}
 
 Updates database model: no
@@ -218,7 +244,7 @@ Updates database model: no
 
 * Improvements
 
-  * [RPNG-608] Update signing libraries
+  * [RPNG-608] Update PKI SDK to [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) with TSL validation loop fix
 
 
 ### 3.7.2 (2026-04-09) [patch] {#v3-7-2}
@@ -227,7 +253,7 @@ Updates database model: no
 
 * Improvements
 
-  * [RPNG-608] Update signing libraries
+  * [RPNG-608] Update PKI SDK to [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) with TSL validation loop fix
 
 
 ### 3.4.3 (2026-04-07) [patch] {#v3-4-3}
@@ -236,7 +262,7 @@ Updates database model: no
 
 * Improvements
 
-  * [RPNG-608] Update signing libraries
+  * [RPNG-608] Update PKI SDK to [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) with TSL validation loop fix
 
 
 ### 4.1.1 (2026-04-06) {#v4-1-1}
@@ -562,7 +588,7 @@ Updates database model: **yes**
 
   * [RPNG-151] Add spanish language
 
-  * [RPNG-414] Update signing libraries
+  * [RPNG-414] Update PKI SDK to [2.21.0](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-21-0)
 
 * Bug fixes
 

@@ -1,4 +1,5 @@
 ---
+sidebar_position: 8
 slug: /rest-pki/core/on-premises/create-sub
 ---
 

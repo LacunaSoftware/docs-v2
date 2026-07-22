@@ -1,4 +1,5 @@
 ﻿---
+sidebar_position: 4
 slug: /rest-pki/core/on-premises/configure-blob-storage
 ---
 

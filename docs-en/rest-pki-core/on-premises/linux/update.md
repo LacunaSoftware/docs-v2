@@ -1,4 +1,5 @@
 ---
+sidebar_position: 5
 slug: /rest-pki/core/on-premises/linux/update
 ---
 

@@ -1,4 +1,5 @@
 ---
+sidebar_position: 12
 slug: /rest-pki/core/on-premises/unprivileged-db-user
 ---
 

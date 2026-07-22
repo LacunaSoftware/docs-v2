@@ -1,4 +1,5 @@
 ﻿---
+sidebar_position: 5
 sidebar_label: "Configuração de envio de email"
 slug: /rest-pki/core/on-premises/configure-email
 ---

@@ -1,4 +1,5 @@
 ---
+sidebar_position: 11
 slug: /rest-pki/core/on-premises/prepare-database
 ---
 

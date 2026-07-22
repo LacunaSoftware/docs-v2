@@ -4,7 +4,7 @@ slug: /rest-pki/core/on-premises/prepare-database
 
 # Preparando um banco de dados para instalação do Rest PKI Core
 
-Para instalar uma [instalação *on premises*](on-premises/index.md) do [Rest PKI Core](index.md), você precisará de uma string de conexão para um dos seguintes motores de banco de dados:
+Para instalar uma [instalação *on premises*](index.md) do [Rest PKI Core](../index.md), você precisará de uma string de conexão para um dos seguintes motores de banco de dados:
 
 * [SQL Server](#sql-server)
 * [PostgreSQL](#postgres)
@@ -18,7 +18,7 @@ Para usar SQL Server, você precisará de um banco de dados com:
 * Credenciais correspondentes a um usuário com a função `db_owner`
 
 :::note
-Se você preferir executar o Rest PKI Core sem conceder `db_owner` ao usuário da aplicação, consulte [este artigo](on-premises/unprivileged-db-user.md)
+Se você preferir executar o Rest PKI Core sem conceder `db_owner` ao usuário da aplicação, consulte [este artigo](unprivileged-db-user.md)
 :::
 
 
@@ -71,7 +71,7 @@ o valor após `Data Source=` precisará ser alterado.
 
 ## PostgreSQL {#postgres}
 
-A partir da [versão 1.12.0](changelog.md#v1-12-0) do Rest PKI Core, o PostgreSQL também é suportado. Qualquer versão atualmente suportada do PostgreSQL
+A partir da [versão 1.12.0](../changelog.md#v1-12-0) do Rest PKI Core, o PostgreSQL também é suportado. Qualquer versão atualmente suportada do PostgreSQL
 também é suportada ([que atualmente significa versão 11 ou superior](https://www.postgresql.org/support/versioning/)).
 
 Comece criando o banco de dados e um usuário para a aplicação (opcionalmente alterando os nomes do banco de dados e do usuário):
@@ -117,4 +117,4 @@ o valor após `Host=` precisará ser alterado.
 
 ## Veja também
 
-* [Executando o RestPkiCore sem privilégios de db_owner](on-premises/unprivileged-db-user.md) (apenas SQL Server)
+* [Executando o RestPkiCore sem privilégios de db_owner](unprivileged-db-user.md) (apenas SQL Server)

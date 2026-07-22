@@ -1,4 +1,5 @@
 ﻿---
+sidebar_position: 4
 sidebar_label: "test-email"
 slug: /rest-pki/core/on-premises/tool/test-email
 ---

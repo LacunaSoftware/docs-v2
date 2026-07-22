@@ -1,5 +1,6 @@
 ---
 sidebar_position: 7
+sidebar_label: "Timestamping Configuration"
 slug: /rest-pki/core/on-premises/configure-timestamp
 ---
 

@@ -1,5 +1,7 @@
 ---
+sidebar_position: 2
 slug: /rest-pki/core/integration/signature-sessions/background-processing
+sidebar_label: "Processamento em background"
 ---
 
 # Processamento em background - Sessões de assinatura

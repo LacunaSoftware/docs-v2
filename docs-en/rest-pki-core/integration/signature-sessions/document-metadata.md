@@ -1,5 +1,7 @@
 ---
+sidebar_position: 4
 slug: /rest-pki/core/integration/signature-sessions/document-metadata
+sidebar_label: "Document metadata"
 ---
 
 # Document metadata - Sessões de assinatura

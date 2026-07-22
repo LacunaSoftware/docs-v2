@@ -753,7 +753,7 @@ Updates database model: **yes**
 
 Updates database model: no
 
-* Bug
+* Bug fixes
 
   * [RPNG-277] Column `DateCompleted` is not filled when a signature session is completed
 
@@ -929,7 +929,7 @@ Updates database model: no
 
   * [RPNG-234] Add route `/api/system/manifest`
 
-* Improvents
+* Improvements
 
   * [RPNG-228] Add settings to log HTTP messages
 
@@ -1138,7 +1138,7 @@ Updates database model: no
 
 Updates database model: **yes**
 
-* New Features
+* New features
 
   * [RPNG-158] Add support for PostgreSQL
 
@@ -1186,7 +1186,7 @@ Updates database model: no
 
 Updates database model: **yes**
 
-* New Features
+* New features
 
   * [RPNG-2] Add certificate authentication API
 
@@ -1202,7 +1202,7 @@ Updates database model: **yes**
 
 Updates database model: no
 
-* New Features
+* New features
 
   * [RPNG-41] Signature validation API
 
@@ -1224,7 +1224,7 @@ Updates database model: **yes**
 
 Updates database model: **yes**
 
-* New Features
+* New features
 
   * [RPNG-135] Detached CAdES signatures
 
@@ -1244,7 +1244,7 @@ Updates database model: **yes**
 
 Updates database model: no
 
-* New Features
+* New features
 
   * [RPNG-129] Add support for using cloud certificates on signature sessions
 
@@ -1268,7 +1268,7 @@ Updates database model: no
 
 Updates database model: **yes**
 
-* New Features
+* New features
 
   * [RPNG-132] Add support for CAdES/CMS signatures
 

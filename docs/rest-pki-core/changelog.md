@@ -175,9 +175,9 @@ Atualiza modelo do banco de dados: não
 
 ### 4.1.6 (2026-04-16) [patch] {#v4-1-6}
  
-Updates database model: no
+Atualiza modelo do banco de dados: não
 
-* Bug fixes
+* Correções de bugs
 
   * [RPNG-616] Página de configurações da subscription lança erros depois de ter sido fechada
 
@@ -754,7 +754,7 @@ Atualiza modelo do banco de dados: **sim**
 
 Atualiza modelo do banco de dados: não
 
-* Bug
+* Correções de bugs
 
   * [RPNG-277] Coluna `DateCompleted` não é preenchida quando uma sessão de assinatura é completada
 

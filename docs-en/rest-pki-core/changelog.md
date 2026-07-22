@@ -494,7 +494,7 @@ Updates database model: **yes**
 
   * [RPNG-446] Dashboard – Add missing fields from FaceTecSession
 
-### 3.5.2 (2025-11-20) [patch] {#v3-5-2}
+### 3.5.2 (2025-11-18) {#v3-5-2}
 
 Updates database model: no
 
@@ -749,7 +749,7 @@ Updates database model: **yes**
 
 
 
-### 2.4.5 (2025-12-03) [patch] {#v2-4-5}
+### 2.4.5 (2025-04-04) {#v2-4-5}
 
 Updates database model: no
 

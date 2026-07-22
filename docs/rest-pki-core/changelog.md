@@ -495,7 +495,7 @@ Atualiza modelo do banco de dados: **sim**
 
   * [RPNG-446] Dashboard - Adicionar campos faltantes de FaceTecSession
 
-### 3.5.2 (2025-11-20) [patch] {#v3-5-2}
+### 3.5.2 (2025-11-18) {#v3-5-2}
 
 Atualiza modelo do banco de dados: não
 
@@ -750,7 +750,7 @@ Atualiza modelo do banco de dados: **sim**
 
 
 
-### 2.4.5 (2025-12-03) [patch] {#v2-4-5}
+### 2.4.5 (2025-04-04) {#v2-4-5}
 
 Atualiza modelo do banco de dados: não
 

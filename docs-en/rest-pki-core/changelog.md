@@ -1,5 +1,7 @@
 ---
 slug: /rest-pki/core/changelog
+sidebar_label: "Changelog"
+sidebar_position: 5
 ---
 
 # Rest PKI Core changelog

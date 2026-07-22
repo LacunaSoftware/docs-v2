@@ -2,9 +2,9 @@
 slug: /rest-pki/core/on-premises/prepare-database
 ---
 
-# Preparando o banco de dados para instalação do Rest PKI Core
+# Preparando um banco de dados para instalação do Rest PKI Core
 
-Para instalar uma [instância *on premises*](index.md) do [Rest PKI Core](../index.md), você vai precisar de uma *connection string* para um dos seguintes SGBDs:
+Para instalar uma [instalação *on premises*](on-premises/index.md) do [Rest PKI Core](index.md), você precisará de uma string de conexão para um dos seguintes motores de banco de dados:
 
 * [SQL Server](#sql-server)
 * [PostgreSQL](#postgres)
@@ -12,38 +12,38 @@ Para instalar uma [instância *on premises*](index.md) do [Rest PKI Core](../ind
 
 ## SQL Server {#sql-server}
 
-Para usar o SQL Server, você precisará de um banco de dados com:
+Para usar SQL Server, você precisará de um banco de dados com:
 
-* Collation: `Latin1_General_100_CI_AI`
-* Credenciais correspondentes a um usuário com papel `db_owner`
+* Collation: `Latin1_General_100_CI_AI` ou `Latin1_General_CI_AI`
+* Credenciais correspondentes a um usuário com a função `db_owner`
 
 :::note
-Se você preferir operar o Rest PKI Core sem conceder `db_owner` ao usuário da aplicação, siga as instruções [neste artigo](unprivileged-db-user.md)
+Se você preferir executar o Rest PKI Core sem conceder `db_owner` ao usuário da aplicação, consulte [este artigo](on-premises/unprivileged-db-user.md)
 :::
 
 
 :::warning
-A *collation* do banco de dados **PRECISA SER** `Latin1_General_100_CI_AI`. Criar o banco de dados com uma *collation* diferente provavelmente fará com que a instalação falhe!
+A collation do banco de dados **deve** ser uma das collations especificadas acima. Criar o banco de dados com uma collation diferente provavelmente causará falha na instalação!
 :::
 
 
-Se você precisar de ajuda para preparar o banco de dados, siga os passos neste artigo.
+Se você precisar de ajuda para preparar o banco de dados, siga as etapas neste artigo.
 
 :::note
-Você não precisa seguir estas instruções especifícas. Se você desejar preparar o banco de dados,
-por exemplo usando recursos avançados como *log shipping* ou *mirroring*, você pode fazê-lo, desde que a *collation* e as permissões sejam observadas.
+Você não precisa seguir estas instruções específicas. Se desejar preparar o banco de dados de forma diferente, por exemplo, usando recursos
+avançados como log shipping ou mirroring, você pode fazer isso, desde que a collation e as associações de funções sejam observadas.
 :::
 
 
 Para criar o banco de dados, use a seguinte consulta T-SQL (opcionalmente alterando o nome do banco de dados):
 
 ```sql
-USE Master;
+USE master;
 CREATE DATABASE RestPkiCore COLLATE Latin1_General_100_CI_AI;
 GO
 ```
 
-Crie um usuário e associe-o ao papel `db_owner`:
+Crie um usuário e conceda a ele a função `db_owner`:
 
 ```sql
 USE master;
@@ -56,25 +56,25 @@ EXEC sp_addrolemember 'db_owner', 'RestPkiCoreAdmin';
 GO
 ```
 
-A *connection string* seria, então:
+A string de conexão seria então:
 
 ```
 Data Source=.;Initial Catalog=RestPkiCore;User ID=RestPkiCoreAdmin;Password=XXXXX
 ```
 
 :::note
-Essa *connection string* presume que o servidor do banco de dados esteja instalado no mesmo servidor que o aplicativo da web. Se este não for o caso,
-o valor após `Data Source=` deve ser alterado.
+Esta string de conexão supõe que o servidor de banco de dados está instalado no mesmo servidor da aplicação web. Se este não for o caso,
+o valor após `Data Source=` precisará ser alterado.
 :::
 
 
 
 ## PostgreSQL {#postgres}
 
-A partir da [versão 1.12.0](../changelog.md#v1-12-0) do Rest PKI Core, também é suportado o uso de PostgreSQL. Qualquer uma das versões do PostgreSQL dentro do período
-de suporte oficial também é suportada ([o que, no momento, significa versão 11 ou superior](https://www.postgresql.org/support/versioning/)).
+A partir da [versão 1.12.0](changelog.md#v1-12-0) do Rest PKI Core, o PostgreSQL também é suportado. Qualquer versão atualmente suportada do PostgreSQL
+também é suportada ([que atualmente significa versão 11 ou superior](https://www.postgresql.org/support/versioning/)).
 
-Comece criando o banco de dados e um usuário para a aplicação (altere os nomes caso deseje):
+Comece criando o banco de dados e um usuário para a aplicação (opcionalmente alterando os nomes do banco de dados e do usuário):
 
 ```
 postgres=# CREATE DATABASE restpkicore;
@@ -83,7 +83,7 @@ postgres=# CREATE USER restpkicore WITH PASSWORD 'XXXXX';
 CREATE ROLE
 ```
 
-Em seguida, conecte-se ao banco de dados recém-criado e configure as permissões ao *schema* `public`:
+Em seguida, conecte-se ao banco de dados recém-criado e defina as permissões para o schema `public`:
 
 ```
 postgres=# \connect restpkicore
@@ -99,22 +99,22 @@ GRANT
 ```
 
 :::note
-Por ora, é necessário utilizar um usuário com acesso pleno. Contate-nos se você precisar executar o Rest PKI Core usando um usuário com acesso limitado.
+Por enquanto, apenas o uso de um usuário com acesso total ao schema é suportado. Entre em contato conosco se precisar executar o Rest PKI Core com menos privilégios.
 :::
 
 
-A *connection string* seria, então, a seguinte (assumindo que você não alterou os nomes do banco de dados e do usuário):
+A string de conexão seria então (supondo que você não alterou os nomes do banco de dados e do usuário):
 
 ```
 Host=localhost;Database=restpkicore;Username=restpkicore;Password=XXXXX
 ```
 
 :::note
-Essa *connection string* parte do pressuposto que o SGBD está instalado no mesmo servidor que a aplicação web. Se esso não for o caso, o valor
-depois de `Host=` acima teria que ser alterado.
+Esta string de conexão supõe que o servidor de banco de dados está instalado no mesmo servidor da aplicação web. Se este não for o caso,
+o valor após `Host=` precisará ser alterado.
 :::
 
 
 ## Veja também
 
-* [Operando o Rest PKI Core sem ser *owner* do banco de dados](unprivileged-db-user.md) (apenas para SQL Server)
+* [Executando o RestPkiCore sem privilégios de db_owner](on-premises/unprivileged-db-user.md) (apenas SQL Server)

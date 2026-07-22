@@ -1,5 +1,5 @@
 ---
-sidebar_position: 12
+sidebar_position: 13
 sidebar_label: "Operando sem ser owner do banco"
 slug: /rest-pki/core/on-premises/unprivileged-db-user
 ---

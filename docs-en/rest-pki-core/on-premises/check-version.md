@@ -1,5 +1,5 @@
 ---
-sidebar_position: 4
+sidebar_position: 5
 sidebar_label: "Checking the installed version"
 slug: /rest-pki/core/on-premises/check-version
 ---

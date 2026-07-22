@@ -173,7 +173,7 @@ Atualiza modelo do banco de dados: não
   * [RPNG-438] [RPNG-611] Adicionar suporte a conversão e validação de PDF/As
 
 
-### 4.1.6 (2026-04-16) [patch] {#v4-1-6}
+### 4.1.6 (2026-04-16) {#v4-1-6}
  
 Atualiza modelo do banco de dados: não
 
@@ -182,7 +182,7 @@ Atualiza modelo do banco de dados: não
   * [RPNG-616] Página de configurações da subscription lança erros depois de ter sido fechada
 
 
-### 4.1.5 (2026-04-16) [patch] {#v4-1-5}
+### 4.1.5 (2026-04-16) {#v4-1-5}
 
 Atualiza modelo do banco de dados: não
 
@@ -191,7 +191,7 @@ Atualiza modelo do banco de dados: não
   * [RPNG-617] Melhorar matcher de número de identidade das vídeo identificações
 
 
-### 4.1.4 (2026-04-16) [patch] {#v4-1-4}
+### 4.1.4 (2026-04-16) {#v4-1-4}
 
 Atualiza modelo do banco de dados: não
 

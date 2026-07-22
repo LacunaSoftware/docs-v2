@@ -172,7 +172,7 @@ Updates database model: no
   * [RPNG-438] [RPNG-611] Add PDF/A conversion and validation support
 
 
-### 4.1.6 (2026-04-16) [patch] {#v4-1-6}
+### 4.1.6 (2026-04-16) {#v4-1-6}
  
 Updates database model: no
 
@@ -181,7 +181,7 @@ Updates database model: no
   * [RPNG-616] Subscription settings page throwing errors after being closed
 
 
-### 4.1.5 (2026-04-16) [patch] {#v4-1-5}
+### 4.1.5 (2026-04-16) {#v4-1-5}
  
 Updates database model: no
 
@@ -190,7 +190,7 @@ Updates database model: no
   * [RPNG-617] Improve IdNumber matcher for Video Identifications
 
 
-### 4.1.4 (2026-04-16) [patch] {#v4-1-4}
+### 4.1.4 (2026-04-16) {#v4-1-4}
  
 Updates database model: no
 

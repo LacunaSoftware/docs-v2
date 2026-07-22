@@ -1,4 +1,6 @@
 ---
+sidebar_position: 8
+sidebar_label: "Webhooks"
 slug: /rest-pki/core/integration/webhooks
 ---
 

@@ -1,4 +1,6 @@
 ---
+sidebar_position: 10
+sidebar_label: "Setup em Docker"
 slug: /rest-pki/core/on-premises/docker
 ---
 
@@ -14,11 +16,11 @@ A imagem de Docker do Rest PKI Core encontra-se disponível no Docker Hub:
 </center>
 <br />
 
-A imagem atualmente recomendada é a `lacunasoftware/restpkicore:4.1`
+A imagem atualmente recomendada é a `lacunasoftware/restpkicore:4.3`
 
 Tags móveis disponíveis:
 
-* A tag `4.1` aponta para a última imagem 4.1.x **(recomendada)**
+* A tag `4.3` aponta para a última imagem 4.3.x **(recomendada)**
 * A tag `4` aponta para a última imagem 4.x
 * A tag `stable` aponta para a última imagem estável
 
@@ -40,13 +42,13 @@ para um guia de como preencher os parâmetros necessários.
 Para preencher o parâmetro `General__EncryptionKey`, gere uma chave de 256 bits para encriptar dados sensíveis armazenados no banco de dados:
 
 ```sh
-docker run lacunasoftware/restpkicore:4.1 -- gen-enc-key
+docker run lacunasoftware/restpkicore:4.3 -- gen-enc-key
 ```
 
 Para preencher o parâmetro `General__RootPasswordHash`, escolha uma senha forte para acesso à interface de gerenciamento como *root* e calcule o hash dela:
 
 ```sh
-docker run -i lacunasoftware/restpkicore:4.1 -- hash-root-pass
+docker run -i lacunasoftware/restpkicore:4.3 -- hash-root-pass
 ```
 
 ## Portas
@@ -112,7 +114,7 @@ Por fim, execute um container com a imagem usando o arquivo de configuração, m
 na porta 80) na porta 8080 da máquina *host*:
 
 ```sh
-docker run --name restpkicore --env-file restpkicore.env -v restpkicore_data:/var/app -p 8080:80 -d lacunasoftware/restpkicore:4.1
+docker run --name restpkicore --env-file restpkicore.env -v restpkicore_data:/var/app -p 8080:80 -d lacunasoftware/restpkicore:4.3
 ```
 
 :::tip

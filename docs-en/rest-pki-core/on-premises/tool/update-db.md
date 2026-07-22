@@ -1,4 +1,6 @@
 ---
+sidebar_position: 5
+sidebar_label: "update-db"
 slug: /rest-pki/core/on-premises/tool/update-db
 ---
 
@@ -17,7 +19,7 @@ dotnet Lacuna.RestPki.Site.dll [settings] -- update-db
 Or, on Docker:
 
 ```sh
-docker run -i lacunasoftware/restpkicore:4.1 [settings] -- update-db
+docker run -i lacunasoftware/restpkicore:4.3 [settings] -- update-db
 ```
 
 The `settings` arguments are additional settings to overwrite settings from configuration files and environment variables,

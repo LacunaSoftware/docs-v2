@@ -1,4 +1,6 @@
 ---
+sidebar_position: 3
+sidebar_label: "hash-root-pass"
 slug: /rest-pki/core/on-premises/tool/hash-root-pass
 ---
 
@@ -17,7 +19,7 @@ dotnet Lacuna.RestPki.Site.dll -- hash-root-pass
 Or, on Docker:
 
 ```sh
-docker run -i lacunasoftware/restpkicore:4.1 -- hash-root-pass
+docker run -i lacunasoftware/restpkicore:4.3 -- hash-root-pass
 ```
 
 ## Description

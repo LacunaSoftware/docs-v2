@@ -1,4 +1,5 @@
 ---
+sidebar_label: "Requesting timestamps"
 slug: /rest-pki/core/requesting-timestamps
 ---
 

@@ -1,4 +1,5 @@
 ---
+sidebar_label: "Client Lib .NET/C#"
 slug: /rest-pki/core/integration/bio-sessions/client-libs/dotnet
 ---
 

@@ -1,4 +1,6 @@
 ---
+sidebar_position: 4
+sidebar_label: "Instalação em Ubuntu Server"
 slug: /rest-pki/core/on-premises/linux/install-ubuntu
 ---
 

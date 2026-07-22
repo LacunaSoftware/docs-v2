@@ -7,1040 +7,1067 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
-## 4.3.2 (2026-07-13) {#v4-3-2}
+
+### 4.4.1 (2026-07-20) {#v4-4-1}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-770 Requisições de autenticação por certificado repetidas não eram reportadas com um erro distinto de reuso de nonce
+  * [RPNG-785] Gravação de vídeo na Identificação em Vídeo gerava um arquivo vazio no Safari/iOS
 
-## 4.3.1 (2026-07-08) {#v4-3-1}
 
-Atualiza modelo do banco de dados: não
-
-### Novas funcionalidades
-
-RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
-
-### Melhorias
-
-RPNG-765 Atualizar para o SPA 7.3, adicionando telemetria de desempenho de runtime ao Microsoft Application Insights
-
-### Correções de bugs
-
-RPNG-766 Corrigir um erro raro que podia ocorrer ao usar as APIs de autenticação legadas
-
-## 4.2.6 (2026-07-07) {#v4-2-6}
-
-Atualiza modelo do banco de dados: não
-
-### Novas funcionalidades
-
-RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
-
-## 4.1.7 (2026-07-07) {#v4-1-7}
-
-Atualiza modelo do banco de dados: não
-
-### Novas funcionalidades
-
-RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
-
-## 4.0.6 (2026-07-07) {#v4-0-6}
-
-Atualiza modelo do banco de dados: não
-
-### Novas funcionalidades
-
-RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
-
-## 3.4.4 (2026-07-07) {#v3-4-4}
-
-Atualiza modelo do banco de dados: não
-
-### Novas funcionalidades
-
-RPNG-762 Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
-
-## 4.3.0 (2026-06-25) {#v4-3-0}
+### 4.4.0 (2026-07-20) {#v4-4-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-323 RPNG-681 RPNG-682 RPNG-683 Adicionar captura de geolocalização nas sessões de biometria
+  * [RPNG-771] Captura de geolocalização best-effort nas sessões de biometria
 
-RPNG-419 Adicionar suporte ao Lacuna FaceTecServer 3.0+
+* Melhorias
 
-RPNG-503 Configurações da página de sessão biométrica
+  * [RPNG-695] Adicionar tradução dos motivos de falha nas sessões de biometria
 
-RPNG-574 Configurações de limites de transação por subscription (SysAdmin)
+* Correções de bugs
 
-RPNG-594 Páginas de configuração de identificações biométricas
-
-RPNG-610 Adicionar botão para remover a imagem da logo
-
-RPNG-623 RPNG-711 Adicionar botão de resetar para os padrões do sistema em cada seção das configurações
-
-### Melhorias
-
-RPNG-389 RPNG-722 Otimizar listagem de dados utilizando paginação por cursor
-
-RPNG-501 Exibir os dados de OCR do FaceTec ID Scan no dashboard
-
-RPNG-535 Aplicar limites de transação para todos os tipos de transação
-
-RPNG-605 RPNG-679 Melhorar APIs do dashboard
-
-RPNG-613 Adicionar traduções para falhas de cadastro biométrico e do cadastro em lote
-
-RPNG-620 Adicionar informações de PDF/A na validação pública de documentos
-
-RPNG-625 Adicionar nomes completos dos novos temas
-
-RPNG-641 Atualizar o FaceTec browser SDK para v9.7.115
-
-RPNG-649 Melhorar o botão que informa a subscription atual
-
-RPNG-689 Adicionar tradução para a frase "Todas as organizações"
-
-### Correções de bugs
-
-RPNG-538 Erro "User not found" ao abrir a tela de detalhes do usuário
-
-RPNG-644 Filtro por aplicação na tabela de transações não funcionava
-
-RPNG-655 Transação duplicada na conclusão de autenticação com certificado (legado)
-
-RPNG-702 FaceMaps antigos não eram excluídos após autenticação biométrica
+  * [RPNG-701] Dados do documento apareciam em sessões sem ID Scan
 
 
-## 4.2.5 (2026-06-24) {#v4-2-5}
+### 4.3.2 (2026-07-13) {#v4-3-2}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Correções de bugs
 
-RPNG-716 Atualizações dos SDKs da FaceTec
+  * [RPNG-770] Requisições de autenticação por certificado repetidas não eram reportadas com um erro distinto de reuso de nonce
+
+### 4.3.1 (2026-07-08) {#v4-3-1}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-762] Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+* Melhorias
+
+  * [RPNG-765] Atualizar para o SPA 7.3, adicionando telemetria de desempenho de runtime ao Microsoft Application Insights
+
+* Correções de bugs
+
+  * [RPNG-766] Corrigir um erro raro que podia ocorrer ao usar as APIs de autenticação legadas
+
+### 4.2.6 (2026-07-07) [patch] {#v4-2-6}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-762] Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+### 4.1.7 (2026-07-07) [patch] {#v4-1-7}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-762] Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+### 4.0.6 (2026-07-07) [patch] {#v4-0-6}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-762] Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+### 3.4.4 (2026-07-07) [patch] {#v3-4-4}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-762] Adicionar configuração para desativar a taxa mínima de dados do corpo da requisição
+
+### 4.3.0 (2026-06-25) {#v4-3-0}
+
+Atualiza modelo do banco de dados: **sim**
+
+* Novas funcionalidades
+
+  * [RPNG-323] [RPNG-681] [RPNG-682] [RPNG-683] Adicionar captura de geolocalização nas sessões de biometria
+
+  * [RPNG-419] Adicionar suporte ao Lacuna FaceTecServer 3.0+
+
+  * [RPNG-503] Configurações da página de sessão biométrica
+
+  * [RPNG-574] Configurações de limites de transação por subscription (SysAdmin)
+
+  * [RPNG-594] Páginas de configuração de identificações biométricas
+
+  * [RPNG-610] Adicionar botão para remover a imagem da logo
+
+  * [RPNG-623] [RPNG-711] Adicionar botão de resetar para os padrões do sistema em cada seção das configurações
+
+* Melhorias
+
+  * [RPNG-389] [RPNG-722] Otimizar listagem de dados utilizando paginação por cursor
+
+  * [RPNG-501] Exibir os dados de OCR do FaceTec ID Scan no dashboard
+
+  * [RPNG-535] Aplicar limites de transação para todos os tipos de transação
+
+  * [RPNG-605] [RPNG-679] Melhorar APIs do dashboard
+
+  * [RPNG-613] Adicionar traduções para falhas de cadastro biométrico e do cadastro em lote
+
+  * [RPNG-620] Adicionar informações de PDF/A na validação pública de documentos
+
+  * [RPNG-625] Adicionar nomes completos dos novos temas
+
+  * [RPNG-641] Atualizar o FaceTec browser SDK para v9.7.115
+
+  * [RPNG-649] Melhorar o botão que informa a subscription atual
+
+  * [RPNG-689] Adicionar tradução para a frase "Todas as organizações"
+
+* Correções de bugs
+
+  * [RPNG-538] Erro "User not found" ao abrir a tela de detalhes do usuário
+
+  * [RPNG-644] Filtro por aplicação na tabela de transações não funcionava
+
+  * [RPNG-655] Transação duplicada na conclusão de autenticação com certificado (legado)
+
+  * [RPNG-702] FaceMaps antigos não eram excluídos após autenticação biométrica
+
+
+### 4.2.5 (2026-06-24) {#v4-2-5}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-716] Atualizações dos SDKs da FaceTec
 
 
 <a name="v4-2-4" />
 
-## 4.2.4 (2026-04-28) {#v4-2-4}
+### 4.2.4 (2026-04-28) {#v4-2-4}
 
 Atualiza modelo do banco de dados: não
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-636 Adicionar configuração para desabilitar upload na página pública de validação de documentos
-
-
-## 4.2.3 (2026-04-21) {#v4-2-3}
-
-Atualiza modelo do banco de dados: não
-
-### Correções de bugs
-
-RPNG-624 Erro no processamento de Liveness quando há baixa qualidade da imagem na captura anterior
+  * [RPNG-636] Adicionar configuração para desabilitar upload na página pública de validação de documentos
 
 
-## 4.2.2 (2026-04-18) {#v4-2-2}
+### 4.2.3 (2026-04-21) {#v4-2-3}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-622 Problemas de compatibilidade na configuração de limite de upload da API
-
-
-## 4.2.1 (2026-04-18) {#v4-2-1}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-RPNG-621 Adicionar SubjectIdentifier para sessões de captura de documento de identidade
+  * [RPNG-624] Erro no processamento de Liveness quando há baixa qualidade da imagem na captura anterior
 
 
-## 4.2.0 (2026-04-16) {#v4-2-0}
+### 4.2.2 (2026-04-18) {#v4-2-2}
 
 Atualiza modelo do banco de dados: não
 
-### Novas funcionalidades
+* Correções de bugs
 
-RPNG-438 RPNG-611 Adicionar suporte a conversão e validação de PDF/As
+  * [RPNG-622] Problemas de compatibilidade na configuração de limite de upload da API
 
 
-## 4.1.6 (2026-04-16) {#v4-1-6}
+### 4.2.1 (2026-04-18) {#v4-2-1}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-621] Adicionar SubjectIdentifier para sessões de captura de documento de identidade
+
+
+### 4.2.0 (2026-04-16) {#v4-2-0}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-438] [RPNG-611] Adicionar suporte a conversão e validação de PDF/As
+
+
+### 4.1.6 (2026-04-16) {#v4-1-6}
  
-Updates database model: no
+Atualiza modelo do banco de dados: não
 
-### Bug fixes
+* Correções de bugs
 
-RPNG-616 Página de configurações da subscription lança erros depois de ter sido fechada
+  * [RPNG-616] Página de configurações da subscription lança erros depois de ter sido fechada
 
 
-## 4.1.5 (2026-04-16) {#v4-1-5}
+### 4.1.5 (2026-04-16) {#v4-1-5}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Melhorias
 
-RPNG-617 Melhorar matcher de número de identidade das vídeo identificações
-
-
-## 4.1.4 (2026-04-16) {#v4-1-4}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-RPNG-615 Adicionar rota para obter detalhes de sessões FortFace
+  * [RPNG-617] Melhorar matcher de número de identidade das vídeo identificações
 
 
-## 4.1.3 (2026-04-15) {#v4-1-3}
+### 4.1.4 (2026-04-16) {#v4-1-4}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Melhorias
 
-RPNG-612 Aumentar limite máximo configurável para tamanho de uploads
-
-
-## 4.1.2 (2026-04-09) {#v4-1-2}
-
-Atualiza modelo do banco de dados: não
-
-### Novas funcionalidades
-
-RPNG-607 Política Adobe Reader para geração de assinatura
-
-### Melhorias
-
-RPNG-608 Atualização de bibliotecas de assinatura
+  * [RPNG-615] Adicionar rota para obter detalhes de sessões FortFace
 
 
-## 3.7.2 (2026-04-09) {#v3-7-2}
+### 4.1.3 (2026-04-15) {#v4-1-3}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Melhorias
 
-RPNG-608 Atualização de bibliotecas de assinatura
-
-
-## 3.4.3 (2026-04-07) {#v3-4-3}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-RPNG-608 Atualização de bibliotecas de assinatura
+  * [RPNG-612] Aumentar limite máximo configurável para tamanho de uploads
 
 
-## 4.1.1 (2026-04-06) {#v4-1-1}
+### 4.1.2 (2026-04-09) {#v4-1-2}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Novas funcionalidades
 
-RPNG-606 Atualização do SDK da Fortface para v2.4.3
+  * [RPNG-607] Política Adobe Reader para geração de assinatura
 
-## 4.1.0 (2026-04-01) {#v4-1-0}
+* Melhorias
+
+  * [RPNG-608] Atualização PKI SDK para [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) com correção do loop de validação de TSL
+
+
+### 3.7.2 (2026-04-09) [patch] {#v3-7-2}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-608] Atualização PKI SDK para [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) com correção do loop de validação de TSL
+
+
+### 3.4.3 (2026-04-07) [patch] {#v3-4-3}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-608] Atualização PKI SDK para [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3) com correção do loop de validação de TSL
+
+
+### 4.1.1 (2026-04-06) {#v4-1-1}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-606] Atualização do SDK da Fortface para v2.4.3
+
+### 4.1.0 (2026-04-01) {#v4-1-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-302 RPNG-599 RPNG-602 Sessão de identificação biométrica (ABIS)
+  * [RPNG-302] [RPNG-599] [RPNG-602] Sessão de identificação biométrica (ABIS)
 
-RPNG-440 RPNG-569 RPNG-580 RPNG-585 RPNG-588 PNG-589 RPNG-595 Importação de biometrias em lote
+  * [RPNG-440] [RPNG-569] [RPNG-580] [RPNG-585] [RPNG-588] PNG-589 RPNG-595 Importação de biometrias em lote
 
-RPNG-579 RPNG-584 RPNG-604 Autenticação facial com fallback para provedor de identidade externa
+  * [RPNG-579] [RPNG-584] [RPNG-604] Autenticação facial com fallback para provedor de identidade externa
 
-RPNG-568 RPNG-575 Adicionar lista de padrões de SubjectIdentifiers aceitos para Subscription
+  * [RPNG-568] [RPNG-575] Adicionar lista de padrões de SubjectIdentifiers aceitos para Subscription
 
-### Melhorias
+* Melhorias
 
-RPNG-544 Mapeamento de TransactionLimits para todas as operações que envolvem Carimbo de Tempo
+  * [RPNG-544] Mapeamento de TransactionLimits para todas as operações que envolvem Carimbo de Tempo
 
-RPNG-555 SysAdmin - Tela de permissões da subscription
+  * [RPNG-555] SysAdmin - Tela de permissões da subscription
 
-RPNG-558 Informação de restrição na listagem e detalhes de planos de carimbo de tempo
+  * [RPNG-558] Informação de restrição na listagem e detalhes de planos de carimbo de tempo
 
-RPNG-559 Dashboard - Melhorias nas informações de FaceTec IdScan
+  * [RPNG-559] Dashboard - Melhorias nas informações de FaceTec IdScan
 
-RPNG-587 Adicionar no detalhe do bio subject: data de exclusão
+  * [RPNG-587] Adicionar no detalhe do bio subject: data de exclusão
 
-RPNG-591 Adicionar "null expected" à chamada de get subject by identifier
+  * [RPNG-591] Adicionar "null expected" à chamada de get subject by identifier
 
-RPNG-592 Melhorar traduções da informação de sessão FortFace
+  * [RPNG-592] Melhorar traduções da informação de sessão FortFace
 
-RPNG-603 Atualizações dos SDKs da FaceTec
+  * [RPNG-603] Atualizações dos SDKs da FaceTec
 
-RPNG-567 Listagem paginada de Subjects da subscription via ClientLib
-
-
-## 4.0.5 (2026-03-20) {#v4-0-5}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-RPNG-547, RPNG-582 Adicionar suporte ao sistema de CNPJs alfanuméricos
+  * [RPNG-567] Listagem paginada de Subjects da subscription via ClientLib
 
 
-## 3.7.1 (2026-03-20) {#v3-7-1}
+### 4.0.5 (2026-03-20) {#v4-0-5}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Melhorias
 
-RPNG-547, RPNG-582 Adicionar suporte ao sistema de CNPJs alfanuméricos
-
-RPNG-540 Configuração de sistema para usar apenas a língua padrão
-
-### Correções de bugs
-
-RPNG-533 TypeError durante a listagem de certificados do Web PKI
+  * [RPNG-547] [RPNG-582] Adicionar suporte ao sistema de CNPJs alfanuméricos
 
 
-## 4.0.4 (2026-03-18) {#v4-0-4}
+### 3.7.1 (2026-03-20) [patch] {#v3-7-1}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Melhorias
 
-RPNG-576 Atualização do FortFace SDK para v2.4.2
+  * [RPNG-547] [RPNG-582] Adicionar suporte ao sistema de CNPJs alfanuméricos
 
+  * [RPNG-540] Configuração de sistema para usar apenas a língua padrão
 
-## 4.0.3 (2026-03-16) {#v4-0-3}
+* Correções de bugs
 
-Atualiza modelo do banco de dados: não
-
-### Correções de bugs
-
-RPNG-566 Problemas com atualização do FortFace SDK para v2.4.1
+  * [RPNG-533] TypeError durante a listagem de certificados do Web PKI
 
 
-## 4.0.2 (2026-03-12) {#v4-0-2}
+### 4.0.4 (2026-03-18) {#v4-0-4}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Melhorias
 
-RPNG-546 Dashboard - Adicionar visualização de detalhes de transações registradas com TypeDiscriminator do TransactionService
-
-RPNG-570 Atualização do FortFace SDK para v2.4.1
-
-### Correções de bugs
-
-RPNG-566 Rotas de completar sessões exigindo subscription
+  * [RPNG-576] Atualização do FortFace SDK para v2.4.2
 
 
-## 4.0.1 (2026-03-10) {#v4-0-1}
+### 4.0.3 (2026-03-16) {#v4-0-3}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-563 Problema com injeção de dependências do BusinessService
+  * [RPNG-566] Problemas com atualização do FortFace SDK para v2.4.1
 
 
-## 4.0.0 (2026-03-09) {#v4-0-0}
+### 4.0.2 (2026-03-12) {#v4-0-2}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-546] Dashboard - Adicionar visualização de detalhes de transações registradas com TypeDiscriminator do TransactionService
+
+  * [RPNG-570] Atualização do FortFace SDK para v2.4.1
+
+* Correções de bugs
+
+  * [RPNG-566] Rotas de completar sessões exigindo subscription
+
+
+### 4.0.1 (2026-03-10) {#v4-0-1}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-563] Problema com injeção de dependências do BusinessService
+
+
+### 4.0.0 (2026-03-09) {#v4-0-0}
 
 :::warning
-Veja [Atualizando o Rest PKI Core da versão 3.x para 4.0](on-premises/update-40.md)
+Veja [Atualizando o Rest PKI Core da versão 3.x para 4.0](on-premises/major-updates/update-40.md)
 :::
 
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-273, RPNG-519 Fluxo de faturas para uma subscription
+  * [RPNG-273] [RPNG-519] Fluxo de faturas para uma subscription
 
-RPNG-347, RPNG-497 Melhorias nas transações FaceTec
+  * [RPNG-347] [RPNG-497] Melhorias nas transações FaceTec
 
-RPNG-458 Dashboard de biometria - Listagem de sessões do cadastro biométrico
+  * [RPNG-458] Dashboard de biometria - Listagem de sessões do cadastro biométrico
 
-RPNG-461 Serviço de limite de transações por tipo/mês
+  * [RPNG-461] Serviço de limite de transações por tipo/mês
 
-RPNG-478 Adicionar transações para sessões FortFace
+  * [RPNG-478] Adicionar transações para sessões FortFace
 
-RPNG-484 Opção de utilizar sessões de biometria com retorno de URL assim como nas de assinatura
+  * [RPNG-484] Opção de utilizar sessões de biometria com retorno de URL assim como nas de assinatura
 
-RPNG-488 Adicionar configuração de Timeout para sessão de biometria
+  * [RPNG-488] Adicionar configuração de Timeout para sessão de biometria
 
-RPNG-505 Lista de ReturnUrl aceitas para BioSession
+  * [RPNG-505] Lista de ReturnUrl aceitas para BioSession
 
-RPNG-511 Vídeo Identificação - Receber valores esperados do documento \(tipo/número\)
+  * [RPNG-511] Vídeo Identificação - Receber valores esperados do documento \(tipo/número\)
 
-RPNG-517 Permissionamento por subscription para TimestampTiers
+  * [RPNG-517] Permissionamento por subscription para TimestampTiers
 
-### Melhorias
+* Melhorias
 
-RPNG-270 Interface com listagem das sessões de assinatura
+  * [RPNG-270] Interface com listagem das sessões de assinatura
 
-RPNG-405 Melhorias na tela inicial das sessões de biometria e customizações
+  * [RPNG-405] Melhorias na tela inicial das sessões de biometria e customizações
 
-RPNG-430 Marcas de carimbo de tempo em espanhol
+  * [RPNG-430] Marcas de carimbo de tempo em espanhol
 
-RPNG-435 Dashboard de Biometria - Adicionar visualização de imagens das sessões biométricas
+  * [RPNG-435] Dashboard de Biometria - Adicionar visualização de imagens das sessões biométricas
 
-RPNG-443, RPNG-447, RPNG-448, RPNG-450 Atualizações do Angular para versão 19
+  * [RPNG-443] [RPNG-447] [RPNG-448] [RPNG-450] Atualizações do Angular para versão 19
 
-RPNG-471 Botão para carregar todas as imagens nos detalhes da sessão de biometria
+  * [RPNG-471] Botão para carregar todas as imagens nos detalhes da sessão de biometria
 
-RPNG-472 Salvar informação sobre Agent que criou a BioSession
+  * [RPNG-472] Salvar informação sobre Agent que criou a BioSession
 
-RPNG-474 Campos Swagger para sessões de biometria
+  * [RPNG-474] Campos Swagger para sessões de biometria
 
-RPNG-477 Adicionar link da sessão FaceTec no detalhe da transação
+  * [RPNG-477] Adicionar link da sessão FaceTec no detalhe da transação
 
-RPNG-481 Adicionar botão de copiar chave de API gerada
+  * [RPNG-481] Adicionar botão de copiar chave de API gerada
 
-RPNG-486 Apresentar mensagem de erro amigável nas sessões de biometria
+  * [RPNG-486] Apresentar mensagem de erro amigável nas sessões de biometria
 
-RPNG-490 Customização das cores e logo da sessão de biometria por subscription
+  * [RPNG-490] Customização das cores e logo da sessão de biometria por subscription
 
-RPNG-507 Informações da vídeo identificação via API
+  * [RPNG-507] Informações da vídeo identificação via API
 
-RPNG-508, RPNG-521, RPNG-531, RPNG-541, RPNG-548 Melhorias de layout das telas de administração
+  * [RPNG-508] [RPNG-521] [RPNG-531] [RPNG-541] [RPNG-548] Melhorias de layout das telas de administração
 
-RPNG-509 Melhorias nos templates OCR para passaportes
+  * [RPNG-509] Melhorias nos templates OCR para passaportes
 
-RPNG-513 Dashboard - Assistir ao vídeo gravado na vídeo identificação
+  * [RPNG-513] Dashboard - Assistir ao vídeo gravado na vídeo identificação
 
-RPNG-468, RPNG-515, RPNG-560 Atualizações dos SDKs da FaceTec
+  * [RPNG-468] [RPNG-515] [RPNG-560] Atualizações dos SDKs da FaceTec
 
-RPNG-536 Melhorias de traduções dos botões de "Encerrar sessão"
+  * [RPNG-536] Melhorias de traduções dos botões de "Encerrar sessão"
 
-RPNG-537 Melhoria na coleta de logs de erro para o SDK da FortFace
+  * [RPNG-537] Melhoria na coleta de logs de erro para o SDK da FortFace
 
-RPNG-540 Configuração de sistema para usar apenas a língua padrão
+  * [RPNG-540] Configuração de sistema para usar apenas a língua padrão
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-258 Campos do PadesSignaturePostRequestBase sendo ignorados
+  * [RPNG-258] Campos do PadesSignaturePostRequestBase sendo ignorados
 
-RPNG-487 Sessão de biometria começa como "Falha" no dashboard
+  * [RPNG-487] Sessão de biometria começa como "Falha" no dashboard
 
-RPNG-512 Vídeo Identificação - Correção da condição de sucesso na vídeo identificação
+  * [RPNG-512] Vídeo Identificação - Correção da condição de sucesso na vídeo identificação
 
-RPNG-518 Corrigir coleta do Agent para as transações de BioSession
+  * [RPNG-518] Corrigir coleta do Agent para as transações de BioSession
 
-RPNG-523 Vídeo Identificação - Problemas na finalização do FaceTec IdScan
+  * [RPNG-523] Vídeo Identificação - Problemas na finalização do FaceTec IdScan
 
-RPNG-525 Vídeo Identificação - Problema ao gravar/enviar vídeo
+  * [RPNG-525] Vídeo Identificação - Problema ao gravar/enviar vídeo
 
-RPNG-527 Sessões ficam presas em "loading" em dispositivos IOS 26.2
+  * [RPNG-527] Sessões ficam presas em "loading" em dispositivos IOS 26.2
 
-RPNG-533 TypeError durante a listagem de certificados do Web PKI
+  * [RPNG-533] TypeError durante a listagem de certificados do Web PKI
 
-RPNG-534 Erro 500 em requisições utilizando métodos inválidos (POST) em rotas do ClientApp
+  * [RPNG-534] Erro 500 em requisições utilizando métodos inválidos (POST) em rotas do ClientApp
 
-RPNG-539 Formulário de configuração da Subscription marcado com unsaved changes mesmo depois de reset
+  * [RPNG-539] Formulário de configuração da Subscription marcado com unsaved changes mesmo depois de reset
 
-RPNG-542 Telas não atualizam ao trocar de subscription
+  * [RPNG-542] Telas não atualizam ao trocar de subscription
 
 
-## 3.7.0 (2025-11-26) {#v3-7-0}
+### 3.7.0 (2025-11-26) {#v3-7-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Melhorias
+* Melhorias
 
-RPNG-453 Melhorar fotos de enrollment com liveness FortFace
+  * [RPNG-453] Melhorar fotos de enrollment com liveness FortFace
 
 
-## 3.6.2 (2025-11-24) {#v3-6-2}
+### 3.6.2 (2025-11-24) {#v3-6-2}
 
 Atualiza modelo do banco de dados: não
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-394 Dashboard de Biometria - Tela de detalhamento de BioSubjects
+  * [RPNG-394] Dashboard de Biometria - Tela de detalhamento de BioSubjects
 
-### Melhorias
+* Melhorias
 
-RPNG-428 Atualizar SDKs da FortFace
+  * [RPNG-428] Atualizar SDKs da FortFace
 
-RPNG-454 Adicionar InteractionMethod no BioSessionModel para BioDashBoard
+  * [RPNG-454] Adicionar InteractionMethod no BioSessionModel para BioDashBoard
 
 
-## 3.6.1 (2025-11-20) {#v3-6-1}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-RPNG-320 Carregamento de dados de sessões FaceTec legadas
-
-## 3.6.0 (2025-11-20) {#v3-6-0}
-
-Atualiza modelo do banco de dados: **sim**
-
-### Novas funcionalidades
-
-RPNG-387 Adicionar tags para transações
-
-RPNG-445 Dashboard - Adicionar sessões de datavalid nos detalhes da sessão de biometria
-
-RPNG-460 Adicionar ferramentas para extração de fotos das sessões de liveness FaceTec
-
-### Melhorias
-
-RPNG-446 Dashboard - Adicionar campos faltantes de FaceTecSession
-
-## 3.5.2 (2025-11-20) {#v3-5-2}
+### 3.6.1 (2025-11-20) {#v3-6-1}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Melhorias
 
-RPNG-457 Problemas com configuração de provedor de identidade externa da Subscription
+  * [RPNG-320] Carregamento de dados de sessões FaceTec legadas
 
-## 3.5.0 (2025-11-17) {#v3-5-0}
-
-Atualiza modelo do banco de dados: **sim**
-
-### Novas funcionalidades
-
-RPNG-336, RPNG-397 Ferramentas para importação de dados FaceTec
-
-RPNG-392 Dashboard de Biometria - Tela de detalhamento da sessão de biometria
-
-RPNG-395 Dashboard de Biometria - Filtros na listagem de sessões
-
-RPNG-427 Carimbo de tempo para vídeo identificação
-
-{/* RPNG-432 Adicionar suporte a OpenTelemetry */}
-
-### Melhorias
-
-RPNG-157 Adicionar campo para inserir Api-Key no swagger
-
-RPNG-274 Melhorar tratamento de PDFs protegidos por senha
-
-RPNG-390 Logar eventos de frontend dos SDKs FortFace e FaceTec
-
-RPNG-406 Refatoração de PolicyWrappers com base no PKI Express
-
-RPNG-423 Ativar descrição de campos no Swagger
-
-RPNG-429 Persistência de informaçõe sadicionais das sessões FaceTec no banco de dados
-
-RPNG-431, RPNG-436 Vídeo Identificação - Melhoria no PDF de result report
-
-RPNG-444 Opção de gerar result-data para sessões biométricas de cadastro e autenticação
-
-### Correções de bugs
-
-RPNG-357 Não existe mensagem de erro amigável quando outro app está usando a câmera (FortFace)
-
-RPNG-409 Problemas na customização de cores FaceTec IdScan
-
-## 3.4.0 (2025-10-28) {#v3-4-0}
+### 3.6.0 (2025-11-20) {#v3-6-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-351, RPNG-352, RPNG-359, RPNG-353, RPNG-364, RPNG-391, RPNG-407, RPNG-422, RPNG-426 Adicionar sessão de vídeo identificação
+  * [RPNG-387] Adicionar tags para transações
 
-RPNG-360 Permitir customização estática da Home Page (por instância)
+  * [RPNG-445] Dashboard - Adicionar sessões de datavalid nos detalhes da sessão de biometria
 
-RPNG-379 Implementar gerenciamento de configurações de PDF e Contexto de Segurança por Subscription
+  * [RPNG-460] Adicionar ferramentas para extração de fotos das sessões de liveness FaceTec
 
-RPNG-381 Adicionar API para renotarização de diplomas
+* Melhorias
 
-RPNG-393 Dashboard de Biometria - Adicionar tela de listagem de cadastros
+  * [RPNG-446] Dashboard - Adicionar campos faltantes de FaceTecSession
 
-### Melhorias
-
-RPNG-151 Adicionar traduções para espanhol
-
-RPNG-414 Atualização de bibliotecas de assinatura
-
-### Correções de bugs
-
-RPNG-285 Ajustes de permissões
-
-RPNG-388 Erro de constraint duplicada ao salvar certificados
-
-## 3.3.0 (2025-10-16) {#v3-3-0}
-
-Atualiza modelo do banco de dados: **sim**
-
-### Novas funcionalidades
-
-RPNG-184 Cadastro de ACs (Autoiridades Certificadoras) intermediárias
-
-RPNG-324 Registro de thumbprint de chave pública das sessões FaceTec
-
-RPNG-346 Sessões biométricas de cadastro e autenticação por foto
-
-RPNG-358 Sessão de correspondência entre documento de identificação com face
-
-RPNG-374 Verificação de identidade facial com provedores externos (FortFace/Datavalid)
-
-RPNG-377 Sessões biométricas de cadastro e autenticação utilizando captura de face com prova de vida FortFace
-
-RPNG-383, RPNG-382 Adicionar tela de configurações de biometria da subscription
-
-RPNG-385 Tela de listagem resumida de sessões biométricas com visualização de imagens
-
-RPNG-404 Adicionar configuração para aceitar imagens de baixa resolução na API de autenticação facial
-
-### Melhorias
-
-RPNG-312, RPNG-314, RPNG-372, RPNG-375, RPNG-384, RPNG-343 Melhorias na modelagem de entidades relacionadas a biometria
-
-RPNG-371 Melhorar layout das demonstrações de sessões biométricas
-
-RPNG-373 Melhorar layout das sessões biométricas em dispositivos móveis
-
-RPNG-399 Adicionar resources do FaceTec browser SDK v9.7.83
-
-### Correções de bugs
-
-RPNG-376 Inconsistência na configuração do limite de tentativas de liveness nas sessões biométricas com FaceTec
-
-{/* RPNG-378 Correção interna de comando de migração SQL */}
-
-## 3.2.1 (2025-08-27) {#v3-2-1}
+### 3.5.2 (2025-11-18) {#v3-5-2}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Correções de bugs
 
-RPNG-367 Atualizar certificados da cadeia de testes v3
+  * [RPNG-457] Problemas com configuração de provedor de identidade externa da Subscription
 
-### Correções de bugs
-
-RPNG-365 Garantir build com última imagem do AspNet
-
-## 3.2.0 (2025-08-22) {#v3-2-0}
+### 3.5.0 (2025-11-17) {#v3-5-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-319 QR Code para sessões de biometria
+  * [RPNG-336] [RPNG-397] Ferramentas para importação de dados FaceTec
 
-RPNG-329 Detecção de oclusão de face nas sessões de prova de via via FortFace
+  * [RPNG-392] Dashboard de Biometria - Tela de detalhamento da sessão de biometria
 
-### Melhorias
+  * [RPNG-395] Dashboard de Biometria - Filtros na listagem de sessões
 
-RPNG-325 Aplicar de temas nas sessões de biometria
+  * [RPNG-427] Carimbo de tempo para vídeo identificação
 
-RPNG-331 Atribuir sessões biométricas implicitas para chamadas de API FaceTec
+  * {/* [RPNG-432] Adicionar suporte a OpenTelemetry */}
 
-RPNG-332 Recortar imagem do resultado da prova de vida via FortFace
+* Melhorias
 
-RPNG-354 Adicionar resources do FaceTec browser SDK v9.7.75
+  * [RPNG-157] Adicionar campo para inserir Api-Key no swagger
 
-### Correções de bugs
+  * [RPNG-274] Melhorar tratamento de PDFs protegidos por senha
 
-RPNG-355 Erro `BadRequest` ao tentar utilizar AWS S3 em alguns cenários
+  * [RPNG-390] Logar eventos de frontend dos SDKs FortFace e FaceTec
 
+  * [RPNG-406] Refatoração de PolicyWrappers com base no PKI Express
 
+  * [RPNG-423] Ativar descrição de campos no Swagger
 
-## 3.1.1 (2025-07-24) {#v3-1-1}
+  * [RPNG-429] Persistência de informaçõe sadicionais das sessões FaceTec no banco de dados
 
-Atualiza modelo do banco de dados: não
+  * [RPNG-431] [RPNG-436] Vídeo Identificação - Melhoria no PDF de result report
 
-### Melhorias
+  * [RPNG-444] Opção de gerar result-data para sessões biométricas de cadastro e autenticação
 
-RPNG-340 Adicionar resources do FaceTec browser SDK v9.7.72
+* Correções de bugs
 
-### Correções de bugs
+  * [RPNG-357] Não existe mensagem de erro amigável quando outro app está usando a câmera (FortFace)
 
-RPNG-341 Imagem para ARM64 não está escutando na porta 80 após atualização para .NET 8
+  * [RPNG-409] Problemas na customização de cores FaceTec IdScan
 
-
-
-## 3.1.0 (2025-07-24) {#v3-1-0}
+### 3.4.0 (2025-10-28) {#v3-4-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-297 Sessões de biometria
+  * [RPNG-351] [RPNG-352] [RPNG-359] [RPNG-353] [RPNG-364] [RPNG-391] [RPNG-407] [RPNG-422] [RPNG-426] Adicionar sessão de vídeo identificação
 
+  * [RPNG-360] Permitir customização estática da Home Page (por instância)
 
+  * [RPNG-379] Implementar gerenciamento de configurações de PDF e Contexto de Segurança por Subscription
 
-## 3.0.1 (2025-06-25) {#v3-0-1}
+  * [RPNG-381] Adicionar API para renotarização de diplomas
+
+  * [RPNG-393] Dashboard de Biometria - Adicionar tela de listagem de cadastros
+
+* Melhorias
+
+  * [RPNG-151] Adicionar traduções para espanhol
+
+  * [RPNG-414] Atualização PKI SDK para [2.21.0](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-21-0)
+
+* Correções de bugs
+
+  * [RPNG-285] Ajustes de permissões
+
+  * [RPNG-388] Erro de constraint duplicada ao salvar certificados
+
+### 3.3.0 (2025-10-16) {#v3-3-0}
+
+Atualiza modelo do banco de dados: **sim**
+
+* Novas funcionalidades
+
+  * [RPNG-184] Cadastro de ACs (Autoiridades Certificadoras) intermediárias
+
+  * [RPNG-324] Registro de thumbprint de chave pública das sessões FaceTec
+
+  * [RPNG-346] Sessões biométricas de cadastro e autenticação por foto
+
+  * [RPNG-358] Sessão de correspondência entre documento de identificação com face
+
+  * [RPNG-374] Verificação de identidade facial com provedores externos (FortFace/Datavalid)
+
+  * [RPNG-377] Sessões biométricas de cadastro e autenticação utilizando captura de face com prova de vida FortFace
+
+  * [RPNG-383] [RPNG-382] Adicionar tela de configurações de biometria da subscription
+
+  * [RPNG-385] Tela de listagem resumida de sessões biométricas com visualização de imagens
+
+  * [RPNG-404] Adicionar configuração para aceitar imagens de baixa resolução na API de autenticação facial
+
+* Melhorias
+
+  * [RPNG-312] [RPNG-314] [RPNG-372] [RPNG-375] [RPNG-384] [RPNG-343] Melhorias na modelagem de entidades relacionadas a biometria
+
+  * [RPNG-371] Melhorar layout das demonstrações de sessões biométricas
+
+  * [RPNG-373] Melhorar layout das sessões biométricas em dispositivos móveis
+
+  * [RPNG-399] Adicionar resources do FaceTec browser SDK v9.7.83
+
+* Correções de bugs
+
+  * [RPNG-376] Inconsistência na configuração do limite de tentativas de liveness nas sessões biométricas com FaceTec
+
+  * {/* [RPNG-378] Correção interna de comando de migração SQL */}
+
+### 3.2.1 (2025-08-27) {#v3-2-1}
 
 Atualiza modelo do banco de dados: não
 
-### Novas funcionalidades
+* Melhorias
 
-RPNG-316 Comando/Job para realizar teste de integridade de documentos
+  * [RPNG-367] Atualizar certificados da cadeia de testes v3
 
-### Melhorias
+* Correções de bugs
 
-RPNG-284 Adicionar resources do FaceTec browser SDK v9.7.63 e v9.7.66
+  * [RPNG-365] Garantir build com última imagem do AspNet
 
-### Correções de bugs
+### 3.2.0 (2025-08-22) {#v3-2-0}
 
-RPNG-315 Erro `BlobNotFoundException` em certos blobs da pasta `signedfiles`
+Atualiza modelo do banco de dados: **sim**
+
+* Novas funcionalidades
+
+  * [RPNG-319] QR Code para sessões de biometria
+
+  * [RPNG-329] Detecção de oclusão de face nas sessões de prova de via via FortFace
+
+* Melhorias
+
+  * [RPNG-325] Aplicar de temas nas sessões de biometria
+
+  * [RPNG-331] Atribuir sessões biométricas implicitas para chamadas de API FaceTec
+
+  * [RPNG-332] Recortar imagem do resultado da prova de vida via FortFace
+
+  * [RPNG-354] Adicionar resources do FaceTec browser SDK v9.7.75
+
+* Correções de bugs
+
+  * [RPNG-355] Erro `BadRequest` ao tentar utilizar AWS S3 em alguns cenários
 
 
 
-## 3.0.0 (2025-06-16) {#v3-0-0}
+### 3.1.1 (2025-07-24) {#v3-1-1}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-340] Adicionar resources do FaceTec browser SDK v9.7.72
+
+* Correções de bugs
+
+  * [RPNG-341] Imagem para ARM64 não está escutando na porta 80 após atualização para .NET 8
+
+
+
+### 3.1.0 (2025-07-24) {#v3-1-0}
+
+Atualiza modelo do banco de dados: **sim**
+
+* Novas funcionalidades
+
+  * [RPNG-297] Sessões de biometria
+
+
+
+### 3.0.1 (2025-06-25) {#v3-0-1}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-316] Comando/Job para realizar teste de integridade de documentos
+
+* Melhorias
+
+  * [RPNG-284] Adicionar resources do FaceTec browser SDK v9.7.63 e v9.7.66
+
+* Correções de bugs
+
+  * [RPNG-315] Erro `BlobNotFoundException` em certos blobs da pasta `signedfiles`
+
+
+
+### 3.0.0 (2025-06-16) {#v3-0-0}
 
 :::warning
-Veja [Atualizando o Rest PKI Core da versão 2.x para 3.0](on-premises/update-30.md)
+Veja [Atualizando o Rest PKI Core da versão 2.x para 3.0](on-premises/major-updates/update-30.md)
 :::
 
 
 Atualiza modelo do banco de dados: **sim**
 
-### Melhorias
+* Melhorias
 
-RPNG-275 Atualizado ASP.NET Core para versão 8.0
+  * [RPNG-275] Atualizado ASP.NET Core para versão 8.0
 
-RPNG-292 Resolver vulnerabilidades conhecidas (para mais informações veja a [Verificação de vulnerabilidade 25.04](https://docs.lacunasoftware.com/en-us/articles/rest-pki/core/on-premises/vulnerabilities#c2504))
+  * [RPNG-292] Resolver vulnerabilidades conhecidas (para mais informações veja a [Verificação de vulnerabilidade 25.04](https://docs.lacunasoftware.com/en-us/articles/rest-pki/core/on-premises/vulnerabilities#c2504))
 
-RPNG-295 Sinalizar para mecanismos de busca que páginas de validação de documentos não devem ser indexadas
+  * [RPNG-295] Sinalizar para mecanismos de busca que páginas de validação de documentos não devem ser indexadas
 
-RPNG-299 Melhorar exibição do carimbo de tempo na tela de validação
+  * [RPNG-299] Melhorar exibição do carimbo de tempo na tela de validação
 
-RPNG-301 Criar imagem "distroless" com superfície de ataque reduzida
+  * [RPNG-301] Criar imagem "distroless" com superfície de ataque reduzida
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-293 Marcas do tipo QRCode causam erro 500 na API de adicionar marcas se executando em Linux
+  * [RPNG-293] Marcas do tipo QRCode causam erro 500 na API de adicionar marcas se executando em Linux
 
-RPNG-296 Detalhes da validação do certificado na página de validação de documentos ficam em inglês mesmo selecionando português
+  * [RPNG-296] Detalhes da validação do certificado na página de validação de documentos ficam em inglês mesmo selecionando português
 
 
 
-## 2.5.0 (2025-04-11) {#v2-5-0}
+### 2.5.0 (2025-04-11) {#v2-5-0}
 
 Idêntica a: 2.5.0 RC 7 (2025-04-11)
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-276 APIs para realização de prova de vida (*liveness*) com FaceTec
+  * [RPNG-276] APIs para realização de prova de vida (*liveness*) com FaceTec
 
-RPNG-279 APIs para realização de digitalização de documento de identificação (*Id Scan*) com FaceTec
+  * [RPNG-279] APIs para realização de digitalização de documento de identificação (*Id Scan*) com FaceTec
 
-RPNG-280 Demonstração de prova de vida com FaceTec
+  * [RPNG-280] Demonstração de prova de vida com FaceTec
 
-### Melhorias
+* Melhorias
 
-RPNG-287 Suporte a uso de schemas de banco de dados personalizados
+  * [RPNG-287] Suporte a uso de schemas de banco de dados personalizados
 
-RPNG-289 Suporte a plataforma ARM64 em Docker
+  * [RPNG-289] Suporte a plataforma ARM64 em Docker
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-288 Erro *An error has occurred while processing your authentication \(blank email address\). Please try again.*
+  * [RPNG-288] Erro *An error has occurred while processing your authentication \(blank email address\). Please try again.*
 
-### Alterações para variantes específicas
+* Alterações para variantes específicas
 
-RPNG-286 Marcas de validação específicas para caso paisagem \(variante *onr*\)
-
-
-
-## 2.4.5 (2025-12-03) {#v2-4-5}
-
-Atualiza modelo do banco de dados: não
-
-### Bug
-
-RPNG-277 Coluna `DateCompleted` não é preenchida quando uma sessão de assinatura é completada
+  * [RPNG-286] Marcas de validação específicas para caso paisagem \(variante *onr*\)
 
 
 
-## 2.4.4 (2024-10-02) {#v2-4-4}
+### 2.4.5 (2025-04-04) {#v2-4-5}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Correções de bugs
 
-RPNG-271 Melhorar desempenho de chamadas simples repetidas muitas vezes por clientes
-
-
-
-## 2.4.3 (2024-09-25) {#v2-4-3}
-
-Atualiza modelo do banco de dados: não
-
-### Correções de bugs
-
-RPNG-291 Problemas de retrocompatibilidade na API de adicionar marcas a PDFs
+  * [RPNG-277] Coluna `DateCompleted` não é preenchida quando uma sessão de assinatura é completada
 
 
 
-## 2.4.2 (2024-07-26) {#v2-4-2}
+### 2.4.4 (2024-10-02) {#v2-4-4}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Melhorias
 
-RPNG-269 Erro 500 ao realizar assinar de PDF com política `PkiBrazil.AdrTempo`
+  * [RPNG-271] Melhorar desempenho de chamadas simples repetidas muitas vezes por clientes
 
 
 
-## 2.4.1 (2024-07-25) {#v2-4-1}
+### 2.4.3 (2024-09-25) {#v2-4-3}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-290 Erro de compatibilidade com SQL Server 2012 \(uso de função `TRIM()`\)
+  * [RPNG-291] Problemas de retrocompatibilidade na API de adicionar marcas a PDFs
 
 
 
-## 2.4.0 (2024-07-25) {#v2-4-0}
+### 2.4.2 (2024-07-26) {#v2-4-2}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-269] Erro 500 ao realizar assinar de PDF com política `PkiBrazil.AdrTempo`
+
+
+
+### 2.4.1 (2024-07-25) {#v2-4-1}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-290] Erro de compatibilidade com SQL Server 2012 \(uso de função `TRIM()`\)
+
+
+
+### 2.4.0 (2024-07-25) {#v2-4-0}
 
 Idêntica a: 2.4.0 RC 1 (2024-06-15)
 
 Atualiza modelo do banco de dados: não
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-262 Configuração `Oidc:AuthorityBackchannelUrl` para situações em que o GrantID tem uma URL específica para comunicação de backend para backend
+  * [RPNG-262] Configuração `Oidc:AuthorityBackchannelUrl` para situações em que o GrantID tem uma URL específica para comunicação de backend para backend
 
-### Melhorias
+* Melhorias
 
-RPNG-265 Melhorar especificação da assinatura a ser executada com a chave privada do assinante nas APIs
+  * [RPNG-265] Melhorar especificação da assinatura a ser executada com a chave privada do assinante nas APIs
 
-RPNG-266 Políticas para validar assinaturas feitas no Gov.BR
+  * [RPNG-266] Políticas para validar assinaturas feitas no Gov.BR
 
-### Alterações para variantes específicas
+* Alterações para variantes específicas
 
-RPNG-264 Metadados do documento não aparecem na página de validação \(variante *onr*\)
+  * [RPNG-264] Metadados do documento não aparecem na página de validação \(variante *onr*\)
 
 
 
-## 2.3.0 (2024-06-06) {#v2-3-0}
+### 2.3.0 (2024-06-06) {#v2-3-0}
 
 Idêntica a: 2.3.0 RC 1 (2024-05-17)
 
 Atualiza modelo do banco de dados: **sim**
 
-### Alterações para variantes específicas
+* Alterações para variantes específicas
 
-RPNG-259 CNS e Cartório por subscription \(variante *onr*\)
-
-
-
-## 2.2.2 (2024-05-04) {#v2-2-2}
-
-Atualiza modelo do banco de dados: não
-
-### Correções de bugs
-
-RPNG-261 Erro NullReferenceException ao solicitar carimbo via TSP
+  * [RPNG-259] CNS e Cartório por subscription \(variante *onr*\)
 
 
 
-## 2.2.1 (2024-05-01) {#v2-2-1}
+### 2.2.2 (2024-05-04) {#v2-2-2}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-260 URLs relativas de upload em chamadas à API ainda não são aceitas em Linux/Docker
+  * [RPNG-261] Erro NullReferenceException ao solicitar carimbo via TSP
 
 
 
-## 2.2.0 (2024-04-30) {#v2-2-0}
+### 2.2.1 (2024-05-01) {#v2-2-1}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-260] URLs relativas de upload em chamadas à API ainda não são aceitas em Linux/Docker
+
+
+
+### 2.2.0 (2024-04-30) {#v2-2-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-241 Registro de transações de API
+  * [RPNG-241] Registro de transações de API
 
-RPNG-225 API para adicionar carimbo em arquivos PDF
+  * [RPNG-225] API para adicionar carimbo em arquivos PDF
 
-RPNG-214 Configurações por subscription de cultura, fuso horário e formato de data/hora (usadas na representação visual de assinaturas PDF)
+  * [RPNG-214] Configurações por subscription de cultura, fuso horário e formato de data/hora (usadas na representação visual de assinaturas PDF)
 
-### Melhorias
+* Melhorias
 
-RPNG-236 Alternância (*round-robin*) de provedores de carimbo com definição opcional de prioridades
+  * [RPNG-236] Alternância (*round-robin*) de provedores de carimbo com definição opcional de prioridades
 
-{/* RPNG-238 Permitir visualização e edição de metadados das aplicações */}
+  * {/* [RPNG-238] Permitir visualização e edição de metadados das aplicações */}
 
-RPNG-239 Atualizar Angular para versão 17
+  * [RPNG-239] Atualizar Angular para versão 17
 
-RPNG-248 Aceitar URLs relativas de upload em chamadas à API
+  * [RPNG-248] Aceitar URLs relativas de upload em chamadas à API
 
-RPNG-255 Exibir na home page da subscription eventos, solicitações de carimbo de tempo e transações
+  * [RPNG-255] Exibir na home page da subscription eventos, solicitações de carimbo de tempo e transações
 
-RPNG-256 Melhorar e separar em item de menu específico as demonstrações de uso das APIs
+  * [RPNG-256] Melhorar e separar em item de menu específico as demonstrações de uso das APIs
 
-RPNG-257 Apagar mensagens antigas de TSP apenas caso explicitamente configurado
+  * [RPNG-257] Apagar mensagens antigas de TSP apenas caso explicitamente configurado
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-235 Sistema não está tentando obter carimbo de tempo novamente em caso de erro
+  * [RPNG-235] Sistema não está tentando obter carimbo de tempo novamente em caso de erro
 
-RPNG-237 Job para completar assinatura CMS está dando erro
+  * [RPNG-237] Job para completar assinatura CMS está dando erro
 
-RPNG-245 Parâmetros inválidos de representação visual estão gerando resposta 500 ao invés de 422
+  * [RPNG-245] Parâmetros inválidos de representação visual estão gerando resposta 500 ao invés de 422
 
-RPNG-247 URLs inválidas no `ResourceContentOrReference.Url` causam erro 500
+  * [RPNG-247] URLs inválidas no `ResourceContentOrReference.Url` causam erro 500
 
-RPNG-250 Exceções transformadas em ApiException não são logadas corretamente
+  * [RPNG-250] Exceções transformadas em ApiException não são logadas corretamente
 
-RPNG-252 Filtro por data não funcionando na tela de "Detalhes do provedor de carimbo de tempo"
+  * [RPNG-252] Filtro por data não funcionando na tela de "Detalhes do provedor de carimbo de tempo"
 
-RPNG-253 Pedido de carimbo de tempo não registra duração em caso de erro no provedor
+  * [RPNG-253] Pedido de carimbo de tempo não registra duração em caso de erro no provedor
 
-RPNG-254 Consulta a chamadas de provedor de carimbo de tempo não utiliza o índice adequado
-
-
-## 2.1.3 (2024-04-10) {#v2-1-3}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-RPNG-240 Usar timestamp tier padrão no caso de uma política com carimbo ser usada em conjunto com um contexto de segurança personalizado sem tier de timestamp definido
+  * [RPNG-254] Consulta a chamadas de provedor de carimbo de tempo não utiliza o índice adequado
 
 
-
-## 2.1.2 (2024-03-14) {#v2-1-2}
+### 2.1.3 (2024-04-10) {#v2-1-3}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Melhorias
 
-RPNG-231 Inconformidades nos códigos de retorno declarados no Swagger
-
-
-
-## 2.1.1 (2024-01-24) {#v2-1-1}
-
-Atualiza modelo do banco de dados: não
-
-### Novas funcionalidades
-
-RPNG-234 Criar rota `/api/system/manifest`
-
-### Melhorias
-
-RPNG-228 Adicionar configuração para logar requisições HTTP
-
-### Correções de bugs
-
-RPNG-208 Propriedade `signatureResult.getFile().url` retorna uma URL absoluta (era relativa no Rest PKI clássico)
+  * [RPNG-240] Usar timestamp tier padrão no caso de uma política com carimbo ser usada em conjunto com um contexto de segurança personalizado sem tier de timestamp definido
 
 
 
-## 2.1.0 (2024-01-15) {#v2-1-0}
+### 2.1.2 (2024-03-14) {#v2-1-2}
 
 Atualiza modelo do banco de dados: não
 
-### Novas funcionalidades
+* Correções de bugs
 
-RPNG-215 Configuração de proxy
-
-### Melhorias
-
-RPNG-216 Adicionar suporte a modo Standby para instalação em Azure App Service
-
-RPNG-219 Exibir informações de certificado de atributo agregado às assinaturas
-
-RPNG-224 Revisar swagger
-
-### Correções de bugs
-
-RPNG-222 Erro ao salvar contexto de segurança referenciando plano de carimbo de tempo
-
-RPNG-226 Informações necessárias à finalização da assinatura são perdidas em caso de erro na finalização
-
-RPNG-227 Erro "NotSupportedException" nas APIs de start Cades V1 e V2
-
-RPNG-232 Aplicação está exigindo claim de CPF desnecessariamente
+  * [RPNG-231] Inconformidades nos códigos de retorno declarados no Swagger
 
 
 
-## 2.0.2 (2023-11-09) {#v2-0-2}
+### 2.1.1 (2024-01-24) {#v2-1-1}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Novas funcionalidades
 
-RPNG-220 Ignorar erros de comunicação com o Amplia caso `AttributeCertificateInclusion` seja `Recommended`
+  * [RPNG-234] Criar rota `/api/system/manifest`
+
+* Melhorias
+
+  * [RPNG-228] Adicionar configuração para logar requisições HTTP
+
+* Correções de bugs
+
+  * [RPNG-208] Propriedade `signatureResult.getFile().url` retorna uma URL absoluta (era relativa no Rest PKI clássico)
 
 
 
-## 2.0.1 (2023-11-08) {#v2-0-1}
+### 2.1.0 (2024-01-15) {#v2-1-0}
 
 Atualiza modelo do banco de dados: não
 
-### Correções de bugs
+* Novas funcionalidades
 
-RPNG-217 Erro "CryptographicException: The payload was invalid" ao consultar sessões de assinatura antigas
+  * [RPNG-215] Configuração de proxy
+
+* Melhorias
+
+  * [RPNG-216] Adicionar suporte a modo Standby para instalação em Azure App Service
+
+  * [RPNG-219] Exibir informações de certificado de atributo agregado às assinaturas
+
+  * [RPNG-224] Revisar swagger
+
+* Correções de bugs
+
+  * [RPNG-222] Erro ao salvar contexto de segurança referenciando plano de carimbo de tempo
+
+  * [RPNG-226] Informações necessárias à finalização da assinatura são perdidas em caso de erro na finalização
+
+  * [RPNG-227] Erro "NotSupportedException" nas APIs de start Cades V1 e V2
+
+  * [RPNG-232] Aplicação está exigindo claim de CPF desnecessariamente
 
 
 
-## 2.0.0 (2023-10-30) {#v2-0-0}
+### 2.0.2 (2023-11-09) {#v2-0-2}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-220] Ignorar erros de comunicação com o Amplia caso `AttributeCertificateInclusion` seja `Recommended`
+
+
+
+### 2.0.1 (2023-11-08) {#v2-0-1}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-217] Erro "CryptographicException: The payload was invalid" ao consultar sessões de assinatura antigas
+
+
+
+### 2.0.0 (2023-10-30) {#v2-0-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Melhorias
+* Melhorias
 
-RPNG-178 Permitir definição opcional de timestamp tier no contexto de segurança
+  * [RPNG-178] Permitir definição opcional de timestamp tier no contexto de segurança
 
-RPNG-204 Anonimização de dados na tela de validação
+  * [RPNG-204] Anonimização de dados na tela de validação
 
-RPNG-207 Melhorias ao gerenciamento de provimento de carimbos de tempo
+  * [RPNG-207] Melhorias ao gerenciamento de provimento de carimbos de tempo
 
-RPNG-246 Filtro por data de início e fim na lista de chamadas ao provedor de carimbo de tempo
+  * [RPNG-246] Filtro por data de início e fim na lista de chamadas ao provedor de carimbo de tempo
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-198 API de validação de assinaturas não respeita configuração `General:DefaultTimeZone`
+  * [RPNG-198] API de validação de assinaturas não respeita configuração `General:DefaultTimeZone`
 
 
 
-## 1.13.1 (2023-10-17) {#v1-13-1}
+### 1.13.1 (2023-10-17) {#v1-13-1}
 
 Atualiza modelo do banco de dados: não
 
-### Alterações para variantes específicas
+* Alterações para variantes específicas
 
-RPNG-212 Alterar texto da marca de validação \(variante *onr*\)
+  * [RPNG-212] Alterar texto da marca de validação \(variante *onr*\)
 
 
 
-## 2.0.0 RC 16 (2023-09-12) {#v2.0.0-rc16}
+### 2.0.0 RC 16 (2023-09-12) {#v2.0.0-rc16}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-160 Adicionar suporte às APIs de assinatura CADES antigas
+  * [RPNG-160] Adicionar suporte às APIs de assinatura CADES antigas
 
-RPNG-182 Histórico de timestamp tiers e providers
+  * [RPNG-182] Histórico de timestamp tiers e providers
 
-RPNG-206 Habilitar acesso via SSH na imagem de Docker
+  * [RPNG-206] Habilitar acesso via SSH na imagem de Docker
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-185 Arquivos de certificado não são aceitos no upload de raízes do gerenciamento de contexto de segurança
+  * [RPNG-185] Arquivos de certificado não são aceitos no upload de raízes do gerenciamento de contexto de segurança
 
-RPNG-200 Propriedade MessageDigest dos assinantes PDF/CMS não é preenchida em situações em que apenas o algoritmo é conhecido
+  * [RPNG-200] Propriedade MessageDigest dos assinantes PDF/CMS não é preenchida em situações em que apenas o algoritmo é conhecido
 
-RPNG-201 APIs de exploração de assinatura estão ignorando o parâmetro `SignaturePolicyId`
+  * [RPNG-201] APIs de exploração de assinatura estão ignorando o parâmetro `SignaturePolicyId`
 
-RPNG-209 Multipart upload não está funcionando
+  * [RPNG-209] Multipart upload não está funcionando
 
 
 
-## 2.0.0 RC 8 (2023-06-30) {#v2.0.0-rc08}
+### 2.0.0 RC 8 (2023-06-30) {#v2.0.0-rc08}
 
 :::warning
 Antes de atualizar para esta versão, garanta que sua licença do PKI SDK suporta versões lançadas até 2023-06-27.
@@ -1049,25 +1076,25 @@ Antes de atualizar para esta versão, garanta que sua licença do PKI SDK suport
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Melhorias
 
-RPNG-192 Criar configuração para retornar exceções nas respostas de erro quando a API tiver sido chamada por uma aplicação
+  * [RPNG-192] Criar configuração para retornar exceções nas respostas de erro quando a API tiver sido chamada por uma aplicação
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-191 Respostas 422 não preenchem propriedade Detail
+  * [RPNG-191] Respostas 422 não preenchem propriedade Detail
 
-RPNG-193 PDFs assinados com padrão antigo \(não-PAdES\) causam erro nas APIs de abertura de assinatura
+  * [RPNG-193] PDFs assinados com padrão antigo \(não-PAdES\) causam erro nas APIs de abertura de assinatura
 
-RPNG-194 PDFs protegidos por senha causam erro 500 \(deveriam causar 422 com código ProtectedPdfError\)
+  * [RPNG-194] PDFs protegidos por senha causam erro 500 \(deveriam causar 422 com código ProtectedPdfError\)
 
-RPNG-195 PDFs corrompidos causam erro 500 \(deveriam causar 422 com código InvalidPdf\)
+  * [RPNG-195] PDFs corrompidos causam erro 500 \(deveriam causar 422 com código InvalidPdf\)
 
-RPNG-196 Erro "Wrong last certificate on Pades signature"
+  * [RPNG-196] Erro "Wrong last certificate on Pades signature"
 
 
 
-## 2.0.0 RC 7 (2023-05-30) {#v2.0.0-rc07}
+### 2.0.0 RC 7 (2023-05-30) {#v2.0.0-rc07}
 
 :::warning
 Antes de atualizar para esta versão, garanta que sua licença do PKI SDK suporta versões lançadas até 2022-10-19.
@@ -1076,256 +1103,256 @@ Antes de atualizar para esta versão, garanta que sua licença do PKI SDK suport
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-155 Adicionar suporte às APIs de autenticação antigas
+  * [RPNG-155] Adicionar suporte às APIs de autenticação antigas
 
-RPNG-159 Adicionar suporte às APIs de assinatura de PDF antigas
+  * [RPNG-159] Adicionar suporte às APIs de assinatura de PDF antigas
 
-RPNG-161 Adicionar suporte às APIs de assinatura de XML antigas
+  * [RPNG-161] Adicionar suporte às APIs de assinatura de XML antigas
 
-RPNG-162 Adicionar suporte às APIs de PdfMarking antigas
+  * [RPNG-162] Adicionar suporte às APIs de PdfMarking antigas
 
-RPNG-177 Adicionar suporte a políticas de assinatura
+  * [RPNG-177] Adicionar suporte a políticas de assinatura
 
-RPNG-179 Agregar certificado de atributo automaticamente a assinaturas
+  * [RPNG-179] Agregar certificado de atributo automaticamente a assinaturas
 
-RPNG-183 Adicionar suporte à API de validação de certificados legada
+  * [RPNG-183] Adicionar suporte à API de validação de certificados legada
 
-### Correções de bugs
+* Correções de bugs
 
-RPNG-180 Assinatura com certificado em nuvem parou de funcionar após atualização para SPA 2.6 \(v1.13.0\)
+  * [RPNG-180] Assinatura com certificado em nuvem parou de funcionar após atualização para SPA 2.6 \(v1.13.0\)
 
-RPNG-190 Erro "cannot access a closed file" usando blob storage tipo AwsS3
-
-
-
-## 1.13.0 (2023-03-14) {#v1-13-0}
-
-Atualiza modelo do banco de dados: **sim**
-
-### Melhorias
-
-RPNG-153 Adicionar representação visual à API de assinatura
-
-RPNG-172 Permitir blob storage em "S3 clones"
-
-RPNG-169 Completar atualização para SPA 2.6
+  * [RPNG-190] Erro "cannot access a closed file" usando blob storage tipo AwsS3
 
 
 
-## 1.12.2 (2023-02-28) {#v1-12-2}
-
-Atualiza modelo do banco de dados: não
-
-### Correções de bugs
-
-RPNG-173 API de obter detalhes de um documento pelo ID não está permitindo acesso inter-contas em instâncias on-premises
-
-
-
-## 1.12.1 (2023-01-05) {#v1-12-1}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-RPNG-164 Melhorar configuração em Linux
-
-
-
-## 1.12.0 (2022-12-13) {#v1-12-0}
+### 1.13.0 (2023-03-14) {#v1-13-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Melhorias
 
-RPNG-158 Adicionado suporte a PostgreSQL
+  * [RPNG-153] Adicionar representação visual à API de assinatura
 
-### Melhorias
+  * [RPNG-172] Permitir blob storage em "S3 clones"
 
-RPNG-156 Atualizado ASP.NET Core para versão 6.0
-
-### Correções de bugs
-
-RPNG-152 Não é possível adicionar raízes confiáveis na tela de criação do contexto de segurança
+  * [RPNG-169] Completar atualização para SPA 2.6
 
 
 
-## 1.11.0 (2022-11-14) {#v1-11-0}
+### 1.12.2 (2023-02-28) {#v1-12-2}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-173] API de obter detalhes de um documento pelo ID não está permitindo acesso inter-contas em instâncias on-premises
+
+
+
+### 1.12.1 (2023-01-05) {#v1-12-1}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-164] Melhorar configuração em Linux
+
+
+
+### 1.12.0 (2022-12-13) {#v1-12-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Melhorias
+* Novas funcionalidades
 
-RPNG-154 Criar configuração de margens esquerda e superior na marcação de PDF
+  * [RPNG-158] Adicionado suporte a PostgreSQL
 
+* Melhorias
 
+  * [RPNG-156] Atualizado ASP.NET Core para versão 6.0
 
-## 1.10.2 (2022-05-03) {#v1-10-2}
+* Correções de bugs
 
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-RPNG-149 Permitir forçar política de assinatura de PDFs para padrão ICP Brasil
+  * [RPNG-152] Não é possível adicionar raízes confiáveis na tela de criação do contexto de segurança
 
 
 
-## 1.10.1 (2022-04-23) {#v1-10-1}
-
-Atualiza modelo do banco de dados: não
-
-### Correções de bugs
-
-RPNG-148 Erro ao utilizar contexto de segurança personalizado
-
-
-
-## 1.10.0 (2022-04-23) {#v1-10-0}
+### 1.11.0 (2022-11-14) {#v1-11-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Melhorias
 
-RPNG-2 API para autenticação com certificado digital
-
-### Melhorias
-
-RPNG-146 Parametrização de PDF marks
-
-RPNG-147 Permitir configurar se PDFs serão marcados
+  * [RPNG-154] Criar configuração de margens esquerda e superior na marcação de PDF
 
 
 
-## 1.9.0 (2022-03-29) {#v1-9-0}
+### 1.10.2 (2022-05-03) {#v1-10-2}
 
 Atualiza modelo do banco de dados: não
 
-### Novas funcionalidades
+* Melhorias
 
-RPNG-41 API para validação de documentos fornecendo o arquivo
-
-RPNG-141 Gerenciamento de contextos de segurança da interface web
+  * [RPNG-149] Permitir forçar política de assinatura de PDFs para padrão ICP Brasil
 
 
 
-## 1.8.0 (2022-02-25) {#v1-8-0}
+### 1.10.1 (2022-04-23) {#v1-10-1}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-148] Erro ao utilizar contexto de segurança personalizado
+
+
+
+### 1.10.0 (2022-04-23) {#v1-10-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Melhorias
+* Novas funcionalidades
 
-RPNG-10 [Requisitos de certificados](integration/signature-sessions/certificate-requirements.md) em sessões de assinatura
+  * [RPNG-2] API para autenticação com certificado digital
+
+* Melhorias
+
+  * [RPNG-146] Parametrização de PDF marks
+
+  * [RPNG-147] Permitir configurar se PDFs serão marcados
 
 
 
-## 1.7.0 (2022-01-25) {#v1-7-0}
+### 1.9.0 (2022-03-29) {#v1-9-0}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-41] API para validação de documentos fornecendo o arquivo
+
+  * [RPNG-141] Gerenciamento de contextos de segurança da interface web
+
+
+
+### 1.8.0 (2022-02-25) {#v1-8-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Melhorias
 
-RPNG-135 Assinatura CAdES detached
-
-RPNG-44 Interface para acompanhar chamadas \(em especial falhas\) ao webhook e à API de validação de arquivos
-
-### Melhorias
-
-RPNG-51 Interface de configuração do tema e *assets* personalizáveis da conta
-
-### Correções de bugs
-
-RPNG-144 Imagens da sessão de assinatura ficam quebradas na volta do login com provedor de certificado em nuvem
+  * [RPNG-10] [Requisitos de certificados](integration/signature-sessions/certificate-requirements.md) em sessões de assinatura
 
 
 
-## 1.6.0 (2021-12-08) {#v1-6-0}
-
-Atualiza modelo do banco de dados: não
-
-### Novas funcionalidades
-
-RPNG-129 Suporte a certificados em nuvem na sessão de assinatura
-
-### Melhorias
-
-RPNG-139 Melhorar informações fornecidas sobre o certificado do assinante no `SignatureSessionModel`
-
-
-
-## 1.5.1 (2021-11-23) {#v1-5-1}
-
-Atualiza modelo do banco de dados: não
-
-### Correções de bugs
-
-RPNG-140 Erro ao tentar usar root password authentication
-
-
-
-## 1.5.0 (2021-09-30) {#v1-5-0}
+### 1.7.0 (2022-01-25) {#v1-7-0}
 
 Atualiza modelo do banco de dados: **sim**
 
-### Novas funcionalidades
+* Novas funcionalidades
 
-RPNG-132 Suporte a assinatura CAdES/CMS
+  * [RPNG-135] Assinatura CAdES detached
 
-RPNG-93 Sessão de assinatura com documentos pré-definidos
+  * [RPNG-44] Interface para acompanhar chamadas \(em especial falhas\) ao webhook e à API de validação de arquivos
 
-### Melhorias
+* Melhorias
 
-RPNG-138 Exibir preview dos documentos sem marcas de validação
+  * [RPNG-51] Interface de configuração do tema e *assets* personalizáveis da conta
 
-RPNG-136 Aplicar marcas em PDFs mesmo que a assinatura seja CAdES
+* Correções de bugs
 
-RPNG-128 Melhorar uso dos theme-assets para permitir logos com diferentes proporções
-
-RPNG-120 Tratar exceção de PDF inválido/corrompido
-
-### Correções de bugs
-
-RPNG-119 Padrões de nomes aceitos estão vindo do subscription cache
-
-### Alterações para variantes específicas
-
-RPNG-130 Adicionada variante *onr*
+  * [RPNG-144] Imagens da sessão de assinatura ficam quebradas na volta do login com provedor de certificado em nuvem
 
 
 
-## 1.4.2 (2021-08-24) {#v1-4-2}
+### 1.6.0 (2021-12-08) {#v1-6-0}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Novas funcionalidades
 
-RPNG-126 Permitir configuração da quantidade de background workers
+  * [RPNG-129] Suporte a certificados em nuvem na sessão de assinatura
 
-### Correções de bugs
+* Melhorias
 
-RPNG-125 Erro no upload segmentado
+  * [RPNG-139] Melhorar informações fornecidas sobre o certificado do assinante no `SignatureSessionModel`
 
 
 
-## 1.4.1 (2021-08-24) {#v1-4-1}
+### 1.5.1 (2021-11-23) {#v1-5-1}
 
 Atualiza modelo do banco de dados: não
 
-### Melhorias
+* Correções de bugs
 
-RPNG-122 Melhorar texto de validação
-
-RPNG-85 Ajustes solicitados ao input de chave de documento
-
-### Correções de bugs
-
-RPNG-124 Erros sob alta demanda
-
-RPNG-123 Retries de processamentos de assinaturas falham após certo tempo transcorrido
+  * [RPNG-140] Erro ao tentar usar root password authentication
 
 
 
-## 1.4.0 (2021-08-11) {#v1-4-0}
+### 1.5.0 (2021-09-30) {#v1-5-0}
+
+Atualiza modelo do banco de dados: **sim**
+
+* Novas funcionalidades
+
+  * [RPNG-132] Suporte a assinatura CAdES/CMS
+
+  * [RPNG-93] Sessão de assinatura com documentos pré-definidos
+
+* Melhorias
+
+  * [RPNG-138] Exibir preview dos documentos sem marcas de validação
+
+  * [RPNG-136] Aplicar marcas em PDFs mesmo que a assinatura seja CAdES
+
+  * [RPNG-128] Melhorar uso dos theme-assets para permitir logos com diferentes proporções
+
+  * [RPNG-120] Tratar exceção de PDF inválido/corrompido
+
+* Correções de bugs
+
+  * [RPNG-119] Padrões de nomes aceitos estão vindo do subscription cache
+
+* Alterações para variantes específicas
+
+  * [RPNG-130] Adicionada variante *onr*
+
+
+
+### 1.4.2 (2021-08-24) {#v1-4-2}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-126] Permitir configuração da quantidade de background workers
+
+* Correções de bugs
+
+  * [RPNG-125] Erro no upload segmentado
+
+
+
+### 1.4.1 (2021-08-24) {#v1-4-1}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-122] Melhorar texto de validação
+
+  * [RPNG-85] Ajustes solicitados ao input de chave de documento
+
+* Correções de bugs
+
+  * [RPNG-124] Erros sob alta demanda
+
+  * [RPNG-123] Retries de processamentos de assinaturas falham após certo tempo transcorrido
+
+
+
+### 1.4.0 (2021-08-11) {#v1-4-0}
 
 * Primeira versão disponível publicamente

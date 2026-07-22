@@ -1,5 +1,7 @@
 ﻿---
+sidebar_position: 5
 slug: /rest-pki/core/integration/signature-sessions/file-validation
+sidebar_label: "File validation"
 ---
 
 # File validation - Signature sessions

@@ -1,4 +1,5 @@
 {
   "label": "Client Libs",
-  "key": "rest-pki-core/integration/bio-sessions/client-libs"
+  "key": "rest-pki-core/integration/bio-sessions/client-libs",
+  "position": 1
 }

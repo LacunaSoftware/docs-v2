@@ -1,4 +1,6 @@
 ---
+sidebar_position: 2
+sidebar_label: "Checking the system logs (Linux)"
 slug: /rest-pki/core/on-premises/linux/troubleshoot/check-logs
 ---
 

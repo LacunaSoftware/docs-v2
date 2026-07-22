@@ -9,6 +9,7 @@ slug: /rest-pki/core/operation
 The following articles describe the most common operations on a [Rest PKI Core](../index.md) instance:
 
 * [Monitoring timestamping](monitor-timestamping.md)
+* [Requesting timestamps to Rest PKI Core](requesting-timestamps.md)
 
 :::note
 If you need instructions for a different operation, please contact us

@@ -1,4 +1,5 @@
 ---
+sidebar_label: "Monitoramento do provimento de carimbos de tempo"
 slug: /rest-pki/core/operation/monitor-timestamping
 ---
 

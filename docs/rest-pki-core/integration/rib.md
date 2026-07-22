@@ -1,4 +1,6 @@
 ---
+sidebar_position: 7
+sidebar_label: "RIB"
 slug: /rest-pki/core/integration/rib
 ---
 

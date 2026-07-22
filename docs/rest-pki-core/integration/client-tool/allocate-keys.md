@@ -1,5 +1,7 @@
 ---
+sidebar_position: 2
 slug: /rest-pki/core/integration/client-tool/allocate-keys
+sidebar_label: "allocate-keys"
 ---
 
 # Comando do utilitário cliente: **allocate-keys**

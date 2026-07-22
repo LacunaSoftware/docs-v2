@@ -1,4 +1,6 @@
 ---
+sidebar_position: 9
+sidebar_label: "Creating a subscription"
 slug: /rest-pki/core/on-premises/create-sub
 ---
 

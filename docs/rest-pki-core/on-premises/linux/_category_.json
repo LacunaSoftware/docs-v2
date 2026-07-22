@@ -1,4 +1,5 @@
 {
   "label": "Setup em Linux",
-  "key": "rest-pki-core/on-premises/linux"
+  "key": "rest-pki-core/on-premises/linux",
+  "position": 1
 }

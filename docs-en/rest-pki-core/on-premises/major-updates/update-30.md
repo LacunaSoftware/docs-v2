@@ -1,22 +1,24 @@
 ---
 slug: /rest-pki/core/on-premises/update-30
+sidebar_position: 1
+sidebar_label: "Update from 2.x to 3.0"
 ---
 
 # Update Rest PKI Core from 2.x to 3.0
 
-Now that ASP.NET Core 6.0 is deprecated, version [3.0](../changelog.md#v3-0-0) of [Rest PKI Core](../index.md) has been migrated to use ASP.NET Core 8.0, which is
+Now that ASP.NET Core 6.0 is deprecated, version [3.0](../../changelog.md#v3-0-0) of [Rest PKI Core](../../index.md) has been migrated to use ASP.NET Core 8.0, which is
 the newest LTS release of ASP.NET Core, [to be supported by Microsoft until November 2026](https://dotnet.microsoft.com/platform/support/policy/dotnet-core#lifecycle).
 
-Because of that, before updating your [on-premises](index.md) instance, you must follow a few extra steps.
+Because of that, before updating your [on-premises](../index.md) instance, you must follow a few extra steps.
 
 ## 1. Install the ASP.NET Core Runtime 8.0
 
 Please refer to the *Install the ASP.NET Core Runtime 8.0* section of the installation procedure corresponding to your platform:
 
-{/* [Windows Server](windows/install.md#install-aspnet-core) */}
+{/* [Windows Server](../windows/install.md#install-aspnet-core) */}
 * Linux
-  * [Ubuntu Server](linux/install-ubuntu.md#install-aspnet-core)
-  * [Rocky Linux](linux/install-rocky.md#install-aspnet-core)
+  * [Ubuntu Server](../linux/install-ubuntu.md#install-aspnet-core)
+  * [Rocky Linux](../linux/install-rocky.md#install-aspnet-core)
 
 :::tip
 It is not necessary to uninstall previous versions of ASP.NET Core Runtime, multiple versions can co-exist in the same system without issues

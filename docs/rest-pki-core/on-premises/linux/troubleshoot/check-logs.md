@@ -1,4 +1,5 @@
 ---
+sidebar_position: 2
 slug: /rest-pki/core/on-premises/linux/troubleshoot/check-logs
 ---
 

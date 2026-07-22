@@ -1,4 +1,5 @@
 {
   "label": "Biometric sessions",
-  "key": "rest-pki-core/integration/bio-sessions"
+  "key": "rest-pki-core/integration/bio-sessions",
+  "position": 3
 }

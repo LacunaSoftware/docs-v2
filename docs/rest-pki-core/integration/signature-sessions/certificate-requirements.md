@@ -1,5 +1,7 @@
 ---
+sidebar_position: 3
 slug: /rest-pki/core/integration/signature-sessions/certificate-requirements
+sidebar_label: "Requisitos de certificados"
 ---
 
 # Requisitos de certificados - Sessões de assinatura

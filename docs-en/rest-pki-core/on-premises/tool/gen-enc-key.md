@@ -1,4 +1,6 @@
 ---
+sidebar_position: 2
+sidebar_label: "gen-enc-key"
 slug: /rest-pki/core/on-premises/tool/gen-enc-key
 ---
 
@@ -17,7 +19,7 @@ dotnet Lacuna.RestPki.Site.dll -- gen-enc-key
 Or, on Docker:
 
 ```sh
-docker run lacunasoftware/restpkicore:4.1 -- gen-enc-key
+docker run lacunasoftware/restpkicore:4.3 -- gen-enc-key
 ```
 
 ## Description

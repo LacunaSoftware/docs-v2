@@ -1,8 +1,10 @@
 ﻿---
+sidebar_label: "Liveness"
+sidebar_position: 7
 slug: /rest-pki/core/integration/bio-sessions/liveness
 ---
 
-# Livenes - Rest PKI Core
+# Liveness - Rest PKI Core
 
 :::warning Unavailable
 

@@ -9,6 +9,7 @@ slug: /rest-pki/core/operation
 Os artigos abaixo descrevem as operações mais comuns em uma instância do [Rest PKI Core](../index.md):
 
 * [Monitoramento do provimento de carimbos de tempo](monitor-timestamping.md)
+* [Solicitando carimbos de tempo ao Rest PKI Core](requesting-timestamps.md)
 
 :::note
 Se você precisar de instruções sobre uma operação diferente, contate-nos

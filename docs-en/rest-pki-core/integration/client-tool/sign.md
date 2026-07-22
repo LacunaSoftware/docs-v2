@@ -1,5 +1,7 @@
 ---
+sidebar_position: 4
 slug: /rest-pki/core/integration/client-tool/sign
+sidebar_label: "sign"
 ---
 
 # Client tool command: **sign**

@@ -1,4 +1,5 @@
 ---
+sidebar_label: "Solicitando carimbos de tempo"
 slug: /rest-pki/core/requesting-timestamps
 ---
 

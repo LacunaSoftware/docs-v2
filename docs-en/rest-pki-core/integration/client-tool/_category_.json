@@ -1,4 +1,5 @@
 {
   "label": "Client tool",
-  "key": "rest-pki-core/integration/client-tool"
+  "key": "rest-pki-core/integration/client-tool",
+  "position": 1
 }

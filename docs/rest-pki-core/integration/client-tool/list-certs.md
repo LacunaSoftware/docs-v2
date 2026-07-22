@@ -1,5 +1,7 @@
 ---
+sidebar_position: 3
 slug: /rest-pki/core/integration/client-tool/list-certs
+sidebar_label: "list-certs"
 ---
 
 # Comando do utilitário cliente: **list-certs**

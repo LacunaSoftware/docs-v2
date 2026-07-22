@@ -1,8 +1,10 @@
 ---
+sidebar_position: 4
 slug: /rest-pki/core/integration/signature-sessions/document-metadata
+sidebar_label: "Document metadata"
 ---
 
-# Document metadata - Sessões de assinatura
+# Document metadata - Signature sessions
 
 When creating a [signature session](index.md), you may specify a set of metadata to be associated to each document created during
 the session. Metadata are specified by a *name* and have one or more *values*.

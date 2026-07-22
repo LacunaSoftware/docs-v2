@@ -1,4 +1,5 @@
 ---
+sidebar_position: 4
 sidebar_label: "Error codes"
 slug: /rest-pki/core/integration/error-codes
 ---

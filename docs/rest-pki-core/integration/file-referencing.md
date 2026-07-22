@@ -1,4 +1,5 @@
 ---
+sidebar_position: 5
 sidebar_label: "Referenciando arquivos"
 slug: /rest-pki/core/integration/file-referencing
 ---

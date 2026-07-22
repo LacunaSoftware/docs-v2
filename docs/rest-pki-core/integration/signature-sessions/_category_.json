@@ -1,4 +1,5 @@
 {
   "label": "Sessões de assinatura",
-  "key": "rest-pki-core/integration/signature-sessions"
+  "key": "rest-pki-core/integration/signature-sessions",
+  "position": 2
 }

@@ -1,5 +1,6 @@
 ---
 slug: /asn1
+unlisted: true
 ---
 
 # Estruturas ASN.1 proprietárias

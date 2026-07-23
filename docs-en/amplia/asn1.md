@@ -1,5 +1,6 @@
 ---
 slug: /asn1
+unlisted: true
 ---
 
 # Proprietary ASN.1 types

@@ -1,5 +1,10 @@
 # PKI SDK changelog
 
+### 2.22.5 (2026-07-23) {#v2-22-5}
+
+- \[PKI-158\] Fix `PKCertificate.Decode` failing on single-line PEM string.
+
+
 ### 2.22.4 (2026-07-06) {#v2-22-4}
 
 - Update Lacuna.T8 package v1.2.27.

@@ -7,6 +7,14 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 4.4.2 (2026-07-28) {#v4-4-2}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-776] Corrige erros de API retornados como um 500 genérico em vez do modelo de erro apropriado
+
 
 ### 4.4.1 (2026-07-20) {#v4-4-1}
 

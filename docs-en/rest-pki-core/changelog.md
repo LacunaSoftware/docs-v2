@@ -7,6 +7,15 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.4.2 (2026-07-28) {#v4-4-2}
+
+Updates database model: no
+
+* Bug fixes
+
+  * [RPNG-776] Fixed some API errors being returned as a generic 500 instead of the proper error model
+
+
 ### 4.4.1 (2026-07-20) {#v4-4-1}
 
 Updates database model: no

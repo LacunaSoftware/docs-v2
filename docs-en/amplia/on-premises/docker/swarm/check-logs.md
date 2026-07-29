@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Amplia - Checking the system logs on Docker Swarm
 
 The Docker image for [Amplia](../../index.md) sends its logs to the standard output, which in turn gets registered

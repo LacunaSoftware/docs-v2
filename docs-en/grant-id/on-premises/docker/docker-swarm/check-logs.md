@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # GrantID - Checking the system logs on Docker
 
 The Docker image for [GrantID](../index.md) sends its logs to the standard output, which in turn gets registered

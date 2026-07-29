@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Certificates on Azure Key Vault
 
 [Azure Key Vault](https://azure.microsoft.com/en-us/services/key-vault/) can be thought of as a cloud HSM. Keys are stored on FIPS 140-2 Level 2

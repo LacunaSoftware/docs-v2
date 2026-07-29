@@ -1,4 +1,8 @@
-﻿# GrantID - Docker Swarm
+﻿---
+unlisted: true
+---
+
+# GrantID - Docker Swarm
 
 :::warning Indisponível
 

@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Exemplos completos
 
 ## Exemplo completo com posicionamento automático

@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Cancel an order - Amplia Reg
 
 :::tip

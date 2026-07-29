@@ -1,4 +1,8 @@
-﻿# Amplia em Docker Swarm - Usando um banco de dados externo
+﻿---
+unlisted: true
+---
+
+# Amplia em Docker Swarm - Usando um banco de dados externo
 
 :::warning Indisponível
 

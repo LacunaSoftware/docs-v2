@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Cancelamento de pedido - Amplia Reg
 
 :::tip

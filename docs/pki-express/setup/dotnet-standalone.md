@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Instalação manual do .NET Core Runtime
 
 No ambiente Linux, o [PKI Express](../index.md) exige o **.NET Core Runtime**. O caminho recomendado para instalar é descrito nas instruções de instalação do PKI Express para qualquer

@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Habilitando o contexto de segurança de testes da Lacuna
 
 Para utilizar os certificados da nossa cadeia de testes, é **preciso habilitar o contexto de segurança da Lacuna de testes**.

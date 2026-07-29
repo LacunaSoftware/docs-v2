@@ -1,4 +1,8 @@
-﻿# GrantID em Docker - Dados persistentes (recomendações de backup)
+﻿---
+unlisted: true
+---
+
+# GrantID em Docker - Dados persistentes (recomendações de backup)
 
 :::warning Indisponível
 

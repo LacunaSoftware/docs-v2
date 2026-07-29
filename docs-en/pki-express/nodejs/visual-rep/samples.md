@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Samples
 
 ## Automatic positioning sample

@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Amplia on Docker Swarm - Using a stack with GrantID
 
 The [standard Amplia stack](https://cdn.lacunasoftware.com/amplia/docker/amplia-stack.yml) depends on an external [GrantID](../../../../grant-id/index.md) service,

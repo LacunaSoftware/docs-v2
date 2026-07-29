@@ -1,4 +1,5 @@
 ---
+unlisted: true
 sidebar_label: "WhatsApp Integration"
 sidebar_position: 5
 slug: /signer/on-premises/whatsapp

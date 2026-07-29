@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # BrazilTrustServices
 O pacote nuget `Lacuna.Pki.BrazilTrustServices` abstrai a lógica necessária para acessar o certificado digital.
 

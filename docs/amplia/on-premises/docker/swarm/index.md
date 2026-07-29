@@ -1,4 +1,8 @@
-﻿# Setup do Amplia em Docker Swarm
+﻿---
+unlisted: true
+---
+
+# Setup do Amplia em Docker Swarm
 
 :::warning Indisponível
 

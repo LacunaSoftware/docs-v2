@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Verificar suporte mínimo ao .NET Framework
 
 A partir do Rest PKI v1.33.3, é necessário ter o **.NET Framework v4.6.2** instalado.

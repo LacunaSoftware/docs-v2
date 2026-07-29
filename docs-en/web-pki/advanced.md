@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Web PKI Advanced topics
 
 This article covers key advanced topics of the Lacuna Web PKI component.

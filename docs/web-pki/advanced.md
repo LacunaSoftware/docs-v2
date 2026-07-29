@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Tópicos avançados do Web PKI
 
 Esse artigo discute tópicos avançados no uso do componente Lacuna Web PKI.

@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Check .NET Framework minimun version support
 
 Since Rest PKI v1.33.3, the **.NET Framework v4.6.2** is required.

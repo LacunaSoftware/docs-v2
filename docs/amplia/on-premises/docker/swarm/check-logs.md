@@ -1,4 +1,8 @@
-﻿# Amplia em Docker Swarm - Verificando os logs
+﻿---
+unlisted: true
+---
+
+# Amplia em Docker Swarm - Verificando os logs
 
 :::warning Indisponível
 

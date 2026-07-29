@@ -1,4 +1,8 @@
-﻿# Amplia em Docker Swarm - Usando com GrantID integrado
+﻿---
+unlisted: true
+---
+
+# Amplia em Docker Swarm - Usando com GrantID integrado
 
 :::warning Indisponível
 

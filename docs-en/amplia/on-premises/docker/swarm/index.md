@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Amplia - Setup on Docker Swarm
 
 To install an [on-premises](../../index.md) instance of [Amplia](../../../index.md) on Docker Swarm, follow the steps below. If you use another Docker orchestrator,

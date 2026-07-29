@@ -1,4 +1,8 @@
-﻿# Amplia em Docker Swarm - Dados persistentes (recomendações de backup)
+﻿---
+unlisted: true
+---
+
+# Amplia em Docker Swarm - Dados persistentes (recomendações de backup)
 
 :::warning Indisponível
 

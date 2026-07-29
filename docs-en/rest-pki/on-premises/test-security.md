@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Enabling Lacuna Test Security Context
 
 To use the certificates from our test chain, you must **enable the security context of the Lacuna Test**.

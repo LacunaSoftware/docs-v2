@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Exemplos completos
 
 Abaixo estão dois exemplos -- um utilizando jQuery e outro com AngularJS -- sem as simplificações do exemplo mostrado na seção [Primeiros Passos](get-started.md).

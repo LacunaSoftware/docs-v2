@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # GrantID - Docker Swarm
 
 To run an [on-premises](../../index.md) of [GrantID](../../../index.md) on Docker, follow the steps below.

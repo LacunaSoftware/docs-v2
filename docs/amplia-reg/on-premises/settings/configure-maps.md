@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Configuração de mapas - Amplia Reg
 
 :::info

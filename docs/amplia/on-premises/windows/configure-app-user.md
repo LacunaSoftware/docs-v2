@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Amplia - Configuração para usar um usuário local
 
 :::info

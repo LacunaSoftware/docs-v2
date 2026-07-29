@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Standalone installation of .NET Core Runtime
 
 On Linux environments, [PKI Express](../index.md) requires the **.NET Core Runtime**. The recommended way to install it

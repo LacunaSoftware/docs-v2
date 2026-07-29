@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Configure Maps - Amplia Reg
 
 :::info

@@ -1,4 +1,8 @@
-﻿# GrantID em Docker - Habilitando SSL
+﻿---
+unlisted: true
+---
+
+# GrantID em Docker - Habilitando SSL
 
 :::warning Indisponível
 

@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Create a CA for device certificates - Amplia
 
 [!NOTE]

@@ -1,4 +1,8 @@
-﻿# Key store nativo
+﻿---
+unlisted: true
+---
+
+# Key store nativo
 
 :::warning Indisponível
 

@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Full samples
 
 Below you'll find two examples -- one with jQuery and the other with AngularJS -- without the simplifications of the example shown on the [Get started](get-started.md)

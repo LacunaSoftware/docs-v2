@@ -1,4 +1,8 @@
-﻿# Amplia em Docker Swarm - Habilitando SSL
+﻿---
+unlisted: true
+---
+
+# Amplia em Docker Swarm - Habilitando SSL
 
 :::warning Indisponível
 

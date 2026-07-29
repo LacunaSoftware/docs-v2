@@ -16,11 +16,16 @@ async function hideUnlistedSidebarItems(generatorArgs: any) {
       .filter((d) => d.frontMatter?.unlisted)
       .map((d) => d.id),
   );
+  // Uma categoria só é descartada quando fica sem itens E sem página própria:
+  // uma categoria com `link` para um doc visível (o index da pasta) continua
+  // sendo um destino legítimo mesmo que todos os filhos sejam unlisted.
+  const categoryHasOwnPage = (it: any) =>
+    it.link?.type === 'doc' ? !unlistedIds.has(it.link.id) : false;
   const prune = (list: any[]): any[] =>
     list
       .filter((it) => !(it.type === 'doc' && unlistedIds.has(it.id)))
       .map((it) => (it.type === 'category' ? {...it, items: prune(it.items)} : it))
-      .filter((it) => !(it.type === 'category' && it.items.length === 0));
+      .filter((it) => !(it.type === 'category' && it.items.length === 0 && !categoryHasOwnPage(it)));
   return prune(items);
 }
 
@@ -192,6 +197,21 @@ const config: Config = {
       {
         redirects: [
           {from: '/pt-br', to: '/'},
+
+          // Páginas do site clássico cuja URL não sobreviveu à migração (o
+          // conteúdo sobreviveu, em outro endereço). Sem estes redirects os
+          // links antigos, que eram públicos no toc do DocFX, quebrariam.
+
+          // PT tinha duas cópias quase idênticas; ficou só a de on-premises.
+          {
+            from: ['/articles/rest-pki/core/prepare-database', '/pt-br/articles/rest-pki/core/prepare-database'],
+            to: '/articles/rest-pki/core/on-premises/prepare-database',
+          },
+
+          // Bulk Signer: docker/systemd/windows-service viraram seções de installation.
+          {from: '/en-us/articles/bulk-signer/docker', to: '/en-us/articles/bulk-signer/installation'},
+          {from: '/en-us/articles/bulk-signer/linux-systemd', to: '/en-us/articles/bulk-signer/installation'},
+          {from: '/en-us/articles/bulk-signer/windows-service', to: '/en-us/articles/bulk-signer/installation'},
         ],
       },
     ],

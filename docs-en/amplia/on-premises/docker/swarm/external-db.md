@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Using an external database on Docker Swarm - Amplia
 
 The [standard Docker Swarm compose file for Amplia](https://cdn.lacunasoftware.com/amplia/docker/amplia-stack.yml) includes an internal service for the database

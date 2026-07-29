@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Configuring Amplia to run with a local user
 
 :::info

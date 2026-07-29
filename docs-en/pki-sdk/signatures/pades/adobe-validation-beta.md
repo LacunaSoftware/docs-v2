@@ -1,4 +1,8 @@
-﻿# Adobe Reader Validation
+﻿---
+unlisted: true
+---
+
+# Adobe Reader Validation
 
 :::warning Unavailable
 

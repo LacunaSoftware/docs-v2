@@ -1,3 +1,7 @@
+---
+unlisted: true
+---
+
 # Enabling SSL on Docker Swarm - Amplia
 
 Stop the stack (if already running):

@@ -5,6 +5,29 @@ sidebar_position: 5
 
 # Histórico de versões do Signer
 
+<a name="v2-18-0" />
+### 2.18.0 (2026-07-30)
+
+* Melhorias
+  * [SIG-1846] Tipos de tags: cadastro dos tipos de tags nas configurações da organização, autocomplete dos tipos ao criar ou editar um documento, obrigatoriedade configurável de tags na criação de documentos e parâmetro de API para sobrescrever essa obrigatoriedade por requisição
+  * [SIG-1849] Adicionada configuração da organização que torna obrigatória a seleção de pasta na criação de documentos e templates, com sobrescrita por requisição para aplicações
+  * [SIG-1829] Permite trocar um participante de uma regra de assinatura ou aprovação em documentos já em andamento: é possível remover o participante e colocar outro no lugar
+  * [SIG-1860] Respeita o Mode de cada tipo de identificador quando múltiplos identificadores por usuário estão habilitados, adiciona a configuração `RequireAtLeastOneIdentifier` e passa a rejeitar participantes duplicados em regras de assinatura e aprovação
+  * [SIG-632] Adicionados novos tipos de profissionais autenticadores para autenticação de documentos, com nomes de profissões neutros quanto ao gênero
+  * [SIG-1879] Permite buscar contatos pelo sobrenome
+  * [SIG-1830] Melhorada a usabilidade do modal "Carregar fluxo de outro documento": modal mais largo, listagem com duas linhas por item exibindo nome, responsável e data do fluxo, e mais espaço para a barra de busca
+  * Adicionada ferramenta de migração de planos de cobrança
+
+* Correções de bugs
+  * [SIG-809] Corrigida a assinatura em lote com HSM quando os documentos não estão mais pendentes para o usuário: o diálogo de lote passa a validar as ações disponíveis antes de abrir, fecha quando não há nada a assinar e restaura a interface quando o PIN do HSM é cancelado
+  * [SIG-1875] Corrigida a opção de recusa ignorada na assinatura embutida e o erro após recusar um documento
+  * [SIG-1885] Corrigido o erro ao editar o fluxo de um documento cujo participante possuía sessão biométrica
+  * [SIG-1884] Corrigido o erro ao apagar pastas associadas a templates; os templates agora são desvinculados ou movidos
+  * [SIG-1883] Corrigida a exibição da chave crua de i18n `common.phone` como label do campo de celular
+  * Corrigida a falha dos jobs de expiração de documentos enfileirados antes da atualização, causada por mudança na assinatura do job
+
+Atualiza modelo de banco de dados: sim (migração: `NewAuthenticatorTypes`, `RequireFolderOnDocumentCreationToSubscription`)
+
 <a name="v2-17-1" />
 ### 2.17.1 (2026-07-15)
 

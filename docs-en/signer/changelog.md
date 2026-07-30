@@ -5,6 +5,29 @@ sidebar_position: 5
 
 # Signer 
 
+<a name="v2-18-0" />
+### 2.18.0 (2026-07-30)
+
+* Improvements
+  * [SIG-1846] Tag labels: register the organization's tag labels in the organization settings, autocomplete them when creating or editing a document, make tags required on document creation (configurable) and override that requirement per request through the API
+  * [SIG-1849] Added an organization setting that makes selecting a folder required when creating documents and templates, with a per-request override for applications
+  * [SIG-1829] Allow replacing a participant of a signing or approval rule in documents already in progress: the participant can be removed and another one put in their place
+  * [SIG-1860] Respect each identifier type's mode when multiple identifiers per user are enabled, added the `RequireAtLeastOneIdentifier` configuration and rejected duplicate participants in signing and approval rules
+  * [SIG-632] Added new professional authenticator types for document authentication, with gender-neutral profession names
+  * [SIG-1879] Allow searching contacts by surname
+  * [SIG-1830] Improved the usability of the "load flow from another document" dialog: a wider modal, list items on two lines showing the flow name, owner and date, and more room for the search bar
+  * Added a billing plan migration tool
+
+* Bug fixes
+  * [SIG-809] Fixed batch HSM signing when the documents are no longer pending for the user: the batch dialog now validates the available actions before opening, closes when there is nothing left to sign, and restores the interface when the HSM PIN prompt is canceled
+  * [SIG-1875] Fixed the refusal option being ignored in the embedded signature and a crash after refusing a document
+  * [SIG-1885] Fixed an error when editing the flow of a document whose participant had a biometric session
+  * [SIG-1884] Fixed an error when deleting folders associated with templates; the templates are now unlinked or moved instead
+  * [SIG-1883] Fixed the raw i18n key `common.phone` being displayed as the phone field label
+  * Fixed expired-document background jobs enqueued before the update failing because of a changed job signature
+
+Updates database model: yes (migration: `NewAuthenticatorTypes`, `RequireFolderOnDocumentCreationToSubscription`)
+
 <a name="v2-17-1" />
 ### 2.17.1 (2026-07-15)
 

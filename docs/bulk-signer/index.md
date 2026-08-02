@@ -10,16 +10,18 @@ scenarios. It receives files from automated sources (watched folders or a REST u
 them through a controlled signing pipeline, and produces verified signed outputs — with a full
 operational history, an operator dashboard, and automatic recovery on restart.
 
-Bulk Signer is designed to run inside your own infrastructure. It has no remote dependency, no
-telemetry, and no auto-update: a single service that watches folders (or accepts uploads), signs,
-verifies, and promotes the results to an output folder.
+Bulk Signer is designed to run inside your own infrastructure: a single service that watches folders
+(or accepts uploads), signs, verifies, and promotes the results to an output folder. There is no
+auto-update, and a default install makes no outbound connections — remote signing, Azure Key Vault,
+and telemetry are each opt-in.
 
 ## Features
 
 - **Signature formats.** CAdES (`.p7m`), PAdES (PDF), and XAdES (XML) — all under the ICP-Brasil
   **ADR-Básica** policy by default.
-- **Certificate sources.** PKCS#12 files (`.pfx` / `.p12`), PKCS#11 HSMs and smart cards, and the
-  Windows certificate store. The source is chosen entirely through configuration.
+- **Certificate sources.** PKCS#12 files (`.pfx` / `.p12`), PKCS#11 HSMs and smart cards, the
+  Windows certificate store, and **Azure Key Vault** (the key stays in the vault and signs remotely).
+  The source is chosen entirely through configuration, globally or per signing profile.
 - **Two ingestion paths.** A watched input folder (with a stability detector so half-written files
   are not picked up early) and a `POST /api/files` endpoint for programmatic clients.
 - **Recoverable pipeline.** Jobs flow through a durable queue with pause/resume that survives a
@@ -32,7 +34,9 @@ verifies, and promotes the results to an output folder.
 - **Hybrid authentication.** A single API key backs both the operator dashboard (via a session
   cookie) and programmatic clients (via the `X-API-Key` header).
 - **Operator dashboard.** A web console with live status, job history, retry/cancel/rescan actions,
-  and an audit trail.
+  a recent-exception viewer, and an audit trail.
+- **Performance visibility.** A per-stage timing panel (queue wait, signing, verification, output)
+  with throughput and a Local vs Remote split, plus optional Azure Application Insights export.
 - **Observability.** Structured logs with automatic secret redaction, a Prometheus metrics
   endpoint, and an RFC 9457 `ProblemDetails` error envelope with stable machine-readable codes.
 - **Per-IP rate limiting.** Configurable fixed-window limits on the upload and action endpoints.
@@ -65,8 +69,8 @@ mkdir -p data logs config
 cp ../appsettings.Production.json.sample config/appsettings.Production.json
 
 # Edit config/appsettings.Production.json and .env — at minimum:
-#   - Signing__License            (base64 license string from Lacuna Software)
-#   - Auth__ApiKey                (>= 16 characters; use a random value)
+#   - Signing__PkiSdkLicense       (base64 license string from Lacuna Software)
+#   - Auth__ApiKey                 (>= 16 characters; use a random value)
 #   - Signing:Certificate:Pfx:Path (and a sibling .pfx file in config/) — or pick another source
 
 sudo chown -R 1654:1654 data logs   # the container runs as UID 1654 on Linux hosts
@@ -84,16 +88,18 @@ For Linux systemd, Windows Service, and foreground installs, see **[Installation
 |-------|------|
 | Install the service on any supported target | [Installation](installation.md) |
 | Every `appsettings.json` key (type, default, environment override) | [Configuration](configuration.md) |
-| Picking and configuring a certificate source (PFX / PKCS#11 / Windows store) | [Certificates](certificates.md) |
+| Picking and configuring a certificate source (PFX / PKCS#11 / Windows store / Azure Key Vault) | [Certificates](certificates.md) |
 | Secret handling, API-key rotation, file ACLs, log redaction | [Security](security.md) |
 | Day-2 operations and the job lifecycle | [Operations](operations.md) |
 | The Blazor operator console | [Dashboard](dashboard.md) |
+| Reading the per-stage timing panel | [Job statistics](statistics.md) |
+| Optional Azure Application Insights export | [Telemetry](telemetry.md) |
 | The REST surface and the `code`-tagged error envelope | [REST API](rest-api.md) |
 | Post-signing encryption (BSENC v1) | [Encryption](encryption.md) |
 | Routing a folder through Lacuna Signer for human signing | [Lacuna Signer integration](lacuna-signer.md) |
 | Retention defaults and what is (and is not) auto-pruned today | [Retention](retention.md) |
 | Failure modes and diagnosis | [Troubleshooting](troubleshooting.md) |
-| Reference decrypt scripts (Python + PowerShell) | [Samples](samples.md) |
+| Reference scripts — decrypt (Python + PowerShell) and Key Vault provisioning | [Samples](samples.md) |
 
 When the service is running, a live OpenAPI reference is served at `/scalar/v1`.
 
@@ -104,5 +110,7 @@ When the service is running, a live OpenAPI reference is served at `/scalar/v1`.
 | Installing the service for the first time | [Installation](installation.md) → [Configuration](configuration.md) → [Certificates](certificates.md) |
 | Wiring an automated system to the REST API | [REST API](rest-api.md) → [Security](security.md) → [Troubleshooting](troubleshooting.md) |
 | Operating an existing install | [Operations](operations.md) → [Dashboard](dashboard.md) → [Troubleshooting](troubleshooting.md) |
+| Diagnosing slow throughput | [Job statistics](statistics.md) → [Certificates](certificates.md) → [Telemetry](telemetry.md) |
+| Keeping the signing key off the host | [Certificates](certificates.md#source--azurekeyvault) → [Samples](samples.md) → [Security](security.md) |
 | Enabling encryption | [Encryption](encryption.md) → [Security](security.md) → [Samples](samples.md) |
 | Routing a folder through Lacuna Signer (human signing) | [Lacuna Signer integration](lacuna-signer.md) → [Configuration](configuration.md) → [Operations](operations.md) |

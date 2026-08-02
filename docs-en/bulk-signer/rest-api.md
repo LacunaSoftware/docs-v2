@@ -1,6 +1,6 @@
 ---
 sidebar_label: "REST API"
-sidebar_position: 8
+sidebar_position: 10
 ---
 
 # REST API
@@ -97,7 +97,7 @@ Per-IP fixed-window limiters, configured under `RateLimiting:` (see
 | Policy | Default | Endpoints |
 |--------|---------|-----------|
 | `Upload` | 30 / 60 s | `POST /api/files` |
-| `Actions` | 60 / 60 s | `POST /api/jobs/{id}/retry`, `POST /api/jobs/{id}/cancel`, `POST /api/pipeline/pause`, `POST /api/pipeline/resume`, `GET /api/pipeline/state`, `POST /api/rescan`, `POST /api/cleanup` |
+| `Actions` | 60 / 60 s | `POST /api/jobs/{id}/retry`, `POST /api/jobs/{id}/cancel`, `DELETE /api/jobs`, `POST /api/pipeline/pause`, `POST /api/pipeline/resume`, `GET /api/pipeline/state`, `POST /api/rescan`, `POST /api/cleanup` |
 
 Over-limit responses are `429 Too Many Requests` with `code = "rate-limited"` and a `Retry-After`
 header.
@@ -169,6 +169,7 @@ Possible errors: `upload.empty`, `upload.too-large`, `upload.invalid-name`,
 | `GET` | `/api/jobs/{id}/output` | Stream the signed (and possibly encrypted) output. `.enc` filename when encrypted. |
 | `POST` | `/api/jobs/{id}/retry` | Create a new job with the same input and `ParentJobId = {id}`. Only valid when the source job is `Failed`. `Actions` rate-limited. |
 | `POST` | `/api/jobs/{id}/cancel` | Cancel a `Queued` **or** `AwaitingSigner` job. In-flight local jobs return `409` with `code = "job.not-queued"`. `Actions` rate-limited. |
+| `DELETE` | `/api/jobs` | **Destructive.** Delete every job record and its history. Returns `{"deleted": N, "message": "…"}`. Leaves events, files, and configuration untouched. `Actions` rate-limited. See [Clear Jobs](operations.md#clear-jobs). |
 
 List `Queued` jobs:
 
@@ -359,4 +360,4 @@ client needs anything not covered here, the live reference is the next stop.
 ---
 
 **Next:** [Encryption](encryption.md) — optional post-signing encryption.
-**Previous:** [Dashboard](dashboard.md).
+**Previous:** [Telemetry](telemetry.md).

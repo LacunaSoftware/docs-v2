@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Troubleshooting"
-sidebar_position: 12
+sidebar_position: 14
 ---
 
 # Troubleshooting
@@ -20,20 +20,20 @@ reaching it. Look at the per-target log location for the bootstrap exception:
 
 ## Service won't start
 
-### `Signing:License is required`
+### `Signing:PkiSdkLicense is required`
 
-**Symptom.** The bootstrap throws a validation exception complaining about `Signing:License`.
+**Symptom.** The bootstrap throws a validation exception complaining about `Signing:PkiSdkLicense`.
 
-**Root cause.** Neither `Signing__License` (env) nor `Signing:License` (config) carries a non-empty
+**Root cause.** Neither `Signing__PkiSdkLicense` (env) nor `Signing:PkiSdkLicense` (config) carries a non-empty
 value.
 
 **Fix.** Set the env var on the install target:
 
 | Target | Command |
 |--------|---------|
-| Linux | Add `Signing__License=<base64>` to `/etc/bulksigner/bulksigner.env`, then `sudo systemctl restart bulksigner`. |
-| Windows | `[Environment]::SetEnvironmentVariable("Signing__License", "<base64>", "Machine"); Restart-Service LacunaBulkSigner` |
-| Docker | Add `Signing__License=<base64>` to `deploy/docker/.env`, then `docker compose up -d`. |
+| Linux | Add `Signing__PkiSdkLicense=<base64>` to `/etc/bulksigner/bulksigner.env`, then `sudo systemctl restart bulksigner`. |
+| Windows | `[Environment]::SetEnvironmentVariable("Signing__PkiSdkLicense", "<base64>", "Machine"); Restart-Service LacunaBulkSigner` |
+| Docker | Add `Signing__PkiSdkLicense=<base64>` to `deploy/docker/.env`, then `docker compose up -d`. |
 
 ### `Auth:ApiKey is required`
 
@@ -59,7 +59,60 @@ env var.
 
 **Root cause.** `Signing:Certificate:Source = WindowsStore` configured on a non-Windows host.
 
-**Fix.** Switch the source. For Linux / Docker, use `Pfx` or `Pkcs11`.
+**Fix.** Switch the source. For Linux / Docker, use `Pfx`, `Pkcs11`, or `AzureKeyVault`.
+
+### `AzureKeyVault:Endpoint must be an absolute https:// URL`
+
+**Symptom.** Bootstrap fails validating the Azure Key Vault block.
+
+**Root cause.** `Signing:Certificate:AzureKeyVault:Endpoint` was given a bare DNS name
+(`my-vault.vault.azure.net`) or an `http://` URL. The connector needs the full vault URL, and a bare
+name would otherwise fail deep inside the Azure client with a far less helpful message.
+
+**Fix.** Use the vault URL exactly as the Azure portal shows it, e.g.
+`https://my-vault.vault.azure.net/`.
+
+### `Certificate '<path>' does not match Azure Key Vault key '<name>'`
+
+**Symptom.** Bootstrap fails reporting that the `.cer`'s public key differs from the vault key's.
+
+**Root cause.** `CerPath` and `KeyName` refer to different key pairs. Usually the certificate was
+renewed against a **new** vault key while `KeyName` still points at the old one, or `CerPath` was left
+pointing at an unrelated certificate after a config edit.
+
+This check exists because the alternative is worse: without it the service starts happily and
+produces signatures that no verifier accepts, and the failure surfaces only per job — and only for
+profiles with `Verify = true`.
+
+**Fix.** Confirm which side is stale by comparing the two public keys directly:
+
+```bash
+openssl x509 -in signer.cer -noout -pubkey
+az keyvault key download --vault-name my-vault --name bulk-signer-signing-key --encoding PEM --file -
+```
+
+The two PEM blocks must be byte-identical. Then update whichever side is wrong.
+
+### Azure Key Vault authentication or authorization failure at startup
+
+**Symptom.** Bootstrap fails while loading the certificate, with an Azure error such as
+`AADSTS7000215` (invalid client secret), `AADSTS700016` (application not found), or a `Forbidden` on
+the key operation.
+
+**Possible causes.**
+
+- **Expired client secret.** Entra ID secrets have a finite lifetime; expiry looks like a sudden boot
+  failure after a restart that previously worked. Rotate in Azure and update
+  `Signing__Certificate__AzureKeyVault__AppSecret`.
+- **Wrong `AppId`,** or the app registration lives in a different tenant than the vault.
+- **Missing key permissions.** The app registration needs *get* on the key plus the *sign*
+  cryptographic operation — the built-in **Key Vault Crypto User** role on an RBAC vault. A
+  `Forbidden` with otherwise valid credentials points here.
+- **No network path.** The host must reach `*.vault.azure.net` and `login.microsoftonline.com`. Check
+  egress rules and proxy configuration.
+
+Failures are reported per profile and aggregated, so a multi-profile deployment sees every
+misconfigured profile in one boot error rather than one per restart.
 
 ### `Encryption.Salt must decode to at least 16 bytes`
 
@@ -167,6 +220,26 @@ private key.
 
 **Fix.** `certlm.msc` → certificate → All Tasks → Manage Private Keys → Add
 `NT SERVICE\LacunaBulkSigner` → grant Read.
+
+### Azure Key Vault jobs fail with throttling (HTTP 429) or transient network errors
+
+**Symptom.** With `Source = AzureKeyVault`, jobs **fail rather than hang**, carrying an Azure error —
+HTTP 429 (`Too many requests`), a timeout, or a name-resolution failure. Often correlated with a burst
+of ingested files.
+
+**Root cause.** Every signature is a remote Key Vault call, so throughput is bounded by the vault's
+request limits rather than by local CPU. A high `Pipeline:MaxConcurrency` plus a large batch can
+exceed those limits. A vault outage or lost egress produces the same shape.
+
+**Fix.**
+
+- Lower `Pipeline:MaxConcurrency` (start around 4–8) and re-measure. Unlike the PKCS#11 case there is
+  no *correctness* reason to drop to `1` — this is a rate limit, not a session conflict.
+- Retry the affected jobs once the vault is reachable. Throttling and outages are transient and the
+  input files are untouched; retry is manual by design (see [Operations](operations.md)).
+- Confirm egress to `*.vault.azure.net` and `login.microsoftonline.com` is stable, including any proxy.
+- If sustained throughput is the goal, check the vault's documented transaction limits for the key
+  type in use — RSA operations have lower ceilings than EC.
 
 ### Downstream verifier rejects a Bulk Signer signature
 

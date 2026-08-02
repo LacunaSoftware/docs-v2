@@ -10,11 +10,20 @@ authentication works, and what the service does to prevent accidental disclosure
 
 ## Threat model in one paragraph
 
-Bulk Signer is an on-premises service that holds three classes of secret: the **PKI SDK license**,
-**certificate material and PINs**, and the **encryption password** (when encryption is enabled). It
-exposes a REST API and a web dashboard, both behind a single API key with a cookie-based session for
-operators. There is no remote dependency, no telemetry, no auto-update. The threat model assumes the
-service runs on a trusted host inside a trusted network with TLS terminated at a reverse proxy.
+Bulk Signer is an on-premises service that holds four classes of secret: the **PKI SDK license**,
+**certificate material, PINs, and cloud credentials**, the **encryption password** (when encryption
+is enabled), and the **API key**. It exposes a REST API and a web dashboard, both behind that single
+API key with a cookie-based session for operators. There is no auto-update. The threat model assumes
+the service runs on a trusted host inside a trusted network with TLS terminated at a reverse proxy.
+
+A default install makes **no outbound connections**. Three opt-in features change that, each
+off unless you enable it:
+
+| Feature | Outbound dependency |
+|---------|---------------------|
+| `Signing:Certificate:Source = AzureKeyVault` | `*.vault.azure.net` + `login.microsoftonline.com` — one sign call per signature. See [Certificates](certificates.md#source--azurekeyvault). |
+| `Signing:Profiles[].Method = LacunaSigner` | Your Lacuna Signer tenant. See [Lacuna Signer integration](lacuna-signer.md). |
+| `Telemetry:Enabled = true` | Azure Application Insights. See [Telemetry](telemetry.md). |
 
 ## Authentication
 
@@ -67,8 +76,8 @@ The Lacuna PKI SDK license is a base64 string. Two ways to load it:
 
 | Where | Persists across | Preferred? |
 |-------|-----------------|------------|
-| `Signing:License` in `appsettings.Production.json` | Service restart | Acceptable if the file is gitignored and the install location is ACL'd to the service account |
-| `Signing__License` environment variable | Service restart | **Yes** — keeps the literal license out of the file tree |
+| `Signing:PkiSdkLicense` in `appsettings.Production.json` | Service restart | Acceptable if the file is gitignored and the install location is ACL'd to the service account |
+| `Signing__PkiSdkLicense` environment variable | Service restart | **Yes** — keeps the literal license out of the file tree |
 
 The env var takes precedence at boot. Per-target wiring:
 
@@ -99,6 +108,34 @@ This is the strictest of the secret-handling rules:
 | `appsettings.json` (committed) | No |
 | `appsettings.Production.json` (gitignored) | No — the validator fails the boot |
 | Environment variable | Yes (the only path) |
+
+### Azure Key Vault credentials
+
+`Signing:Certificate:AzureKeyVault:AppSecret` is a Microsoft Entra ID client secret. Unlike the
+PKCS#11 PIN it **is** permitted in a config file — the validator does not refuse it — but the
+environment-variable form is recommended:
+
+```bash
+export Signing__Certificate__AzureKeyVault__AppSecret='…'
+```
+
+| Where the client secret may live | Allowed? |
+|----------------------------------|----------|
+| `appsettings.json` (committed) | Never — it would land in source control |
+| `appsettings.Production.json` (gitignored) | Yes, and the validator permits it |
+| Environment variable | Yes — **preferred** |
+
+What this source *removes* from the host is the more important point: there is no private key on
+disk, so no PFX file to ACL and no key material in a backup. What it *adds* is a rotatable cloud
+credential. Rotate it in Azure (create a new client secret, update the env var, restart, then delete
+the old secret in Azure) — the credential is far easier to rotate than a certificate, so prefer a
+short expiry.
+
+The `.cer` file at `CerPath` is **not** a secret. It holds only public material; protect its
+integrity, not its confidentiality.
+
+The client secret is registered with both redaction layers described below, so it is scrubbed from
+durable logs whether it appears as a structured property or interpolated into an exception message.
 
 ### Windows certificate store
 
@@ -144,19 +181,22 @@ Durable structured logs flow through a redacting pipeline. Secrets are scrubbed 
 layers:
 
 1. **Property-name redaction.** Every log event's properties are walked and values whose name
-   contains `Password`, `Pin`, `License`, `ApiKey`, `Salt`, `ConnectionString`, `Authorization`, or
-   `Cookie` (case-insensitive) are replaced with `***`. This catches the structured path:
+   contains `Password`, `Pin`, `License`, `ApiKey`, `Secret`, `Salt`, `ConnectionString`,
+   `Authorization`, or `Cookie` (case-insensitive) are replaced with `***`. Matching is on
+   *substring*, so `AppSecret` and `ClientSecret` are both caught by the `Secret` token. This catches
+   the structured path:
    ```
    logger.Information("Loaded {ApiKey}", apiKey);
    // → "Loaded ***"
    ```
 2. **Literal-value redaction.** At startup the service loads the literal text of every configured
-   secret value (PKI license, PFX password, API key, encryption password, PKCS#11 PIN, SQLite
-   connection string) and scrubs those exact strings from every rendered log line. This catches the
-   stray-interpolation path:
+   secret value (PKI license, PFX passwords, Azure Key Vault client secrets, API key, encryption
+   password, PKCS#11 PIN, SQLite connection string) and scrubs those exact strings from every
+   rendered log line. Secrets declared on *every* signing profile are collected, not just those in
+   the global `Signing:Certificate` block. This catches the stray-interpolation path:
    ```
    logger.Error($"Failure with config: {appSettingsBlob}");
-   // → "Failure with config: { … Auth.ApiKey: ***, Signing.License: ***, … }"
+   // → "Failure with config: { … Auth.ApiKey: ***, Signing.PkiSdkLicense: ***, … }"
    ```
    Literal-value redaction skips secrets shorter than 12 characters to avoid pathological matches.
 

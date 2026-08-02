@@ -228,6 +228,40 @@ aggregate counts. Each rescanned file is tagged with the matching folder's name.
 Rescan **does** re-enqueue files that were recently canceled (unlike the watcher's auto-pickup path,
 which leaves canceled files alone).
 
+## Clear Jobs
+
+A maintenance action that **permanently deletes every job record** — the job rows and their history
+timelines — for administrative cleanup. It does **not** touch operational events, pipeline state,
+signing profiles, configuration, signed or processed files, or logs.
+
+From the dashboard: **System → Danger zone → Clear Jobs**. A confirmation dialog gates the action;
+cancelling deletes nothing. From REST:
+
+```bash
+curl -X DELETE http://localhost:8080/api/jobs \
+  -H "X-API-Key: $BULK_SIGNER_API_KEY"
+# → {"deleted": 1234, "message": "Cleared 1234 job record(s)."}
+```
+
+What happens on confirm:
+
+- All job rows and their history are deleted in one transaction (retry-chain parent links are
+  dissolved first so the self-referencing foreign key does not block the delete).
+- A `JobsCleared` operational event records the actor (cookie or API-key identity), timestamp, and
+  deleted-row count; the same is emitted to the structured log. On failure the transaction rolls back,
+  an error is logged, and the operator stays on the page.
+- The in-memory elapsed-time [statistics](statistics.md) aggregates are reset, so the dashboard
+  performance panel also returns to zero.
+
+:::warning Caveats
+The action runs unconditionally, **including over in-flight jobs**. A worker holding a now-deleted row
+tolerates the loss and moves on, but **files already staged in `processing/` for those jobs can be
+left orphaned** on disk. [Pause the pipeline](#pause-and-resume) first and let the active queue drain
+if you want to avoid orphaned staging files.
+
+There is no undo. Back up `db/bulksigner.db` first if the job history has audit value.
+:::
+
 ## Per-folder watcher failure isolation
 
 Each `Storage:Inputs[]` entry has its own watcher with its own consecutive-enqueue-failure budget

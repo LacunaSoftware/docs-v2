@@ -61,8 +61,8 @@ Validation fails fast at startup if any required key is missing or invalid.
 
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
-| `Signing:License` | string | `""` | `Signing__License` | **REQUIRED, SECRET.** Lacuna PKI SDK license string (base64). Environment-variable form preferred. |
-| `Signing:Certificate:Source` | enum | `Pfx` | `Signing__Certificate__Source` | **REQUIRED.** One of `Pfx`, `Pkcs11`, `WindowsStore`. Only the matching subtree below is consulted. |
+| `Signing:PkiSdkLicense` | string | `""` | `Signing__PkiSdkLicense` | **REQUIRED, SECRET.** Lacuna PKI SDK license string (base64). Environment-variable form preferred. |
+| `Signing:Certificate:Source` | enum | `Pfx` | `Signing__Certificate__Source` | **REQUIRED.** One of `Pfx`, `Pkcs11`, `WindowsStore`, `AzureKeyVault`. Only the matching subtree below is consulted. |
 
 ### `Signing:Certificate:Pfx` — when `Source = Pfx`
 
@@ -89,7 +89,21 @@ Windows-only. The validator refuses this source on non-Windows hosts at startup.
 | `Signing:Certificate:WindowsStore:StoreName` | string | `My` | `Signing__Certificate__WindowsStore__StoreName` | Logical store name. `My` is the personal store. |
 | `Signing:Certificate:WindowsStore:Thumbprint` | string | `""` | `Signing__Certificate__WindowsStore__Thumbprint` | **REQUIRED.** SHA-1 thumbprint (hex, no spaces). |
 
-See [Certificates](certificates.md) for thumbprint discovery commands and a deeper walkthrough.
+### `Signing:Certificate:AzureKeyVault` — when `Source = AzureKeyVault`
+
+The private key stays in the vault and each signature is a remote sign call; the public certificate
+is a local `.cer` file. All five keys are required — startup fails naming each missing one.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `Signing:Certificate:AzureKeyVault:Endpoint` | string | `""` | `Signing__Certificate__AzureKeyVault__Endpoint` | **REQUIRED.** Vault URL. Must be an absolute `https://` URL — a bare DNS name is refused at startup. |
+| `Signing:Certificate:AzureKeyVault:AppId` | string | `""` | `Signing__Certificate__AzureKeyVault__AppId` | **REQUIRED.** Application (client) ID of the Microsoft Entra ID app registration. |
+| `Signing:Certificate:AzureKeyVault:AppSecret` | string | `""` | `Signing__Certificate__AzureKeyVault__AppSecret` | **REQUIRED, SECRET.** Entra ID client secret. Unlike the PKCS#11 PIN this *is* permitted in a config file, but the env-var form is recommended. |
+| `Signing:Certificate:AzureKeyVault:KeyName` | string | `""` | `Signing__Certificate__AzureKeyVault__KeyName` | **REQUIRED.** Name of the **key** object in the vault that performs the signature. A vault *certificate* object is not accepted. |
+| `Signing:Certificate:AzureKeyVault:CerPath` | string | `""` | `Signing__Certificate__AzureKeyVault__CerPath` | **REQUIRED.** Path to the `.cer` holding the public certificate for `KeyName`. Boot fails if its public key does not match the vault key. |
+
+See [Certificates](certificates.md) for thumbprint discovery commands, the Azure setup walkthrough,
+and a deeper look at each source.
 
 ## `Signing:Profiles[]` — per-folder signing profiles
 
@@ -102,7 +116,8 @@ certificate validation) under a name. Watched folders reference the profile by n
   needed for a simple single-certificate install.
 - **Profile mode** (declare `Signing:Profiles[]`). Each entry is a named profile with its own
   certificate and posture. `Signing:Certificate` is ignored. Every entry validates as if it were
-  the global certificate block — the same `Pfx` / `Pkcs11` / `WindowsStore` rules apply per profile.
+  the global certificate block — the same `Pfx` / `Pkcs11` / `WindowsStore` / `AzureKeyVault` rules
+  apply per profile.
 
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
@@ -123,11 +138,11 @@ certificate validation) under a name. Watched folders reference the profile by n
 |-----|------|---------|--------------|-------|
 | `Storage:Inputs[].Profile` | string? | `null` (→ "default") | `Storage__Inputs__0__Profile` | Optional. References a `Signing:Profiles[].Name`. Null or empty falls back to the `default` profile. Unknown names fail validation at startup. |
 
-### Example: two profiles routed by folder
+### Example: three profiles routed by folder, one per certificate source
 
 ```json
 "Signing": {
-  "License": "<env-var>",
+  "PkiSdkLicense": "<env-var>",
   "Profiles": [
     {
       "Name": "nfe",
@@ -150,6 +165,23 @@ certificate validation) under a name. Watched folders reference the profile by n
         "Source": "Pfx",
         "Pfx": { "Path": "/etc/bulksigner/contracts.pfx", "Password": "" }
       }
+    },
+    {
+      "Name": "invoices",
+      "Format": "Pades",
+      "Verify": true,
+      "Encrypt": false,
+      "ValidateCertificate": true,
+      "Certificate": {
+        "Source": "AzureKeyVault",
+        "AzureKeyVault": {
+          "Endpoint": "https://my-vault.vault.azure.net/",
+          "AppId": "8f2c1b3e-1111-2222-3333-444455556666",
+          "AppSecret": "",
+          "KeyName": "bulk-signer-invoices-key",
+          "CerPath": "/etc/bulksigner/certificates/invoices.cer"
+        }
+      }
     }
   ]
 },
@@ -157,10 +189,25 @@ certificate validation) under a name. Watched folders reference the profile by n
   "Root": "/var/lib/bulksigner",
   "Inputs": [
     { "Name": "nfe-incoming",       "Path": "/var/lib/bulksigner/input-nfe",       "Profile": "nfe" },
-    { "Name": "contracts-incoming", "Path": "/var/lib/bulksigner/input-contracts", "Profile": "contracts" }
+    { "Name": "contracts-incoming", "Path": "/var/lib/bulksigner/input-contracts", "Profile": "contracts" },
+    { "Name": "invoices-incoming",  "Path": "/var/lib/bulksigner/input-invoices",  "Profile": "invoices" }
   ]
 }
 ```
+
+The `invoices` profile leaves `AppSecret` empty in the file and takes it from the environment
+instead. Array elements are bound by **positional index**, so the secret for the third profile is:
+
+```bash
+export Signing__Profiles__2__Certificate__AzureKeyVault__AppSecret='…'
+```
+
+:::warning
+That index is positional, not name-based. Inserting a new profile *above* `invoices` shifts it to
+index `3`, the index-`2` variable stops reaching it, and startup fails with
+`Signing:Profiles[3].Certificate.AzureKeyVault.AppSecret is required`. Re-check every indexed
+environment variable after reordering the list.
+:::
 
 The startup banner lists every resolved profile with its format, certificate source, and
 verify/encrypt/validate-cert flags. Profiles with `Verify=false` or `ValidateCertificate=false`
@@ -285,6 +332,20 @@ polls.
 |-----|------|---------|--------------|-------|
 | `Dashboard:PollIntervalSeconds` | int | `5` | `Dashboard__PollIntervalSeconds` | Server-side refresh tick for live dashboard pages. Bounds: 1–60. |
 
+## `LogViewer`
+
+Backs the in-memory recent-exception store and the `/logs` dashboard page. All values are read once at
+startup — change them and restart.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `LogViewer:Enabled` | bool | `true` | `LogViewer__Enabled` | Master switch. When false the in-memory sink is not wired, the `/logs` page shows a disabled notice, and the nav link is hidden. |
+| `LogViewer:MaxEntries` | int | `20` | `LogViewer__MaxEntries` | Size of the bounded in-memory buffer and the ceiling on rendered entries. Oldest entries are evicted past this limit. Bounds: 1–1000. |
+| `LogViewer:RefreshIntervalSeconds` | int | `5` | `LogViewer__RefreshIntervalSeconds` | Automatic refresh tick for the `/logs` page. Bounds: 1–60. The page also has a manual refresh button. |
+| `LogViewer:Levels` | string[] | `["Error","Fatal"]` | `LogViewer__Levels__0`, … | Log levels the store captures (case-insensitive). Valid names: `Verbose`, `Debug`, `Information`, `Warning`, `Error`, `Fatal`. Empty or unknown names fail startup. **`Logging:File:MinimumLevel` still applies first** — widening this below that minimum captures nothing, because those events never reach the sink. |
+
+See [Dashboard](dashboard.md#logs--recent-exceptions).
+
 ## `Metrics`
 
 | Key | Type | Default | Env override | Notes |
@@ -292,6 +353,27 @@ polls.
 | `Metrics:RequireApiKey` | bool | `true` | `Metrics__RequireApiKey` | When true, `/api/metrics` requires API-key or cookie auth. Set false only if your Prometheus scraper sits inside the trust boundary and the network is locked down. |
 
 See [REST API](rest-api.md) for the full inventory of metrics instruments.
+
+## `Statistics`
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `Statistics:Enabled` | bool | `true` | `Statistics__Enabled` | Master switch. When false the collector is a no-op (no recording, no locking) and the dashboard panel is hidden. Statistics are held only in process memory and reset on restart — they are never written to the database. |
+
+See [Job statistics](statistics.md) for what each number means.
+
+## `Telemetry`
+
+Opt-in Azure Application Insights export. Off by default; when off, the service has no Application
+Insights dependency and makes no outbound calls on its behalf.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `Telemetry:Enabled` | bool | `false` | `Telemetry__Enabled` | Master switch. When `true`, a connection string is **required** — startup fails without one. |
+| `Telemetry:ConnectionString` | string? | `null` | `Telemetry__ConnectionString` | **SECRET.** Application Insights connection string. Leave unset to supply it via the standard `APPLICATIONINSIGHTS_CONNECTION_STRING` environment variable instead. |
+| `Telemetry:RoleName` | string | `Lacuna.BulkSigner` | `Telemetry__RoleName` | Reported as the `cloud_RoleName` dimension, so several services sharing one resource stay distinguishable. |
+
+See [Telemetry](telemetry.md) for what is collected and the KQL queries to read it.
 
 ## `RateLimiting`
 
@@ -328,6 +410,7 @@ Rate-limited responses carry `code = "rate-limited"` in the error envelope.
 | `BULK_SIGNER_CONFIG_DIR` | Tells the binary where the production config lives when the binary is in a read-only install location. Set by the install scripts. |
 | `BULK_SIGNER_PKCS11_PIN` | The HSM/token PIN — read at the env-var name configured by `Signing:Certificate:Pkcs11:PinEnvVar`. |
 | `BULK_SIGNER_ENCRYPTION_PASSWORD` | PBKDF2 password — read at the env-var name configured by `Encryption:PasswordEnvVar`. |
+| `APPLICATIONINSIGHTS_CONNECTION_STRING` | Standard Azure Monitor variable. Read directly by the exporter and honoured by the startup validator, so `Telemetry:ConnectionString` can be left unset. See [Telemetry](telemetry.md). |
 | `ASPNETCORE_ENVIRONMENT` | Standard ASP.NET Core environment name (`Development`, `Production`). The install scripts set `Production`. |
 | `ASPNETCORE_URLS` | Standard. The install scripts set `http://0.0.0.0:8080`. |
 | `ASPNETCORE_CONTENTROOT` | Standard. The Windows install sets it to `C:\ProgramData\Lacuna\BulkSigner` so file-path resolution lands on operator-writable disk. |

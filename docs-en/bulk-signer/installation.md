@@ -63,13 +63,20 @@ The license is a base64 string supplied by Lacuna Software. Two ways to load it:
 
 | Where | How |
 |-------|-----|
-| Environment variable (preferred) | Set `Signing__License=<base64-license>` |
-| Config file | Set `Signing:License` in `appsettings.Production.json` |
+| Environment variable (preferred) | Set `Signing__PkiSdkLicense=<base64-license>` |
+| Config file | Set `Signing:PkiSdkLicense` in `appsettings.Production.json` |
 
 The environment variable takes precedence at boot. The install scripts read the environment
 variable from the per-target file (`/etc/bulksigner/bulksigner.env` on Linux, machine-scope
 environment variables on Windows, `.env` on Docker) so the license never lands in a committed file.
 See [Security](security.md) for the full secrets-handling story.
+
+:::warning Upgrading from 1.0.x
+This key was named `Signing:License` (`Signing__License`) in 1.0.x and was renamed in **1.1.0**. The
+old name is no longer read, so an upgraded install that still sets it fails at startup with
+`Signing:PkiSdkLicense is required`. Rename the key in your config file or environment file as part
+of the upgrade.
+:::
 
 ## Linux — systemd
 
@@ -122,7 +129,7 @@ sudo bash deploy/linux/uninstall.sh --purge  # also wipe data, logs, config, and
 notepad C:\ProgramData\Lacuna\BulkSigner\config\appsettings.Production.json
 
 # 3. Set secrets as machine-scope environment variables:
-[Environment]::SetEnvironmentVariable("Signing__License",                "<base64-license>", "Machine")
+[Environment]::SetEnvironmentVariable("Signing__PkiSdkLicense",                "<base64-license>", "Machine")
 [Environment]::SetEnvironmentVariable("Auth__ApiKey",                    "<api-key>",        "Machine")
 [Environment]::SetEnvironmentVariable("BULK_SIGNER_PKCS11_PIN",          "<hsm-pin>",        "Machine")
 [Environment]::SetEnvironmentVariable("BULK_SIGNER_ENCRYPTION_PASSWORD", "<password>",       "Machine")

@@ -5,7 +5,7 @@ sidebar_position: 4
 
 # Certificates
 
-Lacuna Bulk Signer signs with X.509 certificates exposed by one of three sources. This page explains
+Lacuna Bulk Signer signs with X.509 certificates exposed by one of four sources. This page explains
 how to pick a source, where to put the certificate material, and how to find the SHA-1 thumbprints
 the configuration requires.
 
@@ -22,10 +22,16 @@ at boot and misconfiguration on any profile fails startup with an aggregated err
 | `Pfx` | The private key is exportable and stored as a `.pfx`/`.p12` file on disk. | The procurement policy forbids exportable keys (then HSM/store). |
 | `Pkcs11` | The key lives in an HSM, smart card, or USB token with a vendor PKCS#11 driver. The audit policy requires that the key never leaves the device. | Containerized installs where the vendor driver cannot be mounted; non-Windows targets where the vendor only ships a Windows driver. |
 | `WindowsStore` | Windows targets where the cert was imported into the certificate store ahead of time. | Linux or Docker targets — the validator refuses this source on non-Windows hosts. |
+| `AzureKeyVault` | The key must never touch the host but an on-premises HSM is not an option — Azure holds the key and signs remotely. Works on every target, Docker included. | Air-gapped installs, or when adding per-signature network latency to Azure is unacceptable. |
 
-All three sources select the signing certificate by **SHA-1 thumbprint**. Subject-based matching is
-never used because tokens and stores routinely hold multiple identities, and a "first match" rule
-would make the audit trail dishonest.
+How the signing identity gets *selected* differs by source, and the difference matters whenever a
+token, store, or vault holds more than one identity:
+
+| Source | Identity selected by |
+|--------|----------------------|
+| `Pfx` | Nothing to select — the file holds a single identity. |
+| `Pkcs11`, `WindowsStore` | **SHA-1 thumbprint.** Subject-based matching is never used, because tokens and stores routinely hold multiple identities and a "first match" rule would make the audit trail dishonest. |
+| `AzureKeyVault` | The vault **key name** for the private key, plus a local `.cer` file for the public certificate. The pair is cross-checked at boot. |
 
 ## ICP-Brasil and ADR-Básica
 
@@ -112,9 +118,11 @@ loaded cert. Picking the wrong combination can silently deadlock or return vendo
 | **Pfx** | Yes (the key is held in memory). | Up to the cap of 32; typical sweet spot is 4–8 on PFX-backed deployments. |
 | **Pkcs11** | **Usually no.** Most consumer tokens expose a single session per login; concurrent signing calls deadlock or fail. Server HSMs often support multi-session, but the count is vendor-specific. | `1` unless the vendor documentation explicitly states concurrent session support and you have measured it. |
 | **WindowsStore** | Vendor-dependent. Software CSPs are typically thread-safe; smart-card-backed CSPs vary. | `1` by default; raise only after verifying the provider behaves under concurrent calls. |
+| **AzureKeyVault** | Yes. Each signature is an independent, stateless HTTPS call — there is no session to contend for. | Up to the cap of 32. Watch for HTTP 429 throttling from Azure rather than for deadlocks. |
 
 The service warns at startup when `MaxConcurrency > 1` is configured alongside `Source = Pkcs11` or
-`Source = WindowsStore`:
+`Source = WindowsStore`. `AzureKeyVault` is deliberately **not** warned about, for the reason in the
+table above:
 
 ```
 [WARN] Pipeline:MaxConcurrency = 4 with Signing:Certificate:Source = Pkcs11 — verify your
@@ -254,16 +262,121 @@ Get-ChildItem -Path Cert:\LocalMachine\My | Format-Table Thumbprint, Subject, No
 The thumbprint column is the SHA-1 hex. Strip any spaces before copying into the config; case does
 not matter (the validator compares hex case-insensitively).
 
+## Source = AzureKeyVault
+
+```json
+"Signing": {
+  "Certificate": {
+    "Source": "AzureKeyVault",
+    "AzureKeyVault": {
+      "Endpoint": "https://my-vault.vault.azure.net/",
+      "AppId": "8f2c1b3e-1111-2222-3333-444455556666",
+      "AppSecret": "",
+      "KeyName": "bulk-signer-signing-key",
+      "CerPath": "/etc/bulksigner/certificates/signer.cer"
+    }
+  }
+}
+```
+
+(Prefer the env var `Signing__Certificate__AzureKeyVault__AppSecret` over a value in the config file.)
+
+The private key is a Key Vault **key** object and never leaves Azure: each signature sends a digest
+to the vault and receives the signature back. The matching **public certificate** is a local `.cer`
+file — put it wherever you would have put the `.pfx`. That file holds only public material, so it
+needs no protection beyond integrity.
+
+This is the *key-only* flavour. Vault-hosted **certificate** objects are deliberately not supported:
+a vault certificate would still have to be downloaded to the host to be used, which defeats the
+reason for choosing Key Vault in the first place.
+
+### Azure setup
+
+If you are starting from an existing PFX, the `Import-PfxToKeyVault.ps1` script on the
+[Samples](samples.md#powershell-7--import-pfxtokeyvaultps1) page performs every step below in one
+pass — it imports the key non-exportably, writes the `.cer`, registers the application, grants it
+sign permission, verifies the pair, and prints the config block to paste in.
+
+The manual steps follow, for the cases the script does not cover (a key generated inside the vault,
+or a CA-issued certificate obtained against a CSR).
+
+1. **Create or import the key.** In the target key vault, create a key (RSA 2048+ or EC) — or import
+   one. Note its **name**; that becomes `KeyName`. It must be a key object, not a certificate object.
+2. **Register an application.** In Microsoft Entra ID, register an application and note its
+   **Application (client) ID** (`AppId`). Under **Certificates & secrets**, create a client secret
+   and note the value (`AppSecret`) — Azure displays it only once.
+3. **Grant vault access.** Give that app registration permission to *get* the key and to *sign* with
+   it. On an RBAC vault the built-in **Key Vault Crypto User** role covers both; on an access-policy
+   vault, grant the **Get** key permission plus the **Sign** cryptographic operation. Nothing more is
+   needed — Bulk Signer never creates, wraps, or exports keys.
+4. **Obtain the certificate.** Generate a CSR against the vault key, have your CA issue the
+   certificate, and save the issued certificate as a `.cer` (DER or PEM) at `CerPath`.
+
+### The certificate and the key must match
+
+At boot, Bulk Signer compares the `.cer`'s public key against the vault key's public key and refuses
+to start if they differ:
+
+```
+Certificate '/etc/bulksigner/certificates/signer.cer' does not match Azure Key Vault key
+'bulk-signer-signing-key' — their public keys differ. Point CerPath at the certificate issued
+for this key, or correct KeyName.
+```
+
+This is the failure mode the two-artifact design invites: renewing a certificate against a *new*
+vault key while `KeyName` still points at the old one, or vice versa. Without the check the service
+would start happily and emit signatures that no verifier can validate. With it, the mismatch is a
+startup refusal that names both halves of the pair.
+
+### Verifying the pair before you deploy
+
+To confirm a `.cer` and a vault key belong together without starting the service, compare their
+public keys with the Azure CLI and OpenSSL:
+
+```bash
+# Public key as recorded in the certificate
+openssl x509 -in signer.cer -noout -pubkey
+
+# Public key as held by the vault
+az keyvault key download --vault-name my-vault --name bulk-signer-signing-key --encoding PEM --file -
+```
+
+The two PEM blocks must be byte-identical.
+
+### Credential handling
+
+`AppSecret` is an Entra ID client secret. Unlike the PKCS#11 PIN it *may* live in a config file, but
+the environment-variable form is recommended:
+
+```bash
+export Signing__Certificate__AzureKeyVault__AppSecret='…'
+```
+
+It is registered with both log-redaction layers, so it is scrubbed from the durable log whether it
+appears as a structured property or interpolated into an exception message. Rotate it in Azure and
+restart the service. See [Security](security.md#azure-key-vault-credentials) for the full posture.
+
+### Network and throttling
+
+Every signature is an outbound HTTPS call, so the host needs a reliable path to `*.vault.azure.net`
+(and to `login.microsoftonline.com` for token acquisition). Vault latency is added to each job's
+signing stage. A vault outage **stalls** the pipeline rather than corrupting it — affected jobs fail
+with the Azure error and can be retried once access is restored.
+
+Concurrency is safe (see the table above), but sustained high `MaxConcurrency` can draw HTTP 429
+throttling responses from Azure. Those surface as failed jobs carrying the Azure error, not as hangs.
+
 ## Hot-swapping the source
 
 Changing `Signing:Certificate:Source` (and the matching subtree) requires a restart — the
 certificate is loaded once at boot. Procedure:
 
 1. Stage the new source (import the cert into the Windows store, copy the new PFX, install the
-   PKCS#11 driver).
-2. Edit `appsettings.Production.json` to point at the new source and set the new thumbprint / path.
-3. If the new source needs a new environment variable (PKCS#11 PIN, encryption password), set it
-   before the restart.
+   PKCS#11 driver, provision the vault key and its `.cer`).
+2. Edit `appsettings.Production.json` to point at the new source and set the new thumbprint / path /
+   key name.
+3. If the new source needs a new environment variable (PKCS#11 PIN, Key Vault client secret,
+   encryption password), set it before the restart.
 4. Restart the service. The bootstrap banner prints `cert source = …` — verify it matches your
    intent.
 5. Send a smoke-test job through the queue (drop a file in `input/`, or POST to `/api/files`).
@@ -273,9 +386,13 @@ certificate is loaded once at boot. Procedure:
 
 | Symptom | Diagnosis |
 |---------|-----------|
-| Boot fails with "Signing:License is required" | Set `Signing__License` (env) or `Signing:License` (config). See [Security](security.md). |
+| Boot fails with "Signing:PkiSdkLicense is required" | Set `Signing__PkiSdkLicense` (env) or `Signing:PkiSdkLicense` (config). See [Security](security.md). |
 | Boot fails with "Pkcs11 PIN env var … is empty" | The env var named by `PinEnvVar` is unset. Set it before restarting. |
 | Boot fails with "WindowsStore source is not supported on this OS" | You configured `Source = WindowsStore` on Linux. Switch source. |
+| Boot fails with "does not match Azure Key Vault key … their public keys differ" | `CerPath` and `KeyName` refer to different key pairs. Verify them with the OpenSSL / Azure CLI recipe above. |
+| Boot fails with "Endpoint must be an absolute https:// URL" | `Endpoint` is a bare vault DNS name or uses `http://`. Use the full form, e.g. `https://my-vault.vault.azure.net/`. |
+| Signing fails with an Azure `403` / `Forbidden` | The app registration lacks the **sign** permission on the key. Grant **Key Vault Crypto User** (RBAC) or the **Sign** operation (access policy). |
+| Signing fails with an Azure `429` | Vault throttling under load. Lower `Pipeline:MaxConcurrency` or request a higher vault limit. |
 | Signing fails immediately with "Certificate not found by thumbprint" | The thumbprint does not match any cert in the configured source. Recheck with the discovery commands above. |
 | Signing fails with PKCS#11 "module load failed" / "C_Initialize" error | The driver `.so`/`.dll` could not be loaded — vendor library missing on host or not mounted into the container. |
 | Signing fails with "Access is denied" reading a Windows private key | Service virtual account lacks key access — grant it via `certlm.msc → Manage Private Keys`. |

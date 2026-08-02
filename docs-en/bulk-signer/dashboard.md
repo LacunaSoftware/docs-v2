@@ -23,7 +23,7 @@ Every page has a top app bar and a left navigation drawer:
 | Element | What it does |
 |---------|--------------|
 | App bar (top) | Theme toggle (light / dark) and an account menu with Logout. |
-| Drawer (left) | The four nav links: Dashboard, Jobs, Input folder, System. |
+| Drawer (left) | The nav links: Dashboard, Jobs, Input folder, Recent exceptions, System. (The Recent exceptions link is hidden when `LogViewer:Enabled = false`.) |
 | Refresh indicator | A small widget showing the last refresh time and the active polling cadence. |
 
 Live pages refresh on a server-side timer driven by `Dashboard:PollIntervalSeconds` (default 5). The
@@ -47,7 +47,17 @@ Landing page. Stat cards and the last few jobs:
 When `Pipeline:MaxConcurrency > 1`, a small **In flight by format** panel breaks the in-flight count
 down by `Pades` / `Cades` / `Xades`. In sequential mode (the default) the panel is hidden.
 
-Below: a throughput chart for the last 24 hours and a table of the last few jobs. This page is a
+### Processing performance panel
+
+Below the stat cards sits a **Processing performance** panel with per-stage elapsed-time statistics —
+average job time, average signing and verification time, rolling and peak throughput, min/avg/max
+totals, a per-stage breakdown, and a Local vs Remote split. The numbers are held in process memory
+and reset on restart.
+
+Hidden entirely when `Statistics:Enabled = false`. Full reading guide, including how to use the stage
+split to localise a slowdown: [Job statistics](statistics.md).
+
+Below that: a throughput chart for the last 24 hours and a table of the last few jobs. This page is a
 read-only overview — for actions, go to Jobs.
 
 ## `/jobs` — Jobs
@@ -137,6 +147,48 @@ in the audit trail.
 The `Cleanup` button is currently a no-op while the retention story is finalized. See
 [Retention](retention.md).
 
+### Danger zone — Clear Jobs
+
+Permanently deletes **every job record** — the Jobs table and its history timelines. A confirmation
+dialog gates the action and spells out that it is irreversible, that only job records are affected,
+and that files already staged in `processing/` for in-flight jobs may be left orphaned. Cancelling or
+dismissing the dialog deletes nothing.
+
+On confirm it records a `JobsCleared` audit event (actor + count), resets the in-memory
+[statistics](statistics.md) aggregates, and refreshes the page.
+
+Untouched by Clear Jobs: operational events, pipeline state, profiles, configuration, signed output
+files, and log files. The Prometheus counters at `/api/metrics` are also unaffected — they are
+monotonic.
+
+:::warning
+There is no undo and no export step. If you need the job history for an audit, back up
+`db/bulksigner.db` first.
+:::
+
+See [Operations](operations.md#clear-jobs).
+
+## `/logs` — Recent exceptions
+
+A read-only viewer over the most recent error-level log entries, held in a bounded in-memory buffer.
+It is **not** a query over the log files on disk — the buffer is cleared on restart, so use the file
+sink for anything historical.
+
+| Aspect | Behaviour |
+|--------|-----------|
+| Source | In-memory bounded FIFO buffer fed by the logging pipeline. Cleared on restart. |
+| Entries | Newest first, capped at `LogViewer:MaxEntries` (default 20). Only levels listed in `LogViewer:Levels` (default `Error`, `Fatal`) are captured. |
+| Per entry | Collapsed: level chip, message, timestamp, source context, exception type. Expanded: full message, exception type and message, and the stack trace in a scrollable monospace block. |
+| Refresh | Auto-refresh on `LogViewer:RefreshIntervalSeconds` (default 5), plus a manual refresh button. |
+| Redaction | Every text field is scrubbed as the entry is captured, so secrets do not surface on the page. See [Security](security.md#log-redaction--two-layers). |
+| Disabled | When `LogViewer:Enabled = false` the nav link is hidden and the page renders a disabled notice. |
+
+:::note
+The global file-sink minimum level applies **first**. Widening `LogViewer:Levels` below that minimum
+(for example adding `Debug` while the minimum is `Information`) captures nothing, because those events
+never reach the sink.
+:::
+
 ## Audit-trail conventions
 
 Every action records:
@@ -147,6 +199,7 @@ Every action records:
 | Cancel | A history entry on the canceled job |
 | Retry | A history entry on the parent + an initial history entry on the child |
 | Rescan | A system event summarizing the result |
+| Clear Jobs | A `JobsCleared` system event recording the actor and how many records were deleted |
 
 Messages follow consistent formats, e.g. `"Pipeline paused by operator. Reason: Quarterly
 maintenance."` and `"Operator canceled: still investigating."`.
@@ -196,4 +249,4 @@ survives). Also forward the `Set-Cookie` and `Cookie` headers unmodified, and se
 
 ---
 
-**Next:** [REST API](rest-api.md) — the programmatic surface. **Previous:** [Operations](operations.md).
+**Next:** [Job statistics](statistics.md) — reading the performance panel. **Previous:** [Operations](operations.md).

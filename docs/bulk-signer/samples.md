@@ -1,9 +1,9 @@
 ---
-sidebar_label: "Samples — decrypt scripts"
-sidebar_position: 13
+sidebar_label: "Samples — scripts"
+sidebar_position: 15
 ---
 
-# Samples — decrypt scripts
+# Samples — scripts
 
 :::warning Indisponível
 

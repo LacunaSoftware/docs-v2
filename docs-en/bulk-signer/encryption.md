@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Encryption (BSENC v1)"
-sidebar_position: 9
+sidebar_position: 11
 ---
 
 # Encryption — BSENC v1

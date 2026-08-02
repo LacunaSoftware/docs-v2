@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Retention"
-sidebar_position: 11
+sidebar_position: 13
 ---
 
 # Retention
@@ -53,7 +53,9 @@ Default behavior:
 - Signed outputs accumulate in `output/`. Operators or downstream automation move them out.
 - Error directories accumulate in `error/`. Operators inspect, then delete with normal filesystem
   commands.
-- Job rows accumulate in SQLite. The DB file grows linearly with throughput.
+- Job rows accumulate in SQLite. The DB file grows linearly with throughput. The one built-in tool for
+  reclaiming that space is [Clear Jobs](operations.md#clear-jobs) — an all-or-nothing delete of every
+  job record. There is no age-based or selective pruning of job history in this version.
 
 ## Estimating disk growth
 

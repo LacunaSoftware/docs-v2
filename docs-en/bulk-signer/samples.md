@@ -1,13 +1,21 @@
 ---
-sidebar_label: "Samples — decrypt scripts"
-sidebar_position: 13
+sidebar_label: "Samples — scripts"
+sidebar_position: 15
 ---
 
-# Samples — decrypt scripts
+# Samples — scripts
 
-Two reference implementations of the BSENC v1 decrypt recipe (see [Encryption](encryption.md)). Both
-accept the password, salt, and iteration count via CLI flags, read the `.enc` envelope from a path,
-and write the decrypted (cleartext) signed artifact to a path.
+| Script | Purpose |
+|--------|---------|
+| [`decrypt-bsenc.py`](#python-3--decrypt-bsencpy) | Decrypt a BSENC v1 envelope — Python 3 |
+| [`Decrypt-Bsenc.ps1`](#powershell-7--decrypt-bsencps1) | Decrypt a BSENC v1 envelope — PowerShell 7+ |
+| [`Import-PfxToKeyVault.ps1`](#powershell-7--import-pfxtokeyvaultps1) | Provision a PFX for the Azure Key Vault certificate source |
+
+## Decrypting BSENC envelopes
+
+The first two scripts are reference implementations of the BSENC v1 decrypt recipe (see
+[Encryption](encryption.md)). Both accept the password, salt, and iteration count via CLI flags, read
+the `.enc` envelope from a path, and write the decrypted (cleartext) signed artifact to a path.
 
 They are reference implementations — adapt them, or write your own in any language with
 PBKDF2-HMAC-SHA256 and AES-256-GCM primitives. Both use these exit codes:
@@ -418,6 +426,492 @@ try {
 exit 0
 ```
 
+## PowerShell 7+ — `Import-PfxToKeyVault.ps1`
+
+Provisions an existing PFX for use with the `AzureKeyVault` certificate source (see
+[Certificates](certificates.md#source--azurekeyvault)). One pass imports the private key into the
+vault as a **non-exportable key**, writes the public certificate out as a `.cer`, registers a
+Microsoft Entra ID application, grants it permission to sign with that key, verifies the pair, and
+prints a ready-to-paste configuration block.
+
+Requires PowerShell 7+ and the `Az.Accounts`, `Az.KeyVault`, and `Az.Resources` modules. Sign in with
+`Connect-AzAccount` first. Supports `-WhatIf` — run it that way once to see what it would do.
+
+The script does **not** create the vault; point it at one that already exists.
+
+:::warning Why a key object and not a certificate object
+Key Vault can hold a PFX either way, and only one of them is genuinely non-exportable. Imported as a
+**key**, the private material can never be retrieved — signing happens inside the vault. Imported as
+a **certificate**, it is marked exportable and the whole PFX can be downloaded from the secret that
+backs it, so anyone with `secrets/get` can walk away with the key. This script imports a key, which
+is why Bulk Signer needs the public certificate supplied separately as a local `.cer`.
+:::
+
+:::warning Keep the PFX
+The PFX still exists on disk after this runs. Once you have confirmed signing works, move it to
+offline backup and remove it from the host — leaving it in place defeats the point of putting the key
+in a vault. **Do not destroy your only copy:** Key Vault will not give the key back, so the PFX (or a
+`Backup-AzKeyVaultKey` blob) is your only disaster-recovery artifact.
+:::
+
+The operator running it needs: **Key Vault Crypto Officer** on the vault (to import a key),
+**Application Developer** or higher in Entra ID (to register an application), and **User Access
+Administrator** or **Owner** on the vault (to create the role assignment — not needed on an
+access-policy vault).
+
+```powershell
+#requires -Version 7.0
+#requires -Modules Az.Accounts, Az.KeyVault, Az.Resources
+<#
+.SYNOPSIS
+    Provisions a PFX for use with Bulk Signer's `Source = AzureKeyVault` certificate source:
+    imports the private key into Azure Key Vault as a non-exportable key, writes the public
+    certificate out as a .cer, registers a Microsoft Entra ID application, and grants that
+    application permission to sign with the key.
+
+.DESCRIPTION
+    Produces everything the AzureKeyVault certificate source needs (see the Certificates page),
+    in one pass:
+
+        1. Reads the PFX locally and verifies it carries a private key.
+        2. Writes the public certificate to a .cer file — this is `CerPath`.
+        3. Imports the private key into the vault as a KEY object      — this is `KeyName`.
+        4. Confirms the imported key's public half matches the .cer, the same check the service
+           performs at boot, so a mismatch is caught here rather than at startup.
+        5. Registers an Entra ID application + service principal      — this is `AppId`.
+        6. Creates a client secret on it                              — this is `AppSecret`.
+        7. Grants the service principal permission to read and sign with that key.
+        8. Prints a ready-to-paste configuration block.
+
+    WHY A KEY OBJECT AND NOT A CERTIFICATE OBJECT
+    Key Vault can hold this PFX either way, and only one of them is actually non-exportable:
+
+      * As a KEY (what this script does). Key Vault never returns private key material for a key
+        object under any permission. Signing happens inside the vault.
+      * As a CERTIFICATE. A certificate imported from a PFX is marked exportable, and its private
+        key can then be downloaded in full from the secret that backs it
+        (`Get-AzKeyVaultSecret -Name <certName>` returns a complete PFX). Anyone holding the
+        secrets/get permission can walk away with the key.
+
+    Bulk Signer's AzureKeyVault source is deliberately key-only for exactly this reason, which is
+    also why the public certificate has to be supplied separately as a local .cer.
+
+    PERMISSIONS THE OPERATOR RUNNING THIS NEEDS
+      * On the vault: import a key — "Key Vault Crypto Officer" (RBAC), or a "create/import" key
+        access policy on a legacy access-policy vault.
+      * In Entra ID: register applications — "Application Developer" or higher.
+      * On the vault or its resource group: create role assignments — "User Access Administrator"
+        or "Owner". Not needed on an access-policy vault.
+
+.PARAMETER PfxPath
+    Path to the .pfx / .p12 holding the signing certificate and its private key.
+
+.PARAMETER PfxPassword
+    Password protecting the PFX. Prompted for securely when omitted. Pass
+    `(ConvertTo-SecureString -String '' -AsPlainText -Force)` for a passwordless PFX.
+
+.PARAMETER VaultName
+    Name of an existing Azure Key Vault. The script does not create the vault.
+
+.PARAMETER KeyName
+    Name to give the imported key inside the vault. Becomes `KeyName` in configuration.
+
+.PARAMETER AppDisplayName
+    Display name for the Entra ID application to register.
+
+.PARAMETER CerPath
+    Where to write the public certificate. Defaults to the PFX path with a .cer extension.
+    Becomes `CerPath` in configuration — place it where the service can read it.
+
+.PARAMETER SecretValidityYears
+    Lifetime of the generated client secret, in years. Default 1. An expired secret fails the
+    service at boot with an Azure authentication error, so pair rotation with a restart.
+
+.PARAMETER GrantScope
+    `Key` (default) scopes the role assignment to this one key — the tightest grant, and what you
+    want when a vault holds keys for more than one consumer. `Vault` scopes it to the whole vault,
+    which is Microsoft's recommendation for manageability when the vault serves a single
+    application. Ignored on access-policy vaults, which can only grant at vault level.
+
+.PARAMETER Destination
+    `Software` (default) or `HSM` for the imported key. `HSM` requires a Premium vault.
+
+.PARAMETER ExistingAppId
+    Reuse an existing application instead of registering a new one. A fresh client secret is still
+    created. Use when several vault keys should share one identity.
+
+.EXAMPLE
+    pwsh ./Import-PfxToKeyVault.ps1 `
+        -PfxPath ./signer.pfx `
+        -VaultName my-vault `
+        -KeyName bulk-signer-signing-key `
+        -AppDisplayName bulk-signer-prod
+
+.EXAMPLE
+    # Least-privilege variant on a vault shared with other consumers, HSM-backed, 2-year secret.
+    pwsh ./Import-PfxToKeyVault.ps1 `
+        -PfxPath ./signer.pfx -VaultName shared-vault -KeyName bulksigner-key `
+        -AppDisplayName bulk-signer-prod -GrantScope Key -Destination HSM -SecretValidityYears 2
+
+.NOTES
+    The client secret is printed once and never written to disk. Capture it before closing the
+    session; if it is lost, create a replacement with `New-AzADAppCredential`.
+
+    The PFX still exists on disk after this runs. Once you have verified signing works, move it to
+    offline backup and remove it from the host — leaving it in place defeats the point of putting
+    the key in a vault. Do not destroy your only copy: Key Vault will not give the key back, so the
+    PFX is your disaster-recovery artifact (as is `Backup-AzKeyVaultKey`).
+
+    Exit codes:
+      0  success
+      1  precondition failed (bad PFX, missing vault, not signed in)
+      2  Azure operation failed (import, app registration, or role assignment)
+#>
+[CmdletBinding(SupportsShouldProcess)]
+param(
+    [Parameter(Mandatory)]
+    [ValidateScript({ Test-Path -LiteralPath $_ -PathType Leaf })]
+    [string]$PfxPath,
+
+    [Parameter()]
+    [System.Security.SecureString]$PfxPassword,
+
+    [Parameter(Mandatory)]
+    [string]$VaultName,
+
+    [Parameter(Mandatory)]
+    [string]$KeyName,
+
+    [Parameter(Mandatory, ParameterSetName = 'NewApp')]
+    [string]$AppDisplayName,
+
+    [Parameter(Mandatory, ParameterSetName = 'ExistingApp')]
+    [string]$ExistingAppId,
+
+    [Parameter()]
+    [string]$CerPath,
+
+    [Parameter()]
+    [ValidateRange(1, 2)]
+    [int]$SecretValidityYears = 1,
+
+    [Parameter()]
+    [ValidateSet('Key', 'Vault')]
+    [string]$GrantScope = 'Key',
+
+    [Parameter()]
+    [ValidateSet('Software', 'HSM')]
+    [string]$Destination = 'Software'
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+$script:CryptoUserRole = 'Key Vault Crypto User'
+
+function Write-Step { param([string]$Message) Write-Host "==> $Message" -ForegroundColor Cyan }
+function Write-Ok { param([string]$Message) Write-Host "    $Message" -ForegroundColor Green }
+function Write-Note { param([string]$Message) Write-Host "    $Message" -ForegroundColor DarkGray }
+
+function Stop-WithError {
+    param([string]$Message, [int]$Code = 1)
+    Write-Host "ERROR: $Message" -ForegroundColor Red
+    exit $Code
+}
+
+# ---------------------------------------------------------------------------------------------
+# 1. Preconditions
+# ---------------------------------------------------------------------------------------------
+Write-Step 'Checking prerequisites'
+
+$context = Get-AzContext
+if (-not $context) {
+    Stop-WithError 'Not signed in to Azure. Run Connect-AzAccount (and Set-AzContext to pick the subscription holding the vault).'
+}
+Write-Ok "Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))"
+Write-Ok "Tenant:       $($context.Tenant.Id)"
+
+$vault = Get-AzKeyVault -VaultName $VaultName -ErrorAction SilentlyContinue
+if (-not $vault) {
+    Stop-WithError "Key vault '$VaultName' not found in subscription $($context.Subscription.Id). Create it first, or Set-AzContext to the right subscription."
+}
+# EnableRbacAuthorization decides how step 6 grants access; the two models are mutually exclusive.
+$usesRbac = [bool]$vault.EnableRbacAuthorization
+Write-Ok "Vault:        $($vault.VaultName) (permission model: $(if ($usesRbac) { 'Azure RBAC' } else { 'access policy' }))"
+
+if (-not $PfxPassword) {
+    $PfxPassword = Read-Host -AsSecureString "Password for '$([System.IO.Path]::GetFileName($PfxPath))' (empty if none)"
+}
+
+if (-not $CerPath) {
+    $CerPath = [System.IO.Path]::ChangeExtension((Resolve-Path -LiteralPath $PfxPath).Path, '.cer')
+}
+
+# ---------------------------------------------------------------------------------------------
+# 2. Read the PFX locally, before touching Azure
+# ---------------------------------------------------------------------------------------------
+Write-Step 'Reading the PFX'
+
+$pfxFullPath = (Resolve-Path -LiteralPath $PfxPath).Path
+$certificate = $null
+try {
+    $pfxBytes = [System.IO.File]::ReadAllBytes($pfxFullPath)
+    # EphemeralKeySet keeps the private key out of the OS key store while we inspect it. Some
+    # PFX/platform combinations reject it, so fall back to default handling.
+    try {
+        $certificate = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new(
+            $pfxBytes, $PfxPassword, [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::EphemeralKeySet)
+    }
+    catch {
+        $certificate = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($pfxBytes, $PfxPassword)
+    }
+}
+catch {
+    Stop-WithError "Could not open '$pfxFullPath'. Wrong password, or the file is not a PKCS#12 archive. ($($_.Exception.Message))"
+}
+
+if (-not $certificate.HasPrivateKey) {
+    Stop-WithError "'$pfxFullPath' contains no private key. Re-export the PFX including the private key."
+}
+
+$thumbprint = $certificate.Thumbprint
+Write-Ok "Subject:    $($certificate.Subject)"
+Write-Ok "Thumbprint: $thumbprint"
+Write-Ok "Valid:      $($certificate.NotBefore.ToString('yyyy-MM-dd')) .. $($certificate.NotAfter.ToString('yyyy-MM-dd'))"
+if ($certificate.NotAfter -lt (Get-Date)) {
+    Write-Warning "This certificate expired on $($certificate.NotAfter.ToString('yyyy-MM-dd')). Signatures produced with it will not validate."
+}
+
+$certRsa = [System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPublicKey($certificate)
+if (-not $certRsa) {
+    Write-Warning 'Certificate does not carry an RSA public key. The automatic key-match check in step 5 will be skipped; verify manually per the Certificates page.'
+}
+
+# ---------------------------------------------------------------------------------------------
+# 3. Write the public certificate (CerPath)
+# ---------------------------------------------------------------------------------------------
+Write-Step "Writing the public certificate to $CerPath"
+
+if ($PSCmdlet.ShouldProcess($CerPath, 'Write DER-encoded public certificate')) {
+    $derBytes = $certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
+    [System.IO.File]::WriteAllBytes($CerPath, $derBytes)
+    Write-Ok "$($derBytes.Length) bytes (DER). Public material only — no private key."
+}
+
+# ---------------------------------------------------------------------------------------------
+# 4. Import the private key as a non-exportable vault KEY
+# ---------------------------------------------------------------------------------------------
+Write-Step "Importing the private key into '$VaultName' as key '$KeyName'"
+
+$existingKey = Get-AzKeyVaultKey -VaultName $VaultName -Name $KeyName -ErrorAction SilentlyContinue
+if ($existingKey) {
+    Write-Warning "Key '$KeyName' already exists in '$VaultName'. Importing creates a NEW VERSION; the current version is retained and reachable by its version-specific id."
+}
+
+$vaultKey = $null
+if ($PSCmdlet.ShouldProcess("$VaultName/keys/$KeyName", 'Import key from PFX')) {
+    try {
+        # KeyOps is restricted to sign/verify so the key cannot be used to encrypt, decrypt, wrap,
+        # or unwrap even by a caller who holds a broader role than intended. Bulk Signer only ever
+        # signs; the public-key side of verification happens locally from the .cer.
+        $vaultKey = Add-AzKeyVaultKey `
+            -VaultName $VaultName `
+            -Name $KeyName `
+            -KeyFilePath $pfxFullPath `
+            -KeyFilePassword $PfxPassword `
+            -Destination $Destination `
+            -KeyOps 'sign', 'verify'
+    }
+    catch {
+        Stop-WithError "Key import failed: $($_.Exception.Message)`nThe signed-in identity needs 'Key Vault Crypto Officer' (RBAC) or key create/import permission (access policy) on '$VaultName'." 2
+    }
+
+    Write-Ok "Key id:   $($vaultKey.Id)"
+    Write-Ok "Key ops:  $($vaultKey.Key.KeyOps -join ', ')"
+    Write-Ok 'Exportable: no — Key Vault never returns private key material for a key object.'
+}
+
+# ---------------------------------------------------------------------------------------------
+# 5. Confirm the imported key matches the certificate (mirrors the service's boot check)
+# ---------------------------------------------------------------------------------------------
+if ($vaultKey -and $certRsa) {
+    Write-Step 'Verifying the vault key matches the certificate'
+
+    $certModulus = $certRsa.ExportParameters($false).Modulus
+    # JWK 'n' and RSAParameters.Modulus are both unsigned big-endian with no leading zero padding,
+    # so a direct byte comparison is valid.
+    $vaultModulus = $vaultKey.Key.N
+
+    $matches = $vaultModulus -and $certModulus.Length -eq $vaultModulus.Length
+    if ($matches) {
+        for ($i = 0; $i -lt $certModulus.Length; $i++) {
+            if ($certModulus[$i] -ne $vaultModulus[$i]) { $matches = $false; break }
+        }
+    }
+
+    if (-not $matches) {
+        Stop-WithError "The imported key's public half does not match '$CerPath'. This should not happen when both come from the same PFX — inspect key '$KeyName' in '$VaultName' before configuring the service." 2
+    }
+    Write-Ok 'Public keys match. The service will accept this CerPath + KeyName pair at boot.'
+}
+
+# ---------------------------------------------------------------------------------------------
+# 6. Register the application and create a client secret
+# ---------------------------------------------------------------------------------------------
+$appId = $null
+$servicePrincipalObjectId = $null
+$clientSecret = $null
+
+if ($PSCmdlet.ParameterSetName -eq 'ExistingApp') {
+    Write-Step "Reusing existing application $ExistingAppId"
+    $app = Get-AzADApplication -ApplicationId $ExistingAppId -ErrorAction SilentlyContinue
+    if (-not $app) { Stop-WithError "No application with appId '$ExistingAppId' in tenant $($context.Tenant.Id)." }
+    $appId = $app.AppId
+
+    $sp = Get-AzADServicePrincipal -ApplicationId $appId -ErrorAction SilentlyContinue
+    if (-not $sp) {
+        Write-Note 'Application has no service principal in this tenant; creating one.'
+        $sp = New-AzADServicePrincipal -ApplicationId $appId
+    }
+    $servicePrincipalObjectId = $sp.Id
+    Write-Ok "Display name: $($app.DisplayName)"
+}
+else {
+    Write-Step "Registering Entra ID application '$AppDisplayName'"
+    if ($PSCmdlet.ShouldProcess($AppDisplayName, 'Register Entra ID application and service principal')) {
+        try {
+            $app = New-AzADApplication -DisplayName $AppDisplayName
+            $appId = $app.AppId
+            Write-Ok "Application (client) id: $appId"
+
+            # The service principal is the security object role assignments target; the application
+            # alone cannot hold one.
+            $sp = New-AzADServicePrincipal -ApplicationId $appId
+            $servicePrincipalObjectId = $sp.Id
+            Write-Ok "Service principal object id: $servicePrincipalObjectId"
+        }
+        catch {
+            Stop-WithError "Application registration failed: $($_.Exception.Message)`nThe signed-in identity needs the 'Application Developer' Entra role (or higher)." 2
+        }
+    }
+}
+
+if ($appId -and $PSCmdlet.ShouldProcess("application $appId", 'Create client secret')) {
+    Write-Step 'Creating a client secret'
+    try {
+        $startDate = Get-Date
+        $credential = New-AzADAppCredential `
+            -ApplicationId $appId `
+            -StartDate $startDate `
+            -EndDate $startDate.AddYears($SecretValidityYears)
+        $clientSecret = $credential.SecretText
+        Write-Ok "Expires: $($startDate.AddYears($SecretValidityYears).ToString('yyyy-MM-dd'))"
+    }
+    catch {
+        Stop-WithError "Client secret creation failed: $($_.Exception.Message)" 2
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+# 7. Grant sign permission on the key
+# ---------------------------------------------------------------------------------------------
+if ($servicePrincipalObjectId) {
+    Write-Step 'Granting permission to sign with the key'
+
+    if ($usesRbac) {
+        $scope = if ($GrantScope -eq 'Key') { "$($vault.ResourceId)/keys/$KeyName" } else { $vault.ResourceId }
+        Write-Note "Role '$script:CryptoUserRole' at scope: $scope"
+        Write-Note "'$script:CryptoUserRole' is the narrowest built-in role granting keys/sign; restricting the key to sign+verify in step 4 is what actually bounds it to signing."
+
+        if ($PSCmdlet.ShouldProcess($scope, "Assign '$script:CryptoUserRole'")) {
+            # A freshly created service principal is not immediately visible to the role-assignment
+            # API ("Principal {id} does not exist in the directory"). Retry rather than fail.
+            $assigned = $false
+            foreach ($attempt in 1..12) {
+                try {
+                    New-AzRoleAssignment -ObjectId $servicePrincipalObjectId `
+                        -RoleDefinitionName $script:CryptoUserRole -Scope $scope -ErrorAction Stop | Out-Null
+                    $assigned = $true
+                    break
+                }
+                catch {
+                    if ($_.Exception.Message -match 'already exists') { $assigned = $true; break }
+                    if ($attempt -eq 12) { Stop-WithError "Role assignment failed after $attempt attempts: $($_.Exception.Message)`nThe signed-in identity needs 'User Access Administrator' or 'Owner' on the vault." 2 }
+                    Write-Note "Directory replication pending (attempt $attempt/12); retrying in 5s."
+                    Start-Sleep -Seconds 5
+                }
+            }
+            if ($assigned) { Write-Ok 'Role assigned.' }
+        }
+    }
+    else {
+        Write-Note 'Access-policy vault: granting key get + sign. This model cannot scope to an individual key.'
+        if ($PSCmdlet.ShouldProcess($VaultName, 'Set key access policy (get, sign)')) {
+            try {
+                Set-AzKeyVaultAccessPolicy -VaultName $VaultName `
+                    -ObjectId $servicePrincipalObjectId -PermissionsToKeys get, sign
+                Write-Ok 'Access policy set.'
+            }
+            catch {
+                Stop-WithError "Setting the access policy failed: $($_.Exception.Message)" 2
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+# 8. Report
+# ---------------------------------------------------------------------------------------------
+if (-not $WhatIfPreference) {
+    $vaultUri = $vault.VaultUri
+    if (-not $vaultUri.EndsWith('/')) { $vaultUri += '/' }
+
+    Write-Host ''
+    Write-Host '─────────────────────────────────────────────────────────────────────────' -ForegroundColor Cyan
+    Write-Host ' Bulk Signer configuration' -ForegroundColor Cyan
+    Write-Host '─────────────────────────────────────────────────────────────────────────' -ForegroundColor Cyan
+    Write-Host @"
+
+"Signing": {
+  "Certificate": {
+    "Source": "AzureKeyVault",
+    "AzureKeyVault": {
+      "Endpoint": "$vaultUri",
+      "AppId": "$appId",
+      "AppSecret": "",
+      "KeyName": "$KeyName",
+      "CerPath": "$CerPath"
+    }
+  }
+}
+
+Supply the secret via environment variable rather than the config file:
+
+  Signing__Certificate__AzureKeyVault__AppSecret
+
+"@
+    Write-Host '─────────────────────────────────────────────────────────────────────────' -ForegroundColor Yellow
+    Write-Host ' Client secret — shown once, not stored anywhere' -ForegroundColor Yellow
+    Write-Host '─────────────────────────────────────────────────────────────────────────' -ForegroundColor Yellow
+    Write-Host ''
+    Write-Host "  $clientSecret"
+    Write-Host ''
+    Write-Host 'Next steps:' -ForegroundColor Cyan
+    Write-Host "  1. Copy the secret above into your secret store or the environment variable now."
+    Write-Host "  2. Place $CerPath where the service account can read it."
+    Write-Host "  3. Start the service. It verifies the certificate/key pair at boot and fails loudly on mismatch."
+    Write-Host "  4. Once signing is confirmed, move $pfxFullPath to offline backup and remove it from this host."
+    Write-Host "     Keep that backup: Key Vault will not return the key, so the PFX is your only recovery path."
+    Write-Host ''
+
+    if ($usesRbac) {
+        Write-Host 'Role assignments can take a minute or two to propagate; an immediate first sign attempt may fail with Forbidden.' -ForegroundColor DarkGray
+    }
+}
+
+exit 0
+```
+
 ---
 
-**Back to:** [Encryption](encryption.md).
+**Back to:** [Encryption](encryption.md) · [Certificates](certificates.md).

@@ -1,14 +1,14 @@
 ---
-sidebar_label: "REST API"
-sidebar_position: 10
+sidebar_label: "Job statistics"
+sidebar_position: 8
 ---
 
-# REST API
+# Job statistics
 
 :::warning Indisponível
 
 Desculpe, este artigo ainda não está disponível no idioma selecionado. Por favor escolha uma das versões disponíveis:
 
-- [English](/en-us/articles/bulk-signer/rest-api)
+- [English](/en-us/articles/bulk-signer/statistics)
 
 :::

@@ -13,6 +13,30 @@ As versões do aplicativo móvel têm o formato `MINOR.PATCH(.BUILD)`
 O terceiro número significa o número do build e não é documentado neste histórico, embora seja visível nas lojas de aplicativo (geralmente com valor `1000`, que denota o build final).
 
 
+## 12.0 (2026-08-04) {#v12-0}
+
+Versão mínima do backend: 1.2.0
+
+### Nova função
+
+PSC-245 Seletor de idioma
+
+### Melhoria
+
+PSC-242 Atualização de SDKs e targets
+
+PSC-243 Mudança na lib de i18n
+
+PSC-244 Melhoria na navegação entre telas
+
+PSC-248 Atualizações de dependências
+
+### Correções de bugs
+
+PSC-249 Correção de requisições desnecessárias na checagem de notificações de certificados
+
+
+
 ## 11.1 (2025-10-01) {#v11-1}
 
 Versão mínima do backend: 1.2.0

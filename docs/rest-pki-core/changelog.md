@@ -7,6 +7,19 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 4.4.3 (2026-08-05) {#v4-4-3}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-820] Suporte a blob storage no Google Cloud Platform (GCP)
+
+* Melhorias
+
+  * [RPNG-822] Registro dos detalhes da exception (message e stack trace) nos spans de erro do OpenTelemetry
+
+
 ### 4.3.4 (2026-08-05) {#v4-3-4}
 
 Atualiza modelo do banco de dados: não

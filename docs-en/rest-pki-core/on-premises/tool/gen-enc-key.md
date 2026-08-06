@@ -19,7 +19,7 @@ dotnet Lacuna.RestPki.Site.dll -- gen-enc-key
 Or, on Docker:
 
 ```sh
-docker run lacunasoftware/restpkicore:4.3 -- gen-enc-key
+docker run lacunasoftware/restpkicore:4.5 -- gen-enc-key
 ```
 
 ## Description

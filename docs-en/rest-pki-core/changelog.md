@@ -7,6 +7,37 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.5.0 (2026-08-06) {#v4-5-0}
+
+Updates database model: yes
+
+* New features
+
+  * [RPNG-688] Rework id-scan document validation into a configurable, per-step pipeline with contextual retry guidance
+
+  * [RPNG-780] Add contextual detail (document number, accepted countries, expected document type) to id-scan failure screens; fix Spanish FaceTec SDK wording
+
+  * [RPNG-786] Add FaceTec attempt debug panels (id-scan data and decision) to the biometrics dashboard
+
+  * [RPNG-803] Add download and on-demand regeneration of the Video Identification result report in the dashboard
+
+* Improvements
+
+  * [RPNG-656] Add an "unlimited" option to subscription and plan transaction-type limits
+
+  * [RPNG-738] Improve accuracy of persisted id-scan document fields by sourcing them from the attempt actually used for acceptance
+
+  * [RPNG-797] Video Identification result report now shows validation results per captured document side
+
+  * [RPNG-798] Add an indicator on the session status API for when a captured document was accepted with a relaxed validation criterion
+
+  * [RPNG-801] Add a per-session option to allow relaxing an id-scan capture check
+
+* Bug fixes
+
+  * [RPNG-809] Transaction-limiting cache duration setting was not applied, always falling back to the default duration
+
+
 ### 4.4.3 (2026-08-05) {#v4-4-3}
 
 Updates database model: no

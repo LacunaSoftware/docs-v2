@@ -7,6 +7,37 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 4.5.0 (2026-08-06) {#v4-5-0}
+
+Atualiza modelo do banco de dados: sim
+
+* Novas funcionalidades
+
+  * [RPNG-688] Reformular a validação de documentos no id-scan em um pipeline configurável por etapas, com dicas contextuais nas telas de nova tentativa
+
+  * [RPNG-780] Adicionar detalhes contextuais (número do documento, países aceitos, tipo de documento esperado) nas telas de falha do id-scan; corrigir textos em espanhol do SDK da FaceTec
+
+  * [RPNG-786] Adicionar painéis de depuração da tentativa FaceTec (dados do id-scan e decisão) ao dashboard de biometria
+
+  * [RPNG-803] Adicionar download e regeneração sob demanda do reporte em PDF da vídeo identificação no dashboard
+
+* Melhorias
+
+  * [RPNG-656] Adicionar opção "ilimitado" aos limites de transação por subscription e por plano
+
+  * [RPNG-738] Melhorar a precisão dos campos do documento persistidos no id-scan, usando a tentativa efetivamente utilizada na aceitação
+
+  * [RPNG-797] Reporte em PDF da vídeo identificação agora mostra os resultados de validação por lado do documento capturado
+
+  * [RPNG-798] Adicionar indicador na API de status da sessão para quando um documento capturado for aceito com um critério de validação flexibilizado
+
+  * [RPNG-801] Adicionar opção por sessão para permitir a flexibilização de uma verificação de captura no id-scan
+
+* Correções de bugs
+
+  * [RPNG-809] Configuração da duração do cache de limite de transações não era aplicada, sempre utilizando o valor padrão
+
+
 ### 4.4.3 (2026-08-05) {#v4-4-3}
 
 Atualiza modelo do banco de dados: não

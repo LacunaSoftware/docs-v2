@@ -51,7 +51,7 @@ Updates database model: no
   * [RPNG-822] Record exception details (message and stack trace) on OpenTelemetry error spans
 
 
-### 4.3.4 (2026-08-05) {#v4-3-4}
+### 4.3.4 (2026-08-05) [patch] {#v4-3-4}
 
 Updates database model: no
 
@@ -60,7 +60,7 @@ Updates database model: no
   * [RPNG-822] Record exception details (message and stack trace) on OpenTelemetry error spans
 
 
-### 4.3.3 (2026-08-05) {#v4-3-3}
+### 4.3.3 (2026-08-05) [patch] {#v4-3-3}
 
 Updates database model: no
 

@@ -13,7 +13,7 @@ Atualiza modelo do banco de dados: sim
 
 * Novas funcionalidades
 
-  * [RPNG-369] Concluir a migração do SDK da FaceTec para a versão 10, iniciada em versões anteriores
+  * [RPNG-369] Atualização major do SDK de captura da FaceTec (v10)
 
   * [RPNG-688] Reformular a validação de documentos no id-scan em um pipeline configurável por etapas, com dicas contextuais nas telas de nova tentativa
 

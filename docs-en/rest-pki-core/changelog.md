@@ -13,7 +13,7 @@ Updates database model: yes
 
 * New features
 
-  * [RPNG-369] Complete the migration to FaceTec SDK v10, started in earlier versions
+  * [RPNG-369] Major update to the FaceTec capture SDK (v10)
 
   * [RPNG-688] Rework id-scan document validation into a configurable, per-step pipeline with contextual retry guidance
 

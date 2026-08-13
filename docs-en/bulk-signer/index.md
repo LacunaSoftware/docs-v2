@@ -18,12 +18,21 @@ and telemetry are each opt-in.
 ## Features
 
 - **Signature formats.** CAdES (`.p7m`), PAdES (PDF), and XAdES (XML) — all under the ICP-Brasil
-  **ADR-Básica** policy by default.
+  **ADR-Básica** policy by default. Per-profile output naming keeps the original extension
+  (`remessa.signed.rem`) or writes PEM-armored CAdES where a downstream system requires it.
 - **Certificate sources.** PKCS#12 files (`.pfx` / `.p12`), PKCS#11 HSMs and smart cards, the
   Windows certificate store, and **Azure Key Vault** (the key stays in the vault and signs remotely).
-  The source is chosen entirely through configuration, globally or per signing profile.
+  The `.pfx` or `.cer` can be read from **Azure Blob Storage** instead of local disk. The source is
+  chosen entirely through configuration, globally or per signing profile.
 - **Two ingestion paths.** A watched input folder (with a stability detector so half-written files
   are not picked up early) and a `POST /api/files` endpoint for programmatic clients.
+- **CNAB240 payment files.** Opt-in per profile: parse a Banco do Brasil remessa, refuse to sign one
+  that is not compliant or whose payment dates have passed, and show an operator the total, the
+  payer and every individual payment.
+- **Approval gate.** Park a payment file on a quorum of named approvers before any signature exists.
+  One rejection is a veto; approvals are bound to the file's bytes, and the rule is frozen onto the
+  job so editing configuration can never release a parked file. Approvers get their own queue, with
+  batch approval and an Excel export.
 - **Recoverable pipeline.** Jobs flow through a durable queue with pause/resume that survives a
   restart. If the service is stopped mid-flight, a startup recovery sweep moves any interrupted job
   aside so nothing is silently lost.
@@ -31,31 +40,41 @@ and telemetry are each opt-in.
   when enabled. Ships with reference Python and PowerShell decryption scripts.
 - **Lacuna Signer integration (per profile).** Route a folder to [Lacuna Signer](https://www.lacunasoftware.com/)
   for human signing instead of signing with a host-held certificate.
-- **Hybrid authentication.** A single API key backs both the operator dashboard (via a session
-  cookie) and programmatic clients (via the `X-API-Key` header).
-- **Operator dashboard.** A web console with live status, job history, retry/cancel/rescan actions,
-  a recent-exception viewer, and an audit trail.
+- **Authentication, two ways.** A single API key backs both the operator dashboard (via a session
+  cookie) and programmatic clients (via the `X-API-Key` header) — or turn on optional **Microsoft
+  Entra ID** sign-in with `Administrator` and `Approver` app roles, leaving the REST API key
+  untouched.
+- **Operator dashboard, in English or Brazilian Portuguese.** A web console with live status, job
+  history, retry/cancel/rescan actions, a recent-exception viewer, and an audit trail. The language
+  is the reader's per-browser choice, not a server setting.
+- **Storage and store, local or in Azure.** The work tree can stay on local disk or live in an
+  **Azure Files** share; the operational store can stay in SQLite or move to **SQL Server / Azure
+  SQL** under your own backup and DR regime. The two choices are independent.
 - **Performance visibility.** A per-stage timing panel (queue wait, signing, verification, output)
   with throughput and a Local vs Remote split, plus optional Azure Application Insights export.
 - **Observability.** Structured logs with automatic secret redaction, a Prometheus metrics
   endpoint, and an RFC 9457 `ProblemDetails` error envelope with stable machine-readable codes.
-- **Per-IP rate limiting.** Configurable fixed-window limits on the upload and action endpoints.
+- **Per-IP rate limiting.** Configurable fixed-window limits on the upload, action, approval and
+  export endpoints.
 - **Multi-target deployment.** The same service runs as a Linux systemd unit, a Windows Service, a
   Docker container, or a foreground console process.
 
 ## How it works
 
 ```
-   input/ folder ─┐
-                  ├─▶ Queue ─▶ Sign ─▶ Verify ─┬─▶ output/        (encryption off)
-   POST /api/files ┘                           └─▶ output/*.enc   (encryption on)
-                                                  │
-                                        on failure └─▶ error/
+  input/ folder ──┐
+                  ├──▶ Queue ──▶ Claim ──▶ [gates] ──▶ Sign ──▶ Verify ──┬──▶ output/
+  POST /api/files ┘                                                      │    (output/*.enc
+                                                            on failure   │     when encryption
+                                                                         └──▶ error/    is on)
+
+  [gates], both opt-in per signing profile and skipped entirely when unconfigured:
+      CNAB240 parse   — refuse a non-compliant remessa, or one whose payment dates have passed
+      Approval gate   — park in AwaitingApproval until a quorum of named people approves
 ```
 
-Every step is recorded in the operational database (job history + system events) and in the
-structured log file. The dashboard and the REST API read the same data and trigger the same
-actions.
+Every step is recorded in the operational store (job history + system events) and in the structured
+log file. The dashboard and the REST API read the same data and trigger the same actions.
 
 ## Quickstart — Docker
 
@@ -97,9 +116,11 @@ For Linux systemd, Windows Service, and foreground installs, see **[Installation
 | The REST surface and the `code`-tagged error envelope | [REST API](rest-api.md) |
 | Post-signing encryption (BSENC v1) | [Encryption](encryption.md) |
 | Routing a folder through Lacuna Signer for human signing | [Lacuna Signer integration](lacuna-signer.md) |
+| Parsing and validating Banco do Brasil payment files | [CNAB240 payment files](cnab240.md) |
+| Parking a payment file on a quorum of approvers | [Approvals](approvals.md) |
 | Retention defaults and what is (and is not) auto-pruned today | [Retention](retention.md) |
 | Failure modes and diagnosis | [Troubleshooting](troubleshooting.md) |
-| Reference scripts — decrypt (Python + PowerShell) and Key Vault provisioning | [Samples](samples.md) |
+| Reference scripts — decrypt, Key Vault provisioning, Entra app registration | [Samples](samples.md) |
 
 When the service is running, a live OpenAPI reference is served at `/scalar/v1`.
 
@@ -114,3 +135,7 @@ When the service is running, a live OpenAPI reference is served at `/scalar/v1`.
 | Keeping the signing key off the host | [Certificates](certificates.md#source--azurekeyvault) → [Samples](samples.md) → [Security](security.md) |
 | Enabling encryption | [Encryption](encryption.md) → [Security](security.md) → [Samples](samples.md) |
 | Routing a folder through Lacuna Signer (human signing) | [Lacuna Signer integration](lacuna-signer.md) → [Configuration](configuration.md) → [Operations](operations.md) |
+| Signing bank payment files | [CNAB240 payment files](cnab240.md) → [Approvals](approvals.md) → [Security](security.md) |
+| Putting an approval step in front of the signer | [Approvals](approvals.md) → [Configuration](configuration.md#signingprofilesapproval--the-approval-gate) → [Security](security.md) |
+| Signing in with organizational accounts | [Installation](installation.md#microsoft-entra-id-sign-in-optional) → [Configuration](configuration.md#authentraid--optional-microsoft-entra-id-sign-in) → [Security](security.md) |
+| Running with no durable local disk | [Configuration](configuration.md#storageprovider--storageazurefiles--the-work-share) → [Installation](installation.md#choosing-where-the-operational-store-lives) → [Certificates](certificates.md#reading-the-file-from-a-blob) |

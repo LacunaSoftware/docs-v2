@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Samples — scripts"
-sidebar_position: 15
+sidebar_position: 17
 ---
 
 # Samples — scripts
@@ -10,6 +10,7 @@ sidebar_position: 15
 | [`decrypt-bsenc.py`](#python-3--decrypt-bsencpy) | Decrypt a BSENC v1 envelope — Python 3 |
 | [`Decrypt-Bsenc.ps1`](#powershell-7--decrypt-bsencps1) | Decrypt a BSENC v1 envelope — PowerShell 7+ |
 | [`Import-PfxToKeyVault.ps1`](#powershell-7--import-pfxtokeyvaultps1) | Provision a PFX for the Azure Key Vault certificate source |
+| [`New-BulkSignerEntraApp.ps1`](#powershell-7--new-bulksignerentraappps1) | Provision the Microsoft Entra ID app registration for the optional sign-in mode |
 
 ## Decrypting BSENC envelopes
 
@@ -912,6 +913,56 @@ Supply the secret via environment variable rather than the config file:
 exit 0
 ```
 
+## PowerShell 7+ — `New-BulkSignerEntraApp.ps1`
+
+Ships in the deployment package alongside the two above. It automates steps 1, 2 and 4 of the
+[Microsoft Entra ID walkthrough](installation.md#microsoft-entra-id-sign-in-optional) through Microsoft
+Graph, creates the client secret, and prints a ready-to-paste configuration block. **Step 3 — assigning
+people to the roles — stays manual**, in the Entra admin center under Enterprise applications → Users
+and groups.
+
+**Prerequisites:**
+
+```powershell
+Install-Module Microsoft.Graph.Applications -Scope CurrentUser
+```
+
+plus an account able to consent to the `Application.ReadWrite.All` delegated scope (Application
+Administrator or Global Administrator).
+
+```bash
+pwsh ./New-BulkSignerEntraApp.ps1 -BaseUrl https://signer.example.com
+```
+
+| Parameter | Required | Default | Notes |
+|-----------|----------|---------|-------|
+| `-BaseUrl` | yes | — | The public origin the dashboard is served from. The redirect URI is derived from it as `<BaseUrl>/signin-oidc`. Must be an absolute `http(s)` origin. |
+| `-DisplayName` | no | `Lacuna Bulk Signer` | Display name for the app registration. |
+| `-SecretValidityMonths` | no | `12` | Client secret lifetime, 1–24. |
+
+What it creates:
+
+- A **single-tenant** application with the `openid` / `profile` / `email` delegated permissions the
+  OIDC handler requests. The `email` claim is also declared as an optional ID-token claim, because
+  approver pool matching binds on it and there is no UPN fallback.
+- The **two app roles** with the exact values the host matches on — `Administrator` and `Approver`.
+- The **enterprise application** with *Assignment required = Yes*, so unassigned accounts fail at
+  Microsoft's door. The host enforces role presence regardless.
+
+It **refuses to create a duplicate**: a second registration with the same display name is almost always
+a re-run, and two apps carrying the same roles is a management trap rather than redundancy. Pass a
+different `-DisplayName`, or delete the existing registration first.
+
+:::danger The client secret is displayed once, by this script
+Store it as the `Auth__EntraId__ClientSecret` environment variable (recommended) or in a non-committed
+`appsettings.Production.json` — never in source control. See
+[Security](security.md#authentraidclientsecret) for where each deployment target should keep it.
+
+An expired secret fails at sign-in time with an `AADSTS` error, not at boot. Rotate it before it
+expires.
+:::
+
 ---
 
-**Back to:** [Encryption](encryption.md) · [Certificates](certificates.md).
+**Back to:** [Encryption](encryption.md) · [Certificates](certificates.md) ·
+[Installation](installation.md).

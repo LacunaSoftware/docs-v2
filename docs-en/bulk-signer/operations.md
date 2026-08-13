@@ -54,44 +54,251 @@ Both file and console output pass through the secret-redaction pipeline. See
 
 ## The job state machine
 
-Seven states: one terminal "good" outcome (`Completed`), two terminal "bad" outcomes (`Failed`,
-`Canceled`). `AwaitingSigner` is only visited by jobs whose profile uses `Method = LacunaSigner` (see
-[Lacuna Signer integration](lacuna-signer.md)).
+Eight states: one terminal "good" outcome (`Completed`), two terminal "bad" outcomes (`Failed`,
+`Canceled`). Two of the eight are **waits, and both are opt-in**: `AwaitingSigner` is only visited by
+jobs whose profile uses `Method = LacunaSigner` (see
+[Lacuna Signer integration](lacuna-signer.md)), and `AwaitingApproval` only by jobs whose profile
+carries an [`Approval` block](approvals.md).
 
 ```
-                ┌─────────┐  operator cancel   ┌──────────┐
-                │ Queued  ├───────────────────▶│ Canceled │ (terminal)
-                └────┬────┘                     └──────────┘
-        worker pickup│
-                     ▼
-              ┌────────────┐  local sign ok   ┌───────────┐  verify ok   ┌───────────┐
-              │ Processing ├─────────────────▶│ Verifying ├─────────────▶│ Completed │ (terminal)
-              └─────┬──────┘                  └─────┬─────┘              └───────────┘
-   dispatch to      │                               │ verify fail
-   Lacuna Signer    │                               ▼
-                    ▼                          ┌────────┐
-            ┌────────────────┐  concluded →    │ Failed │ (terminal)
-            │ AwaitingSigner ├── bytes ─────────▶ (Verifying) ...
-            └────────────────┘  refused/expired/
-                                 timeout → Failed
+                  ┌─────────┐  operator cancel   ┌──────────┐
+                  │ Queued  ├───────────────────▶│ Canceled │ (terminal)
+                  └────┬────┘                    └──────────┘
+          worker pickup│
+                       ▼
+                ┌────────────┐  local sign ok   ┌───────────┐  verify ok   ┌───────────┐
+                │ Processing ├─────────────────▶│ Verifying ├─────────────▶│ Completed │
+                └─┬────────┬─┘                  └─────┬─────┘              └───────────┘
+                  │        │                          │ verify fail
+   profile requires│        │dispatch to               ▼
+   approval        │        │Lacuna Signer         ┌────────┐
+                   ▼        ▼                      │ Failed │ (terminal)
+    ┌──────────────────┐  ┌────────────────┐       └────────┘
+    │ AwaitingApproval │  │ AwaitingSigner │
+    └──────────────────┘  └────────────────┘
+        │         │           │        │
+        │         │           │        └─ refused / expired / timeout ─▶ Failed
+        │         │           └─ concluded → bytes downloaded ─────────▶ Verifying
+        │         └─ rejected / operator cancel / budget expired ──────▶ Canceled
+        └─ quorum met ──▶ back to Queued (re-enters the ordinary queue)
 
    Failed ──operator retry──▶ a NEW Queued job (ParentJobId set; the failed job stays Failed)
 ```
 
 Key rules:
 
-- **Cancel is valid only from `Queued` or `AwaitingSigner`.** In-flight local jobs (`Processing`,
-  `Verifying`) cannot be canceled — they run to natural completion or failure. The cancel endpoint
-  returns `409` with `code = "job.not-queued"` against an in-flight local job. For LacunaSigner
-  profiles, cancelling an `AwaitingSigner` job also makes a best-effort remote-cancel call *after*
-  the local `Canceled` transition has committed — a remote failure does **not** roll back the local
-  cancel. See [Cancel semantics](lacuna-signer.md#cancel-semantics).
+- **`AwaitingApproval` has exactly three transitions**, and `Failed` is deliberately not one of them.
+  Nothing holds a parked job — no worker, no slot, no remote service — so nothing is in a position to
+  fail it. It is released back to `Queued`, cancelled, or it waits. Three different things arrive on
+  that one cancel edge: an approver's **rejection**, an operator's cancel, and — on a profile that sets
+  `Approval.ExpiresAfter` — the wait budget running out. All three mean "this file will not be signed,
+  deliberately"; the audit trail is what tells them apart.
+- **Release re-enters the ordinary queue** rather than resuming in place, so a released job passes
+  through the same claim and the same pre-sign gates as any other — including the
+  [payment-date staleness guard](cnab240.md#payment-dates-that-have-passed), which is exactly the check
+  an open-ended human delay needs re-run. It resumes on the copy it parked with, and the staged bytes
+  are re-hashed immediately before the signature exists; a mismatch fails the job with
+  `approval.content-changed`. See [Approvals](approvals.md#what-is-approved).
+- **Cancel is valid only from `Queued`, `AwaitingSigner` or `AwaitingApproval`.** In-flight local jobs
+  (`Processing`, `Verifying`) cannot be canceled — they run to natural completion or failure. The
+  cancel endpoint returns `409` with `code = "job.not-queued"` against an in-flight local job. For
+  LacunaSigner profiles, cancelling an `AwaitingSigner` job also makes a best-effort remote-cancel call
+  *after* the local `Canceled` transition has committed — a remote failure does **not** roll back the
+  local cancel. See [Cancel semantics](lacuna-signer.md#cancel-semantics).
 - **`Canceled` is terminal.** Files for canceled jobs remain in `input/`; the watcher honors recent
   cancellations and will not auto-resurrect them. Operator-driven actions (Upload, Retry, Rescan)
   will re-enqueue.
 - **`Failed → Queued` is not a transition — it is a new job.** Retry creates a fresh job with
   `ParentJobId = (the failed job).Id`, copying the original input. The failed job stays `Failed`
   forever for audit purposes.
+
+## When an input file changes mid-job
+
+A producer sometimes re-sends a file under the same name while Bulk Signer is still working on the
+previous one — a corrected amount, a re-exported batch, an ERP retry. When that happens **the
+correction is not ingested**: the watcher sees an active job already holding that path and refuses the
+duplicate enqueue, which is the same rule that stops one file being enqueued twice.
+
+What the pipeline does about it is refuse to destroy it. Before deleting the original input, the worker
+compares the file against what was recorded while it was being copied into `processing/` — length and
+SHA-256 always, plus the storage service's entity tag where the file is on a share. If they match, the
+input is deleted as always. If they do not, **the file is left exactly where it is** and the divergence
+is recorded in three places:
+
+- an `InputDiverged` operational event, carrying the code `job.input-diverged`;
+- an entry in the job's own history, visible on `/jobs/{id}`, carrying the same code;
+- the `bulksigner_inputs_diverged_total{profile}` counter.
+
+:::note A divergence is not a signing failure
+The signature is valid, the artifact is in `output/`, and the job completes normally — what was signed
+is the file that was staged and, where an approval gate applies, approved. Nothing about the job needs
+fixing.
+:::
+
+**The rewritten file is then handed back to its watched folder and signed as a job of its own.** The
+watcher's change event fired *during* the job's flight and was correctly dropped, and no further event
+will ever arrive for a file that is simply sitting there — so the pipeline hands the path back
+explicitly, **after** the job reaches a terminal status. It re-enters through the watcher's *ordinary*
+candidate route, so the stability detector, the folder's ignore lists and its profile all apply exactly
+as they do to any arrival.
+
+Two cases still need you. The hand-back is dropped, and the console says so, when:
+
+- **The job did not come from a watched folder** — a REST upload has no watcher that owns its path.
+  Re-submit the file if it should be signed.
+- **No watcher is running for that folder** — either the process is still booting (which resolves
+  itself moments later), or the folder's watcher stopped after repeated failures. Check the Input page;
+  a **Rescan** ingests the folder's contents once the underlying problem is fixed.
+
+**What to check when you see a divergence:**
+
+1. **Was the correction meant to replace something already signed?** The first signature covers the
+   superseded content, and it is valid; if a downstream consumer must not act on it, that is a business
+   decision to make explicitly. Note that the second artifact is named from the input file's name, so
+   it is named identically to the first: if you have not yet collected the first from `output/`, the
+   second job fails on promote with `Output already exists at … resolve manually before re-queueing`.
+   Move or collect the first, then retry the job.
+2. **Is the producer re-sending routinely?** A count that tracks the parked-job rate means files are
+   being re-exported during approval windows, and each one costs a duplicate signature and a second
+   trip through the gate. The fix is on the producer's side — write each remessa under a unique name.
+3. **Was the file merely unreadable, or held?** A producer holding its own file open for write is
+   retried a few times and then reported as a divergence (`unreadable: …`). So is a file another
+   process has taken an exclusive hold on (`held by another lease: …`). In both cases nothing is
+   forced. A **hold** that never clears usually means a second Bulk Signer instance is watching the
+   same folder — a configuration to fix rather than a producer to wait for.
+
+The window this closes is widest on the flows that put a human in the loop. An ordinary local job
+stages and deletes seconds apart; a job in `AwaitingApproval` with no `ExpiresAfter` waits
+indefinitely.
+
+### The two holds on an input file
+
+Bulk Signer takes an exclusive hold on a file in your input folder **twice, briefly, and never in
+between**:
+
+1. **While it stages the file.** Taken when the pipeline commits to copying, released as soon as the
+   copy is done. Under it, nothing can write to the file between the read that copies it and the
+   reading of the identifier that will later identify it.
+2. **While it deletes the file.** A separate hold, so that on a share the comparison and the delete are
+   a single act.
+
+**Nothing holds your file while a job waits on a human.** A job parked in `AwaitingApproval` or
+`AwaitingSigner` keeps an exclusive hold on its own staged copy in `processing/`, for as long as the
+wait takes — but not on the file in your input folder, because a quorum can take days and your ERP
+writes to that folder.
+
+**A hold is never broken and a file is never force-deleted.** If something else holds your input file
+when Bulk Signer wants to stage it, the job **fails** with a message naming the file. If something else
+holds it at deletion time, the deletion is deferred, retried, and then reported as a divergence.
+
+:::info What a hold is worth depends on where the folder is
+On an **Azure Files** input folder the hold is a real service-side lease: it denies writes and deletes
+to every other client of that share, including another Bulk Signer instance. On a **local** input
+folder it is Bulk Signer's own bookkeeping and excludes nothing outside this process — a filesystem
+cannot express "deny writes to everyone but admit my own delete". What protects a local input is the
+comparison rather than the hold, and **the comparison is equally strong on both**.
+:::
+
+## What changes day to day on a share
+
+`Storage:Provider = AzureFiles`, or a single input folder that names it, changes four things. Pause,
+cancel, retry, rescan, the download button, the job state machine, the approval gate, encryption and
+what an approver is shown all behave identically — this feature moves bytes and nothing else.
+
+**1. Ingestion is on a timer, so it is no longer near-instant.** A local folder is event-driven: the OS
+reports a new file within milliseconds. Azure Files publishes no change notifications, so a remote
+folder is **enumerated on its poll interval**. Worst case from a producer closing a file to a job
+appearing in `Queued` is the poll interval (30 s by default) plus the stability window plus one round
+trip — **about half a minute on the defaults**, and up to a full interval on a bad tick.
+
+- It is per folder, so a payroll folder can poll every 10 s while an archive folder polls every 5
+  minutes.
+- The floor is 5 s, and the trade is money: every tick is a listing transaction whether or not anything
+  arrived. A folder polled at 5 s costs six times what the same folder costs at 30 s, idle or not.
+- Two paths are **not** on the timer and stay immediate: `POST /api/files` and `POST /api/rescan`. If
+  somebody needs a file signed *now*, rescan that folder rather than lowering the interval for ever.
+
+Do not read a slow first job as a broken folder. Read the Input page: a folder that is `Running` with
+no error and a recent scan is doing exactly this.
+
+**2. A quiet folder and an unreachable one look identical from the share, so read the surfaces
+instead.** A folder that cannot be listed, cannot be opened, or whose credential has been refused shows
+up on the Input page, in `GET /api/folders` (`status`, `lastError`) and in `GET /api/ready` — it is
+never reported as a folder that simply has nothing new. **The one to alert on is `/api/ready`**: a
+degraded folder can otherwise sit unnoticed for as long as nobody opens the dashboard, and payment
+files piling up unsigned is a phone call rather than a page.
+
+**3. Inspecting files means a storage client, not a shell.** `error/<jobid>/`, `processing/<jobid>/`
+and `output/` are in the share, so wherever this documentation says "look at the file in `error/`" it
+means Azure Storage Explorer, `az storage file download`, or a mount on your own workstation. A live
+job's staged copy carries an infinite lease, so it refuses writes and deletes from everything including
+your own tooling. `logs/` and the SQLite database are **not** in the share and never can be.
+
+**4. The share is marked, and the mark is read at boot.** See the next section.
+
+## When another instance appears to own the work share
+
+**This section applies only when `Storage:Provider = AzureFiles`.** A local work tree is not shared
+storage — two instances pointed at one host's `data/` are the same instance twice. Local deployments
+have no marker, no row and no warning.
+
+A work share is shared storage, which invites the assumption that two hosts may now serve one
+deployment. **They may not** — and moving the operational store to SQL Server does not change that,
+because none of the blockers are in the store:
+
+- the pipeline's **pause flag is a singleton row** read each poll iteration by *the* worker, so two
+  workers read the same row and both act on it;
+- the **watchers are per-instance and event-driven**, so both see a file arrive and both enqueue it,
+  with the loser recording an enqueue failure against that folder;
+- the **statistics are in memory**, so each instance presents its own partial view as the whole.
+
+**How the mark works.** The instance takes an exclusive, non-expiring lease on
+`bulksigner-instance.json`, a small file beside `processing/`, `output/` and `error/`. It records the
+host name, the process id and the moment of the claim. A graceful shutdown gives the lease up; the file
+stays behind as the record of who ran last.
+
+**What happens when the marker is already held.** Startup is never blocked. Instead:
+
+1. a `Critical` entry lands in the log naming the prior holder's **host and process id**;
+2. the same line is printed to stdout, and the banner's `work share owner` row reads
+   `CONTENDED at startup by …`;
+3. the System page shows it above the storage paths;
+4. `/api/ready` returns **503** with a red `work-share-owner` check;
+5. the lease is broken, taken, and the boot carries on.
+
+**Why a warning and not a refusal.** A lease lives on the storage service, not in the process that took
+it — so a crash, a `docker kill`, a power cut or an OOM leaves the marker held by a process that no
+longer exists. Refusing to start would turn every one of those into a manual recovery in the middle of
+the night. This product cannot tell a dead holder from a live sibling, so it hands you the two facts
+that can, and keeps signing.
+
+**What to do when you see it.** Ask whether the named host and process are still running.
+
+- **It is this host, and that process is gone.** Your previous instance did not shut down gracefully.
+  Nothing is wrong now.
+- **It is a different host, or that process is alive.** You have two instances on one work share. Stop
+  one of them, then decide which database is authoritative.
+
+:::note The readiness row does not clear by itself, and that is deliberate
+The marker is claimed once at boot; nothing re-reads it, because there is no fresher answer to be had —
+this instance holds it now. So an ungraceful stop costs one red readiness cycle, and the boot after a
+graceful stop is green again.
+:::
+
+**What actually diverges.** Two instances signing from one work share do **not** sign the same file
+twice: the per-file lease on an input file is refused rather than broken. What diverges is everything
+in each instance's own store:
+
+- **Approval state** — a job parked at the gate exists in one instance's store only. The other knows
+  nothing about it, its approvers, or the quorum it is waiting on. This is the one worth acting on
+  quickly.
+- **Pause state** — `POST /api/pipeline/pause` holds one instance. The other keeps signing.
+- **Statistics and job history** — each instance reports its own, so neither dashboard is the whole
+  picture.
+
+**If the marker cannot be claimed at all** — an unreachable share, a rotated credential — the row reads
+`not claimed cleanly at startup: …` and readiness goes red for that reason instead. Whether another
+instance holds it is then simply unknown, and unknown is not reported as the reassuring answer.
 
 ## The signing pipeline
 

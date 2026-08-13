@@ -86,6 +86,21 @@ To see how long documents are parked awaiting signature, use the `AwaitingSigner
 dashboard, the per-job `AwaitingSignerSince` timestamp, or the `bulksigner_jobs_awaiting_signer`
 metric — see [Lacuna Signer integration](lacuna-signer.md).
 
+### Why the approval wait is excluded too
+
+The same reasoning, for the same reason. An [approval](approvals.md) wait is measured in hours of
+somebody's attention, and folding it into the queue/sign/verify averages would swamp every number with
+a quantity the pipeline neither caused nor can improve.
+
+Concretely: **parking discards the job's in-flight timing entry**, and a released job opens a fresh one
+whose queue wait is measured from the moment it re-entered the queue — not from when the file arrived.
+So a job that waited two days for a quorum and then signed in 400 ms contributes a 400 ms job, which is
+the honest reading of what the pipeline did.
+
+To see how long jobs are parked, use `bulksigner_jobs_awaiting_approval`, or the `parkedSince` field
+on `GET /api/jobs/{id}` — that field is **not cleared** when the job leaves `AwaitingApproval`, which
+is what makes it usable by a stalled-approval monitor.
+
 ## Using the statistics to diagnose slow processing
 
 Read the stage split to localise a slowdown:

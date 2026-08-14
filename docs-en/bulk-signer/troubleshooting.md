@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Troubleshooting"
-sidebar_position: 14
+sidebar_position: 16
 ---
 
 # Troubleshooting
@@ -141,9 +141,73 @@ license.
 
 | Failed probe | Where to look |
 |--------------|---------------|
-| `db` | Is the SQLite path under `Storage:Root` writable by the service account? Did the migration succeed? Check the bootstrap log. |
-| `input` | Does `data/input/` exist? Is the service account allowed to enumerate it? |
+| `database` | Under `Sqlite`: is the path under `Storage:Root` writable by the service account? Under `SqlServer`: is the server reachable, and did the boot probe answer? The check's detail names the store it checked. |
+| `input-folder:<name>` | Does the folder exist? Is the service account allowed to enumerate it? Strict semantics — any missing or `Stopped` folder fails the whole response. |
+| `storage-share:<account>/<share>` | Remote work share only. Credential, network reach, or the role assignment's scope string — see [Security](security.md#azure-files-storage-credentials). |
+| `work-share-owner` | Remote work share only. Another instance held the marker at startup, or the claim could not be made. See below. |
 | `license` | Was the PKI license loaded? The fingerprint is in the ready-summary banner; missing means the license string was rejected at boot. |
+
+### Startup fails with `Signing:Profiles[N].Approval …`
+
+**Symptom.** The host refuses to start with a message naming an approval key.
+
+**Root causes**, all refused before the first job runs:
+
+| Message names | Fix |
+|---------------|-----|
+| `Approval` without `CheckCNAB240` | Add `"CheckCNAB240": true` to the same profile. An approver who cannot be shown the amount is not approving anything meaningful. |
+| An empty `Approvers` pool | The pool is required and non-empty when `Approval` is present. |
+| `MinimumApprovers` below 1 or larger than the pool | A quorum bigger than the pool can never be reached, so every job would park forever. |
+| A malformed email, or the same email twice | One human in two pool slots could satisfy a quorum of two alone. |
+| A CPF whose check digits do not match | A typo names a different legal person, and the resulting audit row looks exactly as authoritative as a correct one. |
+| A non-positive `ExpiresAfter` | Use the `d.hh:mm:ss` form, e.g. `"2.00:00:00"`. |
+
+### Startup warns `has an approval wait budget of …`, or a parked job's deadline is weeks away
+
+**Symptom.** The banner warns about a long wait budget, or a job's decide-by deadline is much further
+out than intended.
+
+**Root cause.** The TimeSpan spelling. A three-component value is `hh:mm:ss` only while the first
+number is 23 or less; at 24 and above .NET reads it as **days**, so `"48:00:00"` is forty-eight *days*.
+
+**Fix.** Write the days component: `"2.00:00:00"`. Boot is the only moment this is catchable — every
+other surface shows the deadline once a job has already parked under it, and the budget is frozen onto
+those jobs. Cancel and re-run anything already parked under the wrong window.
+
+### Startup is refused because both a path and a blob are configured
+
+**Symptom.** Boot fails saying `Path`/`CerPath` and `Blob` are mutually exclusive — or that neither is
+set.
+
+**Fix.** Exactly one of the two. See [Certificates](certificates.md#reading-the-file-from-a-blob).
+
+### Startup fails with an Azure Files configuration message
+
+**Symptom.** Boot fails naming a `Storage:AzureFiles` or `Storage:Inputs[N]` key.
+
+**Root causes.** An unrecognised provider or credential mode; a partial credential block for the chosen
+mode; an NFS share (SMB only); an `azurefiles://` path in `Storage:Root`, `Logging:File:Path` or — under
+`Database:Provider = Sqlite` — `ConnectionStrings:Default`; a backslash in a remote folder's `Path`;
+`Directory` written on an input folder; an `AzureFiles` folder that resolves to no poll interval; or an
+input folder whose path collides with one of the work roots (`output`, or `prod/output` under a
+`Directory` prefix).
+
+That last one is refused because it would otherwise delete one signed artifact per iteration while
+reporting every job `Completed`.
+
+### The share probe reports a share as unreachable at startup
+
+**Symptom.** The banner reads `azure shares = 1 of 2 reachable`, `/api/ready` is red on a
+`storage-share:` row, and the host started anyway.
+
+**Root cause.** Credential, network reach, or role scope. The most common is the **scope string**: an
+assignment built with the management-plane spelling `shares` instead of the data-plane `fileshares`
+binds without complaint and grants nothing, then fails as `AuthorizationPermissionMismatch`.
+
+**Fix.** Compare the scope string before rotating anything, and confirm the identity holds
+`Storage File Data Privileged Contributor` — a read-only role is **not** enough even for an input
+folder. The host coming up degraded rather than refusing to start is deliberate: a share down at 03:00
+must not turn a restart into a service that will not start.
 
 ## Authentication fails
 
@@ -179,6 +243,50 @@ plain HTTP.
 
 **Fix.** Ensure the reverse proxy forwards `Set-Cookie` and `Cookie` headers unmodified. If
 terminating TLS at the proxy, set `X-Forwarded-Proto: https` so the app marks the cookie `Secure`.
+
+### Startup fails with `Auth:EntraId:… is required when the Auth:EntraId section is present`
+
+**Root cause.** The section is **presence-gated** — writing it makes all three keys required. "Present
+but empty" does not mean *off*.
+
+**Fix.** Supply the missing key, or remove the whole `Auth:EntraId` section to go back to API-key
+sign-in.
+
+### Entra sign-in fails at Microsoft with `AADSTS50011` (redirect URI mismatch)
+
+**Root cause.** The app registration's redirect URI does not match the host's callback.
+
+**Fix.** Register a **Web** redirect URI of exactly `https://<your-host>/signin-oidc` — scheme, host,
+port and path all have to match what the browser actually reaches.
+
+### Entra sign-in succeeds but lands on `/access-denied`
+
+**Root cause.** The account authenticated but carries **neither app role**. The app enforces role
+presence regardless of tenant configuration.
+
+**Fix.** Assign `Administrator` or `Approver` (or both) in the enterprise application. The role values
+in the manifest must match those strings exactly. There is no security-group mapping, deliberately.
+
+### An Entra `Approver` signs in but the portal is empty
+
+**Root cause.** The role opens the door; the **frozen pool** still decides which jobs the person sees,
+matched by the email their directory asserts. Their address is in no pool.
+
+**Fix.** Compare the address in the profile's `Approvers` list against the account's mail attribute.
+For **guest accounts**, make sure the mail attribute carries the business address configured in the
+pool — the mangled `#EXT#` UPN is deliberately not used as a fallback. An account whose token carries
+no email claim at all is refused outright with a page that says so.
+
+### After enabling the Entra mode, operators are logged out and `/api/auth/login` stops working
+
+**Not a fault.** Turning the mode on retires every API-key-minted browser session at once, and a POST
+to `/api/auth/login` issues no cookie even for a correct key — off, not hidden. Plan the cutover as a
+sign-everyone-out. REST clients using `X-API-Key` are unaffected.
+
+### Signing out and back in happens instantly, without a password prompt
+
+**Not a fault.** Sign-out is local-only: it clears Bulk Signer's session and deliberately does not end
+the person's Microsoft session. That is normal SSO behaviour.
 
 ## Signing fails
 
@@ -350,6 +458,127 @@ moved to `error/<jobid>/`.
 **Fix:** Resolve the underlying cause, then `POST /api/jobs/{id}/retry`. The retry creates a new
 `Queued` job with `ParentJobId` set; the failed job stays for audit.
 
+### A CNAB240 job fails with `cnab240.invalid`
+
+**Symptom.** The job never reached a signer; the timeline lists the structural violations.
+
+**Root cause.** The file routed through a `CheckCNAB240` profile is not a compliant Banco do Brasil
+remessa — wrong record length, records out of order, a bank code other than `001`, an unrecognised
+segment, a mismatched trailer count, or a **retorno** (`Código Remessa / Retorno = '2'`) dropped into a
+watched folder by mistake.
+
+**Fix.** Correct the file at the originating system and re-run it through Upload, Retry or Rescan. The
+violation list on the timeline is capped, and says so when truncated. See
+[CNAB240](cnab240.md#when-a-file-is-refused).
+
+### A CNAB240 job fails with `cnab240.payment-date-passed`
+
+**Symptom.** A structurally valid remessa is refused just before signing.
+
+**Root cause.** The file's **earliest** payment date is in the past. BB would either refuse it or
+process it on a date nobody intended, and a signature would make the wrong date look deliberate.
+
+**Fix.** Re-export from the originating system with current dates. **Retrying the same file fails the
+same way** — the dates inside it have not changed.
+
+:::tip Check the host timezone first
+"Today" is the host's local date. On a host running in UTC while the payer sits in
+`America/Sao_Paulo`, the boundary rolls over three hours early and a file due today starts being
+refused at 21:00 local. Set `TZ=America/Sao_Paulo` on the container or systemd unit.
+:::
+
+### A job sits in `AwaitingApproval` and nothing happens
+
+**Not a fault by itself** — the job is waiting on a person, and it will wait indefinitely unless the
+profile sets `Approval.ExpiresAfter`. Things to check:
+
+- **Did the link reach anybody?** The product sends no mail. The approval link is on the job page while
+  the job is parked; the durable per-approver links are on the System page.
+- **Is the pool right?** The job page shows the pool **frozen at park time**, not the one in your
+  configuration file. If the people listed are wrong, cancel the job, fix the profile, and re-run the
+  file — editing configuration never changes what a parked job requires.
+- **Watch `bulksigner_approvals_expired_total`.** A climbing expiry rate is the signal that links are
+  not reaching people.
+
+### An approver gets "That address is not in this job's approver pool"
+
+**Root cause.** Their address is not in the **frozen** pool. Leading/trailing spaces and capitalisation
+do not matter; anything else does.
+
+**Fix.** Compare against the pool shown on the job page. The refusal is deliberately coarse — a
+malformed address returns the same code — so somebody who guessed a job id learns nothing about who the
+approvers are.
+
+### A released job failed with `approval.content-changed`
+
+**Symptom.** The quorum was met, the job returned to `Queued`, and it then failed instead of signing.
+
+**Root cause.** The staged copy in `processing/<jobid>/` was modified after the approvers saw it. The
+pre-sign hash check refused to produce a signature over bytes nobody approved.
+
+**Fix.** Do **not** re-sign it. Find out what wrote to `processing/`, then re-run the original file
+from `input/` so it is parsed, totalled and approved afresh. This counter should be flat at zero
+forever; anything else is worth investigating rather than retrying past.
+
+### A job failed with `approval.rejected` instead of being cancelled
+
+**Root cause.** The rejection landed after a worker had already claimed the job, so the pipeline
+refused the signature rather than the approval handler cancelling it. `Processing` has no legal
+transition to `Canceled`.
+
+**Not a fault.** The file is unsigned, which is the property that matters. Correct and re-submit.
+
+### A job was canceled with "Approval window expired."
+
+**Root cause.** Nobody decided inside the profile's `ExpiresAfter` window.
+
+**Fix.** The staged copy is under `error/<jobid>/`, the original is still in `input/`, and any
+approvals that *were* recorded are still on the job page. Retry does not apply (it accepts only
+`Failed`) — re-run the file through Rescan or Upload, which creates a new job that parks and asks the
+pool again.
+
+A **pause does not extend the window**: the budget is a wall-clock deadline, not a budget of pipeline
+uptime, so a pipeline paused across a window expires the jobs whose windows closed during the pause.
+
+### A job completed but its input file is still in `input/`
+
+**Not a fault.** The file was rewritten while the job held it, so the pipeline refused to delete
+something it could not show was the file it processed. Look for `job.input-diverged` on the job's
+timeline. The rewritten file is handed back to its watched folder and signed as a job of its own.
+
+Two cases where the hand-back is dropped and the console says so: a REST upload (no watcher owns its
+path), and a folder whose watcher is not running. See
+[Operations](operations.md#when-an-input-file-changes-mid-job).
+
+### A file under `processing/` or `error/` cannot be written or deleted
+
+**Root cause.** On an Azure Files work share, a live job's staged copy carries an infinite lease that
+refuses writes and deletes from everything, including your own storage tooling. That is the point while
+the job is in flight.
+
+**Fix.** If the job is terminal and the lease is still held, that is a fault — restart the service,
+which releases leases it holds, and report it.
+
+### `/api/ready` is 503 with `work-share-owner` red
+
+**Root cause.** Another instance held the work share's marker at startup. The banner, the log, the
+System page and this check all name the prior holder's **host and process id**.
+
+**Fix.** Ask whether that host and process are still running.
+
+- **This host, and the process is gone** — your previous instance did not shut down gracefully. Nothing
+  is wrong now. The row stays red for the life of this instance and clears on the next boot after a
+  graceful stop; the marker is claimed once and nothing re-reads it, so there is no fresher answer to
+  be had.
+- **A different host, or that process is alive** — you have two instances on one work share, which is
+  not supported. Stop one, then decide which store is authoritative. **Approval state is the one to act
+  on quickly**: a parked job exists in one instance's store only.
+
+If the row instead reads `not claimed cleanly at startup: …`, the marker could not be reached at all —
+an unreachable share or a rotated credential. Whether another instance holds it is then simply unknown,
+and unknown is not reported as the reassuring answer. The share's own `storage-share:` row usually says
+why.
+
 ## Encryption
 
 ### Decryption fails with a tag-mismatch error
@@ -502,6 +731,89 @@ use`.
 | Docker | Edit the `ports:` line in `deploy/docker/docker-compose.yml`. |
 
 ## Database
+
+### The dashboard freezes while a batch signs (SQL Server)
+
+**Symptom.** The dashboard hangs, or pages take tens of seconds, but only while the pipeline is
+working. No job fails.
+
+**Root cause.** `READ_COMMITTED_SNAPSHOT` is **off** on the database. Without it, the dashboard's reads
+take shared locks and block behind the pipeline's writes. Azure SQL enables it by default; on-premises
+SQL Server does not.
+
+**Fix.** The banner says so at boot (`store isolation = READ_COMMITTED_SNAPSHOT off …`) and warns on
+the ops console. Bulk Signer reports it and **never issues the statement that changes it** — that needs
+exclusive access to a database that is yours:
+
+```sql
+ALTER DATABASE [BulkSigner] SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE;
+```
+
+`WITH ROLLBACK IMMEDIATE` terminates other connections, so stop the service first. Then restart it and
+confirm the banner no longer reports the row — when it is on, nothing is reported.
+
+### The store row says `UNREACHABLE` and the service started anyway
+
+**Not a fault.** A database down during a maintenance window must not turn a restart into an outage, so
+the host comes up, the migration is **skipped**, and `/api/ready` stays red.
+
+**Fix.** Fix the store, then **restart**. The readiness verdict is taken per request, but it also stays
+red for the life of an instance whose boot skipped the migration — that clears on the next boot, not
+when the store comes back.
+
+Common causes: the database does not exist (Bulk Signer creates its *tables*, not its database); the
+login is not mapped to a user in it; TLS the client will not accept (`Encrypt` defaults to `True`, so
+an untrusted server certificate fails the login with *certificate chain … not trusted*); or, on Azure
+SQL from inside Azure, only TCP 1433 opened when the `Redirect` connection policy also needs TCP
+11000–11999.
+
+### The service refuses to start with `Database migration failed`
+
+**Root cause.** A migration could not be applied. Most often the login lacks `db_ddladmin`, which is
+needed on the first boot and on any boot after an upgrade that ships a migration.
+
+**Fix.** Grant the role and restart. This failure is fatal by design — running against a schema the
+code does not match is worse than not starting.
+
+### A job or a page fails once and then works (SQL Server)
+
+**Not a fault.** Transient-fault retry is on under `SqlServer` with EF Core's defaults — the initial
+attempt plus up to six retries against the error numbers the SQL client classifies as transient, each
+delay capped at 30 seconds. It is on because running against Azure SQL effectively requires it, and
+there is deliberately no configuration key: a retry budget an operator can tune is a retry budget that
+gets tuned to zero during an incident.
+
+If retries are exhausting, look at the network path rather than the budget.
+
+### Startup is refused because the connection string does not match the provider
+
+**Root cause.** One of two refusals, and which one depends on `Database:Provider`:
+
+- Under `SqlServer`, a data source naming a **file** rather than a server — what a deployment that
+  flipped the provider and left the SQLite path behind produces. Without the refusal it would arrive as
+  a login failure against a server named after a path.
+- Under `Sqlite`, a connection string naming an Azure Files location — a database file reached over SMB
+  is the documented way to corrupt one.
+
+Also under `SqlServer`: an **absent** connection string is refused rather than guessed at. No refusal
+ever echoes the string, because it may carry a password; only the data source is quoted.
+
+:::warning The environment variable replaces the whole value
+`ConnectionStrings:Default` is a single key, so there is no way to keep the server in
+`appsettings.Production.json` and supply only the password from the environment. A JSON value left in
+place alongside the environment variable is silently ignored rather than combined with it.
+:::
+
+### After switching to SQL Server, every job and approval is gone
+
+**Not recoverable from the new store — and not a fault.** There is no importer and no boot-time check
+for a SQLite file left behind, so the new store comes up with an empty schema: no jobs, no history, no
+operational events, and **no approval snapshots and no recorded approvals**.
+
+**Fix.** The old `db/bulksigner.db` is still on disk unless something removed it. Archive it and keep a
+SQLite client to hand for the day somebody asks who approved a payment file from before the move. See
+[Installation](installation.md#switching-from-sqlite--archive-the-old-file-first) for the order to do
+this in next time.
 
 ### SQLite "database is locked"
 

@@ -31,7 +31,11 @@ token, store, or vault holds more than one identity:
 |--------|----------------------|
 | `Pfx` | Nothing to select — the file holds a single identity. |
 | `Pkcs11`, `WindowsStore` | **SHA-1 thumbprint.** Subject-based matching is never used, because tokens and stores routinely hold multiple identities and a "first match" rule would make the audit trail dishonest. |
-| `AzureKeyVault` | The vault **key name** for the private key, plus a local `.cer` file for the public certificate. The pair is cross-checked at boot. |
+| `AzureKeyVault` | The vault **key name** for the private key, plus a `.cer` for the public certificate. The pair is cross-checked at boot. |
+
+The two sources that name a *file* — `Pfx` and `AzureKeyVault` — can read that file from
+[Azure Blob Storage](#reading-the-file-from-a-blob) instead of local disk, which is what makes them
+usable on a host with no durable filesystem.
 
 ## ICP-Brasil and ADR-Básica
 
@@ -366,6 +370,91 @@ with the Azure error and can be retried once access is restored.
 Concurrency is safe (see the table above), but sustained high `MaxConcurrency` can draw HTTP 429
 throttling responses from Azure. Those surface as failed jobs carrying the Azure error, not as hangs.
 
+## Reading the file from a blob
+
+A host with **no durable local disk** — a container, an App Service, an AKS pod — has nowhere to keep a
+`.pfx` or a `.cer`. Baking it into the image works but makes certificate renewal an image rebuild, and
+puts certificate-shaped material in your registry. So the two sources that name a file can instead name
+a blob in Azure Blob Storage:
+
+```json
+"Signing": {
+  "Certificate": {
+    "Source": "Pfx",
+    "Pfx": {
+      "Password": "",
+      "Blob": {
+        "Url": "https://contoso.blob.core.windows.net/certificates/signer.pfx",
+        "Credential": "ManagedIdentity"
+      }
+    }
+  }
+}
+```
+
+`Path` is omitted — **exactly one of `Path` or `Blob`, never both, never neither.** The same block works
+under `AzureKeyVault` (holding the `.cer` instead of `CerPath`), and under any
+`Signing:Profiles[].Certificate` entry.
+
+| Key | Required | Notes |
+|-----|----------|-------|
+| `Url` | yes | The full blob URL — exactly what the portal's **Copy URL** button gives you. A URL carrying a **query string is refused at boot**: that is how a shared-access signature arrives, and SAS is not an accepted credential. Because of that rule the URL is never secret, so it is printed whole on the startup banner. |
+| `Credential` | yes | `ManagedIdentity`, `ServicePrincipal` or `AccountKey`. **Never defaulted** — reaching for the host's own Azure identity unasked would authenticate as somebody nobody named. |
+| `TenantId`, `AppId`, `AppSecret` | `ServicePrincipal` only | `TenantId` is required even when `AppId` names the same Entra application as the `AzureKeyVault` block beside it: that block has no tenant key, and **nothing here inherits**. |
+| `AccountKey` | `AccountKey` only | Warned about at startup. See below. |
+
+Because you supply the host, a **sovereign-cloud endpoint works with no extra configuration** — write
+the endpoint you actually use.
+
+### What the credential needs
+
+For `ManagedIdentity` and `ServicePrincipal`, grant the identity **Storage Blob Data Reader** on the
+container (or the account). Read access to one blob is all this ever needs — nothing in Bulk Signer
+writes, lists, moves or leases a blob. `ManagedIdentity` is **system-assigned only**; a host outside
+Azure has no identity endpoint at all.
+
+### `AccountKey` and what it costs
+
+An account key grants **full data-plane access to the entire storage account** and cannot be scoped
+down or expired. It is accepted anyway, because an on-premises `Pfx` deployment may have no path to a
+Microsoft Entra tenant at all — and unlike `AzureKeyVault`, which cannot work without Entra
+reachability in the first place, that host has no other option.
+
+The startup warning therefore says different things depending on what the blob holds:
+
+| Blob under | What it holds | What a leaked `AccountKey` yields |
+|------------|---------------|-----------------------------------|
+| `AzureKeyVault:Blob` | the `.cer` — public material | a public certificate; the private key stays in the vault |
+| `Pfx:Blob` | the PKCS#12 file | **the signing key** |
+
+:::danger
+If you can reach a tenant, use `ManagedIdentity` or `ServicePrincipal` — especially for a PFX.
+`Pfx:Blob` is the **only** configuration in this product under which private key material travels over
+a network; `Pkcs11` and `AzureKeyVault` both exist to prevent that, and neither is weakened by its
+existence.
+:::
+
+### What this does not change
+
+- **The file is read once, at boot.** A renewed blob needs a restart, exactly as a renewed local file
+  does. Nothing polls it.
+- **An unreachable blob stops the host from starting**, deliberately: a profile with no signing
+  material cannot sign at all, so there is no useful degraded state. This is the opposite of an
+  unreachable work share or operational store, both of which let the host start and report themselves
+  degraded.
+- **The PFX password is not fetchable from anywhere.** It stays a config value with an environment
+  override. A password retrieved from the same store as the file it opens is not a second factor.
+- **Nothing about signing moves.** With `Pfx`, the key is still loaded into this host's memory and
+  signing is still local; with `AzureKeyVault`, the key still never leaves the vault. Putting the file
+  in a blob is a statement about where bytes are stored and nothing else.
+
+The startup banner names the blob on the profile's row, so you can confirm which object this process
+actually paired against rather than which one the config file currently names:
+
+```
+signer  cades · cert=AzureKeyVault · blob=contoso/certificates/signer.cer · verify=on · …
+```
+
 ## Hot-swapping the source
 
 Changing `Signing:Certificate:Source` (and the matching subtree) requires a restart — the
@@ -391,6 +480,9 @@ certificate is loaded once at boot. Procedure:
 | Boot fails with "WindowsStore source is not supported on this OS" | You configured `Source = WindowsStore` on Linux. Switch source. |
 | Boot fails with "does not match Azure Key Vault key … their public keys differ" | `CerPath` and `KeyName` refer to different key pairs. Verify them with the OpenSSL / Azure CLI recipe above. |
 | Boot fails with "Endpoint must be an absolute https:// URL" | `Endpoint` is a bare vault DNS name or uses `http://`. Use the full form, e.g. `https://my-vault.vault.azure.net/`. |
+| Boot fails saying both a path and a blob are configured | `Path`/`CerPath` and `Blob` are mutually exclusive. Remove one. The same refusal fires when neither is set. |
+| Boot fails with a blob URL rejected for carrying a query string | The URL is a shared-access signature. SAS is not an accepted credential — use `Credential` with `ManagedIdentity`, `ServicePrincipal` or `AccountKey` and a bare blob URL. |
+| Boot fails reading the signing material blob | Check the identity holds **Storage Blob Data Reader** on the container, and that the blob exists at the URL on the banner. An unreachable blob is fatal by design. |
 | Signing fails with an Azure `403` / `Forbidden` | The app registration lacks the **sign** permission on the key. Grant **Key Vault Crypto User** (RBAC) or the **Sign** operation (access policy). |
 | Signing fails with an Azure `429` | Vault throttling under load. Lower `Pipeline:MaxConcurrency` or request a higher vault limit. |
 | Signing fails immediately with "Certificate not found by thumbprint" | The thumbprint does not match any cert in the configured source. Recheck with the discovery commands above. |

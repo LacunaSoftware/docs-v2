@@ -22,13 +22,28 @@ Every page has a top app bar and a left navigation drawer:
 
 | Element | What it does |
 |---------|--------------|
-| App bar (top) | Theme toggle (light / dark) and an account menu with Logout. |
+| App bar (top) | Language selector (globe icon, see below), theme toggle (light / dark) and an account menu with Logout. |
 | Drawer (left) | The nav links: Dashboard, Jobs, Input folder, Recent exceptions, System. (The Recent exceptions link is hidden when `LogViewer:Enabled = false`.) |
 | Refresh indicator | A small widget showing the last refresh time and the active polling cadence. |
 
 Live pages refresh on a server-side timer driven by `Dashboard:PollIntervalSeconds` (default 5). The
 Job detail page stops polling once the job reaches a terminal state — there is no point refreshing a
 `Completed` or `Failed` row.
+
+### Display language
+
+The web surfaces render in **American English or Brazilian Portuguese**, chosen per browser via the
+language selector — in the app bar on the operator pages, pinned top-right on the bare-layout pages
+(`/login`, the approver surfaces). The choice is stored in the standard ASP.NET Core culture cookie for
+a year; switching is a full page reload. Resolution order is **cookie → the browser's `Accept-Language`
+→ `en-US`**, so a Brazilian browser gets Portuguese on first visit with no interaction.
+
+There is no configuration knob — the reader chooses, the server does not.
+
+What the language deliberately does **not** change: audit-trail sentences on the job timeline (evidence
+stays English, exactly as written), REST wire values (`JobStatus` names, problem `code`s and prose),
+durable logs, the console dashboard, and everything CNAB240 — `R$` amounts, `dd/MM/yyyy` payment dates
+and the remessa vocabulary are properties of the file, not of the reader.
 
 ## `/` — Dashboard
 
@@ -82,6 +97,24 @@ job is a retry), and error message (if `Failed`).
 
 - **Encrypted-output chip** — visible only when the job was signed with encryption enabled. Tells
   operators that downloading will yield a `.enc` envelope, not a cleartext signed artifact.
+- **Payment file section** — present only on jobs parsed as a [CNAB240 remessa](cnab240.md). Shows the
+  file's total in BRL, the payment count, the cancellation count, the payment-date range, and the
+  SHA-256 of the parsed bytes. Cancellations render as an amber chip only when there are any.
+- **Payments panel** — on payment-file jobs only: a paginated table of every value-bearing record
+  (record number, lote, segment, name, beneficiary CPF/CNPJ, branch and account, payment date,
+  amount), with exclusão rows labelled and struck through. **Nothing is masked for an operator** — an
+  operator chasing a payment BB rejected needs the digits BB is complaining about. Present only while
+  the job is in flight; the panel explains itself once the job is terminal and the line detail has been
+  [purged](retention.md#the-one-exception-cnab240-line-detail).
+- **Approval section** — present only on jobs that parked, and it survives the job going terminal
+  (neither the snapshot nor the approval rows are purged). Shows the frozen quorum as an "N of M
+  required" chip, how many approvals are in, when the job parked, the frozen wait budget, and the
+  approver pool — name, email and CPF — **as it stood at park time**, each row carrying that person's
+  decision, its reason, and when they made it. Editing the profile's `Approval` block does **not**
+  change what is shown here; that is the whole point of the snapshot. A rejected job reads
+  *"2 of 2 approvals — rejected"*, with a banner above the pool saying why the job is `Canceled`. While
+  the job is parked, the section also renders the **approval link** in a read-only field to copy, with
+  the capability warning directly above it.
 - **Profile section** — the resolved signing profile: name, declared format (or `auto` for the
   synthesised legacy default), cert source, and the `Verify` / `Encrypt` / `Validate certificate`
   posture flags. If the job's profile name was removed from config after the job ran, a warning is
@@ -94,10 +127,21 @@ Action buttons (visibility gated by status):
 | Button | Visible when status is… | What it does |
 |--------|-------------------------|--------------|
 | Retry | `Failed` | Creates a new job with `ParentJobId = this.Id`; navigates to the new job. |
-| Cancel | `Queued` (or `AwaitingSigner`) | Moves the job to `Canceled`; the watcher will not auto-resurrect the file. |
+| Cancel | `Queued`, `AwaitingSigner`, `AwaitingApproval` | Moves the job to `Canceled`; the watcher will not auto-resurrect the file. From `AwaitingApproval` it also relocates the staged copy to `error/<jobid>/`. |
 | Download | `Completed` (or `Failed` with output) | Streams the output. `application/octet-stream` with a `.enc` filename when encrypted. |
 
 Each result renders as a toast — success, warning (e.g. `job.not-queued`), or error.
+
+:::note This is the one page an approver may open too
+An approver arrives here from the tally chip on their [queue](#approvals--approver-portal), and only
+for a job whose *frozen pool* names them; any other job id is refused with the same *Job not found.* a
+nonexistent one gets. They see the record and none of the operator's capabilities — no approval link,
+no approver CPFs, and no Retry, Cancel or Download. Withholding the link is a **quorum** control, not a
+disclosure one: it lets its holder approve as any pool member, so a member holding it could satisfy
+`MinimumApprovers = 3` alone.
+
+Everything else on `/jobs`, `/input`, `/system` and the whole REST surface remains operator-only.
+:::
 
 ## `/input` — Input folders
 
@@ -140,6 +184,27 @@ Read-only service info:
 | Signature policy | ADR-Básica (default; see [Certificates](certificates.md)) |
 | Encryption | Enabled / Disabled |
 | Queue length | Snapshot of `Queued` count |
+
+**Where the operational store is** is *not* on this page. The storage-paths table shows the local
+directories under `Storage:Root`, `db/` among them — which under `Database:Provider = SqlServer` is
+simply unused. The surfaces that name the store are the ready-summary banner's `operational store` row
+and `/api/ready`'s `database` check, both of which name provider, server and database and never the
+connection string.
+
+**Who owns the work share** — above the storage-paths table, and **only** when
+`Storage:Provider = AzureFiles`. Ordinarily one caption naming the marker this instance claimed. When
+another instance held it at startup, a red alert instead, naming that instance's host and process id.
+It is a boot-time snapshot rather than a live check: the marker is claimed once and held for the
+process's life, so a row that refreshed would be implying a freshness it cannot have. See
+[Operations](operations.md#when-another-instance-appears-to-own-the-work-share).
+
+**Approver links** — when `ApproverPortal:Enabled`, a section listing every configured approver with
+their personal portal URL and which profiles' pools they belong to. Config-derived, which is why it
+lives here and deliberately *not* on a job page: a durable link rendered beside one job reads as being
+about that job, and an operator would forward it expecting it to expire with the file. Each is shown as
+a read-only field to copy rather than a clickable anchor, since clicking one would open somebody else's
+queue in the operator's own browser. The section carries the capability warning. With the portal off,
+it says so instead. See [Approvals](approvals.md#the-approver-portal).
 
 Pipeline pause/resume buttons are here, gated by the current state. The optional `reason` field lands
 in the audit trail.
@@ -188,6 +253,46 @@ The global file-sink minimum level applies **first**. Widening `LogViewer:Levels
 (for example adding `Debug` while the minimum is `Information`) captures nothing, because those events
 never reach the sink.
 :::
+
+## `/approve/{id}` — Approval (anonymous)
+
+The one page in the application that is **not** behind the operator policy. It renders on a bare layout
+— no nav drawer, no app bar — because the person opening it is an approver rather than an operator.
+Present only when a signing profile carries an [`Approval` block](approvals.md).
+
+| Aspect | Behaviour |
+|--------|-----------|
+| Auth | **None by default.** Anyone who can reach the URL can approve — or reject — as anyone in the job's frozen pool, with the warning stated on the page itself. If the visitor already holds an [approver-portal](#approvals--approver-portal) session or a Microsoft Entra `Approver` session, the page **recognises them**: it names them instead of offering the picker, records the stronger identification method, and shows the identifiers unmasked. |
+| Decisions | **Approve** or **Reject**, with an optional shared reason field. Rejecting takes a confirming second click. One rejection stops the job whatever the quorum says. |
+| Shows | File name, grand total, payment count, cancellation count, payment-date range, payer, the frozen pool with each member's decision, progress toward the quorum, the wait budget, and the content hash. |
+| Individual payments | The **same** payment table the operator's job page renders, paginated. Which disclosure applies follows the *reader*, not the page: an anonymous visitor sees CPF/CNPJ reduced to its check digits and the account to its last digits, both captioned *(partial)*; an identified one sees them whole. Absent once the job is terminal, because the line detail is purged at that transition. |
+| Not offered | **No raw file download**, on any approval surface. |
+| Retry context | When the job is a retry of a previously approved one: who approved the parent, and whether the file is byte-for-byte identical. Those approvals do **not** count toward this job's quorum. |
+| Not found | A job that does not exist and a job that never parked render the same message, so a guessed id reveals nothing. |
+
+Full walkthrough: [Approvals](approvals.md).
+
+## `/approvals` — Approver portal
+
+One approver's queue, reached through their own durable link or a Microsoft Entra `Approver` sign-in.
+Like `/approve/{id}` it renders on the bare layout. Off unless `ApproverPortal:Enabled` — see
+[Configuration](configuration.md#approverportal).
+
+| Aspect | Behaviour |
+|--------|-----------|
+| Auth | An **approver session**, on its own cookie scheme. Not the operator cookie and not the API key. Because it carries an authorization policy, `/approvals` is **not** an anonymous route — which is what makes an index of pending approvals permissible at all. |
+| Getting in | `/approvals/link/{token}` — the durable link, anonymous because it is how a credential is obtained. It validates, sets the cookie, and redirects; from then on the approver bookmarks `/approvals`. An unresolvable token and an absent one land on the same page, which says nothing about why. |
+| Tabs | **Needs you**, **Waiting on others**, **Decided** — cut by *your decision*, not job status. The first two are both `AwaitingApproval`. |
+| Scope | Only jobs whose **frozen pool** names you. |
+| Each row | One line: file name, status, grand total, payment and exclusão counts, the quorum tally, when it parked, the decide-by deadline — plus one risk signal, the **largest single payment**, where an extra zero shows. The payer appears only when the list holds more than one distinct payer. |
+| Approving | One click from the row. Ticked rows on **Needs you** can be approved as one batch from the toolbar; every ticked file is attempted whatever the ones before it returned, and the result names each file that did not go through and why. |
+| Rejecting | On the row, behind a **modal dialog** carrying the irreversibility warning and an optional reason — the row button only asks. **There is no bulk reject**, here or anywhere. |
+| Who gets paid | Expands the row in place to the payment table, identifiers **whole** — the reader is a specific person rather than whoever holds a forwarded URL. |
+| Decided reach | Bounded by `ApproverPortal:DecidedLookback` (90 days by default) and capped at 200 rows. When the cap bites the page says so. |
+| Export | **Export to Excel**, in the same place on every tab, disabled rather than hidden when the tab is empty. Downloads the whole tab, not the ticked rows. **Job-level: one row per payment file, never one per beneficiary.** A title block above the table names the reader, the moment and the list, and on **Decided** its lookback window and whether the cap bit. |
+| Not offered | No raw file download. No route to a job outside your pools. |
+
+Where operators get the links: the **System** page, one per configured approver. Never the job page.
 
 ## Audit-trail conventions
 

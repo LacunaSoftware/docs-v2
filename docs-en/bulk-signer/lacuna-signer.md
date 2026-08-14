@@ -245,4 +245,4 @@ See [Troubleshooting](troubleshooting.md) for diagnosis steps on:
 
 ---
 
-**Next:** [Retention](retention.md). **Previous:** [Encryption](encryption.md).
+**Next:** [CNAB240 payment files](cnab240.md). **Previous:** [Encryption](encryption.md).

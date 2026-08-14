@@ -5,6 +5,22 @@ sidebar_position: 5
 
 # Histórico de versões do Signer
 
+<a name="v2-19-0" />
+### 2.19.0 (2026-08-14)
+
+* Melhorias
+  * [SIG-1889] Permite reuso de sessão de assinatura em nuvem por período configurável, possibilitando que uma única autenticação autorize múltiplas assinaturas sem solicitar novo OTP
+  * [SIG-1821] Melhorias na integração do IdRC: melhor visibilidade e rastreabilidade no manifesto do documento e listagem de fluxo, controle de configuração aprimorado e representação visual melhorada
+  * [SIG-1886] Adicionados mecanismos de limpeza de storage do Hangfire para evitar acúmulo ilimitado de jobs falhados no banco de dados
+
+* Correções de bugs
+  * [SIG-1894] Corrigida a exibição de erro JSON bruto ao visualizar documentos recusados em vez do PDF
+  * [SIG-1869] Corrigido o auto-cadastro de identificador ao editar etapas de fluxo de participante em instâncias com CI (Cédula de Identidad) como tipo de identificador padrão
+  * [SIG-1882] Corrigidas sessões do IdRC quebrando durante assinaturas concorrentes
+  * Corrigido preview de marcas de assinatura e campo de erro de validação que não refletiam corretamente o tipo de identificador selecionado
+
+Atualiza modelo de banco de dados: sim (migrações: `IdRCSessionCancellation`, `IdRCSignedFlag`, `CloudSignatureSessions`)
+
 <a name="v2-18-0" />
 ### 2.18.0 (2026-07-30)
 

@@ -5,6 +5,22 @@ sidebar_position: 5
 
 # Signer 
 
+<a name="v2-19-0" />
+### 2.19.0 (2026-08-14)
+
+* Improvements
+  * [SIG-1889] Allow cloud signature session reuse for a configurable period, enabling a single authentication to authorize multiple signatures without requesting new OTP
+  * [SIG-1821] IdRC integration improvements: better visibility and traceability in document manifest and flow listing, enhanced configuration control and improved visual representation
+  * [SIG-1886] Added Hangfire storage cleanup mechanisms to prevent unbounded accumulation of failed jobs in the database
+
+* Bug fixes
+  * [SIG-1894] Fixed raw JSON error display when previewing refused documents instead of PDF
+  * [SIG-1869] Fixed identifier auto-registration when editing document flow participant steps in instances with CI (Cédula de Identidad) as default identifier type
+  * [SIG-1882] Fixed IdRC sessions breaking during concurrent signatures
+  * Fixed signature marks preview and validation error field not correctly reflecting the selected identifier type
+
+Updates database model: yes (migrations: `IdRCSessionCancellation`, `IdRCSignedFlag`, `CloudSignatureSessions`)
+
 <a name="v2-18-0" />
 ### 2.18.0 (2026-07-30)
 

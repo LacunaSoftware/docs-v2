@@ -93,8 +93,8 @@ Create the site folder, download and extract the binaries:
 
 ```sh
 mkdir /usr/share/lacuna-signer
-curl -O https://cdn.lacunasoftware.com/signer/signer-2.18.0.tar.gz
-tar xzf signer-2.18.0.tar.gz -C /usr/share/lacuna-signer
+curl -O https://cdn.lacunasoftware.com/signer/signer-2.19.0.tar.gz
+tar xzf signer-2.19.0.tar.gz -C /usr/share/lacuna-signer
 chmod -R a=,u+rwX,go+rX /usr/share/lacuna-signer
 ```
 

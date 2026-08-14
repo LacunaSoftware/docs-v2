@@ -292,6 +292,15 @@ Under section **ElectronicSignature**:
 * **MaxLivenessSessionsPerSignature** (default: `5`, v2.13.0): maximum number of liveness sessions that can be created per signature attempt. Use `-1` for unlimited.
 * **MaxIdScanSessionsPerSignature** (default: `5`, v2.13.0): maximum number of IdScan sessions that can be created per signature attempt. Use `-1` for unlimited.
 
+###  *CloudSignatureSession* Settings (v2.19.0)
+
+Under section **CloudSignatureSession**:
+
+* **Enabled** (default: `false`): if `true`, enables cloud signature session reuse. When enabled, users can authorize a single authentication to sign multiple documents within a configured period, avoiding repeated OTP prompts.
+* **OrganizationAllowsSessionsByDefault** (default: `true`): if `true`, cloud signature session reuse is enabled by default for new organizations. Organizations can override this setting individually.
+* **DefaultSessionExpirationMinutes** (default: `720`): the default session duration in minutes. The maximum allowed value is `10080` (7 days). Any configured value exceeding this limit will be clamped to the maximum.
+* **CheckboxCheckedByDefault** (default: `true`): if `true`, the "keep session active" checkbox is checked by default when a user performs a cloud signature, making session reuse opt-out rather than opt-in.
+
 ###  *Signature Certificate* Settings (v1.52.0) {#signature-certificate}
 
 Under section **SignatureCertificate**:

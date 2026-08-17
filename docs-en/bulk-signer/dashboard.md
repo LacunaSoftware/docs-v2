@@ -22,9 +22,17 @@ Every page has a top app bar and a left navigation drawer:
 
 | Element | What it does |
 |---------|--------------|
-| App bar (top) | Language selector (globe icon, see below), theme toggle (light / dark) and an account menu with Logout. |
-| Drawer (left) | The nav links: Dashboard, Jobs, Input folder, Recent exceptions, System. (The Recent exceptions link is hidden when `LogViewer:Enabled = false`.) |
+| App bar (top) | The **running version**, language selector (globe icon, see below), theme toggle (light / dark) and an account menu with Logout. |
+| Drawer (left) | The nav links: Dashboard, Jobs, Input folder, Recent exceptions, System — plus Backup when `Backup:Enabled`. (The Recent exceptions link is hidden when `LogViewer:Enabled = false`.) |
 | Refresh indicator | A small widget showing the last refresh time and the active polling cadence. |
+
+**The running version is in the app bar on every page**, so somebody reporting a problem is already
+looking at it. The bar shows the short form; the full informational version — which carries the commit
+SHA the SDK appends, and which will not fit in a bar — is the element's tooltip *and* its accessible
+name, so it can be hovered or read out without widening anything. The diagnostic surfaces print it whole:
+the ready-summary boot panel and `/system`. A prerelease label is never dropped, since that is identity
+rather than metadata. The same version also appears under the branded console banner on every start, and
+as a row in the live console dashboard.
 
 Live pages refresh on a server-side timer driven by `Dashboard:PollIntervalSeconds` (default 5). The
 Job detail page stops polling once the job reaches a terminal state — there is no point refreshing a
@@ -65,9 +73,14 @@ down by `Pades` / `Cades` / `Xades`. In sequential mode (the default) the panel 
 ### Processing performance panel
 
 Below the stat cards sits a **Processing performance** panel with per-stage elapsed-time statistics —
-average job time, average signing and verification time, rolling and peak throughput, min/avg/max
-totals, a per-stage breakdown, and a Local vs Remote split. The numbers are held in process memory
-and reset on restart.
+average job time, average signing and verification time, rolling throughput, min/avg/max totals, a
+per-stage breakdown, and a Local vs Remote split. The numbers are rows in the operational store, so they
+**survive a restart**, and in a cluster the panel describes the whole deployment rather than whichever
+instance answered your request.
+
+The former **Max throughput/sec** card was retired rather than reworked: it measured one process's
+lifetime, which under a cluster would have described one instance's luck. "Throughput (last min)"
+answers what it was mostly read for.
 
 Hidden entirely when `Statistics:Enabled = false`. Full reading guide, including how to use the stage
 split to localise a slowdown: [Job statistics](statistics.md).
@@ -198,6 +211,25 @@ It is a boot-time snapshot rather than a live check: the marker is claimed once 
 process's life, so a row that refreshed would be implying a freshness it cannot have. See
 [Operations](operations.md#when-another-instance-appears-to-own-the-work-share).
 
+**Instances** — **only** when `Cluster:Enabled = true`. One row per instance that has registered with
+the operational store: its derived identity, a **Live** or **Stale** chip, the application version it is
+running, and the age of its last heartbeat. The row for the instance answering your request is badged as
+such — and because the load balancer picks per request, reloading the page moves that badge, which is the
+cheapest confirmation available that traffic really is spread. The caption names the heartbeat cadence and
+staleness threshold in force.
+
+Two readings matter here. **Stale is a presumption, not a confirmed death** — an instance alive but unable
+to write heartbeats appears the same way. And **two different versions outside a deploy window** is the
+mixed-version condition, which is reported as a Critical at the newer instance's boot and is never
+prevented. See [Operations](operations.md#which-instances-are-alive-cluster-mode-only) and
+[High availability](high-availability.md#upgrades-are-stop-the-world).
+
+**Approver second factor** — when `ApproverSecondFactor:Enabled`, a list with one row per configured
+approver, enrolled or not, with the enrolment date. Each carries a **Reset** button, which is the
+lost-phone path: it clears that approver's enrolment so they bind a new authenticator on their next visit,
+and is recorded under the operator's name as its own audit event. See
+[Approvals](approvals.md#proving-it-is-you).
+
 **Approver links** — when `ApproverPortal:Enabled`, a section listing every configured approver with
 their personal portal URL and which profiles' pools they belong to. Config-derived, which is why it
 lives here and deliberately *not* on a job page: a durable link rendered beside one job reads as being
@@ -214,24 +246,48 @@ The `Cleanup` button is currently a no-op while the retention story is finalized
 
 ### Danger zone — Clear Jobs
 
-Permanently deletes **every job record** — the Jobs table and its history timelines. A confirmation
-dialog gates the action and spells out that it is irreversible, that only job records are affected,
-and that files already staged in `processing/` for in-flight jobs may be left orphaned. Cancelling or
-dismissing the dialog deletes nothing.
+Permanently deletes **finished** job records — the Jobs table and its history timelines. A confirmation
+dialog gates the action and spells out that it is irreversible and that only job records are affected.
+Cancelling or dismissing the dialog deletes nothing.
 
-On confirm it records a `JobsCleared` audit event (actor + count), resets the in-memory
-[statistics](statistics.md) aggregates, and refreshes the page.
+**A `Queued`, parked or in-flight job survives**, and the result message reports how many were skipped
+alongside how many were removed. That narrowing landed for every deployment, not just clustered ones:
+deleting the row under a running job was the sharpest operator-action hazard in the product, and under a
+cluster it would be a *sibling's* running job.
+
+On confirm it records a `JobsCleared` audit event (actor + both counts), moves the deployment-wide
+[statistics](statistics.md#resetting-the-panel) reset marker inside the same transaction, and refreshes
+the page.
 
 Untouched by Clear Jobs: operational events, pipeline state, profiles, configuration, signed output
 files, and log files. The Prometheus counters at `/api/metrics` are also unaffected — they are
 monotonic.
 
 :::warning
-There is no undo and no export step. If you need the job history for an audit, back up
-`db/bulksigner.db` first.
+There is no undo and no export step. If you need the job history for an audit, back up the operational
+store first — `db/bulksigner.db` under SQLite, or your DBMS regime's backup under SQL Server. See
+[Retention](retention.md#backup-discipline).
 :::
 
 See [Operations](operations.md#clear-jobs).
+
+## `/backup` — Database backup
+
+Present only when `Backup:Enabled = true`, and available on `Database:Provider = Sqlite` only —
+`Backup:Enabled = true` under `SqlServer` refuses the boot rather than showing a page that could not
+work, so a cluster never has this page.
+
+| Element | What it does |
+|---------|--------------|
+| Destination summary | The configured `Backup:Destination` (`Disk`, `S3` or `AzureBlob`) and where artifacts land. |
+| Back up now | Runs one backup immediately. Refuses with `backup.disabled` when the feature is off. |
+| Schedule | The configured `Backup:IntervalHours`, or "manual only" when absent, plus when the next run is due — anchored on the last **successful** run, so a restart does not reset it and a failed run does not consume it. |
+| History | Recent runs with their outcome, size and duration. |
+| Retention | `Backup:RetainCount` and what will be pruned. The prune runs only after a successful store and cannot fail the run. |
+
+Every key, including each destination's credential shape, is in
+[Configuration](configuration.md#backup); how it fits the wider picture is
+[Retention](retention.md#backup-discipline).
 
 ## `/logs` — Recent exceptions
 

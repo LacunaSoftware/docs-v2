@@ -195,6 +195,31 @@ input folder whose path collides with one of the work roots (`output`, or `prod/
 That last one is refused because it would otherwise delete one signed artifact per iteration while
 reporting every job `Completed`.
 
+### A deployment that used to start now refuses, naming a watched input folder
+
+**Symptom.** After upgrading, boot fails naming a `Storage:Inputs[N]` path that collides with one of the
+work roots — `output/`, `processing/` or `error/`.
+
+**Diagnosis.** This refusal applies on **every** storage provider, not just Azure Files, and it is a
+deliberate change: such a configuration was watching the directory it writes finished artifacts into, so
+each signed file was re-ingested, re-signed and then **deleted** as the "original" of the next iteration.
+The deployment appeared healthy and reported every job `Completed` throughout.
+
+**Fix.** Point the input folder somewhere outside the work roots. Before editing, **check `output/` against
+what recipients actually collected** — the refusal tells you the configuration was wrong, not how long it
+had been destroying artifacts.
+
+### A file is refused with `job.path-too-long`
+
+**Symptom.** An upload or a watched file is rejected, naming a path length limit of 850 characters.
+
+**Diagnosis.** The job's original path is recorded in the operational store, and a path past that bound
+cannot be. It is now refused **when the file is taken in** rather than accepted and failed later, on every
+database provider, so the failure arrives at the caller that can still do something about it.
+
+**Fix.** Shorten the directory nesting or the file name. Deeply nested date-partitioned trees under an
+Azure Files `Directory` prefix are the usual cause, since the prefix counts toward the total.
+
 ### The share probe reports a share as unreachable at startup
 
 **Symptom.** The banner reads `azure shares = 1 of 2 reachable`, `/api/ready` is red on a
@@ -836,6 +861,157 @@ this in next time.
 **Fix.** Manually archive the DB: stop the service, move `db/bulksigner.db` to
 `db/bulksigner-archive-YYYYMM.db`, start the service. A fresh DB is initialized; the archive is
 read-only. Open the archive in a SQLite client for historical queries.
+
+## Cluster mode
+
+Everything in this section requires `Cluster:Enabled = true`. Off the switch none of it applies — see
+[Azure App Service (cluster mode)](azure.md) for the deployment and
+[High availability](high-availability.md) for what the mode does and does not buy.
+
+### `Cluster mode refused to start`, naming configuration keys
+
+**Symptom.** The host exits at boot with a message naming one or more of `Database:Provider`,
+`Storage:Provider`, `Storage:Inputs[]` or a certificate `Source`.
+
+**Diagnosis.** These are the configurations that could not have worked, refused rather than half-run.
+The message names **every** failing key at once rather than one per attempt, so one read is enough:
+
+| Named key | What it must be | Why |
+|---|---|---|
+| `Database:Provider` | `SqlServer` | The store is the cluster's coordination point; a SQLite file cannot be shared between hosts. |
+| `Storage:Provider` | `AzureFiles` | The local file store's lease excludes nothing outside its own process. |
+| every `Storage:Inputs[]` entry | on `AzureFiles` | A folder local to one instance is invisible to its siblings. The zero-config synthesised `default` folder is local, so a first run with the switch on refuses too. |
+| a certificate `Source` | not `Pkcs11`, not `WindowsStore` | A token or a machine store lives on one machine, and cluster instances are fungible. Use `Pfx` (ideally read from a blob) or `AzureKeyVault`. |
+
+**Fix.** Correct the named keys, or turn `Cluster:Enabled` off — off is the single-instance product
+unchanged. An NFS Azure Files share is refused by name; the work share must be SMB.
+
+### Boot refused naming an instance identity that is already beating
+
+**Symptom.** The host exits naming its own derived instance identity, and says that identity already has
+a live heartbeat.
+
+**Diagnosis.** Two processes are answering to one name. Identity is what recovery, takeover and every
+per-instance surface are built on, so there is no degraded mode to offer. The usual causes, in order of
+likelihood:
+
+1. **A deployment slot carrying production's connection string.** The swap does not introduce this — the
+   slot's first boot does. Slots are not supported on this topology at all; see
+   [High availability](high-availability.md#upgrades-are-stop-the-world).
+2. A second deployment pointed at the same database.
+3. Two hosts genuinely presenting the same name (outside App Service, where identity falls back to the
+   machine name).
+
+**Fix.** If the holder is genuinely gone, its row goes stale on its own — **waiting out
+`Cluster:StaleAfterSeconds` is the supported fix**, not deleting rows by hand. Otherwise stop whichever
+deployment should not be there.
+
+### Boot refused naming two operational stores
+
+**Symptom.** The host exits saying the work share's marker names a different operational store than the
+one this instance is configured with, naming both.
+
+**Diagnosis.** Two clusters are pointed at one work share. This is the one catastrophe no database can
+see — each store believes it owns the tree, and they overwrite each other's staging, output and error
+directories — which is exactly what the marker exists to catch.
+
+**Fix.** Decide which store is authoritative and repoint or retire the other. Do **not** delete the
+marker to make the message go away; it is the only guard against this condition.
+
+:::note What the gate does not catch
+It refuses on evidence and never on the absence of it, so a share carrying no marker yet, and the instant
+of a naming write, are both narrowed rather than closed — and a check that runs once at boot cannot see a
+rival cluster arriving afterwards. The gate is also **not** what stops two instances signing one file;
+the per-file lease and the database claim are. See
+[High availability](high-availability.md#the-work-share-gate-is-narrower-than-the-catastrophe-it-is-named-for).
+:::
+
+### Operators (or approvers) are bounced to sign-in intermittently
+
+**Symptom.** Sessions work, then do not, seemingly at random — and more often the more instances are
+running.
+
+**Diagnosis.** The instances are not sharing one Data Protection key ring, so a cookie minted by one is
+rejected by the next. Both session cookies ride that ring, so this strands approvers as well as
+operators. Two causes:
+
+- **One host has `Cluster:Enabled = false`.** The ring placement follows the switch, so that host is
+  still using its local `keys/` directory.
+- **Instances are pointed at different operational stores.** Different store, different ring.
+
+**Fix.** Make the switch and the connection string identical across every instance — which on App
+Service is automatic, since app settings are per app. Note that **ARR affinity does not fix this**:
+affinity is for the Blazor circuit, the shared ring is for the cookie.
+
+### Startup logs a Critical about instances on a different application version
+
+**Symptom.** A Critical at boot naming live heartbeats carrying a different version, and the host starts
+anyway.
+
+**Diagnosis.** Mixed versions are sharing one store, one queue and one work share. It is a warning
+rather than a refusal on purpose: refusing would block instances from coming up for as long as a *dead*
+old-version heartbeat took to go stale, which is exactly the moment after a failed deploy.
+
+**Fix.** Finish the deploy — stop every instance, deploy, start. If nothing is deploying, look for a
+slot or a second deployment on this database. Treat the Critical as the alarm it is; nothing else will
+stop this.
+
+### A job is stuck and no instance will touch it
+
+**Symptom.** A row sits in `Processing`, `Verifying` or `AwaitingSigner` indefinitely. No takeover event
+appears, and boot recovery does not clear it.
+
+**Diagnosis.** The row has **no owner**, or names an instance with no heartbeat row at all. Boot recovery
+takes only this instance's own identity and takeover follows an owner's heartbeat, so a row with neither
+is a row nobody reconciles. Ownerless rows are left by a build older than the ownership column, or by a
+run with the mode off. Such a job dispatched to Lacuna Signer is worse than it looks: `Signer:TimeoutHours`
+is only enforced while a row is being polled, so a row nothing polls is a row nothing bounds.
+
+**Fix.** **Boot once with `Cluster:Enabled = false`** and let ordinary
+[startup recovery](operations.md#startup-recovery) sweep every in-progress row whoever owns it, then turn
+the mode back on. Do this at the upgrade, before the first cluster boot, and it stops being a concern.
+This is the remedy every surface that meets one of these rows names.
+
+### Log lines about lost claims and lease conflicts, on a healthy cluster
+
+**Symptom.** Steady "claim lost to a concurrent writer" and input lease-conflict lines whenever files
+arrive in batches.
+
+**Diagnosis.** **This is the system working.** Every instance watches every folder, so they race on each
+arrival, and in cluster mode the losing side is logged at the expected-outcome level under its own event
+id. Every file still becomes exactly one job — the losing enqueue is refused by a partial unique index
+and answered `AlreadyActive`.
+
+**Fix.** None. Neither outcome counts against a folder's consecutive-failure budget, so a busy cluster
+cannot trip the per-folder breaker by being busy. See
+[Operations](operations.md#contention-between-instances-is-not-a-failure).
+
+### Prometheus series jump between instances
+
+**Symptom.** Gauges on `/api/metrics` are discontinuous, and `bulksigner_jobs_awaiting_signer` reads
+lower than the dashboard's count.
+
+**Diagnosis.** `/api/metrics` is per-process and App Service's front door cannot target an instance, so
+each scrape lands on whichever instance the load balancer picked. **No configuration recovers scrape
+continuity.** The gauge is also per-instance by design: it counts the rows *this* instance polls.
+
+**Fix.** `sum()` across the fleet for a cluster-wide total — nothing is double-counted, a job having
+exactly one owner. For a supported path, use the Application Insights distro, which is instance-aware
+natively ([Telemetry](telemetry.md)). See
+[High availability](high-availability.md#metrics-scraping-reaches-an-arbitrary-instance).
+
+### A pause held every instance, and that was not expected
+
+**Symptom.** `POST /api/pipeline/pause` stopped the whole fleet rather than the instance it was sent to.
+
+**Diagnosis.** Not a fault. The pause flag is one row every worker reads each poll iteration, so pause is
+cluster-wide — which is what an operator pausing "the pipeline" means. **There is no per-instance
+drain**, and it was deliberately not built.
+
+**Fix.** To take one instance out, stop it and let
+[takeover](operations.md#when-an-instance-stops-answering-a-survivor-takes-its-jobs-over) reconcile its
+work. Note that takeover sits *behind* the pause gate, so a paused cluster does not declare its siblings
+dead.
 
 ## Docker-specific
 

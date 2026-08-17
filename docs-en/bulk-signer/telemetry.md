@@ -212,7 +212,8 @@ via `customEvents`. Queries written against a classic-SDK application will need 
 
 ## Related
 
-- [Job statistics](statistics.md) — the in-memory dashboard statistics, a separate always-local surface.
+- [Job statistics](statistics.md) — the dashboard's stage timings, held in the operational store and
+  read deployment-wide.
 - [REST API](rest-api.md) — the Prometheus `/api/metrics` endpoint, the durable scrape-based record.
 - [Configuration](configuration.md) — every configuration key.
 - [Security](security.md) — secret handling and the two-layer log redaction.

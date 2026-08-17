@@ -242,15 +242,28 @@ your own tooling. `logs/` and the SQLite database are **not** in the share and n
 storage — two instances pointed at one host's `data/` are the same instance twice. Local deployments
 have no marker, no row and no warning.
 
+:::note This whole section describes cluster mode **off**
+With `Cluster:Enabled = true` the marker means something different: the share is claimed by *the
+cluster* rather than by one instance, siblings share it deliberately, and the `work share owner` row
+reads `this cluster (one marker, shared between instances)`. What the marker guards under the switch is
+the one catastrophe below that no database can see — two operational stores over one share — and an
+instance whose store does not match the marker **refuses to start**. See
+[High availability](high-availability.md#the-work-share-gate-is-narrower-than-the-catastrophe-it-is-named-for).
+:::
+
 A work share is shared storage, which invites the assumption that two hosts may now serve one
-deployment. **They may not** — and moving the operational store to SQL Server does not change that,
-because none of the blockers are in the store:
+deployment. **Off cluster mode they may not** — and moving the operational store to SQL Server does not
+change that on its own, because none of the blockers are in the store:
 
 - the pipeline's **pause flag is a singleton row** read each poll iteration by *the* worker, so two
   workers read the same row and both act on it;
 - the **watchers are per-instance and event-driven**, so both see a file arrive and both enqueue it,
   with the loser recording an enqueue failure against that folder;
-- the **statistics are in memory**, so each instance presents its own partial view as the whole.
+- **nothing records which instance owns a job**, so a boot sweeps rows a sibling is still working.
+
+Cluster mode is the supported answer to each of those three, and it is a deliberate opt-in rather than
+something inferred from the storage provider — see
+[Azure App Service (cluster mode)](azure.md).
 
 **How the mark works.** The instance takes an exclusive, non-expiring lease on
 `bulksigner-instance.json`, a small file beside `processing/`, `output/` and `error/`. It records the
@@ -299,6 +312,73 @@ in each instance's own store:
 **If the marker cannot be claimed at all** — an unreachable share, a rotated credential — the row reads
 `not claimed cleanly at startup: …` and readiness goes red for that reason instead. Whether another
 instance holds it is then simply unknown, and unknown is not reported as the reassuring answer.
+
+## Which instances are alive (cluster mode only)
+
+With `Cluster:Enabled = true`, each instance keeps one row in the operational store — who it is, when it
+last beat, and which application version it is running — and every instance can read every other's.
+**System → Instances** on the dashboard is that table.
+
+| Column | What it tells you |
+|---|---|
+| Instance | The derived identity. On App Service this comes from the platform's `WEBSITE_INSTANCE_ID`, so it is stable for the life of the instance and distinct between siblings. |
+| State | **Live** while the last heartbeat is inside `Cluster:StaleAfterSeconds`; **Stale** past it. Stale is a presumption, not a confirmed death — see [the wager](high-availability.md#a-presumed-death-is-a-wager). |
+| Version | The application version that instance is running. Two different values here during anything but a deploy window is the mixed-version condition, and it is reported as a Critical at the newer instance's boot. |
+| Last beat | Age of the most recent heartbeat. The caption under the table names the cadence (`Cluster:HeartbeatSeconds`, default 15) and the staleness threshold (default 60) actually in force. |
+
+One row is badged as the instance answering your request. Because the load balancer picks per request,
+reloading the page moves that badge between rows — which is the cheapest confirmation available that
+traffic really is spread.
+
+`GET /api/folders` carries an `instance` field for the same reason: a machine client polling it needs to
+tell "the folder changed" from "a different instance answered".
+
+## When an instance stops answering, a survivor takes its jobs over
+
+Every surviving instance watches the heartbeat table. When a sibling goes stale, one survivor claims its
+in-flight rows and reconciles each one **by where it had got to**, not by retrying it:
+
+| The dead instance's job was… | What the survivor does | Why |
+|---|---|---|
+| Claimed, but had not reached the sign call | **Re-enqueued** | Nothing was attempted, so nothing is being retried. |
+| Past the sign call | **Failed**, conservatively | A signature is never re-attempted without a human deciding it. `Failed` is an honest terminal outcome, not "stuck" — the operator's [manual retry](#retrying-failed-jobs) remains the retry. |
+| `AwaitingSigner` (dispatched to Lacuna Signer) | **Reassigned** to the survivor, which resumes polling it | The remote side holds the work; only the poll needs a new owner. |
+
+Each takeover writes a `JobTakenOver` operational event naming **both** instances, so the audit trail
+records who lost the work and who picked it up.
+
+:::warning Takeover sits behind the pause gate
+`POST /api/pipeline/pause` holds every instance, and takeover does not run while the pipeline is paused.
+That is deliberate: an operator pausing a cluster to investigate a store that has gone slow is exactly
+the person who must not have every instance declare every sibling dead.
+:::
+
+Two rows nothing will ever take over, both reported rather than adopted:
+
+- **A job with no owner at all**, left by a build older than the ownership column or by a run with the
+  mode off. The remedy is named on every surface that meets one — boot once with `Cluster:Enabled =
+  false` so ordinary [startup recovery](#startup-recovery) sweeps it, then turn the mode back on.
+- **A job owned by a named instance that has no heartbeat row.** Absence of a heartbeat is not evidence
+  of death, so this is reported once and left rather than read as a licence to fail live work.
+
+Both cases, and why adopting them would reintroduce the defect the feature removes, are in
+[High availability](high-availability.md#rows-nobody-owns-are-reconciled-by-nobody).
+
+## Contention between instances is not a failure
+
+Every instance watches every input folder, so on each arrival they race. That is the design, and the
+losing side of the race is classified as an **expected outcome** rather than an error:
+
+- The losing enqueue is refused by a partial unique index over active original paths and answered
+  `AlreadyActive`. Every file becomes exactly one job.
+- A lease conflict on an input file is logged at the expected-outcome level, under its own event id, so
+  "a sibling got there first" and "something else on this instance did" stay different facts.
+- **Neither counts against the folder's consecutive-failure budget**, and an `AlreadyActive` outcome
+  resets that counter exactly as a successful enqueue does. A busy cluster therefore cannot trip the
+  [per-folder breaker](#per-folder-watcher-failure-isolation) simply by being busy.
+
+The batch claim degrades under contention too — it falls back to claiming one row at a time and logs the
+lost race. That is a small, known cost rather than a fault.
 
 ## The signing pipeline
 
@@ -437,9 +517,19 @@ which leaves canceled files alone).
 
 ## Clear Jobs
 
-A maintenance action that **permanently deletes every job record** — the job rows and their history
+A maintenance action that **permanently deletes finished job records** — the job rows and their history
 timelines — for administrative cleanup. It does **not** touch operational events, pipeline state,
 signing profiles, configuration, signed or processed files, or logs.
+
+:::warning Changed in 2.0.0 — finished records only
+Clear Jobs now deletes **terminal** jobs only. A `Queued`, parked or in-flight job survives the action,
+and both surfaces report what they left behind alongside what they removed. A script that clears the
+table and then expects it to be empty has to drain or cancel the unfinished jobs first.
+
+Deleting the row under a running job was the sharpest operator-action hazard in the product — under a
+cluster it would be a *sibling's* running job — so the narrowing is not gated on `Cluster:Enabled` and
+applies to every deployment.
+:::
 
 From the dashboard: **System → Danger zone → Clear Jobs**. A confirmation dialog gates the action;
 cancelling deletes nothing. From REST:
@@ -447,26 +537,25 @@ cancelling deletes nothing. From REST:
 ```bash
 curl -X DELETE http://localhost:8080/api/jobs \
   -H "X-API-Key: $BULK_SIGNER_API_KEY"
-# → {"deleted": 1234, "message": "Cleared 1234 job record(s)."}
+# → {"deleted": 1230, "skipped": 4, "message": "Cleared 1230 job record(s); skipped 4 unfinished."}
 ```
 
 What happens on confirm:
 
-- All job rows and their history are deleted in one transaction (retry-chain parent links are
-  dissolved first so the self-referencing foreign key does not block the delete).
-- A `JobsCleared` operational event records the actor (cookie or API-key identity), timestamp, and
-  deleted-row count; the same is emitted to the structured log. On failure the transaction rolls back,
-  an error is logged, and the operator stays on the page.
-- The in-memory elapsed-time [statistics](statistics.md) aggregates are reset, so the dashboard
-  performance panel also returns to zero.
+- Every **terminal** job row and its history is deleted in one transaction (retry-chain parent links
+  are dissolved first so the self-referencing foreign key does not block the delete).
+- Unfinished rows are counted and reported as `skipped` — on the dashboard as a line in the result
+  message, in the REST response as its own field.
+- A `JobsCleared` operational event records the actor (cookie or API-key identity), timestamp, and both
+  counts; the same is emitted to the structured log. On failure the transaction rolls back, an error is
+  logged, and the operator stays on the page.
+- A deployment-wide **reset marker** moves inside the same transaction, so the
+  [performance panel](statistics.md#resetting-the-panel) counts only jobs completed after it. Nothing
+  is deleted to clear the panel, and a clear that fails leaves it exactly as it was.
 
-:::warning Caveats
-The action runs unconditionally, **including over in-flight jobs**. A worker holding a now-deleted row
-tolerates the loss and moves on, but **files already staged in `processing/` for those jobs can be
-left orphaned** on disk. [Pause the pipeline](#pause-and-resume) first and let the active queue drain
-if you want to avoid orphaned staging files.
-
-There is no undo. Back up `db/bulksigner.db` first if the job history has audit value.
+:::warning There is no undo
+Back up the operational store first if the job history has audit value — `db/bulksigner.db` under
+SQLite, or your DBMS regime's backup under SQL Server. See [Retention](retention.md#backup-discipline).
 :::
 
 ## Per-folder watcher failure isolation
@@ -506,6 +595,18 @@ side — the local host has no way to know whether the participant has signed ye
 its first tick after boot, exactly where it left off.
 
 The recovery sweep is idempotent — a clean restart finds no in-flight jobs and is a no-op.
+
+:::note Under cluster mode a boot sweeps only its own rows
+A job records the instance that claimed it, and with `Cluster:Enabled = true` recovery is filtered to
+this instance's own identity — otherwise a boot would fail work a live sibling is still doing. A
+sibling's interrupted rows are handled by
+[takeover](#when-an-instance-stops-answering-a-survivor-takes-its-jobs-over) instead, which follows the
+owner's heartbeat rather than the boot.
+
+The consequence is the one thing to do at the upgrade: a row left in progress by an older build carries
+**no** owner, and nothing under the switch will ever sweep it. Boot once with `Cluster:Enabled = false`
+before the first cluster boot and this sweep clears them all.
+:::
 
 ## The ready-summary banner
 

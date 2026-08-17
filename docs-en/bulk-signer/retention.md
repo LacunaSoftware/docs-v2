@@ -54,6 +54,45 @@ Net effect at the defaults: ~14 days of structured logs at ≤ 50 MB per day-fil
 flushes frequently, so concurrent readers (`tail -f`, `journalctl -fu bulksigner`) see writes in
 near-real-time.
 
+## Logs in a table — nothing prunes them
+
+`Logging:AzureTable:*` sends the same log events to an Azure Storage table so the diagnostic stream
+survives a host whose disk does not (see
+[Configuration](configuration.md#loggingazuretable--a-second-log-sink)). It is the one destination in
+this product with **no retention mechanism at all**, and that is worth settling before you enable it
+rather than after.
+
+:::danger Decide the pruning story before you turn the sink on
+The file sink deletes its own old files (`RetainedFileCountLimit`). The table does not, and **no Azure
+mechanism can do it for you**: Azure Storage tables have no TTL, no lifecycle-management rule and no
+bulk-delete operation. The table grows for as long as the sink is enabled, and every row is billed
+storage plus the transactions to remove it later.
+:::
+
+What that means in practice:
+
+| | File sink | Table sink |
+|---|---|---|
+| Old data removed by | The sink itself, as it rolls | **Nothing.** You schedule a job, or it grows forever |
+| Bounded by | `RetainedFileCountLimit` × `FileSizeLimitBytes` | Your own pruning schedule |
+| Cost of leaving it alone | Nil — self-limiting | Grows monotonically |
+
+The supported answer is the `Prune-BulkSignerLogTable.ps1` script in the deployment package, run on a
+schedule (an Azure Automation runbook, a scheduled task, or a container job) with a retention window
+that matches whatever your file sink keeps. Two operational notes:
+
+- **Deletion is per entity.** There is no `DELETE WHERE`, so pruning is a query followed by batched
+  entity deletes, and the cost scales with what you are removing. Pruning weekly from the start is much
+  cheaper than pruning once after a year.
+- **Give each deployment its own table** if two share a storage account. Distinguishing them by a column
+  inside one table breaks the pruning recipe, which partitions by date rather than by deployment.
+
+Cluster mode makes this sink close to mandatory — a Linux container's disk vanishes on recycle and takes
+rolled log files with it — which is why leaving it off there logs a Critical at startup rather than
+passing silently. That is also why the ordering matters: the deployment most likely to need the sink is
+the one least likely to have a pruning job yet. See
+[High availability](high-availability.md#logs-are-ephemeral-unless-you-make-them-durable).
+
 ## Operational data — not auto-pruned
 
 The cleanup action (`POST /api/cleanup` and the dashboard's System-page Cleanup button) is currently
@@ -73,8 +112,9 @@ Default behavior:
 - Error directories accumulate in `error/`. Operators inspect, then delete with normal filesystem
   commands.
 - Job rows accumulate in the operational store, which grows linearly with throughput. The one built-in
-  tool for reclaiming that space is [Clear Jobs](operations.md#clear-jobs) — an all-or-nothing delete
-  of every job record. There is no age-based or selective pruning of job history in this version.
+  tool for reclaiming that space is [Clear Jobs](operations.md#clear-jobs), which deletes every
+  **finished** job record and leaves unfinished ones in place. There is no age-based or selective pruning
+  of job history in this version.
 
 ## The one exception: CNAB240 line detail
 
@@ -173,10 +213,31 @@ restart with a fresh DB) over partial deletes.
 
 ## Backup discipline
 
-Independent of retention:
+### The built-in backup feature — SQLite only
 
-- **Back up `db/bulksigner.db` before every service upgrade.** Schema migrations run automatically at
-  startup and are one-way.
+Under `Database:Provider = Sqlite`, the product can back the store up for you: `Backup:Enabled = true`
+adds a `/backup` dashboard page, `GET|POST /api/backup`, and an optional scheduler
+(`Backup:IntervalHours`). Artifacts go to a local path, an S3 or S3-compatible bucket, or an Azure Blob
+container, with `Backup:RetainCount` bounding how many are kept. Every key is in
+[Configuration](configuration.md#backup).
+
+:::warning `Backup:Enabled = true` under `SqlServer` refuses the boot
+It is a refusal naming both keys, not a silent no-op — because backing up a customer's own DBMS is that
+DBMS regime's job, and a feature that quietly did nothing would read as a backup that exists. Since
+cluster mode **requires** `SqlServer`, the combination is unreachable there by construction; Azure SQL's
+own point-in-time restore is the answer on that topology.
+:::
+
+Two constraints on `Backup:Disk:Path` are worth repeating here because they are retention mistakes
+rather than configuration ones, and both are refused at boot: a path inside a **watched input folder**
+(the pipeline would ingest, sign and then *delete* your backup) and a path inside `processing/`,
+`output/`, `error/` or `db/`.
+
+### Independent of retention, and of that feature
+
+- **Back up the operational store before every service upgrade.** Schema migrations run automatically at
+  startup and are one-way. Under `SqlServer` a 2.0.0 upgrade adds migrations in both histories, applied
+  at boot.
 - **Snapshot `output/` if it carries audit-significant artifacts.** Especially when encryption is
   enabled — losing an encrypted file is doubly irrecoverable (no password = no plaintext).
 - **Treat `data/` as a unit when backing up.** `input/`, `processing/`, `output/`, `error/`, `db/`,

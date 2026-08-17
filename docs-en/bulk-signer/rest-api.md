@@ -75,6 +75,7 @@ localized. The full inventory:
 | `job.output-unavailable` | 404 | Output download requested on a job that has no output yet (not completed). |
 | `job.output-gone` | 404 | Output download requested but the file is missing from `output/`. |
 | `job.already-processing` | 409 | Upload conflicted with an active job for the same on-disk file. |
+| `job.path-too-long` | 400 | The file's path exceeds 850 characters, so it could not be recorded. Refused **when the file is taken in** — by upload or by a watcher — rather than accepted and failed later, on every database provider. Shorten the directory nesting or the file name. |
 | `upload.empty` | 400 | Multipart `file` field is missing or zero bytes. |
 | `upload.too-large` | 413 | Upload exceeds `Upload:MaxBytes`. |
 | `upload.invalid-name` | 400 | Multipart `file` part is missing a `filename` header. |
@@ -95,6 +96,7 @@ localized. The full inventory:
 | `approval.unknown-approver` | 403 | The address is not in the job's frozen pool — also returned for a malformed address, deliberately. |
 | `approval.already-decided` | 409 | This approver has already decided; decisions are final. |
 | `approval.unknown-decision` | 400 | `decision` was present and was neither `approved` nor `rejected`. |
+| `approval.second-factor-required` | 403 | `ApproverSecondFactor:Enabled` is on, which **withdraws `POST /api/approvals/{id}` entirely** — every call refuses and no header, key or body field satisfies it, because only a browser session can carry a proven presence. Deciding moves to the approver portal; `GET /api/jobs/{id}/approvals` is unaffected. See [Approvals](approvals.md#proving-it-is-you). |
 | `approval.job-incomplete` | 500 | The job is parked but its frozen rule or content hash is missing — the row was modified outside the application. |
 | `approval.rejected` | — | Audited on the failed job. A rejection landed after a worker had already claimed the job, so the pipeline refused the signature. |
 | `approval.content-changed` | — | Audited on the failed job. The staged copy changed between being approved and being signed. **Should never be seen.** |
@@ -193,7 +195,7 @@ Possible errors: `upload.empty`, `upload.too-large`, `upload.invalid-name`,
 | `POST` | `/api/jobs/{id}/retry` | Create a new job with the same input and `ParentJobId = {id}`. Only valid when the source job is `Failed`. `Actions` rate-limited. |
 | `POST` | `/api/jobs/{id}/cancel` | Cancel a `Queued`, `AwaitingSigner` **or** `AwaitingApproval` job. In-flight local jobs return `409` with `code = "job.not-queued"`. `Actions` rate-limited. |
 | `GET` | `/api/jobs/{id}/approvals` | **Read only.** The job's approval record: the frozen rule, the frozen pool with each member's decision, and the decision list. `404` with `approval.not-required` on a job that never parked. |
-| `DELETE` | `/api/jobs` | **Destructive.** Delete every job record and its history. Returns `{"deleted": N, "message": "…"}`. Leaves events, files, and configuration untouched. `Actions` rate-limited. See [Clear Jobs](operations.md#clear-jobs). |
+| `DELETE` | `/api/jobs` | **Destructive.** Delete every **finished** job record and its history; `Queued`, parked and in-flight jobs survive. Returns `{"deleted": N, "skipped": M, "message": "…"}` — a script that clears and then expects an empty table must drain or cancel the unfinished jobs first. Leaves events, files, and configuration untouched. `Actions` rate-limited. See [Clear Jobs](operations.md#clear-jobs). |
 
 List `Queued` jobs:
 

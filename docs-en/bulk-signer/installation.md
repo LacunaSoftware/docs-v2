@@ -29,7 +29,15 @@ have that package on (or copied to) the target machine.
 | Linux server | systemd — `deploy/linux/install.sh` |
 | Windows server | Windows Service — `deploy/windows/Install-Service.ps1` |
 | Any host with Docker | Container — `deploy/docker/docker-compose.yml` |
+| Azure, on more than one instance | **[Azure App Service (cluster mode)](azure.md)** — its own page |
 | Just testing locally | Console — run the published executable in the foreground |
+
+Every target on this page is a **single instance**, which is what this product is unless you deliberately
+turn on cluster mode. Running two of these against one work share is a documented hazard, not a
+deployment — see [Operations](operations.md#when-another-instance-appears-to-own-the-work-share). The one
+supported multi-instance topology is an Azure Web App scaled out on one App Service Plan, and it has its
+own walkthrough ([Azure App Service](azure.md)) and its own list of limits
+([High availability](high-availability.md)).
 
 ## Prerequisites — common to every target
 
@@ -294,9 +302,12 @@ pipeline's pause flag, the frozen approval rules and the recorded approvals — 
 :::info Neither is a throughput decision
 SQLite is not this pipeline's ceiling — the bound is cryptography and I/O — and nothing about
 `SqlServer` makes signing faster. It matters because "we moved to SQL Server" reads as a scaling story,
-and that leads to the wrong inference about instances: **more than one instance is still unsupported**
-on either provider, for reasons that have nothing to do with the store. See
-[Operations](operations.md#when-another-instance-appears-to-own-the-work-share).
+and that leads to the wrong inference about instances: **choosing `SqlServer` does not by itself make a
+second instance supported.** Running more than one is an explicit opt-in (`Cluster:Enabled`) with its own
+prerequisites and its own list of limits — `SqlServer` is one of those prerequisites rather than the whole
+of it. Off that switch, two instances over one work share remain a documented hazard: see
+[Operations](operations.md#when-another-instance-appears-to-own-the-work-share). To actually scale out,
+start at [High availability and its limits](high-availability.md).
 :::
 
 ### What to have in place before the first boot
@@ -471,6 +482,34 @@ against a schema that is already current creates nothing.
 
 The startup recovery sweep moves any job left in flight by the previous version aside automatically
 — no manual cleanup needed. See [Operations](operations.md#startup-recovery).
+
+### Upgrading to 2.0.0
+
+Four changes can stop a deployment that starts today, or change what an existing script sees. Each is
+deliberate; the first is the one to check *before* editing anything.
+
+- **A watched input folder pointed at a work root now refuses the boot.** Such a configuration was
+  re-ingesting and then deleting the artifacts it produced, one per iteration, while reporting every job
+  `Completed`. **Check `output/` against what recipients actually collected** before you fix the config —
+  see [Troubleshooting](troubleshooting.md#a-deployment-that-used-to-start-now-refuses-naming-a-watched-input-folder).
+- **Clear Jobs deletes finished records only.** `DELETE /api/jobs` now reports `skipped` alongside
+  `deleted`, and a script that clears the table and then expects it empty has to drain or cancel the
+  unfinished jobs first. See [Operations](operations.md#clear-jobs).
+- **A file whose path exceeds 850 characters is refused when it is taken in**, with the new problem code
+  `job.path-too-long`, rather than being accepted and failed later.
+- **The dashboard's "Max throughput/sec" card is retired.** The
+  `bulksigner_signing_duration_seconds` histogram on `/api/metrics` is unchanged and still the external
+  record. See [Job statistics](statistics.md#max-throughputsec-is-gone).
+
+This release adds migrations in **both** database histories, applied at boot — so the backup warning above
+matters more than usual on this upgrade.
+
+:::warning Turning on cluster mode? Boot once with it off first
+`Cluster:Enabled = true` filters startup recovery to each instance's own jobs, and a row left in progress
+by an older build carries **no owner** — so nothing under the switch will ever sweep it. Boot once with
+`Cluster:Enabled = false`, let recovery run, then turn the mode on. It is a one-time concern at the
+upgrade. See [Azure App Service](azure.md#6-first-boot-on-one-instance).
+:::
 
 ## Quick health checks
 

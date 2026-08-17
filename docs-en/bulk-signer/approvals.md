@@ -395,6 +395,80 @@ account — no link needed.
   includes their email. An **Administrator-only** sign-in gets none of this — the page treats them as
   anonymous, because recognising an operator there would be operator-on-behalf-of approval.
 
+## Proving it is you
+
+`ApproverSecondFactor:Enabled` puts an RFC 6238 authenticator app between an approver and a decision.
+**Off by default**, so nothing about an existing deployment changes until somebody chooses it. Host-wide
+rather than per profile, deliberately: a per-profile rule would be frozen onto the job at the park, and
+authentication must not be in that snapshot — otherwise editing configuration could be an authorisation
+bypass.
+
+**Each approver binds one authenticator, once, through the portal**: a QR code, a manual-entry secret,
+and a live code confirmed before anything is stored. Afterwards the first decision made on a browser asks
+for the current six digits. Entering them opens a **verification window**
+(`ApproverSecondFactor:VerificationWindow`, twenty minutes by default) during which nothing on that
+browser asks again, however many files are cleared.
+
+The window is **absolute from the moment the code was typed, and belongs to the browser session rather
+than to the person** — proving the factor on a laptop at home does nothing for the machine left signed in
+at the office, which is precisely the unattended session the control exists to close. Zero is a legitimate
+setting and means "prompt on every decision".
+
+Other behaviour worth knowing:
+
+- **A code is single-use.** Five consecutive wrong ones close that approver's enrolment for five minutes.
+  Both counters live on the enrolment row, so a restart clears neither.
+- **Operators get an `Approver second factor` list** on the [System page](dashboard.md#system--system) —
+  one row per configured approver, enrolled or not, with the date — and a **Reset** button. That is the
+  lost-phone path, and it is recorded under the operator's name as its own audit event.
+- **Seeds are encrypted at rest** under a key derived from the required `ApproverSecondFactor:SeedSecret`.
+  Seeds are random per approver, so holding the first factor cannot mint the second. **Losing or rotating
+  that secret means every approver enrols again.**
+- **Every decision row records whether a factor was verified**, and when.
+- **The window crosses instances.** It lives in the operational store keyed by an identifier carried
+  inside the cookie, so a window opened via one instance is honoured via another with nothing added.
+
+:::danger Breaking, on opt-in: enabling the factor withdraws `POST /api/approvals/{id}`
+That route refuses **every** call while the setting is on, with `403` and
+`approval.second-factor-required`, and there is nothing a caller can send that would satisfy it — no
+header, no key, no body field — because what is missing is a proven presence and only a browser session
+can carry one.
+
+**Any approval driven from an ERP, a scheduler or a script stops on the day the setting is flipped**, and
+the operator flipping it is usually not the person whose integration stops. Treat it as a coordinated
+change rather than a configuration tweak.
+
+There is deliberately **no authenticated approve endpoint to move to**: an approve route behind the API
+key would be *weaker* than the anonymous page, since that key lives in the ERP's configuration, the
+deploy pipeline and a production settings file — so "an approver decided" would mean "something holding
+the operator credential decided". `GET /api/jobs/{id}/approvals` is untouched, so a system that
+[watches approval state](#reading-the-state-from-another-system) keeps working. It is only the deciding
+that moves to the portal.
+:::
+
+**The anonymous per-job page splits by reader rather than by route.** With the factor on,
+`/approve/{jobId}` opened by somebody the host cannot identify renders **read-only**: every figure, every
+payment line, and exactly the masking it used before — this narrows nothing about what a forwarded link
+discloses and must not be read as having improved it — with the decision panel replaced by a route to the
+portal, and the self-declared warning gone with it, because there is no longer a self-declared decision
+for it to warn about. The same URL opened by a reader holding a portal link or an Entra session behaves
+exactly as the portal does: the same controls, the same code prompt, and the *same* window, so verifying
+in the portal and then following a link from last week's mail does not ask twice.
+
+The boot banner follows the same rule. The warning that fires on every approval-configured profile —
+"decisions on this build are self-declared" — is false once the factor is on, so with the setting enabled
+it becomes an informational line stating the actual posture, including that the REST route now refuses
+every call.
+
+:::warning This does not make an operator unable to be an approver
+TOTP is symmetric, an operator can read every approver link and reset every enrolment, so an operator can
+still be any approver. Binding an approver to the CPF in the frozen pool via an ICP-Brasil certificate
+remains outstanding, and this control must not be described as having closed that gap.
+:::
+
+Every key, its bounds and the three boot refusals are in
+[Configuration](configuration.md#approversecondfactor).
+
 ## Rejection is a veto
 
 **One rejection stops the job, whatever the quorum arithmetic says.** A pool of three with a quorum of
@@ -528,6 +602,13 @@ fact. This is the deliberate opposite of the CNAB240 line detail, which *is* pur
 — see [Retention](retention.md).
 
 ## REST
+
+:::danger This route is withdrawn when the second factor is on
+`ApproverSecondFactor:Enabled = true` makes `POST /api/approvals/{id}` refuse **every** call with `403`
+and `approval.second-factor-required`, and no header, key or body field satisfies it. If an ERP or
+scheduler drives approvals here, read [Proving it is you](#proving-it-is-you) before enabling the factor.
+`GET /api/jobs/{id}/approvals` is unaffected.
+:::
 
 Deciding is one anonymous route:
 

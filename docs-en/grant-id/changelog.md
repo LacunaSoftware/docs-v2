@@ -1,5 +1,12 @@
 # GrantID changelog
 
+### 5.5.0 (2026-07-15) {#v5-5-0}
+
+* Bug fixes
+  * [LI-450] Improve security of error code display on error page
+
+Updates database model: no
+
 ### 5.4.0 (2026-05-28) {#v5-4-0}
 
 * Improvements

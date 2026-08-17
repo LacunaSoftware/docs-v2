@@ -1,5 +1,12 @@
 # Histórico de versões do GrantID
 
+### 5.5.0 (2026-07-15) {#v5-5-0}
+
+* Correções de bugs
+  * [LI-450] Melhorar segurança da exibição de códigos na página de erros
+
+Atualiza modelo do banco de dados: não
+
 ### 5.4.0 (2026-05-28) {#v5-4-0}
 
 * Melhorias

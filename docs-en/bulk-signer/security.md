@@ -125,6 +125,35 @@ HTTPS. The auth ticket has an **8-hour sliding expiration** — every authentica
 clock; eight idle hours and the operator is logged out. There is no longer-lived "remember me"
 option. Operators can log out explicitly via the account menu in the dashboard.
 
+### The session key ring, and where it lives
+
+Both session cookies — the operator's and the approver's — are ASP.NET Data Protection payloads, so the
+key ring that protects them decides who can validate a cookie. **Its location follows
+`Cluster:Enabled` rather than a setting of its own**, deliberately: a deployment able to choose the
+placement independently of the topology is a deployment able to choose the broken combination.
+
+| `Cluster:Enabled` | Where the ring lives | At rest |
+|---|---|---|
+| `false` (default) | `keys/` under `Storage:Root` | DPAPI-encrypted on Windows; unencrypted on Linux |
+| `true` | Rows in the operational store | **Plaintext**, guarded by the database's own access control |
+
+Two consequences of the clustered form, and the second is easy to miss:
+
+- **The Windows DPAPI encryptor is dropped under the switch.** Machine-scoped DPAPI is exactly the
+  property that makes a copy of `keys/` useless on another host — and exactly the property that makes a
+  ring unreadable by a sibling, so keeping it would be keeping the defect. On Windows this is weaker at
+  rest. It costs nothing on the supported topology, whose Linux container has no encryption at rest for
+  the on-disk ring either, and it is the one place turning cluster mode on trades a control away rather
+  than adding one.
+- **An unreachable store fails the request, with no fallback.** A host that quietly minted sessions from
+  a per-instance ring would issue cookies its siblings reject — the intermittent sign-out the shared ring
+  exists to remove.
+
+Either way, **read access to the ring is a session as anyone**: treat `keys/` with the same ACLs as the
+database, and treat the connection string as the credential it is. See
+[the operational store connection string](#the-operational-store-connection-string) and
+[High availability](high-availability.md#the-session-key-ring-is-plaintext-in-the-store).
+
 ## License storage
 
 The Lacuna PKI SDK license is a base64 string. Two ways to load it:
@@ -488,9 +517,41 @@ per device for a session cookie, opening a queue scoped to their pool membership
 
 Approval state is **readable** over REST — `GET /api/jobs/{id}` carries an `approval` summary and
 `GET /api/jobs/{id}/approvals` returns the frozen pool and the decision list, both behind the ordinary
-API-key-or-cookie policy. **No REST route records a decision**, and that asymmetry is a decision rather
-than a gap in the surface. Behind the API key it would be *worse* than the unauthenticated page: the
-key already sits in an ERP's configuration, a deploy pipeline and a production settings file.
+API-key-or-cookie policy. **No *authenticated* REST route records a decision**, and that asymmetry is a
+decision rather than a gap in the surface. Behind the API key it would be *worse* than the unauthenticated
+page: the key already sits in an ERP's configuration, a deploy pipeline and a production settings file, so
+"an approver decided" would mean "something holding the operator credential decided".
+
+The one route that does record a decision, `POST /api/approvals/{id}`, is anonymous and carries the same
+capability the approval link does. Enabling the second factor **withdraws it entirely** rather than
+authenticating it, for the same reason — see [below](#the-second-factor-and-what-it-is-worth).
+
+### The second factor, and what it is worth
+
+`ApproverSecondFactor:Enabled` adds a TOTP prompt before an approver's decision, once per verification
+window per browser session. What it closes is precisely the **unattended session**: a machine left signed
+in, or a portal link read by somebody who should not have it, no longer decides on its own. The window is
+absolute and belongs to the browser rather than to the person, which is what makes that true.
+
+Three limits to hold onto, because each is a claim this control does **not** support:
+
+- **It does not make an operator unable to be an approver.** TOTP is symmetric, an operator can read every
+  approver link and reset every enrolment, so an operator can still be any approver. Binding an approver
+  to the CPF in the frozen pool via an ICP-Brasil certificate remains outstanding, and the second factor
+  must not be described as having closed that.
+- **It does not narrow what a forwarded link discloses.** With the factor on, an unidentified reader of
+  `/approve/{jobId}` gets the same read-only view with the same masking as before — only the *capability*
+  to decide is withheld.
+- **It withdraws `POST /api/approvals/{id}` entirely** rather than gating it, because only a browser
+  session can carry a proven presence. See [Approvals](approvals.md#proving-it-is-you).
+
+**`ApproverSecondFactor:SeedSecret` is a secret with no rotation story.** It is the key every approver's
+authenticator seed is encrypted at rest under (PBKDF2-HMAC-SHA256 → AES-256-GCM), minimum 32 characters,
+and it is required whenever the factor is on — the store may be the customer's own DBMS, so seeds are
+never held in the clear there. Seeds are random per approver rather than derived, so holding the first
+factor cannot mint the second. **Losing or changing it means every approver enrols again**, which is a
+coordinated operation rather than a config edit. Supply it by environment variable and register it with
+the same care as `ApproverPortal:LinkSecret`.
 
 ### An approval is bound to bytes
 
@@ -527,6 +588,30 @@ tractable — **never run with `ASPNETCORE_ENVIRONMENT=Development` on a product
   `false` only when the Prometheus scraper sits inside the trust boundary.
 - Rate limiting is on by default (`RateLimiting:Enabled = true`). Disable only for closed-network
   installs.
+
+### Whose client address the product believes
+
+Two things act on the client address, so behind a proxy or load balancer this is a security setting rather
+than a detail: the **rate-limit partition**, and the **address recorded on every approval** — one of the
+compensating controls for the anonymous approval route. Behind a proxy with no forwarded-header handling,
+every caller arrives from one address: the per-client budget becomes a single shared one for the whole
+world, and the recorded address says nothing about who decided.
+
+`Hosting:ForwardedHeaders:Enabled = true` fixes that, and **requires a trust set** — one of
+`TrustAnyProxy`, `KnownProxies` or `KnownNetworks`, or the boot is refused rather than defaulting to the
+wide answer. Two rules worth stating plainly:
+
+- **`TrustAnyProxy = true` is correct on Azure App Service and dangerous on a reverse proxy.** App
+  Service's front end has no stable address to list; a reverse-proxy deployment that trusts anyone means
+  whoever can reach Kestrel directly can name themselves any client address. Lock the origin if you use
+  it — see [Azure App Service](azure.md#inbound--front-door-in-front-of-the-app).
+- **Setting the framework's `ASPNETCORE_FORWARDEDHEADERS_ENABLED` alongside it is refused at boot.** Each
+  adds its own processing, so headers would be handled twice and a `ForwardLimit` of one would silently
+  believe two hops.
+
+The ready-summary banner prints `forwarded headers = …` naming the trust set rather than only `on`. Under
+[cluster mode](high-availability.md#rate-limit-budgets-are-per-instance-so-the-effective-limit-is-n),
+remember that each instance enforces its own budget, so the effective per-client limit is ×N.
 
 ## Forensic posture
 

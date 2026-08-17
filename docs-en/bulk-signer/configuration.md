@@ -49,6 +49,58 @@ Standard `Microsoft.Extensions.Logging` knobs (`Logging:LogLevel:*`) work as usu
 | `Logging:File:MinimumLevel` | string | `Information` | `Logging__File__MinimumLevel` | One of `Verbose`, `Debug`, `Information`, `Warning`, `Error`, `Fatal`. |
 | `Logging:File:WriteToConsole` | bool | `true` | `Logging__File__WriteToConsole` | When true, also writes to stdout. The same redacting formatter runs on both sinks. |
 
+## `Logging:AzureTable` — a second log sink
+
+A deployment on an ephemeral filesystem — a container that is replaced rather than restarted — loses
+`data/logs/` every time. This block sends log events to an Azure Storage table as well, so the
+diagnostic stream survives the host. It is the last of three places state can move into Azure: files
+can already live on an Azure Files share
+([`Storage:Provider`](#storageprovider--storageazurefiles--the-work-share)) and the operational record
+in Azure SQL ([`Database`](#database-and-connectionstrings)).
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `Logging:AzureTable:Enabled` | bool | `false` | `Logging__AzureTable__Enabled` | Off unless set. `true` over an incomplete block is a **boot refusal** naming the missing key, not a silently inert sink. |
+| `Logging:AzureTable:TableName` | string | `bulksignerlogs` | `Logging__AzureTable__TableName` | Must already exist — the service does not create it. Alphanumeric only, 3–63 characters, must not start with a digit; a bad name is refused at boot rather than on the first write. |
+| `Logging:AzureTable:MinimumLevel` | string | *(inherits `Logging:File:MinimumLevel`)* | `Logging__AzureTable__MinimumLevel` | Narrow the table without narrowing the file. **Setting it *below* the global minimum does nothing** — that gate runs before any sink. |
+| `Logging:AzureTable:ServiceUri` | string | — | `Logging__AzureTable__ServiceUri` | **REQUIRED when enabled.** The table endpoint, e.g. `https://contosologs.table.core.windows.net`. A URL carrying a **query string is refused** — that is how a shared-access signature arrives, and SAS is deliberately not among this product's storage credentials. Refusing it also keeps this value non-secret, which is what makes it safe to print on the startup banner. |
+| `Logging:AzureTable:Credential` | string | — | `Logging__AzureTable__Credential` | **REQUIRED when enabled.** `ManagedIdentity`, `ServicePrincipal` or `AccountKey`. **Never defaulted** — see below. |
+| `Logging:AzureTable:AccountName` | string | — | `Logging__AzureTable__AccountName` | Required for `AccountKey` **and that mode only**: the shared-key credential needs the account by name, and it cannot be read off `ServiceUri` without guessing whether that URL is a production endpoint or an emulator one. |
+| `Logging:AzureTable:AccountKey` | string | — | `Logging__AzureTable__AccountKey` | **SECRET.** `AccountKey` mode only. |
+| `Logging:AzureTable:TenantId` | string | — | `Logging__AzureTable__TenantId` | `ServicePrincipal` mode only. |
+| `Logging:AzureTable:AppId` | string | — | `Logging__AzureTable__AppId` | `ServicePrincipal` mode only. |
+| `Logging:AzureTable:AppSecret` | string | — | `Logging__AzureTable__AppSecret` | **SECRET.** `ServicePrincipal` mode only. Env override recommended. |
+| `Logging:AzureTable:QueueLimit` | int | `10000` | `Logging__AzureTable__QueueLimit` | Events held in memory while the table is unreachable. Beyond it events are **dropped and counted** — reported on `/api/ready` and on `bulksigner_log_sink_dropped_total`. The bound exists because an unbounded buffer against a long outage is an out-of-memory kill of a signing service because *logging* broke. |
+| `Logging:AzureTable:BatchSizeLimit` | int | `100` | `Logging__AzureTable__BatchSizeLimit` | Events per write. Capped at 100, the documented ceiling on an entity-group transaction; above it a batch stops being one transaction rather than merely being slower. |
+| `Logging:AzureTable:BatchPeriodSeconds` | int | `5` | `Logging__AzureTable__BatchPeriodSeconds` | How long a partial batch waits before being written. |
+
+**The credential keys are the same ones `Storage:AzureFiles` and a profile's signing material blob
+use**, so an operator who has configured one storage credential in this product has configured them
+all. The identity needs **Storage Table Data Contributor** on the table or its account.
+
+**A block naming no credential is refused at boot.** Falling back to a development identity would mean
+a missing or unassigned managed identity working on a laptop and failing only in production.
+
+**Prefer `ManagedIdentity` to `AccountKey`.** Microsoft recommends disallowing Shared Key
+authorization, and many organisations set `allowSharedKeyAccess = false` at the account — on such an
+account `AccountKey` cannot be configured at all. An account key also grants full data-plane access to
+the *whole* account, so a key used for a log table has also handed out access to any Azure Files share
+the same account holds.
+
+### Two rules that are enforced, not advisory
+
+**The table may never be the only sink.** `Logging:File:Enabled` is the off switch (for a read-only
+root filesystem), but a configuration where **both local sinks are off** is refused at boot: if the
+table stops accepting writes, the failure to log is itself unloggable. Keep the file sink, or keep
+`WriteToConsole` — in a container that is stdout, which `docker logs` and App Service log streaming
+already capture.
+
+:::danger Nothing prunes the table
+No TTL, no lifecycle rule, no bulk delete — the table grows until you delete from it. Read
+[Retention](retention.md#logs-in-a-table--nothing-prunes-them) *before* enabling this, and schedule the
+pruning script. If two deployments share a storage account, give each its own table.
+:::
+
 ## `Database` and `ConnectionStrings`
 
 The **operational store** — jobs, their history, operational events, the pipeline's pause flag, the
@@ -65,8 +117,10 @@ authentication in the connection string for thirty years, and adding a second me
 already works would only add a way for the two to disagree.
 
 The store's provider is independent of `Storage:Provider` — files on an Azure Files share with the
-store in SQLite, or the reverse, are both ordinary. Neither combination makes running **more than one
-instance** supported; see [Operations](operations.md#when-another-instance-appears-to-own-the-work-share).
+store in SQLite, or the reverse, are both ordinary. **Neither combination makes running more than one
+instance supported on its own**: that is [`Cluster:Enabled`](#cluster--multi-instance-deployment), which
+*requires* `SqlServer` and `AzureFiles` but is not implied by them. Off that switch, see
+[Operations](operations.md#when-another-instance-appears-to-own-the-work-share).
 
 Azure SQL Managed Instance and SQL Server on a VM are *configure as `SqlServer`, untested* — the same
 implementation reaches them and nothing about them is known to differ, but neither is exercised.
@@ -883,9 +937,168 @@ See [REST API](rest-api.md) for the full inventory of metrics instruments.
 
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
-| `Statistics:Enabled` | bool | `true` | `Statistics__Enabled` | Master switch. When false the collector is a no-op (no recording, no locking) and the dashboard panel is hidden. Statistics are held only in process memory and reset on restart — they are never written to the database. |
+| `Statistics:Enabled` | bool | `true` | `Statistics__Enabled` | Master switch. When false the collector is a no-op (no recording, no locking), no row is written, and the dashboard panel is hidden. Statistics are one row per completed job in the operational store: they **survive restarts**, and every instance of a cluster reads the same figures. Turning the switch off does not delete rows already recorded — turning it back on shows them again; clearing the panel is [Clear Jobs](operations.md#clear-jobs). |
 
 See [Job statistics](statistics.md) for what each number means.
+
+## `Backup`
+
+Backs the database backup feature: the `/backup` dashboard page, `GET|POST /api/backup`, and the
+scheduler. **Off by default, and SQLite only** — with `Database:Provider = SqlServer`,
+`Backup:Enabled = true` is a **boot refusal** rather than a silent no-op, because backing up the store
+is that DBMS regime's job. Since cluster mode requires `SqlServer`, the combination is unreachable
+there by construction.
+
+Read once at startup. Only the selected destination's block is read at all.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `Backup:Enabled` | bool | `false` | `Backup__Enabled` | Master switch. When false nothing is scheduled, the start button and `POST /api/backup` refuse with `backup.disabled`, and the page explains what to turn on. **`true` under `Database:Provider = SqlServer` refuses the boot**, naming both keys and the remedy. |
+| `Backup:Destination` | string | `Disk` | `Backup__Destination` | `Disk`, `S3` or `AzureBlob`. Absent means `Disk` — the destination that needs no credential. Case-insensitive; an unrecognised value is refused at boot naming the key, your value and the valid names. |
+| `Backup:IntervalHours` | int? | *(absent)* | `Backup__IntervalHours` | How often a backup runs automatically. **Absent means manual only** — the feature is on, the button works, nothing runs on a timer. Bounds 1–8760. An interval rather than a time of day, deliberately: a time of day needs a timezone, which this product does not have. Anchored on the last **successful** run, so a restart does not reset it and a failed run does not consume it. Never having backed up means a backup is due immediately. |
+| `Backup:RetainCount` | int | `14` | `Backup__RetainCount` | How many artifacts to keep at the destination. `0` keeps **every** one — and does not even list the destination — for a bucket or container whose own lifecycle rules prune. Bounds 0–1000. A count rather than an age, because a count survives somebody changing `IntervalHours`. The prune runs only after a successful store and **cannot fail the run**. |
+| `Backup:Disk:Path` | string | — | `Backup__Disk__Path` | **REQUIRED when `Destination = Disk`.** No default, on purpose: every plausible one would put the backup on the same disk as the database it is a backup of. A UNC path or mounted network volume is fine. Four boot refusals: absent; the product's own `azurefiles://` scheme (a backup destination is deliberately **not** a storage provider); a path inside a **watched input folder** (the pipeline would ingest, sign and then *delete* the backup); and a path inside `processing/`, `output/`, `error/` or `db/`. |
+| `Backup:S3:BucketName` | string | — | `Backup__S3__BucketName` | **REQUIRED when `Destination = S3`.** |
+| `Backup:S3:Region` | string | — | `Backup__S3__Region` | **REQUIRED when `Destination = S3` and no `ServiceUrl` is set.** The region's system name, e.g. `sa-east-1`. Not defaulted: the SDK would fall back to the host's environment or shared profile, so an omitted region decides where a copy of the payment-approval record is stored by accident. |
+| `Backup:S3:Prefix` | string | `""` | `Backup__S3__Prefix` | Key prefix within the bucket. Normalised — `bulksigner`, `bulksigner/` and `/bulksigner/` all mean the same thing. |
+| `Backup:S3:Credential` | string | — | `Backup__S3__Credential` | **REQUIRED when `Destination = S3`.** `AccessKey` or `InstanceRole`. **Never defaulted** — the AWS SDK's own chain would authenticate as whoever the host happens to be. A presigned URL is not an accepted credential. |
+| `Backup:S3:AccessKeyId` | string | — | `Backup__S3__AccessKeyId` | **REQUIRED when `Credential = AccessKey`.** Deliberately **not** redacted from logs: it is the identifier half of the pair, and masking it would remove the one value that says which key a refused request used. Setting it under `InstanceRole` is a boot refusal. |
+| `Backup:S3:SecretAccessKey` | string | — | `Backup__S3__SecretAccessKey` | **REQUIRED when `Credential = AccessKey`. SECRET.** Setting it under `InstanceRole` is a boot refusal. |
+| `Backup:S3:ServiceUrl` | string | — | `Backup__S3__ServiceUrl` | An S3-compatible **API** endpoint instead of AWS — MinIO, Ceph, Wasabi, Backblaze B2. Absolute `http://` or `https://`. When set, `Region` becomes optional. |
+| `Backup:S3:ForcePathStyle` | bool | `false` | `Backup__S3__ForcePathStyle` | Address buckets as a path segment (`host/bucket/key`) rather than as a subdomain. `false` is what AWS itself wants; **almost every S3-compatible endpoint needs `true`** — leaving it false against MinIO or Ceph produces a DNS failure naming a hostname you never configured. |
+| `Backup:AzureBlob:ContainerUrl` | string | — | `Backup__AzureBlob__ContainerUrl` | **REQUIRED when `Destination = AzureBlob`.** The full https URL of the container, e.g. `https://contoso.blob.core.windows.net/bulksigner-backups`. Refused at boot when it is not absolute https, does not name an account, names more than one path segment (put a path in `Prefix`), or **carries a query string** — which is how a SAS arrives, and refusing one keeps this value permanently non-secret. The container is **not** created for you. |
+| `Backup:AzureBlob:Prefix` | string | `""` | `Backup__AzureBlob__Prefix` | Blob-name prefix within the container. Normalised like the S3 one. |
+| `Backup:AzureBlob:Credential` | string | — | `Backup__AzureBlob__Credential` | **REQUIRED when `Destination = AzureBlob`.** `ManagedIdentity`, `ServicePrincipal` or `AccountKey` — spelled exactly as `Storage:AzureFiles`' is. **Never defaulted.** `ManagedIdentity` is **system-assigned only**. The identity needs **`Storage Blob Data Contributor`** — write, not the `Storage Blob Data Reader` a certificate blob needs. |
+| `Backup:AzureBlob:TenantId` / `AppId` | string | — | `Backup__AzureBlob__TenantId`, … | **REQUIRED when `Credential = ServicePrincipal`.** |
+| `Backup:AzureBlob:AppSecret` | string | — | `Backup__AzureBlob__AppSecret` | **REQUIRED when `Credential = ServicePrincipal`. SECRET.** Setting it under another mode is a boot refusal — a secret this deployment does not use is one nobody will rotate. |
+| `Backup:AzureBlob:AccountKey` | string | — | `Backup__AzureBlob__AccountKey` | **REQUIRED when `Credential = AccountKey`. SECRET.** Grants full data-plane access to the **entire** storage account and cannot be scoped to one container. Setting it under another mode is a boot refusal. |
+
+Nothing inherits from `Storage:AzureFiles` or from a signing material blob's block, even where the same
+Entra application is named: those credentials grant read access to different resources, and this one
+needs **write**.
+
+### Example: an interval to a local volume
+
+```jsonc
+{
+  "Backup": {
+    "Enabled": true,
+    "Destination": "Disk",
+    "IntervalHours": 24,
+    "RetainCount": 14,
+    "Disk": { "Path": "/backup/bulksigner" }
+  }
+}
+```
+
+### Example: an S3-compatible endpoint (MinIO)
+
+```jsonc
+{
+  "Backup": {
+    "Enabled": true,
+    "Destination": "S3",
+    "IntervalHours": 12,
+    "RetainCount": 0,                      // the bucket's lifecycle rules prune
+    "S3": {
+      "BucketName": "bulksigner-backups",
+      "ServiceUrl": "https://minio.internal:9000",
+      "ForcePathStyle": true,
+      "Credential": "AccessKey",
+      "AccessKeyId": "…",
+      // In practice set via Backup__S3__SecretAccessKey, not here.
+      "SecretAccessKey": ""
+    }
+  }
+}
+```
+
+See [Retention](retention.md#backup-discipline) for how this fits the wider retention picture.
+
+## `Cluster` — multi-instance deployment
+
+Cluster mode — more than one active instance cooperating over one operational store and one work
+share. **Off by default, and off is byte-for-byte the single-instance product**: a deployment that
+never writes this section needs nothing and changes nothing on upgrade.
+
+These three keys are the smallest part of turning the mode on. What it costs is in
+[High availability and its limits](high-availability.md) — read that before setting `Enabled = true` —
+and how to deploy it is [Azure App Service (cluster mode)](azure.md), which also carries the platform
+settings (session affinity, the health-check path, Always On) that have no key here because they are
+not this product's to set.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `Cluster:Enabled` | bool | `false` | `Cluster__Enabled` | Master switch. When true the boot refusals below apply; when false or absent, no cluster mechanism is registered and nothing changes. The supported multi-instance topology is exactly one: an Azure Web App (Linux container) scaled out on one App Service Plan. |
+| `Cluster:HeartbeatSeconds` | int | `15` | `Cluster__HeartbeatSeconds` | How often this instance writes one row saying it is alive. Range `[5, 300]`, refused at boot outside it. Read only when the mode is on. |
+| `Cluster:StaleAfterSeconds` | int | `60` | `Cluster__StaleAfterSeconds` | How long an instance may go quiet before its siblings presume it dead. Range `[15, 3600]`, and refused at boot when it is worth **under three cadences** — a threshold that short presumes death on one or two missed beats, and a beat goes missing for reasons that are not death (a collection pause, a store that took a moment, a container the platform briefly starved). The default is four cadences. |
+
+### What `Enabled = true` refuses at boot
+
+Every cluster configuration that could not have worked is a refusal naming the keys and the remedy:
+
+- **`Database:Provider` must be `SqlServer`.** The store is the cluster's coordination point, and a
+  SQLite file cannot be shared between hosts.
+- **The work share and every watched input folder must be on `AzureFiles`.** The local file store's
+  lease excludes nothing outside its own process, and a folder local to one instance is invisible to
+  its siblings. The zero-config synthesised `default` folder is local, so a first run with the switch
+  on refuses too.
+- **The per-host certificate sources `Pkcs11` and `WindowsStore` are refused.** A token or a machine
+  store lives on one machine, and cluster instances are fungible. Use `Pfx` (ideally
+  [read from a blob](#blob--reading-the-file-from-azure-blob-storage)) or `AzureKeyVault`. A stale
+  `Certificate` block on a `Method = LacunaSigner` profile stays tolerated, as it is everywhere else.
+
+One refusal is **not** about configuration at all, and is listed here because it reads like one: with
+the mode on, the work share's own marker records which operational store the share belongs to, and an
+instance whose store does not match refuses to start naming both. That is a fact about the share rather
+than about `appsettings.json`, and it is the one thing that catches two clusters pointed at one work
+share.
+
+One cluster condition is deliberately a **warning, not a refusal**: cluster mode with
+`Logging:AzureTable:Enabled = false` logs a Critical at startup, because on the supported topology the
+instance disk is ephemeral and rolled log files are discarded on every recycle. The never-only-sink
+rule keeps the local file sink on either way.
+
+### Identity and liveness
+
+**Identity is derived, never configured, and there is deliberately no key for it.** An instance calls
+itself by the platform's own instance id (`WEBSITE_INSTANCE_ID`, which App Service sets on every
+instance) or by the machine name where there is no such variable, plus a fresh **incarnation**
+identifier for each boot. App Service creates and destroys instances by scale rule, so a name an
+operator typed would be a key nobody could keep truthful; the incarnation is what lets an instance tell
+*its own previous life* from a stranger.
+
+Each instance keeps one row in the operational store — identity, incarnation, application version, when
+it started, when it last said it was alive — refreshed on `Cluster:HeartbeatSeconds` and presumed dead
+past `Cluster:StaleAfterSeconds`. The [System page](dashboard.md#system--system) renders that table as
+its **Instances** view. Two guards ride on it, deliberately different in kind:
+
+- **A booting instance that finds its own identity already beating refuses to start**, naming the
+  identity on the console and in the log. Identity is what recovery, takeover and every per-instance
+  surface are built on, so two processes answering to one name makes all of them wrong at once and
+  there is no degraded mode to offer.
+- **Live instances on a different application version log a Critical and the boot continues.** Upgrades
+  on the supported topology are stop-the-world, so this is a deployment slot swapped into a running
+  cluster, or a deploy that did not stop every instance. It is a warning rather than a refusal on
+  purpose: refusing would block instances from coming up for as long as a *dead* old-version heartbeat
+  took to go stale, which is exactly when an operator needs them up.
+
+If the operational store is unreachable at boot the registration is skipped along with the migration,
+the host still starts, and the instance is simply absent from the Instances view until it is restarted
+with the store reachable.
+
+### The session key ring has no key of its own, and needs none
+
+Off the switch, the Data Protection ring is `keys/` under `Storage:Root`, DPAPI-encrypted on Windows.
+On, it is rows in the operational store, in plaintext, guarded by the database's own access control —
+because a ring derived from a local root is structurally one host's, so behind a load balancer a cookie
+minted by one instance is rejected by the next, which reaches people as an intermittent sign-out with
+nothing anywhere reporting it. Both cookies ride it, so it strands operators and approvers alike.
+
+It follows the switch rather than a setting deliberately: a deployment that can choose the placement
+independently of the topology is a deployment that can choose the broken combination. See
+[Security](security.md) and
+[High availability](high-availability.md#the-session-key-ring-is-plaintext-in-the-store).
 
 ## `Telemetry`
 
@@ -923,6 +1136,69 @@ Rate-limited responses carry `code = "rate-limited"` in the error envelope.
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
 | `Hosting:RequireHttps` | bool | `false` | `Hosting__RequireHttps` | Gates the in-process HTTPS redirect. `false` (default) for service and Docker installs that terminate TLS at a reverse proxy. Surfaced in the ready-summary banner as `https redirect = on/off`. |
+| `Hosting:ForwardedHeaders:Enabled` | bool | `false` | `Hosting__ForwardedHeaders__Enabled` | Read the client's address and scheme from `X-Forwarded-For` and `X-Forwarded-Proto`. Off by default, and off is byte-for-byte the product as it shipped — no middleware is added at all. Turning it on **requires a trust set**: one of `TrustAnyProxy`, `KnownProxies` or `KnownNetworks`, or the boot is refused. Surfaced in the ready-summary banner as `forwarded headers = …`, naming the trust set rather than only `on`. |
+| `Hosting:ForwardedHeaders:TrustAnyProxy` | bool | `false` | `Hosting__ForwardedHeaders__TrustAnyProxy` | Believe a forwarded header from **any** upstream address. The intended setting on Azure App Service, whose front door has no stable address to list. ⚠️ On a reverse-proxy deployment it means anybody who can reach Kestrel directly can name themselves any client address. Cannot be combined with the two keys below — a list beside it would be ignored, so it is refused at boot rather than resolved by precedence. |
+| `Hosting:ForwardedHeaders:KnownProxies` | string[] | `[]` | `Hosting__ForwardedHeaders__KnownProxies__0` | Bare IP addresses whose forwarded headers are believed (`10.4.0.7`, `::1`). A value that is not an IP address is refused at boot, naming it. **The framework's loopback defaults are not kept** — when this section names a trust set, that set is the whole of it, so a proxy on this host must be listed. |
+| `Hosting:ForwardedHeaders:KnownNetworks` | string[] | `[]` | `Hosting__ForwardedHeaders__KnownNetworks__0` | CIDR ranges whose forwarded headers are believed (`10.4.0.0/16`). Refused at boot if it is not a CIDR range, or if the address carries bits below its prefix length — `10.4.0.7/16` describes `10.4.0.0/16`, and a file that says one range while the host trusts another is worth failing over. |
+| `Hosting:ForwardedHeaders:ForwardLimit` | int | `1` | `Hosting__ForwardedHeaders__ForwardLimit` | How many entries are taken off the right-hand end of each forwarded header — one per proxy the request genuinely passes through, which is `1` for both a platform load balancer and a single reverse proxy. Range `[1, 16]`, refused at boot outside it; the framework's "unlimited" is deliberately not reachable, because an unlimited chain is one whose far end the client wrote. |
+
+### Why forwarded headers are a product key and not just the framework's switch
+
+ASP.NET Core has its own switch, `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`, and it trusts **any**
+upstream with no way to narrow that. Setting both it and `Hosting:ForwardedHeaders:Enabled` is
+**refused at boot**, naming both: each adds forwarded-headers processing, so every header would be
+processed twice and a `ForwardLimit` of one would silently believe two hops.
+
+Two things in the product act on the client address, which is why whose headers you believe is a
+configuration question rather than a detail:
+
+- **The rate-limit partition.** Behind a load balancer every caller arrives from one address, so the
+  anonymous approval route's per-client budget becomes a single shared one for the whole world.
+- **The address recorded on an approval**, which is one of the compensating controls for the anonymous
+  approval route. An address that is really the load balancer's records nothing about who decided.
+
+On Azure App Service the intended setting is `Enabled = true` with `TrustAnyProxy = true`, and the
+hazard that carries is closed by locking the origin — see
+[Azure App Service](azure.md#inbound--front-door-in-front-of-the-app).
+
+## `ApproverSecondFactor`
+
+A TOTP second factor for approvers — a code from an authenticator app, held against a per-person
+enrolment. **Off by default**, so upgrading changes nothing. Read once at startup; change any of it and
+restart.
+
+Host-wide rather than per signing profile, and that is the load-bearing choice rather than a
+convenience: a per-profile rule is frozen onto the job when it parks, and authentication must not be in
+that snapshot — the snapshot records *which rule applied*, so editing this file can never be an
+authorisation bypass. A host-wide switch has nothing per-profile to freeze, so a job that parked before
+the factor was enabled needs no migration and no special case.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `ApproverSecondFactor:Enabled` | bool | `false` | `ApproverSecondFactor__Enabled` | Master switch. When false nothing about any approver surface changes and no `ApproverSecondFactor:*` value is read. When true: the enrolment panel appears on `/approvals`, **every decision on the portal asks for a code once per verification window**, and the two surfaces that carry no browser session — `POST /api/approvals/{id}` and a decision from `/approve/{jobId}` — **refuse outright**. That last part breaks any ERP driving approvals over REST; see [Approvals](approvals.md#proving-it-is-you). |
+| `ApproverSecondFactor:SeedSecret` | string | — | `ApproverSecondFactor__SeedSecret` | **REQUIRED when enabled. SECRET — never commit it.** The key every approver's authenticator seed is encrypted at rest under (PBKDF2-HMAC-SHA256 → AES-256-GCM). Minimum 32 characters, the same floor `ApproverPortal:LinkSecret` carries. It **encrypts** the seeds; it does not derive them — seeds are random per approver, deliberately, so that holding the first factor cannot mint the second. **Losing or rotating it means every approver enrols again.** |
+| `ApproverSecondFactor:VerificationWindow` | TimeSpan | `00:20:00` | `ApproverSecondFactor__VerificationWindow` | How long a proven factor stands before it must be proven again. **Zero is legitimate and means "prompt on every decision"** — the strictest setting, not a disabled one. Absolute, never sliding, and scoped to one browser session. Bounds `00:00:00` to `08:00:00`. **Frozen onto each window when the code is entered**, so editing it governs windows opened afterwards and changes nothing about ones already open. |
+| `ApproverSecondFactor:Issuer` | string | `Lacuna Bulk Signer` | `ApproverSecondFactor__Issuer` | The label an authenticator app shows above the code. Carried in the provisioning URI's `issuer` parameter and repeated in its label, because apps disagree about which they read. Set it when one directory holds several environments and an approver would otherwise see two identically-named accounts. |
+
+:::warning Always write the days component in `VerificationWindow`
+A three-component value is `hh:mm:ss` only while the first number is 23 or less; at 24 and above the
+binder reads it as *days*, so `"24:00:00"` means twenty-four days. Unlike `ExpiresAfter`, which accepts
+that silently, the eight-hour ceiling here turns it into a boot refusal that names the mistake.
+:::
+
+### Three boot refusals
+
+`Enabled = true` fails startup, naming the key, when:
+
+1. **`SeedSecret` is missing or shorter than 32 characters.** Enrolments are unreadable without it, so a
+   half-configured factor is not a weaker control — it is one whose strength nobody has stated.
+2. **`VerificationWindow` is negative or above eight hours.** Beyond a shift the value stops describing
+   presence at a keyboard and starts describing a session, which is what a sliding window was rejected
+   for being.
+3. **`ApproverPortal:Enabled` is false *and* no `Auth:EntraId` section is configured.** Those are the
+   only two surfaces that produce an identified session, and the factor is proven inside one. With
+   neither, nobody could enrol, every job on an approval-configured profile would park indefinitely, and
+   no payment file would be signed.
 
 ## `AllowedHosts`
 

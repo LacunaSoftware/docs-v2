@@ -32,7 +32,8 @@ and telemetry are each opt-in.
 - **Approval gate.** Park a payment file on a quorum of named approvers before any signature exists.
   One rejection is a veto; approvals are bound to the file's bytes, and the rule is frozen onto the
   job so editing configuration can never release a parked file. Approvers get their own queue, with
-  batch approval and an Excel export.
+  batch approval and an Excel export — and an optional **TOTP second factor** that asks an approver to
+  prove they are present before a decision.
 - **Recoverable pipeline.** Jobs flow through a durable queue with pause/resume that survives a
   restart. If the service is stopped mid-flight, a startup recovery sweep moves any interrupted job
   aside so nothing is silently lost.
@@ -50,14 +51,24 @@ and telemetry are each opt-in.
 - **Storage and store, local or in Azure.** The work tree can stay on local disk or live in an
   **Azure Files** share; the operational store can stay in SQLite or move to **SQL Server / Azure
   SQL** under your own backup and DR regime. The two choices are independent.
+- **Scale-out on Azure App Service (opt-in).** `Cluster:Enabled` runs more than one active instance over
+  one operational store and one work share: a job is never processed twice, a dying instance's work is
+  taken over rather than stranded, and the pipeline keeps signing while a host is gone. Off by default,
+  and off is byte-for-byte the single-instance product. See
+  **[Azure App Service](azure.md)** and, first, **[its limits](high-availability.md)**.
+- **Database backup (SQLite deployments).** Scheduled or on-demand backups of the operational store to a
+  local path, an S3-compatible bucket or an Azure Blob container, with a retention count.
 - **Performance visibility.** A per-stage timing panel (queue wait, signing, verification, output)
-  with throughput and a Local vs Remote split, plus optional Azure Application Insights export.
-- **Observability.** Structured logs with automatic secret redaction, a Prometheus metrics
-  endpoint, and an RFC 9457 `ProblemDetails` error envelope with stable machine-readable codes.
+  with throughput and a Local vs Remote split — held in the operational store, so it survives restarts
+  and describes a whole cluster — plus optional Azure Application Insights export.
+- **Observability.** Structured logs with automatic secret redaction and an optional **Azure Table**
+  sink for hosts whose disk does not survive a restart, a Prometheus metrics endpoint, and an RFC 9457
+  `ProblemDetails` error envelope with stable machine-readable codes.
 - **Per-IP rate limiting.** Configurable fixed-window limits on the upload, action, approval and
-  export endpoints.
+  export endpoints, with optional forwarded-header support so the real client is counted behind a proxy
+  or load balancer.
 - **Multi-target deployment.** The same service runs as a Linux systemd unit, a Windows Service, a
-  Docker container, or a foreground console process.
+  Docker container, an Azure Web App, or a foreground console process.
 
 ## How it works
 
@@ -106,6 +117,8 @@ For Linux systemd, Windows Service, and foreground installs, see **[Installation
 | Topic | Page |
 |-------|------|
 | Install the service on any supported target | [Installation](installation.md) |
+| Scale out on Azure App Service, step by step | [Azure App Service (cluster mode)](azure.md) |
+| What running more than one instance does *not* give you | [High availability and its limits](high-availability.md) |
 | Every `appsettings.json` key (type, default, environment override) | [Configuration](configuration.md) |
 | Picking and configuring a certificate source (PFX / PKCS#11 / Windows store / Azure Key Vault) | [Certificates](certificates.md) |
 | Secret handling, API-key rotation, file ACLs, log redaction | [Security](security.md) |
@@ -139,3 +152,7 @@ When the service is running, a live OpenAPI reference is served at `/scalar/v1`.
 | Putting an approval step in front of the signer | [Approvals](approvals.md) → [Configuration](configuration.md#signingprofilesapproval--the-approval-gate) → [Security](security.md) |
 | Signing in with organizational accounts | [Installation](installation.md#microsoft-entra-id-sign-in-optional) → [Configuration](configuration.md#authentraid--optional-microsoft-entra-id-sign-in) → [Security](security.md) |
 | Running with no durable local disk | [Configuration](configuration.md#storageprovider--storageazurefiles--the-work-share) → [Installation](installation.md#choosing-where-the-operational-store-lives) → [Certificates](certificates.md#reading-the-file-from-a-blob) |
+| Running more than one instance | [High availability and its limits](high-availability.md) → [Azure App Service](azure.md) → [Configuration](configuration.md#cluster--multi-instance-deployment) |
+| Keeping the log stream when the host's disk does not survive | [Configuration](configuration.md#loggingazuretable--a-second-log-sink) → [Retention](retention.md#logs-in-a-table--nothing-prunes-them) |
+| Asking approvers for a second factor | [Approvals](approvals.md#proving-it-is-you) → [Configuration](configuration.md#approversecondfactor) → [Security](security.md) |
+| Backing up the operational store | [Retention](retention.md#backup-discipline) → [Configuration](configuration.md#backup) |

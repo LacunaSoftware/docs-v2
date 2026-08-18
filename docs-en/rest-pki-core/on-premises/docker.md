@@ -1,5 +1,5 @@
 ---
-sidebar_position: 10
+sidebar_position: 11
 sidebar_label: "Setup on Docker"
 slug: /rest-pki/core/on-premises/docker
 ---

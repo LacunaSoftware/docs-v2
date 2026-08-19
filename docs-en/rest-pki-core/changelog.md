@@ -7,6 +7,41 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.4.4 (2026-08-18) [patch] {#v4-4-4}
+
+Updates database model: no
+
+* Bug fixes
+
+  * [RPNG-831] Trusted-root certificate view failing in System Admin security contexts
+
+
+### 4.5.2 (2026-08-17) {#v4-5-2}
+
+Updates database model: no
+
+* Bug fixes
+
+  * [RPNG-837] Biometric subjects paginated listing failed when called with query string parameters
+
+
+### 4.5.1 (2026-08-17) {#v4-5-1}
+
+Updates database model: no
+
+* New features
+
+  * [RPNG-827] E-Notariado standard security context (activation-gated)
+
+* Bug fixes
+
+  * [RPNG-830] Serilog logging did not work on the OpenTelemetry-enabled image
+
+  * [RPNG-831] Trusted-root certificate view failing in System Admin security contexts
+
+  * [RPNG-832] Spurious error logged at boot when FaceTec is not in use
+
+
 ### 4.5.0 (2026-08-06) {#v4-5-0}
 
 Updates database model: yes
@@ -37,7 +72,13 @@ Updates database model: yes
 
 * Bug fixes
 
+  * [RPNG-776] Fixed some API errors being returned as a generic 500 instead of the proper error model
+
+  * [RPNG-789] Fixed biometric sessions failing to start when a plan-level transaction limit was set to unlimited
+
   * [RPNG-809] Transaction-limiting cache duration setting was not applied, always falling back to the default duration
+
+  * [RPNG-823] Document face match now reported from the actual match result instead of the configuration
 
 
 ### 4.4.3 (2026-08-05) {#v4-4-3}

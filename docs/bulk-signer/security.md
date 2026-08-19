@@ -481,7 +481,7 @@ job que um aprovador pode abrir:
 
 - **Sem download do arquivo bruto.** A tabela renderizada é limitada e serve à decisão; o arquivo é um
   dump completo, legível por máquina, do CPF e da conta bancária de cada beneficiário, em um formato
-  feito para processamento em massa. O `GET /api/jobs/{id}/output` exige credenciais de operador.
+  feito para processamento em lote. O `GET /api/jobs/{id}/output` exige credenciais de operador.
   Desmascarar a tabela para um aprovador identificado **não** liberou os bytes.
 - **Sem índice *anônimo* de aprovações pendentes.** O portal do aprovador é um índice, mas carrega uma
   política de autorização e lista apenas os jobs cujo pool congelado nomeia a pessoa que o está lendo.

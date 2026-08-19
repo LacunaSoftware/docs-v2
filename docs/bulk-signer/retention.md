@@ -65,7 +65,7 @@ depois.
 :::danger Decida a história da poda antes de ligar o destino
 O destino de arquivo apaga seus próprios arquivos antigos (`RetainedFileCountLimit`). A tabela não, e
 **nenhum mecanismo do Azure consegue fazer isso por você**: tabelas do Azure Storage não têm TTL, não têm
-regra de gerenciamento de ciclo de vida e não têm operação de exclusão em massa. A tabela cresce por todo
+regra de gerenciamento de ciclo de vida e não têm operação de exclusão em lote. A tabela cresce por todo
 o tempo em que o destino estiver habilitado, e cada linha é armazenamento cobrado, mais as transações
 para removê-la depois.
 :::

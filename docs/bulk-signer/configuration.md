@@ -98,7 +98,7 @@ ela mesma não registrável. Mantenha o destino de arquivo, ou mantenha o `Write
 container isso é a saída padrão, que o `docker logs` e o streaming de logs do App Service já capturam.
 
 :::danger Nada poda a tabela
-Sem TTL, sem regra de ciclo de vida, sem exclusão em massa — a tabela cresce até você apagar dela. Leia
+Sem TTL, sem regra de ciclo de vida, sem exclusão em lote — a tabela cresce até você apagar dela. Leia
 [Retenção](retention.md#logs-em-uma-tabela--nada-os-poda) *antes* de habilitar isto, e agende o script
 de poda. Se duas implantações compartilham uma conta de armazenamento, dê a cada uma sua própria tabela.
 :::
@@ -863,7 +863,7 @@ observador espera até que o tamanho e a data da última escrita permaneçam id�
 |-------|------|--------|------------------|-------------|
 | `WatchedFolder:StabilityPollIntervalMs` | int | `500` | `WatchedFolder__StabilityPollIntervalMs` | Intervalo entre verificações de estabilidade. Limites: 50–10000. |
 | `WatchedFolder:StabilityRequiredSamples` | int | `3` | `WatchedFolder__StabilityRequiredSamples` | Amostras idênticas consecutivas necessárias antes do enfileiramento. Limites: 1–100. |
-| `WatchedFolder:StabilityConcurrency` | int | `8` | `WatchedFolder__StabilityConcurrency` | Quantos arquivos candidatos cada pasta estabiliza e enfileira concorrentemente. A verificação de estabilidade bloqueia aproximadamente `StabilityRequiredSamples × StabilityPollIntervalMs` por arquivo, então processá-los um de cada vez limita a entrada a cerca de um arquivo por esse intervalo; sobrepor as esperas mantém o pipeline alimentado em despejos em massa. Limites: 1–64. |
+| `WatchedFolder:StabilityConcurrency` | int | `8` | `WatchedFolder__StabilityConcurrency` | Quantos arquivos candidatos cada pasta estabiliza e enfileira concorrentemente. A verificação de estabilidade bloqueia aproximadamente `StabilityRequiredSamples × StabilityPollIntervalMs` por arquivo, então processá-los um de cada vez limita a entrada a cerca de um arquivo por esse intervalo; sobrepor as esperas mantém o pipeline alimentado quando um lote grande de arquivos chega de uma vez. Limites: 1–64. |
 | `WatchedFolder:StabilityTimeoutSeconds` | int | `60` | `WatchedFolder__StabilityTimeoutSeconds` | Espera máxima antes de desistir de um arquivo que nunca estabiliza. Limites: 1–3600. |
 | `WatchedFolder:PollIntervalSeconds` | int? | `30` | `WatchedFolder__PollIntervalSeconds` | **Com que frequência uma pasta que consulta é enumerada — não se ela consulta.** Sobrescrito por pasta por `Storage:Inputs[N].PollIntervalSeconds`, e é a presença *daquela* chave que liga a consulta para uma pasta local; definir apenas esta não muda nada em lugar nenhum. Uma pasta `AzureFiles` sempre consulta e toma este valor a menos que nomeie o seu. Limites: 5–3600. |
 | `WatchedFolder:IgnoredExtensions` | array | `[".tmp", ".part", ".crdownload", ".swp"]` | n/a (use a configuração) | Extensões de arquivo que o observador ignora por completo. |

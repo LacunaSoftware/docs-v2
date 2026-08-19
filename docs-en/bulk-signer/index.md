@@ -89,10 +89,13 @@ log file. The dashboard and the REST API read the same data and trigger the same
 
 ## Quickstart — Docker
 
-Using the deployment package provided by Lacuna Software:
+Using the deployment package provided by Lacuna Software, plus the image from Lacuna's private Docker
+image repository — see [Obtaining the product](installation.md#obtaining-the-product):
 
 ```bash
 cd deploy/docker
+
+docker login <lacuna-registry> --username <registry-username>   # the compose file names the repository
 
 cp .env.sample .env
 mkdir -p data logs config

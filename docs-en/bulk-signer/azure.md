@@ -49,7 +49,7 @@ makes much stronger than they are elsewhere.
 | 1 | **An Azure SQL database**, plus a login in `db_datareader` + `db_datawriter` + `db_ddladmin` | The store is the cluster's coordination point: job claims, the pause flag, the heartbeat table and the session key ring all live there. `Cluster:Enabled = true` with `Database:Provider` anything but `SqlServer` is **refused at boot**. This service creates its tables, not its database. |
 | 2 | **An Azure Files share (SMB)** for the work tree, with every watched input directory created inside it | `Storage:Provider` and **every** `Storage:Inputs[]` entry must resolve to `AzureFiles`, refused at boot otherwise. The local store's lease is in-process bookkeeping that excludes nothing outside its own process, and a folder local to one instance is invisible to its siblings. An NFS share is refused by name. |
 | 3 | **A decision between the two certificate sources that are not per-host** — `Pfx` read from a blob, or `AzureKeyVault` | `Pkcs11` and `WindowsStore` are **refused at boot**: a token or a machine store lives on one machine, and cluster instances are fungible. That leaves two, and neither is the obvious winner — [step 3](#3-the-signing-key-lives-in-a-vault) is the choice and what it costs. Nothing has to exist yet. |
-| 4 | **The container image in a registry the web app can pull from** | Built and pushed by `Publish-ToAcr.ps1` in the deployment package. |
+| 4 | **The container image in a registry the web app can pull from** | Lacuna publishes it to its private Docker image repository; [step 1](#1-import-the-image) copies the tag you were issued into a registry of your own, which is what makes a managed-identity pull possible. |
 | 5 | **An Azure Storage table for the log sink** | Strongly recommended rather than required. The container's disk is ephemeral, so rolled log files are discarded on every recycle; leaving `Logging:AzureTable:Enabled = false` in cluster mode logs a **Critical at startup** and starts anyway. Nothing prunes that table — read [Retention](retention.md#logs-in-a-table--nothing-prunes-them) and schedule the pruning script *before* you turn the sink on. |
 | 6 | **An Application Insights resource** | Also recommended rather than required, and for a reason specific to this topology: `/api/metrics` behind the load balancer reaches an arbitrary instance, so Prometheus scraping has no continuity here. The Application Insights distro is instance-aware natively and is the recommended cluster observability path — see [Telemetry](telemetry.md). |
 
@@ -124,25 +124,47 @@ a single-instance install off SQLite, whose ceiling is not this pipeline's eithe
 
 ---
 
-## 1. Publish the image
+## 1. Import the image
 
-From the deployment package provided by Lacuna Software:
-
-```bash
-pwsh deploy/docker/Publish-ToAcr.ps1 -Registry <registry-name>
-```
-
-The script builds the container image remotely in ACR Tasks (no local Docker daemon), pushes to the
-`lacuna/bulksigner` repository by default, tags `<version>`, `<version>-<git sha>` and `latest`, and
-stages a curated `.dockerignore` at the context root for the duration of the build. `-WhatIf` prints
-the resolved plan and touches nothing — worth running first, because an existing `<version>` tag is a
-hard stop without `-Force`.
-
-## 2. Create the plan and the app — one instance first
+Lacuna publishes the container image to its **private Docker image repository** and issues you a
+registry username and access token for it — see
+[Obtaining the product](installation.md#obtaining-the-product). Nothing is built here: you copy the tag
+you were told to install into a container registry of your own.
 
 ```bash
 az group create --name bulksigner-rg --location brazilsouth
 ```
+
+```bash
+az acr create --name <registry-name> --resource-group bulksigner-rg --sku Basic
+```
+
+```bash
+az acr import --name <registry-name> \
+  --source <lacuna-registry>/bulksigner:<version> \
+  --image bulksigner:<version> \
+  --username <registry-username> --password <registry-token>
+```
+
+`az acr import` is a registry-to-registry copy performed by the service: the layers never touch your
+workstation and no local Docker daemon is involved. Skip either `create` line if the group or the
+registry already exists — the import is the part that has to happen, and `Basic` is enough registry for
+one image pulled by a handful of instances.
+
+Import one explicit `<version>` tag rather than `latest`. The tag you name here is the tag step 2 pins
+the web app to, and on this topology an upgrade is a
+[stop-the-world window](#8-upgrades-are-stop-the-world) — something you schedule, not something a
+platform recycle does to you.
+
+**Why a registry of your own, rather than pointing the web app straight at Lacuna's.** Two reasons, and
+the first shapes the rest of this page: the app pulls with its **managed identity** (`AcrPull`, step 2),
+and an identity in your tenant can only be granted a role on a registry in your tenant — a foreign
+registry means a username and password in app settings, which is one more secret to rotate and the one
+this design otherwise spends effort eliminating. The second is availability: App Service pulls the
+image again on every instance it starts, so scale-out ([step 7](#7-scale-to-two)) and platform recycles
+would otherwise depend on a registry outside your subscription answering at that moment.
+
+## 2. Create the plan and the app — one instance first
 
 ```bash
 az appservice plan create --name bulksigner-plan --resource-group bulksigner-rg --is-linux --sku P1V3 --number-of-workers 1
@@ -158,11 +180,12 @@ one worker deliberately: the first boot is where every refusal fires, and readin
 console is easier than reading two.
 
 ```bash
-az webapp create --name bulksigner --resource-group bulksigner-rg --plan bulksigner-plan --container-image-name <registry-name>.azurecr.io/lacuna/bulksigner:<version>
+az webapp create --name bulksigner --resource-group bulksigner-rg --plan bulksigner-plan --container-image-name <registry-name>.azurecr.io/bulksigner:<version>
 ```
 
-`lacuna/bulksigner` is the publish script's default repository. Pin the `<version>` tag rather than
-`latest`, so an upgrade is something you do rather than something a restart does.
+`bulksigner:<version>` is the repository and tag [step 1](#1-import-the-image) imported into — your
+registry, not Lacuna's. Pin that tag rather than `latest`, so an upgrade is something you do rather
+than something a restart does.
 
 ```bash
 az webapp identity assign --name bulksigner --resource-group bulksigner-rg
@@ -521,9 +544,24 @@ Drop several files into a watched folder at once and read `/jobs`:
 
 ## 8. Upgrades are stop-the-world
 
-Stop the app, deploy the new image, start it. Not a rolling restart, and **not a deployment-slot
-swap** — a staging slot carrying production's connection string is a second set of instances joining
-the cluster on a different application version, which is the one shape this design does not support.
+Stop the app, deploy the new image, start it — with one step ahead of those three, because the image
+comes from Lacuna's registry rather than from a build:
+
+```bash
+az acr import --name <registry-name> \
+  --source <lacuna-registry>/bulksigner:<new-version> \
+  --image bulksigner:<new-version> \
+  --username <registry-username> --password <registry-token>
+
+az webapp stop --name bulksigner --resource-group bulksigner-rg
+az webapp config container set --name bulksigner --resource-group bulksigner-rg \
+  --container-image-name <registry-name>.azurecr.io/bulksigner:<new-version>
+az webapp start --name bulksigner --resource-group bulksigner-rg
+```
+
+Not a rolling restart, and **not a deployment-slot swap** — a staging slot carrying production's
+connection string is a second set of instances joining the cluster on a different application version,
+which is the one shape this design does not support.
 
 The heartbeat's version stamp is the tripwire rather than the guard: a booting instance that sees live
 heartbeats from a different version logs a **Critical and continues**. It is deliberately not a

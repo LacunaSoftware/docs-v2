@@ -7,6 +7,41 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 4.4.4 (2026-08-18) [patch] {#v4-4-4}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-831] Erro ao visualizar certificado de raiz confiável em contextos de segurança System Admin
+
+
+### 4.5.2 (2026-08-17) {#v4-5-2}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-837] Listagem paginada de biometric subjects falhava ao ser chamada com parâmetros de query string
+
+
+### 4.5.1 (2026-08-17) {#v4-5-1}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-827] Contexto de segurança padrão E-Notariado (habilitado por chave de ativação)
+
+* Correções de bugs
+
+  * [RPNG-830] Log via Serilog não funcionava na imagem com OpenTelemetry habilitado
+
+  * [RPNG-831] Erro ao visualizar certificado de raiz confiável em contextos de segurança System Admin
+
+  * [RPNG-832] Erro registrado no log de boot ao inicializar chaves da FaceTec em instâncias sem biometria configurada
+
+
 ### 4.5.0 (2026-08-06) {#v4-5-0}
 
 Atualiza modelo do banco de dados: sim
@@ -37,7 +72,13 @@ Atualiza modelo do banco de dados: sim
 
 * Correções de bugs
 
+  * [RPNG-776] Corrige erros de API retornados como um 500 genérico em vez do modelo de erro apropriado
+
+  * [RPNG-789] Sessões de biometria falhavam ao iniciar quando o limite de transação do plano estava configurado como ilimitado
+
   * [RPNG-809] Configuração da duração do cache de limite de transações não era aplicada, sempre utilizando o valor padrão
+
+  * [RPNG-823] Resultado de correspondência facial com o documento era reportado a partir da configuração, e não do resultado real da verificação
 
 
 ### 4.4.3 (2026-08-05) {#v4-4-3}

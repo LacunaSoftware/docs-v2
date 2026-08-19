@@ -589,10 +589,11 @@ The reason to decline: this section adds four billable resources and a tier upgr
 already-Premium plan and vault. No figures here — Azure pricing dates faster than any document.
 
 **Inbound is a choice between two shapes, and only one of them can be true at a time.** Either the app
-stays on the internet behind a Front Door, or it leaves the internet entirely and is reached over a VPN.
-The outbound half below is the same work either way. Read both before building either — the second is
-the stronger answer to the anonymous approval route and the weaker one to everything a WAF does, and
-which of those matters more is not a question this page can answer for you.
+stays on the internet behind a Front Door — the rest of this step — or it leaves the internet entirely and
+is reached over a VPN, which is [step 10](#10-no-public-endpoint-at-all-optional) and carries consequences
+that run past the network. The outbound half below is the same work either way. Read both before building
+either — the second is the stronger answer to the anonymous approval route and the weaker one to
+everything a WAF does, and which of those matters more is not a question this page can answer for you.
 
 ![Front Door in front, private endpoints behind](/images/bulk-signer/azure-network-hardening.svg)
 
@@ -649,15 +650,35 @@ marker gate refuses that by design — see
 [High availability](high-availability.md#the-work-share-gate-is-narrower-than-the-catastrophe-it-is-named-for).
 :::
 
-### Inbound, the other shape — no public endpoint at all
+### Outbound — VNet integration and private endpoints
 
-The two inbound options are **exclusive**, and this is the second one. Rather than putting a Front Door
-in front of a public app, give the app a **private endpoint** and then take its public endpoint away, so
-that the only route to it is from your own network: a site-to-site or point-to-site VPN, or ExpressRoute
-private peering. The picture above stops applying at its left edge — everything from
-[Outbound](#outbound--vnet-integration-and-private-endpoints) down is shared by both shapes and applies
-here unchanged. The rate-budget argument in this step's opening is Front Door's alone; this shape answers
-it differently rather than not at all, and *What this shape does not close* below is where.
+Integrate the web app into a subnet and give **all four data-plane services** a private endpoint:
+Azure SQL, the Azure Files share, the vault and the certificate blob. All four, not three — a private
+endpoint on most of them leaves the remaining one as the reason the virtual network exists, and nobody
+notices until an audit does.
+
+Two exclusions, both deliberate:
+
+- **The log table stays public.** It is the destination that has to keep working when everything else
+  is broken; a network path that can fail is exactly what a log sink must not depend on, since a sink
+  that cannot report its own failure is the outage that hides itself.
+- **Application Insights stays public.** Private ingestion requires an Azure Monitor Private Link
+  Scope, a separate construct with its own DNS consequences across every resource sharing it — a
+  larger decision than this section, and one that should be made for a whole subscription rather than
+  for one web app.
+
+## 10. No public endpoint at all (optional)
+
+The two inbound options are **exclusive**, and this is the second one: if you built
+[step 9](#9-hardening-the-network-optional)'s Front Door, you are not building this. Rather than putting a
+Front Door in front of a public app, give the app a **private endpoint** and then take its public endpoint
+away, so that the only route to it is from your own network: a site-to-site or point-to-site VPN, or
+ExpressRoute private peering. [Outbound](#outbound--vnet-integration-and-private-endpoints) is shared by
+both shapes and applies here unchanged — it is the inbound half that step 9's picture describes and this
+step replaces. The rate-budget argument in step 9's opening is Front Door's alone; this shape answers it
+differently rather than not at all, and *What this shape does not close* below is where.
+
+![No public endpoint: the app is reached only from your own network](/images/bulk-signer/azure-no-public-endpoint.svg)
 
 Choose this one when the requirement is that **nobody outside your network reaches this service at
 all**, and Front Door when the service has to be reachable from the internet and the only question is
@@ -747,7 +768,7 @@ still pins the Blazor circuit, both internal to App Service and both indifferent
 
 :::note "No internet exposure" here means inbound, and two things still go out
 The app keeps its outbound path to the internet, and the two deliberate exclusions in
-[Outbound](#outbound--vnet-integration-and-private-endpoints) below depend on it: the Azure table log
+[Outbound](#outbound--vnet-integration-and-private-endpoints) above depend on it: the Azure table log
 sink and Application Insights. If your requirement covers egress as well, those two are the whole
 conversation — Application Insights needs an Azure Monitor Private Link Scope, and the log table needs a
 private endpoint on its storage account, which **collides with the reason that exclusion exists**: a log
@@ -756,23 +777,6 @@ before closing it, and note that simply turning the sink off is not the cheap wa
 it logs a Critical at startup, because a container's rolled log files go away with the container
 ([Before you start](#before-you-start), item 5).
 :::
-
-### Outbound — VNet integration and private endpoints
-
-Integrate the web app into a subnet and give **all four data-plane services** a private endpoint:
-Azure SQL, the Azure Files share, the vault and the certificate blob. All four, not three — a private
-endpoint on most of them leaves the remaining one as the reason the virtual network exists, and nobody
-notices until an audit does.
-
-Two exclusions, both deliberate:
-
-- **The log table stays public.** It is the destination that has to keep working when everything else
-  is broken; a network path that can fail is exactly what a log sink must not depend on, since a sink
-  that cannot report its own failure is the outage that hides itself.
-- **Application Insights stays public.** Private ingestion requires an Azure Monitor Private Link
-  Scope, a separate construct with its own DNS consequences across every resource sharing it — a
-  larger decision than this section, and one that should be made for a whole subscription rather than
-  for one web app.
 
 ---
 

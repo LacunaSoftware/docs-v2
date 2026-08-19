@@ -610,11 +610,12 @@ de um plano e de um cofre que já são Premium. Sem números aqui — o preço d
 que qualquer documento.
 
 **A entrada é uma escolha entre dois formatos, e apenas um deles pode ser verdadeiro por vez.** Ou o
-app permanece na internet atrás de um Front Door, ou ele deixa a internet inteiramente e é alcançado por
-uma VPN. A metade de saída abaixo é o mesmo trabalho nos dois casos. Leia os dois antes de construir
-qualquer um — o segundo é a resposta mais forte para a rota de aprovação anônima e a mais fraca para
-tudo o que um WAF faz, e qual desses importa mais não é uma pergunta que esta página pode responder por
-você.
+app permanece na internet atrás de um Front Door — o resto deste passo — ou ele deixa a internet
+inteiramente e é alcançado por uma VPN, que é o
+[passo 10](#10-nenhum-endpoint-público-opcional) e carrega consequências que vão além da rede. A metade
+de saída abaixo é o mesmo trabalho nos dois casos. Leia os dois antes de construir qualquer um — o
+segundo é a resposta mais forte para a rota de aprovação anônima e a mais fraca para tudo o que um WAF
+faz, e qual desses importa mais não é uma pergunta que esta página pode responder por você.
 
 ![Front Door na frente, private endpoints atrás](/images/bulk-signer/azure-network-hardening.svg)
 
@@ -673,16 +674,37 @@ compartilhamento de trabalho, e o gate do marcador do compartilhamento recusa is
 [Alta disponibilidade](high-availability.md#o-gate-do-compartilhamento-de-trabalho-é-mais-estreito-que-a-catástrofe-que-lhe-dá-nome).
 :::
 
-### Entrada, o outro formato — nenhum endpoint público
+### Saída — integração com VNet e private endpoints
 
-As duas opções de entrada são **exclusivas**, e esta é a segunda. Em vez de colocar um Front Door na
-frente de um app público, dê ao app um **private endpoint** e então tire dele o endpoint público, de
-modo que a única rota até ele seja a partir da sua própria rede: uma VPN site-a-site ou ponto-a-site, ou
-peering privado de ExpressRoute. O desenho acima deixa de se aplicar em sua borda esquerda — tudo de
-[Saída](#saída--integração-com-vnet-e-private-endpoints) para baixo é compartilhado pelos dois formatos
-e se aplica aqui sem mudança. O argumento do orçamento de taxa na abertura deste passo é exclusivo do
-Front Door; este formato o responde de outra maneira, em vez de não o responder, e *O que este formato
-não fecha*, abaixo, é onde.
+Integre o web app a uma sub-rede e dê a **todos os quatro serviços de plano de dados** um private
+endpoint: o Azure SQL, o compartilhamento do Azure Files, o cofre e o blob do certificado. Os quatro,
+não três — um private endpoint na maioria deles deixa o remanescente como a razão pela qual a rede
+virtual existe, e ninguém percebe até que uma auditoria perceba.
+
+Duas exclusões, ambas deliberadas:
+
+- **A tabela de logs continua pública.** Ela é o destino que precisa continuar funcionando quando todo
+  o resto está quebrado; um caminho de rede que pode falhar é exatamente do que um destino de log não
+  pode depender, já que um destino incapaz de relatar sua própria falha é a indisponibilidade que se
+  esconde a si mesma.
+- **O Application Insights continua público.** A ingestão privada exige um Azure Monitor Private Link
+  Scope, um constructo separado com suas próprias consequências de DNS em todos os recursos que o
+  compartilham — uma decisão maior que esta seção, e que deveria ser tomada para uma assinatura inteira
+  em vez de para um web app.
+
+## 10. Nenhum endpoint público (opcional)
+
+As duas opções de entrada são **exclusivas**, e esta é a segunda: se você construiu o Front Door do
+[passo 9](#9-endurecendo-a-rede-opcional), você não está construindo este. Em vez de colocar um Front
+Door na frente de um app público, dê ao app um **private endpoint** e então tire dele o endpoint público,
+de modo que a única rota até ele seja a partir da sua própria rede: uma VPN site-a-site ou ponto-a-site,
+ou peering privado de ExpressRoute. A [Saída](#saída--integração-com-vnet-e-private-endpoints) é
+compartilhada pelos dois formatos e se aplica aqui sem mudança — é a metade de entrada que o desenho do
+passo 9 descreve e que este passo substitui. O argumento do orçamento de taxa na abertura do passo 9 é
+exclusivo do Front Door; este formato o responde de outra maneira, em vez de não o responder, e *O que
+este formato não fecha*, abaixo, é onde.
+
+![Nenhum endpoint público: o app é alcançado apenas a partir da sua própria rede](/images/bulk-signer/azure-no-public-endpoint.svg)
 
 Escolha este quando o requisito for que **ninguém fora da sua rede alcance este serviço de forma
 alguma**, e o Front Door quando o serviço tiver de ser alcançável pela internet e a única pergunta for
@@ -777,7 +799,7 @@ tudo isso.
 
 :::note "Sem exposição à internet" aqui significa entrada, e duas coisas ainda saem
 O app mantém seu caminho de saída para a internet, e as duas exclusões deliberadas em
-[Saída](#saída--integração-com-vnet-e-private-endpoints) abaixo dependem dele: o destino de log em tabela
+[Saída](#saída--integração-com-vnet-e-private-endpoints) acima dependem dele: o destino de log em tabela
 do Azure e o Application Insights. Se o seu requisito cobre também a saída, esses dois são a conversa
 inteira — o Application Insights precisa de um Azure Monitor Private Link Scope, e a tabela de logs
 precisa de um private endpoint na sua conta de armazenamento, o que **colide com o motivo pelo qual
@@ -787,24 +809,6 @@ destino não é a saída barata — no modo cluster isso registra um Critical na
 arquivos de log rotacionados de um container vão embora com o container
 ([Antes de começar](#antes-de-começar), item 5).
 :::
-
-### Saída — integração com VNet e private endpoints
-
-Integre o web app a uma sub-rede e dê a **todos os quatro serviços de plano de dados** um private
-endpoint: o Azure SQL, o compartilhamento do Azure Files, o cofre e o blob do certificado. Os quatro,
-não três — um private endpoint na maioria deles deixa o remanescente como a razão pela qual a rede
-virtual existe, e ninguém percebe até que uma auditoria perceba.
-
-Duas exclusões, ambas deliberadas:
-
-- **A tabela de logs continua pública.** Ela é o destino que precisa continuar funcionando quando todo
-  o resto está quebrado; um caminho de rede que pode falhar é exatamente do que um destino de log não
-  pode depender, já que um destino incapaz de relatar sua própria falha é a indisponibilidade que se
-  esconde a si mesma.
-- **O Application Insights continua público.** A ingestão privada exige um Azure Monitor Private Link
-  Scope, um constructo separado com suas próprias consequências de DNS em todos os recursos que o
-  compartilham — uma decisão maior que esta seção, e que deveria ser tomada para uma assinatura inteira
-  em vez de para um web app.
 
 ---
 

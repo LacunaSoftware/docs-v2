@@ -5,7 +5,7 @@ sidebar_position: 1
 
 # Lacuna Bulk Signer
 
-O Lacuna Bulk Signer é um **serviço de assinatura digital em massa *on premises*** para cenários
+O Lacuna Bulk Signer é um **serviço de assinatura em lote *on premises*** para cenários
 compatíveis com a ICP-Brasil. Ele recebe arquivos de origens automatizadas (pastas monitoradas ou
 upload via REST), processa-os através de um pipeline de assinatura controlado e produz saídas
 assinadas e verificadas — com histórico operacional completo, um dashboard para o operador e

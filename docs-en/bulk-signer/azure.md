@@ -67,6 +67,61 @@ and [step 3](#3-the-signing-key-lives-in-a-vault) weighs it against what the vau
 knowing before you choose a certificate source.
 :::
 
+## Sizing the plan and the database
+
+Two of the prerequisites above have a size as well as an existence, and one number an operator usually
+knows in advance sizes both: signatures a day. The table is a **starting point rather than a benchmark result** — what it
+cannot know is your files, and those move the answer further than the volume does. A CAdES signature
+over a CNAB240 remessa and a PAdES signature over a 300-page scanned PDF are the same one job to this
+product and nothing like the same work.
+
+| Signatures per day | App Service Plan | Azure SQL — max vCores |
+|---|---|---|
+| 0 – 1,000 | P0 V3 × 1 | 2 |
+| 1,001 – 5,000 | P1 V3 × 1 | 4 |
+| 5,001 – 20,000 | P1 V3 × 2 | 6 |
+| 20,001 – 100,000 | P2 V3 × 2 | 8 |
+| 100,001 – 1,000,000 | P2 V3 × 2 | 8 |
+
+`× N` is the instance count — `--number-of-workers` on **one** plan, never a second plan. Whichever row
+you are on, step 2 still starts you at one worker and [step 7](#7-scale-to-two) is where you scale to
+the number above: the first boot is where every refusal fires, and reading one instance's console is
+easier than reading two.
+
+**The last two rows are the same hardware, and that is the table's most informative line.** Somewhere
+around 100,000 signatures a day the web tier stops being the constraint. A job is one signature, and
+what bounds it from there is the certificate source — a `Pfx` already in memory, or a round trip to Key
+Vault — together with the share's I/O. Ten times the volume on the same plan is therefore a statement
+about where the work actually is, not headroom the plan was holding in reserve. At the top of that row,
+size [the vault round trip](#latency-is-the-constraint-here-not-throttling) and
+`Pipeline:MaxConcurrency` first, and grow the plan last.
+
+**A larger SKU does not sign more files at once.** `Pipeline:MaxConcurrency` is the only thing that
+does, it is per instance, and [step 3](#3-the-signing-key-lives-in-a-vault) sets it to `4` — so a `× 2`
+row is eight signatures in flight, and eight is the number the certificate source has to survive rather
+than the configured four. [High availability](high-availability.md) is where that same multiplication
+reads as a limitation instead of a feature.
+
+**The two `× 1` rows do not need this page.** Cluster mode is legal at one instance — step 6 boots
+exactly that way — but at one instance nothing it coordinates is doing any work, and a deployment that
+stays there permanently is paying for an Azure SQL database and an Azure Files share it could have done
+without. Under 5,000 signatures a day, read [Installation](installation.md) first and come back when
+the volume, or a second instance, is the reason rather than the platform.
+
+:::note What "max vCores" means, and why auto-pause never fires
+A *max* vCore figure describes Azure SQL's **serverless** compute tier, where that number is the
+ceiling the database may scale up to (`--max-capacity`); on the provisioned tier read the same figure as
+the vCore count, since there is nothing to scale. Do not budget for auto-pause savings either way. This
+product polls its store continuously, and in cluster mode every instance also writes a heartbeat every
+`Cluster:HeartbeatSeconds` — 15 by default — so the database is never idle for anything like the hour
+auto-pause requires. Size it as a database that is always up.
+:::
+
+**None of this is a throughput argument for `SqlServer`.** The vCore column sizes a database whose
+provider [Before you start](#before-you-start) already made compulsory here; it is not a reason to move
+a single-instance install off SQLite, whose ceiling is not this pipeline's either — that decision is in
+[Installation](installation.md#choosing-where-the-operational-store-lives), on its own terms.
+
 ---
 
 ## 1. Publish the image
@@ -92,6 +147,9 @@ az group create --name bulksigner-rg --location brazilsouth
 ```bash
 az appservice plan create --name bulksigner-plan --resource-group bulksigner-rg --is-linux --sku P1V3 --number-of-workers 1
 ```
+
+`P1V3` above is the example's SKU, not a recommendation —
+[Sizing the plan and the database](#sizing-the-plan-and-the-database) is which one your volume asks for.
 
 **Basic (B1) is the floor**, because it is the first tier that scales out at all — and it caps at
 three instances, which also caps what Health check can do for you, since rerouting away from an
@@ -492,6 +550,12 @@ page closes that.
 The reason to decline: this section adds four billable resources and a tier upgrade on top of an
 already-Premium plan and vault. No figures here — Azure pricing dates faster than any document.
 
+**Inbound is a choice between two shapes, and only one of them can be true at a time.** Either the app
+stays on the internet behind a Front Door, or it leaves the internet entirely and is reached over a VPN.
+The outbound half below is the same work either way. Read both before building either — the second is
+the stronger answer to the anonymous approval route and the weaker one to everything a WAF does, and
+which of those matters more is not a question this page can answer for you.
+
 ![Front Door in front, private endpoints behind](/images/bulk-signer/azure-network-hardening.svg)
 
 ### Inbound — Front Door in front of the app
@@ -545,6 +609,114 @@ Front Door here is a WAF, a TLS terminator and a DDoS front, not a global load b
 application. A second region would be a second set of instances over one work share, and the share's
 marker gate refuses that by design — see
 [High availability](high-availability.md#the-work-share-gate-is-narrower-than-the-catastrophe-it-is-named-for).
+:::
+
+### Inbound, the other shape — no public endpoint at all
+
+The two inbound options are **exclusive**, and this is the second one. Rather than putting a Front Door
+in front of a public app, give the app a **private endpoint** and then take its public endpoint away, so
+that the only route to it is from your own network: a site-to-site or point-to-site VPN, or ExpressRoute
+private peering. The picture above stops applying at its left edge — everything from
+[Outbound](#outbound--vnet-integration-and-private-endpoints) down is shared by both shapes and applies
+here unchanged. The rate-budget argument in this step's opening is Front Door's alone; this shape answers
+it differently rather than not at all, and *What this shape does not close* below is where.
+
+Choose this one when the requirement is that **nobody outside your network reaches this service at
+all**, and Front Door when the service has to be reachable from the internet and the only question is
+how safely.
+
+**The anonymous approval route stops being internet-reachable, and that is the largest thing on this
+page.** `/approve/{jobId}` and `POST /api/approvals/{id}` take no credential by design — a decision
+compensated rather than hidden, with a recorded identification method, the approver's address and user
+agent, their own rate-limit budget and deliberately coarse refusals ([Approvals](approvals.md)). Every
+one of those controls was designed for a page anybody could load. Take the public endpoint away and the
+population that can reach the route at all is the population already admitted to your network, which is
+a stronger compensation than anything the product itself can ship. If that unauthenticated route is why
+you are reading this section, this shape is the answer to it and Front Door is not.
+
+**Stated the other way round, that is also the cost: an approver who is not on the network cannot
+approve.** The portal link is a derived HMAC that works from any device, and this shape makes
+*reachable* the binding constraint instead. Count the approver population before committing — a director
+approving a payroll from a phone, an external auditor, anybody at a client — because for each of them
+the answer becomes a VPN client on that device, and that is much cheaper to know now than after the
+first payroll parks over a weekend.
+
+**What this shape does not close.** There is no WAF here, so the ×N rate budget stays ×N; what changes
+is who can spend it, not the arithmetic. `/api/metrics` still lands on an arbitrary instance, and
+upgrades are still stop-the-world. If you need a WAF **and** no public exposure, the answer is an
+internal Application Gateway rather than Front Door — which always has a public front end of its own —
+and that is a third deployment shape, not documented here.
+
+**Keep `Hosting__ForwardedHeaders__*` exactly as [step 4](#4-app-settings) set it, and the address it
+records gets better.** Private Link forwards the real client address to the app, so what lands on an
+approval record is the approver's own address rather than a proxy hop. `TrustAnyProxy=true` also stops
+carrying the caveat step 4 attaches to it, for the same reason the Private Link origin option does: with
+public access disabled there is no path to Kestrel from outside the network left to abuse.
+
+### Provisioning the private endpoint
+
+The private endpoint needs a subnet of its own — **not** the one VNet integration uses, which is a
+platform restriction rather than a preference and the most common way this gets built twice:
+
+```bash
+az network private-endpoint create --resource-group bulksigner-rg --name bulksigner-pe --vnet-name bulksigner-vnet --subnet inbound --group-id sites --connection-name bulksigner-sites --private-connection-resource-id $(az webapp show --name bulksigner --resource-group bulksigner-rg --query id -o tsv)
+```
+
+```bash
+az network private-dns zone create --resource-group bulksigner-rg --name privatelink.azurewebsites.net
+```
+
+```bash
+az network private-dns link vnet create --resource-group bulksigner-rg --zone-name privatelink.azurewebsites.net --name bulksigner-vnet-link --virtual-network bulksigner-vnet --registration-enabled false
+```
+
+```bash
+az network private-endpoint dns-zone-group create --resource-group bulksigner-rg --endpoint-name bulksigner-pe --name default --private-dns-zone privatelink.azurewebsites.net --zone-name azurewebsites
+```
+
+```bash
+az resource update --ids $(az webapp show --name bulksigner --resource-group bulksigner-rg --query id -o tsv) --set properties.publicNetworkAccess=Disabled
+```
+
+**That last command is the one that does the work, and the private endpoint does not imply it.** A
+private endpoint and public access **coexist** on an App Service by default: build the endpoint, connect
+over the VPN, watch it work — and the app is still on the internet exactly as it was. Note also that the
+app's access-restriction rules are *not* evaluated for traffic arriving through the private endpoint, so
+the `x-azure-fdid` rule from the Front Door option is inert here. This shape is enforced by there being
+no public endpoint, never by a rule.
+
+:::warning DNS is where this fails, and it fails as a `403` rather than a timeout
+The app's public name keeps resolving after the endpoint exists — to a public address that now refuses
+you. A client that has not been given private resolution therefore gets a **403 from the platform**,
+which reads like a permissions problem and is not one. Two A records are needed in
+`privatelink.azurewebsites.net`, one for the app and one for its `scm` name; the DNS zone group above
+creates both, which is why it is worth using rather than hand-writing records. **VPN clients resolve
+through your own DNS**, so the last mile is a conditional forwarder from your resolvers into Azure — an
+[Azure DNS Private Resolver](https://learn.microsoft.com/azure/dns/dns-private-resolver-overview)
+inbound endpoint is the maintained way to do that. Keep using the default `*.azurewebsites.net` host
+name: the platform certificate is issued for it, and a custom domain here means bringing your own.
+:::
+
+**Two things you were told to do earlier move inside the network.**
+[Step 6](#6-first-boot-on-one-instance) reads the boot narration with `az webapp log tail`, which reaches
+the app's SCM site — private now, so run it from a VPN-connected workstation, or read the boot from the
+table log sink instead. And if you put a private endpoint on the container registry too, the image pull
+has to be routed through the network explicitly, by setting `properties.vnetImagePullEnabled` the same
+way step 2 sets `acrUseManagedIdentityCreds`; a registry left public needs nothing. What does **not**
+change is anything the platform does to itself —
+[Health check](#the-health-check-reads-the-readiness-endpoint) still pings `/api/ready` and ARR affinity
+still pins the Blazor circuit, both internal to App Service and both indifferent to all of this.
+
+:::note "No internet exposure" here means inbound, and two things still go out
+The app keeps its outbound path to the internet, and the two deliberate exclusions in
+[Outbound](#outbound--vnet-integration-and-private-endpoints) below depend on it: the Azure table log
+sink and Application Insights. If your requirement covers egress as well, those two are the whole
+conversation — Application Insights needs an Azure Monitor Private Link Scope, and the log table needs a
+private endpoint on its storage account, which **collides with the reason that exclusion exists**: a log
+sink is the one destination that has to keep working when the network is what broke. Read that argument
+before closing it, and note that simply turning the sink off is not the cheap way out — in cluster mode
+it logs a Critical at startup, because a container's rolled log files go away with the container
+([Before you start](#before-you-start), item 5).
 :::
 
 ### Outbound — VNet integration and private endpoints

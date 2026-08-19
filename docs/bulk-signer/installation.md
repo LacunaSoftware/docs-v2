@@ -17,10 +17,11 @@ O Lacuna Bulk Signer é um único serviço que pode rodar em quatro alvos suport
 O mesmo binário suporta os quatro. O banner de inicialização imprime uma linha `host mode = …` que
 informa qual ciclo de vida está de fato ativo.
 
-A Lacuna Software fornece um **pacote de implantação** contendo o bundle publicado da aplicação (o
-diretório `publish/`), os scripts de instalação por alvo (o diretório `deploy/`) e um arquivo de
-configuração de exemplo comentado (`appsettings.Production.json.sample`). As instruções abaixo
-assumem que você tem esse pacote na máquina de destino (ou copiado para ela).
+Você baixa a aplicação da Lacuna: a **imagem de container**, do repositório privado de imagens Docker
+da Lacuna, ou os **binários publicados**, de uma URL de download específica do sistema operacional que
+carrega o identificador único da sua organização. Os scripts de instalação por alvo e o arquivo de
+configuração de exemplo comentado chegam separadamente, no **pacote de implantação**. A seção
+[Obtendo o produto](#obtendo-o-produto) cobre os dois, e as credenciais que cada um exige.
 
 ## Escolha seu alvo
 
@@ -40,6 +41,94 @@ deliberadamente ative o modo cluster. Rodar duas dessas contra um mesmo comparti
 um único App Service Plan, e ela tem seu próprio passo a passo
 ([Azure App Service](azure.md)) e sua própria lista de limites
 ([Alta disponibilidade](high-availability.md)).
+
+## Obtendo o produto
+
+Não há download público, e nada aqui é construído a partir do código-fonte. A Lacuna Software distribui
+a aplicação de duas formas, e o alvo que você acabou de escolher decide qual delas você leva:
+
+| O que você baixa | De onde | Para quais alvos |
+|------------------|---------|------------------|
+| A **imagem de container**, já construída | Do repositório privado de imagens Docker da Lacuna, como `<registry-da-lacuna>/bulksigner:<versão>` | Docker / Compose, [Azure App Service](azure.md) |
+| Os **binários publicados**, um arquivo por sistema operacional | De uma URL de download que carrega o identificador único da sua organização | systemd no Linux, Serviço do Windows, console |
+
+Nenhum dos dois artefatos traz os scripts de instalação. Eles vêm no **pacote de implantação** — um
+único arquivo, o mesmo em todo sistema operacional, contendo a árvore `deploy/`, o
+`appsettings.Production.json.sample` comentado e os scripts auxiliares em PowerShell documentados em
+[Exemplos](samples.md). Descompacte-o na máquina de onde você vai instalar: todo caminho `deploy/…`
+desta página é relativo à raiz dele.
+
+A Lacuna lhe entrega três coisas, e elas não são intercambiáveis:
+
+| O que você recebe | O que destrava | Se vazar ou expirar |
+|-------------------|----------------|---------------------|
+| **Credenciais de registry** — um usuário e um token de acesso | O pull da imagem do repositório privado | Peça a reemissão à Lacuna. O token tem o escopo da sua organização e é revogável por si só. |
+| **Um identificador único** | As URLs de download dos binários | Peça a reemissão à Lacuna. Ele identifica a sua organização, e não uma versão — um mesmo identificador serve a todos os sistemas operacionais. |
+| **A string de licença do PKI SDK** | O serviço **em execução**, em todo alvo — não o download | Não é uma credencial de distribuição; veja [Obtendo a licença do PKI SDK](#obtendo-a-licença-do-pki-sdk). |
+
+:::warning O identificador em uma URL de download é uma credencial
+Ele é a única coisa entre aquela URL e qualquer um que a tenha, então uma URL que o carrega não tem lugar
+em um ticket público, em um log de CI compartilhado, em uma página de wiki ou em um script versionado.
+Guarde-o onde você guarda o token do registry — e, se ele escapar, peça a reemissão à Lacuna em vez de
+contar com a obscuridade do link.
+:::
+
+### A imagem de container
+
+```bash
+docker login <registry-da-lacuna> --username <usuário-do-registry>   # pede o token de acesso
+docker pull <registry-da-lacuna>/bulksigner:<versão>
+```
+
+A Lacuna fornece o host do registry, o caminho do repositório e as credenciais em conjunto. O repositório
+é privado, então um pull sem autenticação responde `not found` em vez de `unauthorized` — essa é a
+resposta habitual do Docker para um repositório que suas credenciais não conseguem ver, e não um sinal de
+que você digitou o nome errado.
+
+**Fixe a `<versão>`.** Uma tag `latest` se move, e em um host de containers isso significa que um restart
+pode subir uma versão que você não escolheu instalar.
+
+Nada é construído localmente: a imagem que a Lacuna publica é a imagem que roda, baseada em Debian-slim
+pelo motivo que está em [Docker / Compose](#docker--compose) abaixo.
+
+### Os binários publicados
+
+Pegue o arquivo correspondente ao sistema operacional do host e extraia-o onde o script de instalação
+consiga lê-lo:
+
+```bash
+# Linux
+curl -fL -o bulksigner-linux-x64.tar.gz \
+  "https://cdn.lacunasoftware.com/bulk-signer/<identificador>/linux-x64.tar.gz"
+mkdir -p publish && tar -xzf bulksigner-linux-x64.tar.gz -C publish
+```
+
+```powershell
+# Windows — um prompt comum basta aqui; só a instalação em si precisa de elevação
+Invoke-WebRequest -Uri "https://cdn.lacunasoftware.com/bulk-signer/<identificador>/win-x64.zip" -OutFile bulksigner-win-x64.zip
+Expand-Archive -Path bulksigner-win-x64.zip -DestinationPath publish
+```
+
+`publish` é o nome que o resto desta página usa, porque é o que os scripts de instalação recebem em
+`--from publish` / `-From publish` — o arquivo compactado não se importa, e a flag aceita qualquer
+caminho. Peça à Lacuna se você precisa de um sistema operacional ou de uma arquitetura que aquelas duas
+URLs não cobrem.
+
+### Um host sem rota para a internet
+
+Nenhum dos dois artefatos precisa de uma no momento da instalação: os dois são completos, sem feed de
+pacotes, sem etapa de restore e sem uma segunda ligação para casa — de modo que baixar em uma estação
+conectada e copiar para o host é uma resposta completa. Leve os binários como o arquivo compactado; leve a
+imagem com `docker save` / `docker load`, ou publique-a em um registry que o host alcance, que é o que o
+[passo 1](azure.md#1-importe-a-imagem) do passo a passo do Azure faz, por outro motivo. A licença do PKI
+SDK é uma string, e não um download, então uma instalação isolada da rede continua isolada.
+
+### Depois, confira o que você obteve
+
+A versão que está de fato rodando aparece na barra de aplicativo do dashboard em todas as páginas, é
+impressa por inteiro sob o banner de console com a marca a cada início, e está na página Sistema. Uma vez
+concluída a instalação abaixo, leia-a contra a versão que lhe disseram para instalar — é a única
+confirmação de que a URL, ou a tag, entregou o que você esperava.
 
 ## Pré-requisitos — comuns a todos os alvos
 
@@ -93,7 +182,8 @@ ambiente como parte da atualização.
 ## Linux — systemd
 
 ```bash
-# 1. Copie o bundle publish/ e os scripts deploy/ para a máquina de destino, então:
+# 1. Com os binários extraídos em publish/ e o pacote de implantação descompactado na
+#    máquina de destino (veja Obtendo o produto acima):
 sudo bash deploy/linux/install.sh --from publish
 
 # 2. Edite a configuração de produção e o arquivo de ambiente com os segredos.
@@ -134,8 +224,8 @@ sudo bash deploy/linux/uninstall.sh --purge  # também apaga dados, logs, config
 ## Windows — Serviço do Windows
 
 ```powershell
-# 1. Copie o bundle publish/ e os scripts deploy/ para a máquina de destino, então, em um prompt
-#    do PowerShell COM PRIVILÉGIOS ELEVADOS:
+# 1. Com os binários extraídos em publish\ e o pacote de implantação descompactado na máquina de
+#    destino (veja Obtendo o produto acima), em um prompt do PowerShell COM PRIVILÉGIOS ELEVADOS:
 .\deploy\windows\Install-Service.ps1 -From publish
 
 # 2. Edite a configuração de produção:
@@ -187,28 +277,36 @@ cada job. Procure essas no arquivo de log.
 ```bash
 cd deploy/docker
 
-# 1. Prepare os diretórios de trabalho no host.
+# 1. Autentique-se no registry privado da Lacuna — a linha image: do compose o nomeia.
+docker login <registry-da-lacuna> --username <usuário-do-registry>
+
+# 2. Prepare os diretórios de trabalho no host.
 cp .env.sample .env
 mkdir -p data logs config
 cp ../appsettings.Production.json.sample config/appsettings.Production.json
 
-# 2. Edite a configuração e o arquivo de ambiente.
+# 3. Edite a configuração e o arquivo de ambiente.
 nano config/appsettings.Production.json
 nano .env
 
-# 3. O container roda como UID 1654. Em hosts Linux:
+# 4. O container roda como UID 1654. Em hosts Linux:
 sudo chown -R 1654:1654 data logs
 
-# 4. Suba.
+# 5. Suba — o `up` faz o pull da imagem na primeira execução.
 docker compose up -d
 
-# 5. Verifique.
+# 6. Verifique.
 curl http://localhost:8080/api/health
 docker compose ps                       # deve mostrar "healthy" após ~30 s
 docker compose logs -f bulksigner
 ```
 
-A imagem é baseada em Debian-slim — **não** em Alpine. Bibliotecas `.so` de HSM geralmente não são
+A linha `image:` do arquivo do compose é onde vivem o repositório privado e sua tag fixada, então é a
+linha que você edita no momento da atualização. Um pull que falha se parece com um container que nunca
+inicia e um log de aplicação vazio — porque ainda não há aplicação — então confira o `docker login` antes
+de tirar conclusões do silêncio.
+
+A Lacuna constrói a imagem sobre Debian-slim — **não** sobre Alpine. Bibliotecas `.so` de HSM geralmente não são
 compatíveis com musl, então o Alpine está fora de questão. A imagem já traz ferramental PKCS#11
 genérico (`libpcsclite1` + `opensc`); drivers de HSM dos fabricantes (SafeNet, Thales, Entrust,
 Yubico) são montados pelo operador em tempo de execução via `volumes:` no arquivo do compose. Veja os
@@ -475,13 +573,16 @@ acordo. Clientes REST que usam `X-API-Key` não são afetados.
 
 ## Atualizações
 
-O schema do banco de dados migra automaticamente na inicialização. Para atualizar no lugar:
+O schema do banco de dados migra automaticamente na inicialização. Baixe antes a nova versão — pelos
+mesmos dois canais da primeira instalação, [Obtendo o produto](#obtendo-o-produto) — e use o pacote de
+implantação que veio com ela, em vez da cópia de onde você instalou a última vez. Então, para atualizar no
+lugar:
 
 | Alvo | Passos |
 |------|--------|
-| Linux | `sudo bash deploy/linux/install.sh --from <novo-diretório-publish>` — para a unit, reimplanta o binário, reinicia. |
-| Windows | `.\deploy\windows\Install-Service.ps1 -From <novo-diretório-publish>` — para o serviço, espelha a árvore de binários, reinicia. |
-| Docker | `docker compose pull && docker compose up -d`. |
+| Linux | Extraia o novo [arquivo de binários](#os-binários-publicados), então `sudo bash deploy/linux/install.sh --from <novo-diretório-publish>` — para a unit, reimplanta o binário, reinicia. |
+| Windows | Extraia o novo [arquivo de binários](#os-binários-publicados), então `.\deploy\windows\Install-Service.ps1 -From <novo-diretório-publish>` — para o serviço, espelha a árvore de binários, reinicia. |
+| Docker | Ajuste a tag na linha `image:` do arquivo do compose, então `docker compose pull && docker compose up -d`. Rode o `docker login` novamente antes, se o token de acesso expirou desde a instalação. |
 
 :::warning Sempre faça backup do banco de dados operacional antes de atualizar.
 

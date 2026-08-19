@@ -17,10 +17,11 @@ Lacuna Bulk Signer is a single service that can run as four supported targets:
 The same binary supports all four. The startup banner prints a `host mode = …` line that tells you
 which lifetime is actually active.
 
-Lacuna Software provides a **deployment package** containing the published application bundle (the
-`publish/` directory), the per-target install scripts (the `deploy/` directory), and an annotated
-sample configuration file (`appsettings.Production.json.sample`). The instructions below assume you
-have that package on (or copied to) the target machine.
+You download the application from Lacuna: the **container image** from Lacuna's private Docker image
+repository, or the **published binaries** from an OS-specific URL carrying your organization's unique
+identifier. The per-target install scripts and the annotated sample configuration arrive separately,
+in the **deployment package**. [Obtaining the product](#obtaining-the-product) covers both, and the
+credentials each one takes.
 
 ## Choose your target
 
@@ -38,6 +39,90 @@ deployment — see [Operations](operations.md#when-another-instance-appears-to-o
 supported multi-instance topology is an Azure Web App scaled out on one App Service Plan, and it has its
 own walkthrough ([Azure App Service](azure.md)) and its own list of limits
 ([High availability](high-availability.md)).
+
+## Obtaining the product
+
+There is no public download, and nothing here is built from source. Lacuna Software ships the
+application two ways, and the target you just picked decides which one you take:
+
+| What you download | From | Targets that take it |
+|-------------------|------|----------------------|
+| The **container image**, prebuilt | Lacuna's private Docker image repository, as `<lacuna-registry>/bulksigner:<version>` | Docker / Compose, [Azure App Service](azure.md) |
+| The **published binaries**, one archive per OS | A download URL carrying your organization's unique identifier | Linux systemd, Windows Service, console |
+
+Neither artifact carries the install scripts. Those come in the **deployment package** — one archive,
+the same on every OS, holding the `deploy/` tree, the annotated `appsettings.Production.json.sample`,
+and the PowerShell helper scripts documented in [Samples](samples.md). Unpack it on the machine you
+will install from: every `deploy/…` path on this page is relative to its root.
+
+Lacuna issues you three things, and they are not interchangeable:
+
+| Issued to you | What it unlocks | If it leaks or expires |
+|---------------|-----------------|------------------------|
+| **Registry credentials** — a username and an access token | Pulling the image from the private repository | Ask Lacuna to reissue. The token is scoped to your organization and revocable on its own. |
+| **A unique identifier** | The binary download URLs | Ask Lacuna to reissue. It identifies your organization rather than a release — one identifier serves every OS. |
+| **The PKI SDK license string** | The *running* service, on every target — not the download | Not a distribution credential at all; see [Obtaining the PKI SDK license](#obtaining-the-pki-sdk-license). |
+
+:::warning The identifier in a download URL is a credential
+It is the only thing standing between that URL and anybody holding it, so a URL that carries it does
+not belong in a public issue, a shared CI log, a wiki page or a committed script. Keep it where you
+keep the registry token — and if it does get out, ask Lacuna to reissue rather than counting on the
+link staying obscure.
+:::
+
+### The container image
+
+```bash
+docker login <lacuna-registry> --username <registry-username>   # prompts for the access token
+docker pull <lacuna-registry>/bulksigner:<version>
+```
+
+Lacuna supplies the registry host, the repository path and the credentials together. The repository is
+private, so an unauthenticated pull answers `not found` rather than `unauthorized` — that is Docker's
+usual reply for a repository your credentials cannot see, and not a sign that you mistyped the name.
+
+**Pin `<version>`.** A `latest` tag moves, and on a container host that means a restart can bring up a
+release you did not choose to install.
+
+Nothing is built locally: the image Lacuna publishes is the image that runs, Debian-slim based for the
+reason in [Docker / Compose](#docker--compose) below.
+
+### The published binaries
+
+Take the archive matching the host's OS, and extract it where the install script can read it:
+
+```bash
+# Linux
+curl -fL -o bulksigner-linux-x64.tar.gz \
+  "https://cdn.lacunasoftware.com/bulk-signer/<identifier>/linux-x64.tar.gz"
+mkdir -p publish && tar -xzf bulksigner-linux-x64.tar.gz -C publish
+```
+
+```powershell
+# Windows — an ordinary prompt is enough here; only the install itself needs elevation
+Invoke-WebRequest -Uri "https://cdn.lacunasoftware.com/bulk-signer/<identifier>/win-x64.zip" -OutFile bulksigner-win-x64.zip
+Expand-Archive -Path bulksigner-win-x64.zip -DestinationPath publish
+```
+
+`publish` is the name the rest of this page uses, because it is what the install scripts take as
+`--from publish` / `-From publish` — the archive does not care, and the switch accepts any path. Ask
+Lacuna if you need an OS or an architecture those two URLs do not cover.
+
+### A host with no route to the internet
+
+Neither artifact needs one at install time: both are whole, with no package feed, no restore step and no
+second call home, so a download on a connected workstation and a copy across is a complete answer. Bring
+the binaries over as the archive; bring the image over with `docker save` / `docker load`, or push it
+into a registry the host can reach — which is what [step 1](azure.md#1-import-the-image) of the Azure
+walkthrough does, for a different reason. The PKI SDK license is a string rather than a download, so an
+air-gapped install stays air-gapped.
+
+### Then check what you got
+
+The version actually running is in the dashboard's app bar on every page, printed whole under the
+branded console banner at each start, and on the System page. Once the install below is done, read it
+against the release you were told to install — that is the only confirmation that the URL, or the tag,
+served what you expected.
 
 ## Prerequisites — common to every target
 
@@ -89,7 +174,8 @@ of the upgrade.
 ## Linux — systemd
 
 ```bash
-# 1. Copy the publish/ bundle and deploy/ scripts to the target machine, then:
+# 1. With the binaries extracted to publish/ and the deployment package unpacked on the
+#    target machine (see Obtaining the product above):
 sudo bash deploy/linux/install.sh --from publish
 
 # 2. Edit the production config and the secrets env file.
@@ -129,8 +215,8 @@ sudo bash deploy/linux/uninstall.sh --purge  # also wipe data, logs, config, and
 ## Windows — Windows Service
 
 ```powershell
-# 1. Copy the publish/ bundle and deploy/ scripts to the target machine, then in an
-#    ELEVATED PowerShell prompt:
+# 1. With the binaries extracted to publish\ and the deployment package unpacked on the
+#    target machine (see Obtaining the product above), in an ELEVATED PowerShell prompt:
 .\deploy\windows\Install-Service.ps1 -From publish
 
 # 2. Edit the production config:
@@ -182,28 +268,36 @@ Look in the log file for those.
 ```bash
 cd deploy/docker
 
-# 1. Prepare working directories on the host.
+# 1. Authenticate to Lacuna's private registry — the compose file's image: line names it.
+docker login <lacuna-registry> --username <registry-username>
+
+# 2. Prepare working directories on the host.
 cp .env.sample .env
 mkdir -p data logs config
 cp ../appsettings.Production.json.sample config/appsettings.Production.json
 
-# 2. Edit the config and the env file.
+# 3. Edit the config and the env file.
 nano config/appsettings.Production.json
 nano .env
 
-# 3. The container runs as UID 1654. On Linux hosts:
+# 4. The container runs as UID 1654. On Linux hosts:
 sudo chown -R 1654:1654 data logs
 
-# 4. Start.
+# 5. Start — `up` pulls the image on its first run.
 docker compose up -d
 
-# 5. Verify.
+# 6. Verify.
 curl http://localhost:8080/api/health
 docker compose ps                       # should show "healthy" after ~30 s
 docker compose logs -f bulksigner
 ```
 
-The image is Debian-slim based — **not** Alpine. HSM `.so` libraries are generally not
+The compose file's `image:` line is where the private repository and its pinned tag live, so it is the
+line you edit at upgrade time. A pull that fails looks like a container that never starts with an empty
+application log — because there is no application yet — so check `docker login` before reading anything
+into the silence.
+
+Lacuna builds the image on Debian-slim — **not** Alpine. HSM `.so` libraries are generally not
 musl-compatible, so Alpine is off the table. The image ships generic PKCS#11 tooling
 (`libpcsclite1` + `opensc`); vendor HSM drivers (SafeNet, Thales, Entrust, Yubico) are
 operator-mounted at runtime via `volumes:` in the compose file. See the commented examples in
@@ -457,13 +551,15 @@ sessions minted by a login form that no longer exists. Plan the cutover accordin
 
 ## Upgrades
 
-The database schema migrates automatically at startup. To upgrade in place:
+The database schema migrates automatically at startup. Fetch the new release first — the same two
+channels as the first install, [Obtaining the product](#obtaining-the-product) — and use the deployment
+package that came with it rather than the copy you installed from last time. Then, to upgrade in place:
 
 | Target | Steps |
 |--------|-------|
-| Linux | `sudo bash deploy/linux/install.sh --from <new-publish-dir>` — stops the unit, redeploys the binary, restarts. |
-| Windows | `.\deploy\windows\Install-Service.ps1 -From <new-publish-dir>` — stops the service, mirrors the binary tree, restarts. |
-| Docker | `docker compose pull && docker compose up -d`. |
+| Linux | Extract the new [binaries archive](#the-published-binaries), then `sudo bash deploy/linux/install.sh --from <new-publish-dir>` — stops the unit, redeploys the binary, restarts. |
+| Windows | Extract the new [binaries archive](#the-published-binaries), then `.\deploy\windows\Install-Service.ps1 -From <new-publish-dir>` — stops the service, mirrors the binary tree, restarts. |
+| Docker | Bump the tag on the compose file's `image:` line, then `docker compose pull && docker compose up -d`. Run `docker login` again first if the access token has expired since the install. |
 
 :::warning Always back up the operational database before upgrading.
 

@@ -101,10 +101,13 @@ log estruturado. O dashboard e a API REST leem os mesmos dados e disparam as mes
 
 ## Início rápido — Docker
 
-Usando o pacote de implantação fornecido pela Lacuna Software:
+Usando o pacote de implantação fornecido pela Lacuna Software, mais a imagem do repositório privado de
+imagens Docker da Lacuna — veja [Obtendo o produto](installation.md#obtendo-o-produto):
 
 ```bash
 cd deploy/docker
+
+docker login <registry-da-lacuna> --username <usuário-do-registry>   # o compose nomeia o repositório
 
 cp .env.sample .env
 mkdir -p data logs config

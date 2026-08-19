@@ -50,7 +50,7 @@ erro fatal ou uma linha de readiness vermelha, em vez de uma surpresa em tempo d
 | 1 | **Um banco de dados Azure SQL**, mais um login em `db_datareader` + `db_datawriter` + `db_ddladmin` | A base é o ponto de coordenação do cluster: as reivindicações de job, a flag de pausa, a tabela de heartbeat e o key ring de sessão vivem todos ali. `Cluster:Enabled = true` com `Database:Provider` diferente de `SqlServer` é **recusado no boot**. Este serviço cria suas tabelas, não seu banco de dados. |
 | 2 | **Um compartilhamento do Azure Files (SMB)** para a árvore de trabalho, com todo diretório de entrada monitorado criado dentro dele | `Storage:Provider` e **cada** entrada de `Storage:Inputs[]` precisam resolver para `AzureFiles`, sob pena de recusa no boot. O lease da base local é uma contabilidade em processo que não exclui nada fora do próprio processo, e uma pasta local a uma instância é invisível para suas irmãs. Um compartilhamento NFS é recusado nominalmente. |
 | 3 | **Uma decisão entre as duas origens de certificado que não são por host** — `Pfx` lido de um blob, ou `AzureKeyVault` | `Pkcs11` e `WindowsStore` são **recusados no boot**: um token ou um repositório de máquina vive em uma máquina, e instâncias de cluster são intercambiáveis. Sobram duas, e nenhuma é a vencedora óbvia — o [passo 3](#3-a-chave-de-assinatura-vive-em-um-cofre) é a escolha e o que ela custa. Nada precisa existir ainda. |
-| 4 | **A imagem de container em um registry do qual o web app consiga fazer pull** | Construída e publicada pelo `Publish-ToAcr.ps1` do pacote de implantação. |
+| 4 | **A imagem de container em um registry do qual o web app consiga fazer pull** | A Lacuna a publica em seu repositório privado de imagens Docker; o [passo 1](#1-importe-a-imagem) copia a tag que você recebeu para um registry seu, que é o que torna possível um pull por managed identity. |
 | 5 | **Uma tabela do Azure Storage para o destino de logs** | Fortemente recomendada, e não obrigatória. O disco do container é efêmero, então arquivos de log rotacionados são descartados a cada reciclagem; deixar `Logging:AzureTable:Enabled = false` no modo cluster registra um **Critical na inicialização** e sobe assim mesmo. Nada poda essa tabela — leia [Retenção](retention.md#logs-em-uma-tabela--nada-os-poda) e agende o script de poda *antes* de ligar o destino. |
 | 6 | **Um recurso do Application Insights** | Também recomendado, e não obrigatório, por um motivo específico desta topologia: `/api/metrics` atrás do balanceador de carga alcança uma instância arbitrária, então a coleta pelo Prometheus não tem continuidade aqui. A distro do Application Insights é nativamente ciente de instâncias e é o caminho de observabilidade recomendado para cluster — veja [Telemetria](telemetry.md). |
 
@@ -132,25 +132,48 @@ decisão está em
 
 ---
 
-## 1. Publique a imagem
+## 1. Importe a imagem
 
-A partir do pacote de implantação fornecido pela Lacuna Software:
-
-```bash
-pwsh deploy/docker/Publish-ToAcr.ps1 -Registry <nome-do-registry>
-```
-
-O script constrói a imagem de container remotamente no ACR Tasks (sem daemon Docker local), publica no
-repositório `lacuna/bulksigner` por padrão, aplica as tags `<versão>`, `<versão>-<git sha>` e `latest`,
-e prepara um `.dockerignore` curado na raiz do contexto durante a build. O `-WhatIf` imprime o plano
-resolvido e não toca em nada — vale rodar primeiro, porque uma tag `<versão>` já existente é uma parada
-dura sem `-Force`.
-
-## 2. Crie o plano e o app — uma instância primeiro
+A Lacuna publica a imagem de container em seu **repositório privado de imagens Docker** e lhe entrega um
+usuário e um token de acesso para ele — veja
+[Obtendo o produto](installation.md#obtendo-o-produto). Nada é construído aqui: você copia para um
+container registry seu a tag que lhe disseram para instalar.
 
 ```bash
 az group create --name bulksigner-rg --location brazilsouth
 ```
+
+```bash
+az acr create --name <nome-do-registry> --resource-group bulksigner-rg --sku Basic
+```
+
+```bash
+az acr import --name <nome-do-registry> \
+  --source <registry-da-lacuna>/bulksigner:<versão> \
+  --image bulksigner:<versão> \
+  --username <usuário-do-registry> --password <token-do-registry>
+```
+
+O `az acr import` é uma cópia de registry para registry feita pelo próprio serviço: as camadas nunca
+passam pela sua estação de trabalho e não há daemon Docker local envolvido. Pule qualquer uma das linhas
+de `create` se o grupo ou o registry já existirem — o import é a parte que precisa acontecer, e o
+`Basic` é registry suficiente para uma imagem consumida por um punhado de instâncias.
+
+Importe uma tag `<versão>` explícita, e não a `latest`. A tag que você nomeia aqui é a tag à qual o passo
+2 fixa o web app, e nesta topologia uma atualização é uma
+[janela que para o mundo](#8-atualizações-param-o-mundo) — algo que você agenda, não algo que uma
+reciclagem da plataforma faz com você.
+
+**Por que um registry seu, em vez de apontar o web app direto para o da Lacuna.** Dois motivos, e o
+primeiro dá forma ao resto desta página: o app faz o pull com sua **managed identity** (`AcrPull`, passo
+2), e uma identidade do seu tenant só pode receber um papel em um registry do seu tenant — um registry de
+terceiros significa um usuário e uma senha nos app settings, que é mais um segredo a rotacionar, e
+justamente o tipo de segredo que este desenho gasta esforço para eliminar. O segundo é disponibilidade: o
+App Service faz o pull da imagem de novo em toda instância que sobe, então a escala horizontal
+([passo 7](#7-escale-para-duas)) e as reciclagens da plataforma passariam a depender de um registry fora
+da sua subscription responder naquele momento.
+
+## 2. Crie o plano e o app — uma instância primeiro
 
 ```bash
 az appservice plan create --name bulksigner-plan --resource-group bulksigner-rg --is-linux --sku P1V3 --number-of-workers 1
@@ -167,11 +190,12 @@ produção. Comece com um worker deliberadamente: o primeiro boot é onde toda r
 console de uma instância é mais fácil do que ler o de duas.
 
 ```bash
-az webapp create --name bulksigner --resource-group bulksigner-rg --plan bulksigner-plan --container-image-name <nome-do-registry>.azurecr.io/lacuna/bulksigner:<versão>
+az webapp create --name bulksigner --resource-group bulksigner-rg --plan bulksigner-plan --container-image-name <nome-do-registry>.azurecr.io/bulksigner:<versão>
 ```
 
-`lacuna/bulksigner` é o repositório padrão do script de publicação. Fixe a tag `<versão>` em vez de
-`latest`, para que uma atualização seja algo que você faz, e não algo que um restart faz.
+`bulksigner:<versão>` é o repositório e a tag para os quais o [passo 1](#1-importe-a-imagem) importou — o
+seu registry, não o da Lacuna. Fixe aquela tag em vez de `latest`, para que uma atualização seja algo que
+você faz, e não algo que um restart faz.
 
 ```bash
 az webapp identity assign --name bulksigner --resource-group bulksigner-rg
@@ -540,10 +564,24 @@ Solte vários arquivos de uma vez em uma pasta monitorada e leia `/jobs`:
 
 ## 8. Atualizações param o mundo
 
-Pare o app, implante a nova imagem, inicie-o. Não é um restart rolante, e **não é uma troca de
-deployment slot** — um slot de staging carregando a connection string de produção é um segundo conjunto
-de instâncias entrando no cluster em uma versão diferente da aplicação, que é o único formato que este
-desenho não suporta.
+Pare o app, implante a nova imagem, inicie-o — com um passo antes desses três, porque a imagem vem do
+registry da Lacuna, e não de uma build:
+
+```bash
+az acr import --name <nome-do-registry> \
+  --source <registry-da-lacuna>/bulksigner:<nova-versão> \
+  --image bulksigner:<nova-versão> \
+  --username <usuário-do-registry> --password <token-do-registry>
+
+az webapp stop --name bulksigner --resource-group bulksigner-rg
+az webapp config container set --name bulksigner --resource-group bulksigner-rg \
+  --container-image-name <nome-do-registry>.azurecr.io/bulksigner:<nova-versão>
+az webapp start --name bulksigner --resource-group bulksigner-rg
+```
+
+Não é um restart rolante, e **não é uma troca de deployment slot** — um slot de staging carregando a
+connection string de produção é um segundo conjunto de instâncias entrando no cluster em uma versão
+diferente da aplicação, que é o único formato que este desenho não suporta.
 
 A marca de versão no heartbeat é o fio de alarme, não a guarda: uma instância subindo que enxergue
 heartbeats vivos de uma versão diferente registra um **Critical e continua**. Deliberadamente não é uma

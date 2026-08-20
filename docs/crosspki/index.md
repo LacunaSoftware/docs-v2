@@ -1,5 +1,5 @@
 ---
-sidebar_label: "# CrossPKI para CEF - Guia de Integração"
+sidebar_label: "CrossPKI para CEF - Guia de Integração"
 sidebar_position: 9
 ---
 

@@ -57,7 +57,6 @@ toolset. Nothing is linked at build time — it loads the DLL at runtime.
 
 ```
 https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.0.0.zip
-https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.0.0.zip.sha256
 ```
 
 SHA-256: `56e2196289da981150c2bf73d71915bc05cad86b252fdac191fe20313e1f9787`

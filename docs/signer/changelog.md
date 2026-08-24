@@ -5,6 +5,23 @@ sidebar_position: 5
 
 # Histórico de versões do Signer
 
+<a name="v2-20-0" />
+### 2.20.0 (2026-08-24)
+
+* Melhorias
+  * [SIG-1911] Novo tipo de identificador "Passaporte": aceita qualquer valor alfanumérico (mínimo 6 caracteres), com extração automática do passaporte a partir de certificados do Paraguai e do Equador na assinatura
+  * [SIG-263] Log de validação de certificado: dialog de validação reformulado em uma árvore recolhível inline e adição de download/cópia do log de validação por signatário em arquivo TXT
+  * [SIG-1897] Desacoplada a emissão do boleto (Iugu) do fechamento da fatura, de modo que uma indisponibilidade do gateway não deixe mais faturas travadas sem forma de reprocessamento, com novo endpoint para reemitir as faturas do gateway
+  * [SIG-1901] Melhorado o uso de threads para mitigar thread pool starvation sob carga
+  * [SIG-1915] Sincronizado o SDK C# (Signer.Client) com a API atual, corrigindo o endpoint de exclusão de usuário da organização e adicionando Document Flows, Contatos e Marks Sessions
+
+* Correções de bugs
+  * [SIG-1079] Corrigido erro indevido de permissão ao abrir um documento de uma pasta à qual o usuário tem apenas acesso de pasta, em assinaturas com videoconferência habilitada
+  * [SIG-1896] Corrigida NullReferenceException ao baixar a versão printer-friendly de um documento cancelado sem evidências armazenadas
+  * [SIG-1916] Corrigido erro no formulário de usuário da edição de fluxo ao atualizar um usuário selecionado pelo autocomplete
+
+Atualiza modelo de banco de dados: não
+
 <a name="v2-19-0" />
 ### 2.19.0 (2026-08-14)
 

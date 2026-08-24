@@ -5,6 +5,23 @@ sidebar_position: 5
 
 # Signer 
 
+<a name="v2-20-0" />
+### 2.20.0 (2026-08-24)
+
+* Improvements
+  * [SIG-1911] New "Passport" identifier type: accepts any alphanumeric value (minimum 6 characters), with automatic passport extraction from Paraguay and Ecuador certificates when signing
+  * [SIG-263] Certificate validation log: reworked the validation dialog into an inline collapsible tree and added a per-signer download/copy of the validation log as a TXT file
+  * [SIG-1897] Decoupled bank slip (Iugu) emission from invoice closing so a gateway outage no longer leaves invoices stuck without a way to reprocess them, with a new endpoint to re-emit gateway invoices
+  * [SIG-1901] Improved thread usage to mitigate thread pool starvation under load
+  * [SIG-1915] Synchronized the Signer.Client C# SDK with the current API, fixing the organization-user deletion endpoint and adding Document Flows, Contacts and Marks Sessions
+
+* Bug fixes
+  * [SIG-1079] Fixed a spurious permission error when opening a document from a folder the user only has folder access to, on subscriptions with videoconferencing enabled
+  * [SIG-1896] Fixed a NullReferenceException when downloading the printer-friendly version of a canceled document with no stored evidences
+  * [SIG-1916] Fixed an error in the flow-editing user form when updating a user selected through autocomplete
+
+Updates database model: no
+
 <a name="v2-19-0" />
 ### 2.19.0 (2026-08-14)
 

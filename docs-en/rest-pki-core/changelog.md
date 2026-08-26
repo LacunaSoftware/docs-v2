@@ -7,6 +7,21 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.5.3 (2026-08-26) {#v4-5-3}
+
+Updates database model: no
+
+* New features
+
+  * [RPNG-827] Add the "PKI Brazil with e-Notariado" and "PKI Brazil with Gov.BR and e-Notariado" standard security contexts
+
+  * [RPNG-828] Add the option to see the standard trusted root used by the signature on the signature validation response (enabled per installation)
+
+* Bug fixes
+
+  * [RPNG-784] [RPNG-864] Issue on passport capture in Video Identification
+
+
 ### 4.4.4 (2026-08-18) [patch] {#v4-4-4}
 
 Updates database model: no

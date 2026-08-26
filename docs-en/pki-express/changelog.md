@@ -1,5 +1,11 @@
 # PKI Express changelog
 
+### 1.38.0 (2026-08-26) {#v1-38-0}
+
+- [PKIE-12] Add support for keys and certificates on PKCS#11 tokens/HSMs through the `pkcs11LibraryPath` configuration
+- [PKIE-86] Add metadata option to the PAdES signature commands to set the PDF metadata
+- Update Lacuna.Pki SDK [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3)
+
 ### 1.36.2 (2026-03-09) {#v1-36-2}
 
 - Update Lacuna.Pki SDK [2.22.2](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-2)

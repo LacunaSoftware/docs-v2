@@ -9,7 +9,7 @@ To install PKI Express, download and run the installer:
 
 <br />
 <center>
-**[PKI Express (64-bit) 1.36.2 installer](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x64.msi) (recommended)**
+**[PKI Express (64-bit) 1.38.0 installer](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x64.msi) (recommended)**
 </center>
 <br />
 
@@ -25,10 +25,10 @@ The Configuration Manager tool does not appear on the start menu, you must run i
 
 File                                                                            | Description
 ------------------------------------------------------------------------------- | ------------------
-**[pkie-1.36.2-x64.msi](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x64.msi)** | **Windows installer (64 bits)**
-[pkie-1.36.2-x86.msi](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x86.msi)     | Windows installer (32 bits)
-[pkie-1.36.2-x64.zip](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x64.zip)     | Standalone zip package (64 bits)
-[pkie-1.36.2-x86.zip](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x86.zip)     | Standalone zip package (32 bits)
+**[pkie-1.38.0-x64.msi](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x64.msi)** | **Windows installer (64 bits)**
+[pkie-1.38.0-x86.msi](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x86.msi)     | Windows installer (32 bits)
+[pkie-1.38.0-x64.zip](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x64.zip)     | Standalone zip package (64 bits)
+[pkie-1.38.0-x86.zip](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x86.zip)     | Standalone zip package (32 bits)
 
 Whenever possible, choose the 64-bit version of PKI Express.
 

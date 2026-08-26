@@ -9,7 +9,7 @@ Para instalar o PKI Express, baixe e execute o instalador:
 
 <br />
 <center>
-**[PKI Express (64-bit) 1.36.2 installer](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x64.msi) (recomendado)**
+**[PKI Express (64-bit) 1.38.0 installer](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x64.msi) (recomendado)**
 </center>
 <br />
 
@@ -27,10 +27,10 @@ Caso prefira, você pode optar por um dos downloads alternativos:
 
 Arquivo                                                                         | Descrição
 ------------------------------------------------------------------------------- | ------------------
-**[pkie-1.36.2-x64.msi](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x64.msi)** | **Instalador 64 bits**
-[pkie-1.36.2-x86.msi](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x86.msi)     | Instalador 32 bits
-[pkie-1.36.2-x64.zip](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x64.zip)     | Pacote zip 64 bits
-[pkie-1.36.2-x86.zip](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.36.2-x86.zip)     | Pacote zip 32 bits
+**[pkie-1.38.0-x64.msi](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x64.msi)** | **Instalador 64 bits**
+[pkie-1.38.0-x86.msi](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x86.msi)     | Instalador 32 bits
+[pkie-1.38.0-x64.zip](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x64.zip)     | Pacote zip 64 bits
+[pkie-1.38.0-x86.zip](https://cdn.lacunasoftware.com/pki-express/windows/pkie-1.38.0-x86.zip)     | Pacote zip 32 bits
 
 Sempre que possível, escolha a versão 64 bits do PKI Express.
 

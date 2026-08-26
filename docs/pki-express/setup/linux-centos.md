@@ -8,9 +8,9 @@ De posse do arquivo de licença (**LacunaPkiLicense.config**), siga os passos ab
 Baixe o pacote do PKI Express e extraia para a pasta de destino:
 
 ```sh
-curl -O https://cdn.lacunasoftware.com/pki-express/linux/pkie-1.36.2.tar.gz
+curl -O https://cdn.lacunasoftware.com/pki-express/linux/pkie-1.38.0.tar.gz
 sudo mkdir /usr/share/pkie
-sudo tar xzf pkie-1.36.2.tar.gz -C /usr/share/pkie
+sudo tar xzf pkie-1.38.0.tar.gz -C /usr/share/pkie
 sudo chmod +x /usr/share/pkie/pkie
 sudo ln -s /usr/share/pkie/pkie /usr/local/bin/pkie
 ```
@@ -39,9 +39,9 @@ Se a ativação automática falhar, siga as instruções no artigo [Ativação m
 Para atualizar o PKI Express, apenas baixe o novo pacote e extraia para a pasta de destino:
 
 ```sh
-curl -O https://cdn.lacunasoftware.com/pki-express/linux/pkie-1.36.2.tar.gz
+curl -O https://cdn.lacunasoftware.com/pki-express/linux/pkie-1.38.0.tar.gz
 sudo rm -R /usr/share/pkie/*
-sudo tar xzf pkie-1.36.2.tar.gz -C /usr/share/pkie
+sudo tar xzf pkie-1.38.0.tar.gz -C /usr/share/pkie
 sudo chmod -R a=r,a+X,u+w /usr/share/pkie
 ```
 

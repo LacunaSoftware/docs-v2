@@ -1,5 +1,11 @@
 # Histórico de versões do PKI Express
 
+### 1.38.0 (2026-08-26) {#v1-38-0}
+
+- [PKIE-12] Adiciona suporte a chaves e certificados em tokens/HSMs PKCS#11 através da configuração `pkcs11LibraryPath`
+- [PKIE-86] Adiciona opção metadata nos comandos de assinatura PAdES para definir metadados do PDF
+- Atualização Lacuna.Pki SDK [2.22.3](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-3)
+
 ### 1.36.2 (2026-03-09) {#v1-36-2}
 
 - Atualização Lacuna.Pki SDK [2.22.2](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-2)

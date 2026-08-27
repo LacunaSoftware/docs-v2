@@ -7,6 +7,15 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.5.4 (2026-08-27) [patch] {#v4-5-4}
+
+Updates database model: no
+
+* Bug fixes
+
+  * [RPNG-866] Video Identification rejecting valid ID cards whose expected document number is in the MRZ optional data
+
+
 ### 4.5.3 (2026-08-26) {#v4-5-3}
 
 Updates database model: no

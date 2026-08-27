@@ -7,6 +7,15 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 4.5.4 (2026-08-27) [patch] {#v4-5-4}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-866] Vídeo identificação rejeitando documentos válidos cujo número esperado está nos dados opcionais da MRZ
+
+
 ### 4.5.3 (2026-08-26) {#v4-5-3}
 
 Atualiza modelo do banco de dados: não

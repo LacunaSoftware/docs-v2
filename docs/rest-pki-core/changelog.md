@@ -7,6 +7,21 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 4.5.3 (2026-08-26) {#v4-5-3}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-827] Novos contextos de segurança padrão "PKI Brazil with e-Notariado" e "PKI Brazil with Gov.BR and e-Notariado"
+
+  * [RPNG-828] Adicionar possibilidade de visualizar a raiz confiável padrão utilizada na assinatura na resposta da validação de assinatura (habilitado por instalação)
+
+* Correções de bugs
+
+  * [RPNG-784] [RPNG-864] Problema na captura de passaportes na vídeo identificação
+
+
 ### 4.4.4 (2026-08-18) [patch] {#v4-4-4}
 
 Atualiza modelo do banco de dados: não

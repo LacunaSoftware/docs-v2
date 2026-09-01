@@ -7,7 +7,16 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
-### 4.5.4 (2026-08-27) [patch] {#v4-5-4}
+### 4.5.5 (2026-08-31) {#v4-5-5}
+
+Updates database model: no
+
+* Improvements
+
+  * [RPNG-843] Add subscription filter to the paginated listing of biometric subjects (client libraries)
+
+
+### 4.5.4 (2026-08-27) {#v4-5-4}
 
 Updates database model: no
 

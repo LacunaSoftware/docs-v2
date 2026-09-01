@@ -7,7 +7,16 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
-### 4.5.4 (2026-08-27) [patch] {#v4-5-4}
+### 4.5.5 (2026-08-31) {#v4-5-5}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-843] Filtro por subscription na listagem paginada de subjects biométricos (bibliotecas cliente)
+
+
+### 4.5.4 (2026-08-27) {#v4-5-4}
 
 Atualiza modelo do banco de dados: não
 

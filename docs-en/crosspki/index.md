@@ -25,7 +25,9 @@ toolset. Nothing is linked at build time — it loads the DLL at runtime.
 
 ## 2. Requirements
 
-- **Windows**, **x64**. CrossPKI uses the Windows certificate store and CNG.
+- **Windows**, **x64 or x86**. CrossPKI uses the Windows certificate store and CNG.
+  The ZIP carries a DLL for each architecture; deploy the one matching your host
+  process, since a process can only load a DLL of its own bitness.
 - **CEF.** The bridge is compiled as part of your application, so what matters is
   that it builds against your SDK. Verified with MSVC v143 against the current
   stable build of each line:
@@ -34,6 +36,7 @@ toolset. Nothing is linked at build time — it loads the DLL at runtime.
   |---|---|---|
   | 93.1.14 | yes | no |
   | 110.0.32 | yes | yes |
+  | 111.2.7 | yes | yes |
   | 138.0.62 | yes | yes |
   | 149.0.6 | no | yes |
 
@@ -56,10 +59,11 @@ toolset. Nothing is linked at build time — it loads the DLL at runtime.
 ## 3. Download
 
 ```
-https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.0.0.zip
+https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.0.1.zip
+https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.0.1.zip.sha256
 ```
 
-SHA-256: `56e2196289da981150c2bf73d71915bc05cad86b252fdac191fe20313e1f9787`
+SHA-256: `23c2cc58391cb167f757657d5234e0edc45009cb45a128737f9f5c7d4d1b136d`
 
 Every release has an immutable URL, so a given version always resolves to the same
 bytes. `crosspki.dll` is Authenticode-signed by Lacuna Software — verify both the
@@ -211,9 +215,10 @@ optimization bailouts. Either add `node-forge` to `allowedCommonJsDependencies` 
 ## 8. Deploy
 
 Ship `crosspki.dll` next to your host executable, alongside `libcef.dll` and the
-rest of your CEF binaries. The bridge looks there first and only then falls back to
-the standard search path, which is what stops a stray copy elsewhere on the machine
-from being picked up instead.
+rest of your CEF binaries — `bin/x64/` for a 64-bit host, `bin/x86/` for a 32-bit
+one. The bridge looks there first and only then falls back to the standard search
+path, which is what stops a stray copy elsewhere on the machine from being picked up
+instead.
 
 There is nothing to register, no COM component, and no installer step.
 
@@ -260,10 +265,11 @@ fields — see https://docs.lacunasoftware.com/articles/crosspki.
 
 ## 10. Sandbox
 
-**Keep the Chromium sandbox enabled.** The DLL loads in the browser process, never
-in a renderer, precisely so your renderers can stay sandboxed. Nothing here needs
-`no_sandbox` or `--single-process`. If you are working from a CEF sample that sets
-`no_sandbox = true`, that belongs to the sample, not to CrossPKI.
+CrossPKI works with the Chromium sandbox **enabled or disabled**.
+
+The DLL loads in the browser process,
+never in a renderer, so a sandboxed renderer is fully compatible.
+And so is a host that runs with `no_sandbox = true`, which is how CrossPKI's own test harness runs.
 
 ---
 

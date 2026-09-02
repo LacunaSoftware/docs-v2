@@ -7,6 +7,15 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.5.6 (2026-09-01) {#v4-5-6}
+
+Updates database model: no
+
+* Improvements
+
+  * [RPNG-870] Video Identification improvements
+
+
 ### 4.5.5 (2026-08-31) {#v4-5-5}
 
 Updates database model: no

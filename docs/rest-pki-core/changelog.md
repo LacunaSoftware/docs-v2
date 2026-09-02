@@ -7,6 +7,15 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 4.5.6 (2026-09-01) {#v4-5-6}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-870] Melhorias da Vídeo identificação
+
+
 ### 4.5.5 (2026-08-31) {#v4-5-5}
 
 Atualiza modelo do banco de dados: não

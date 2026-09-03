@@ -227,6 +227,8 @@ initial page showing document details. If `true` reverts to the old behavior of 
 
 * **IncludeQrCodeInEmailNotifications** (v2.9.0, default: `false`): if `true`, includes a QR code in email notifications that link to the document in the platform through the WebPKI app.
 
+* **CleanupFailedHangfireJobsCommandTimeoutSeconds** (default: `300`, v2.21.0): command timeout, in seconds, for each batch delete performed by the failed Hangfire jobs cleanup job. This cleanup runs against the live Hangfire schema and may briefly wait on locks, so it needs a longer budget than the default request timeout. Set to zero or less to fall back to the default timeout.
+
 ###  *Billing* Settings (v1.40.0) {#billing-settings}
 
 Under section **Billing**:

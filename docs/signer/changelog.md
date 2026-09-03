@@ -5,6 +5,31 @@ sidebar_position: 5
 
 # Histórico de versões do Signer
 
+<a name="v2-21-0" />
+### 2.21.0 (2026-09-01)
+
+* Melhorias
+  * [SIG-1925] Novo método de autenticação para assinatura eletrônica: WhatsApp + Selfie
+  * [SIG-1895] Melhorias de UI/UX na listagem de documentos, incluindo melhor responsividade mobile e chips de signatários inline
+  * [SIG-1887] Carregamento de temas sob demanda em vez de embutir todos, reduzindo o CSS inicial
+  * [SIG-1914] Evita a requisição de preferências de notificação a cada renovação de token quando o cookie de idioma já está definido
+  * [SIG-780] Melhoria de desempenho na listagem de documentos por meio da denormalização do status do signatário em DocumentUser com índice sincronizado
+  * [SIG-1881] Nova regra de acesso para validação de documentos: login, acesso na organização e acesso ao documento
+  * [SIG-1927] Melhoria de performance: evita operações desnecessárias ao receber recusa de acesso a documento
+
+* Correções de bugs
+  * [SIG-1908] Corrigido o identificador do participante que não era persistido/recarregado em fluxo pré-definido da organização
+  * [SIG-1926] Corrigida a opção "exigir tipo de certificado" que, para e-CNPJ, exibia e validava o campo de identificador como RUC em vez de CNPJ
+  * [SIG-1930] Corrigido timeout de SQL no job de limpeza de jobs falhados do Hangfire, com timeout de comando configurável e hints de lock que evitam o bloqueio do servidor Hangfire em execução
+  * [SIG-1491] Tratamento do erro de crédito insuficiente do BirdId (BILLING_LOCK) com mensagem amigável
+  * Corrigida a lista de certificados em nuvem na tela de assinatura e uma condição de corrida no dropdown de certificados da assinatura rápida
+
+Atualiza modelo de banco de dados: sim (migração: `DenormalizeDocumentUserWithTrigger`)
+
+:::caution
+Esta versão introduz jobs em background relacionados a desempenho, incluindo um backfill único executado na inicialização da aplicação (SIG-780) e novos jobs recorrentes. Logo após o deploy, enquanto o backfill é executado, a instância pode apresentar um aumento temporário de carga no banco de dados e lentidão na listagem de documentos. Isso é esperado e se normaliza assim que o backfill termina.
+:::
+
 <a name="v2-20-0" />
 ### 2.20.0 (2026-08-24)
 

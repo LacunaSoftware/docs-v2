@@ -5,6 +5,31 @@ sidebar_position: 5
 
 # Signer 
 
+<a name="v2-21-0" />
+### 2.21.0 (2026-09-01)
+
+* Improvements
+  * [SIG-1925] New electronic signature authentication method: WhatsApp + Selfie
+  * [SIG-1895] Document list UI/UX improvements, including better mobile responsiveness and inline signer chips
+  * [SIG-1887] Load themes on demand instead of inlining all of them, reducing the initial CSS payload
+  * [SIG-1914] Skip the notification-preferences request on every token renewal when the language cookie is already set
+  * [SIG-780] Improved document-listing performance by denormalizing signer status onto DocumentUser with a synchronized index
+  * [SIG-1881] New document-validation access rule: login, organization access, and document access
+  * [SIG-1927] Performance improvement: avoids unnecessary operations when a document access is denied
+
+* Bug fixes
+  * [SIG-1908] Fixed the participant identifier not being persisted/reloaded in an organization's predefined flow
+  * [SIG-1926] Fixed the "require certificate type" e-CNPJ option showing and validating the identifier field as RUC instead of CNPJ
+  * [SIG-1930] Fixed a SQL timeout in the failed Hangfire jobs cleanup job by adding a configurable command timeout and lock hints that prevent it from blocking the live Hangfire server
+  * [SIG-1491] Handle the BirdId insufficient-credit (BILLING_LOCK) error with a user-friendly message
+  * Fixed the cloud certificate list on the signing screen and a race in the fast-signature certificate dropdown
+
+Updates database model: yes (migration: `DenormalizeDocumentUserWithTrigger`)
+
+:::caution
+This version introduces performance-related background jobs, including a one-time backfill that runs at application startup (SIG-780) and new recurring jobs. Right after the deployment, while the backfill runs, the instance may show a temporary increase in database load and slower document listing. This is expected and subsides once the backfill completes.
+:::
+
 <a name="v2-20-0" />
 ### 2.20.0 (2026-08-24)
 

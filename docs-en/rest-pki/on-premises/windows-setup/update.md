@@ -10,7 +10,7 @@ Also [check the minimum .NET version required on Windows](netframework-version.m
 
 1. Create a backup of the database and of the site folder
 1. Delete all files on the site folder **EXCEPT THE FILES** `AppSettings.config` and `Connections.config`
-1. Extract the contests of the new Rest PKI package ([restpki-1.33.8.zip](https://cdn.lacunasoftware.com/restpki/restpki-1.33.8.zip)) to the site folder
+1. Extract the contests of the new Rest PKI package ([restpki-1.33.9.zip](https://cdn.lacunasoftware.com/restpki/restpki-1.33.9.zip)) to the site folder
 1. Access the website
 
 :::note

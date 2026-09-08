@@ -1,5 +1,12 @@
 # Rest PKI changelog
 
+### 1.33.9 (2026-09-08) {#v1-33-9}
+
+Database model update: No
+
+- Update PKI SDK to [2.22.5](https://docs.lacunasoftware.com/en-us/articles/pki-sdk/changelog#v2-22-5)
+
+
 ### 1.33.8 (2026-04-07) {#v1-33-8}
 
 Database model update: No

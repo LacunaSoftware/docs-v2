@@ -10,7 +10,7 @@ Também [verifique a versão mínima do .NET exigida no Windows](netframework-ve
 
 1. Crie um backup do banco de dados e da pasta do site
 1. Apague todos os arquivos da pasta do site **EXCETO OS ARQUIVOS** `AppSettings.config` e `Connections.config`
-1. Extraia o conteúdo do novo pacote do Rest PKI ([restpki-1.33.8.zip](https://cdn.lacunasoftware.com/restpki/restpki-1.33.8.zip)) para a pasta do site
+1. Extraia o conteúdo do novo pacote do Rest PKI ([restpki-1.33.9.zip](https://cdn.lacunasoftware.com/restpki/restpki-1.33.9.zip)) para a pasta do site
 1. Acesse o site
 
 :::note

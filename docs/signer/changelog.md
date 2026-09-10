@@ -5,6 +5,24 @@ sidebar_position: 5
 
 # Histórico de versões do Signer
 
+<a name="v2-22-0" />
+### 2.22.0 (2026-09-10)
+
+* Melhorias
+  * [SIG-855] Permite o pré-posicionamento da rubrica (assinatura/iniciais) para participantes do tipo Aprovador e Regra de Aprovação, antes restrito a signatários
+  * [SIG-897] Permite colar uma imagem da área de transferência (Ctrl+V) para preencher a rubrica e a representação visual da assinatura
+  * [SIG-1912] Permite definir o idioma da notificação de conclusão por destinatário (PT/EN/ES) na lista "enviar documento assinado para"
+  * [SIG-1902] Nova flag `disableRefusal` por participante via API, que oculta o botão de recusar e bloqueia o endpoint de recusa para aquele participante
+  * [SIG-1913] Nova opção de instância para restringir a configuração de Carimbo do Tempo por organização somente a sysadmins, ocultando a seção dos admins de organização
+  * [SIG-1600] Suprimidos os warnings do Entity Framework com ordenação explícita em consultas paginadas (Take/Skip) e um índice em Invoices, tornando determinística a ordem de processamento dos jobs em background
+
+* Correções de bugs
+  * [SIG-1928] Corrigida a assinatura em lote com certificado no HSM que travava o diálogo em "preparando documento" e não assinava nada; certificados inválidos (não confiáveis/expirados/revogados) passam a reportar erro por linha em vez de falso sucesso (também no lote com certificado em nuvem)
+  * [SIG-1391] Corrigida a representação visual do carimbo de autenticação que persistia após voltar ao modo normal na Assinatura Única
+  * [SIG-1933] Corrigida a obrigatoriedade de dados de faturamento que não bloqueava a criação de documentos em contas pessoais quando a fatura ainda não tinha valor a cobrar (trial/pré-pago); nova opção habilita a checagem também para faturas de valor zero
+
+Atualiza modelo de banco de dados: sim (migrações: `FlowActionDisableRefusal`, `AddInvoiceStatusCloseJobIndex`)
+
 <a name="v2-21-0" />
 ### 2.21.0 (2026-09-01)
 

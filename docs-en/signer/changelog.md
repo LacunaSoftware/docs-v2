@@ -5,6 +5,24 @@ sidebar_position: 5
 
 # Signer 
 
+<a name="v2-22-0" />
+### 2.22.0 (2026-09-10)
+
+* Improvements
+  * [SIG-855] Allow pre-positioning of the rubric (signature/initials) for approver and approval-rule participants, previously restricted to signers
+  * [SIG-897] Paste an image from the clipboard (Ctrl+V) to fill the rubric and the signature visual representation
+  * [SIG-1912] Let the completion notification language be chosen per recipient (PT/EN/ES) in the "send signed document to" list
+  * [SIG-1902] New per-participant `disableRefusal` API flag that hides the refuse button and blocks the refusal endpoint for that participant
+  * [SIG-1913] New instance option to restrict the organization Time Stamp setting to sysadmins only, hiding the section from organization admins
+  * [SIG-1600] Suppressed Entity Framework warnings by adding explicit ordering to batched (Take/Skip) queries and an index on Invoices, making background-job processing order deterministic
+
+* Bug fixes
+  * [SIG-1928] Fixed batch signing with an HSM certificate that hung the dialog on "preparing document" and signed nothing; invalid certificates (untrusted/expired/revoked) now report an error per row instead of a false success (also for cloud-certificate batches)
+  * [SIG-1391] Fixed the authentication stamp visual representation persisting after switching back to normal mode in Single Signature
+  * [SIG-1933] Fixed the mandatory billing information check not blocking document creation for personal accounts on invoices with no chargeable value yet (trial/prepaid); new opt-in setting extends the check to zero-value invoices
+
+Updates database model: yes (migrations: `FlowActionDisableRefusal`, `AddInvoiceStatusCloseJobIndex`)
+
 <a name="v2-21-0" />
 ### 2.21.0 (2026-09-01)
 

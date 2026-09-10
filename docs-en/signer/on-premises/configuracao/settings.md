@@ -243,6 +243,7 @@ organization will be free of charge (the creation date of the organization is co
 * **AllowBasicUsersToViewOrganizationBillingInformation** (v1.62.0): if `true` basic users will be able to view invoices and billing information of an organization. 
 * **BlockSubscriptionDeletionIfHasPaymentDebt** (default: `true`, v1.78.0): if `true` organization administrators cannot delete a subscription if it has payment debts. The 
 instance administrator will be able to delete it if necessary though.
+* **EnableInformationCheckForZeroValueInvoices** (default: `false`, v2.22.0): when `EnableBillingInformationCheck` is also enabled, extends the billing information requirement to invoices that have not yet accumulated a chargeable value (trial-period subscriptions, and prepaid subscriptions with no charge posted to the invoice yet) instead of only enforcing it once the invoice value is greater than zero.
 
 ###  *DocumentTypes* Settings (v1.7.0) {#document-types-settings}
 
@@ -810,6 +811,9 @@ Under section **Timestamper**:
 * **Password** (v1.28.0): if type is `BasicAuthentication` or `BasicAuthenticationV2`, defines the password value for authentication.
 * **MaxAutoRetryCount** (default: `3`, v1.30.0): the number of retries that will be made if a timestamp cannot be obtained in the first try.
 * **RetryDelayInMilliseconds** (default: `1500`): the delay in miliseconds to wait between timestamp retries.
+* **Organization** (v2.22.0): controls how organization admins may manage the per-organization Time Stamp setting:
+	* **EnabledByDefault** (default: `true`, v2.22.0): the value used for an organization's Time Stamp setting when it has no explicit override of its own.
+	* **DisableSettingsByNonInstanceAdmin** (default: `false`, v2.22.0): when `true`, only instance sysadmins may change (or reset) an organization's Time Stamp setting; the section is hidden from organization admins and any attempt to change it through the API is rejected with `403 Forbidden`.
 
 
 ###  *Notarize* Settings

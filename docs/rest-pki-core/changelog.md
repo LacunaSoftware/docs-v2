@@ -7,6 +7,21 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 4.5.8 (2026-09-10) {#v4-5-8}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-836] Atualização do Browser SDK da FaceTec
+
+  * [RPNG-878] Vídeo identificação: melhoria no tratamento do verso do documento na última tentativa de captura
+
+* Correções de bugs
+
+  * [RPNG-879] Verificação do nome na MRZ reprovava documentos com primeiros nomes abreviados
+
+
 ### 4.5.6 (2026-09-01) {#v4-5-6}
 
 Atualiza modelo do banco de dados: não

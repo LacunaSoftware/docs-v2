@@ -7,6 +7,21 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 4.5.8 (2026-09-10) {#v4-5-8}
+
+Updates database model: no
+
+* Improvements
+
+  * [RPNG-836] Update FaceTec Browser SDK
+
+  * [RPNG-878] Video Identification: improved handling of the document back on the last capture attempt
+
+* Bug fixes
+
+  * [RPNG-879] MRZ name check rejected documents with abbreviated given names
+
+
 ### 4.5.6 (2026-09-01) {#v4-5-6}
 
 Updates database model: no

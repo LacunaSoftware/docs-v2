@@ -8,10 +8,14 @@ sidebar_position: 5
 <a name="v2-22-0" />
 ### 2.22.0 (2026-09-10)
 
-* Improvements
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.22.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.22.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.22.0.tar.gz)
+
+* New Features
   * [SIG-855] Allow pre-positioning of the rubric (signature/initials) for approver and approval-rule participants, previously restricted to signers
   * [SIG-897] Paste an image from the clipboard (Ctrl+V) to fill the rubric and the signature visual representation
   * [SIG-1912] Let the completion notification language be chosen per recipient (PT/EN/ES) in the "send signed document to" list
+
+* Improvements
   * [SIG-1902] New per-participant `disableRefusal` API flag that hides the refuse button and blocks the refusal endpoint for that participant
   * [SIG-1913] New instance option to restrict the organization Time Stamp setting to sysadmins only, hiding the section from organization admins
   * [SIG-1600] Suppressed Entity Framework warnings by adding explicit ordering to batched (Take/Skip) queries and an index on Invoices, making background-job processing order deterministic
@@ -26,8 +30,12 @@ Updates database model: yes (migrations: `FlowActionDisableRefusal`, `AddInvoice
 <a name="v2-21-0" />
 ### 2.21.0 (2026-09-01)
 
-* Improvements
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.21.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.21.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.21.0.tar.gz)
+
+* New Features
   * [SIG-1925] New electronic signature authentication method: WhatsApp + Selfie
+
+* Improvements
   * [SIG-1895] Document list UI/UX improvements, including better mobile responsiveness and inline signer chips
   * [SIG-1887] Load themes on demand instead of inlining all of them, reducing the initial CSS payload
   * [SIG-1914] Skip the notification-preferences request on every token renewal when the language cookie is already set
@@ -51,6 +59,8 @@ This version introduces performance-related background jobs, including a one-tim
 <a name="v2-20-0" />
 ### 2.20.0 (2026-08-24)
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.20.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.20.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.20.0.tar.gz)
+
 * Improvements
   * [SIG-1911] New "Passport" identifier type: accepts any alphanumeric value (minimum 6 characters), with automatic passport extraction from Paraguay and Ecuador certificates when signing
   * [SIG-263] Certificate validation log: reworked the validation dialog into an inline collapsible tree and added a per-signer download/copy of the validation log as a TXT file
@@ -68,6 +78,8 @@ Updates database model: no
 <a name="v2-19-0" />
 ### 2.19.0 (2026-08-14)
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.19.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.19.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.19.0.tar.gz)
+
 * Improvements
   * [SIG-1889] Allow cloud signature session reuse for a configurable period, enabling a single authentication to authorize multiple signatures without requesting new OTP
   * [SIG-1821] IdRC integration improvements: better visibility and traceability in document manifest and flow listing, enhanced configuration control and improved visual representation
@@ -83,6 +95,8 @@ Updates database model: yes (migrations: `IdRCSessionCancellation`, `IdRCSignedF
 
 <a name="v2-18-0" />
 ### 2.18.0 (2026-07-30)
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.18.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.18.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.18.0.tar.gz)
 
 * Improvements
   * [SIG-1846] Tag labels: register the organization's tag labels in the organization settings, autocomplete them when creating or editing a document, make tags required on document creation (configurable) and override that requirement per request through the API
@@ -107,6 +121,8 @@ Updates database model: yes (migration: `NewAuthenticatorTypes`, `RequireFolderO
 <a name="v2-17-1" />
 ### 2.17.1 (2026-07-15)
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.17.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.17.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.17.1.tar.gz)
+
 * Improvements
   * [SIG-1866] Added a configuration (`AllowBasicAndOperatorUsersToManageContacts`) that lets the Basic and Operator organization roles create, update and delete the organization's contacts
 
@@ -121,6 +137,8 @@ Updates database model: no
 
 ### 2.17.0 (2026-07-13) {#v2-17-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.17.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.17.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.17.0.tar.gz)
+
 * Improvements
   * [SIG-1861] Added an optional `timestampEnabled` field to document creation via API, allowing a per-document override of the organization's timestamp setting
   * [SIG-1831] Added an organization-level setting to enable or restrict the use of electronic signature, with the global instance setting taking precedence
@@ -132,6 +150,8 @@ Updates database model: no
 Updates database model: yes (migration: `ElectronicSignatureConfigForSubscription`, `DocumentTimestampEnabled`)
 
 ### 2.16.1 (2026-07-06) {#v2-16-1}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.16.1)
 
 * Improvements
   * [SIG-1478] Block downloading a document after it has been refused, preventing refused documents from circulating as if they were valid and signed; download settings moved to a dedicated `DocumentDownload` configuration section
@@ -145,6 +165,8 @@ Updates database model: no
 
 ### 2.16.0 (2026-07-02) {#v2-16-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.16.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.16.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.16.0.tar.gz)
+
 * Improvements
   * [SIG-1796] New invoice (NFSe) management screen in the billing module: admin listing with status (success, processing, error, canceled), detail view, search filters, invoice ID column, personal-account filter, reissue of failed invoices, send-by-email dialog, and PDF/XML download
 
@@ -157,6 +179,8 @@ Updates database model: no
 
 ### 2.15.1 (2026-06-29) {#v2-15-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.15.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.15.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.15.1.tar.gz)
+
 * Improvements
   * [SIG-1298] Generate document list reports asynchronously as background jobs for large result sets, sending a download link by email to avoid timeouts and excessive memory usage
 
@@ -167,6 +191,8 @@ Updates database model: no
 Updates database model: no
 
 ### 2.15.0 (2026-06-26) {#v2-15-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.15.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.15.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.15.0.tar.gz)
 
 * Improvements
   * [SIG-1787] Add a Terms of Use report listing the users who accepted the terms, including name, date/time and accepted version, filterable by version and deliverable by email
@@ -179,6 +205,8 @@ Updates database model: no
 Updates database model: no
 
 ### 2.14.4 (2026-06-15) {#v2-14-4}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.14.4) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.14.4.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.14.4.tar.gz)
 
 * Improvements
   * [SIG-1810] Fix invoice month assignment to use the instance's configured timezone (BRT) instead of UTC, preventing documents created late on the last day of the month from being charged to the following month
@@ -193,6 +221,8 @@ Updates database model: no
 
 ### 2.14.3 (2026-06-09) {#v2-14-3}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.14.3) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.14.3.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.14.3.tar.gz)
+
 * Bug fixes
   * [SIG-1808] Fix credit card not being saved when registered as the default payment method on Iugu checkout
   * [SIG-1809] Respect the user's configured notification language when adding participants through contact search
@@ -203,6 +233,8 @@ Updates database model: no
 
 ### 2.14.2 (2026-06-08) {#v2-14-2}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.14.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.14.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.14.2.tar.gz)
+
 * Bug fixes
   * Fix identifier masking for identifiers displayed in the private area
   * Fix TSP discovery to use identifiers from the identifiers table
@@ -210,6 +242,8 @@ Updates database model: no
 Updates database model: no
 
 ### 2.14.1 (2026-06-05) {#v2-14-1}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.14.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.14.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.14.1.tar.gz)
 
 * Bug fixes
   * [SIG-1788] Fix certificate registration to correctly handle comparison against the user's identifiers
@@ -219,6 +253,8 @@ Updates database model: no
 Updates database model: no
 
 ### 2.14.0 (2026-06-03) {#v2-14-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.14.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.14.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.14.0.tar.gz)
 
 * Improvements
   * [SIG-1709] PDF/A document conversion: convert uploads to PDF/A on document creation, document generation, single signing and templates (forms), with PDF/A profile selection and PdfService integration
@@ -233,6 +269,8 @@ Updates database model: yes (migration: `PdfA`)
 
 ### 2.13.3 (2026-06-01) {#v2-13-3}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.13.3) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.13.3.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.13.3.tar.gz)
+
 * Improvements
   * [SIG-744] Report subscription storage usage in billing invoice webhook
 
@@ -246,6 +284,8 @@ Updates database model: no
 
 ### 2.13.2 (2026-05-25) {#v2-13-2}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.13.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.13.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.13.2.tar.gz)
+
 * Improvements
   * Added setting to disable the identifier synchronization background job
 
@@ -257,12 +297,16 @@ Updates database model: no
 
 ### 2.13.1 (2026-05-22) {#v2-13-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.13.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.13.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.13.1.tar.gz)
+
 * Bug fixes
   * Fix normalization of contact identifiers
 
 Updates database model: no
 
 ### 2.13.0 (2026-05-22) {#v2-13-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.13.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.13.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.13.0.tar.gz)
 
 * Improvements
   * [SIG-1695] Allow administrators to configure the priority order of SMS and email notification providers per channel, with automatic fallback on failure
@@ -280,6 +324,8 @@ Updates database model: yes (migrations: `ElectronicSignatureBioSessions`, `Noti
 
 ### 2.12.1 (2026-05-05) {#v2-12-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.12.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.12.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.12.1.tar.gz)
+
 * Bug fixes
   * Fix bug in punctuation handling on contact search
   * Fix bug in user identifier removal
@@ -287,6 +333,8 @@ Updates database model: yes (migrations: `ElectronicSignatureBioSessions`, `Noti
 Updates database model: no
 
 ### 2.12.0 (2026-04-30) {#v2-12-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.12.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.12.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.12.0.tar.gz)
 
 * Improvements
   * [SIG-1646] Add external contact list management with advanced search
@@ -299,6 +347,8 @@ Updates database model: yes (migration: `SubscriptionContacts`)
 
 ### 2.11.1 (2026-04-24) {#v2-11-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.11.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.11.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.11.1.tar.gz)
+
 * Improvements
   * Flag to disable identifier synchronization in GrantID
   * [SIG-1618] Notify administrators and register an event when updating the Terms of Use
@@ -310,12 +360,16 @@ Updates database model: no
 
 ### 2.11.0 (2026-04-16) {#v2-11-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.11.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.11.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.11.0.tar.gz)
+
 * Improvements
   * [SIG-1570] Support for multiple identifiers per user
 
 Updates database model: yes (migration: `MultipleIdentifiers`)
 
 ### 2.10.0 (2026-04-16) {#v2-10-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.10.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.10.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.10.0.tar.gz)
 
 * Improvements
   * [SIG-1601] Support for alphanumeric CNPJ
@@ -325,6 +379,8 @@ Updates database model: no
 
 ### 2.9.2 (2026-04-14) {#v2-9-2}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.9.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.9.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.9.2.tar.gz)
+
 * Improvements
   * Added gmc theme
   * Improvements and fixes to CSP rules
@@ -332,6 +388,8 @@ Updates database model: no
 Updates database model: no
 
 ### 2.9.1 (2026-04-09) {#v2-9-1}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.9.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.9.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.9.1.tar.gz)
 
 * Improvements
   * [SIG-1690] New configuration for monotone dashboard mode
@@ -342,6 +400,8 @@ Updates database model: no
 Updates database model: no
 
 ### 2.9.0 (2026-04-02) {#v2-9-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.9.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.9.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.9.0.tar.gz)
 
 * Improvements
   * [SIG-1669] Option to include a signature QR Code in the reminder email body
@@ -354,12 +414,16 @@ Updates database model: yes (migration: `NotificationDocument`)
 
 ### 2.8.1 (2026-03-30) {#v2-8-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.8.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.8.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.8.1.tar.gz)
+
 * Bug fixes
   * [SIG-1507] Phone field validation in the New Document form fails on mobile devices
 
 Updates database model: no
 
 ### 2.8.0 (2026-03-25) {#v2-8-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.8.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.8.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.8.0.tar.gz)
 
 * Improvements
   * [SIG-1586] Dashboard visual redesign
@@ -372,6 +436,8 @@ Updates database model: yes (migration: `IdRC`)
 
 ### 2.7.0 (2026-03-16) {#v2-7-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.7.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.7.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.7.0.tar.gz)
+
 * Improvements
   * [SIG-1612] Option to request the CPF of one of the signers during validation in the public area
   * [SIG-1041] Option to allow batch signing in the public area
@@ -380,12 +446,16 @@ Updates database model: yes
 
 ### 2.6.2 (2026-02-27) {#v2-6-2}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.6.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.6.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.6.2.tar.gz)
+
 * Bug fixes
   * [SIG-1641] Loss of access to documents inside of folders for authorized users
 
 Updates database model: no
 
 ### 2.6.1 (2026-02-24) {#v2-6-1}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.6.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.6.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.6.1.tar.gz)
 
 * Improvements
   * [SIG-1622] Modify folder navigation layout
@@ -399,6 +469,8 @@ Updates database model: no
 
 ### 2.6.0 (2026-02-09) {#v2-6-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.6.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.6.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.6.0.tar.gz)
+
 * Improvements
   * [SIG-636] Allow adding a mobile phone number when editing a flow
   * [SIG-702] Send email notifications to participants after document deletion
@@ -409,6 +481,8 @@ Updates database model: no
 Updates database model: no
 
 ### 2.5.2 (2026-01-27) {#v2-5-2}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.5.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.5.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.5.2.tar.gz)
 
 * Improvements
   * [SIG-1604] Removal of existing signatures when generating envelopes, with a prior warning during document creation
@@ -421,12 +495,16 @@ Updates database model: no
 
 ### 2.5.1 (2026-01-22) {#v2-5-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.5.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.5.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.5.1.tar.gz)
+
 * Improvements
   * [SIG-1580] Dashboard buttons redirect to the documents page with the selected filter applied
 
 Updates database model: no
 
 ### 2.5.0 (2026-01-22) {#v2-5-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.5.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.5.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.5.0.tar.gz)
 
 * Improvements
   * [SIG-1580] New document visualization on the dashboard
@@ -436,12 +514,16 @@ Updates database model: no
 
 ### 2.4.11 (2026-01-19) {#v2-4-11}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.11) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.11.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.11.tar.gz)
+
 * Bug fixes
   * [SIG-1541] Error when retrieving a document in a folder via API integration
 
 Updates database model: no
 
 ### 2.4.10 (2026-01-06) {#v2-4-10}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.10) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.10.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.10.tar.gz)
 
 * Bug fixes
   * [SIG-1574] Continuation of fixes for document submission for signing, addressing additional scenarios not covered in version 2.4.9
@@ -450,12 +532,16 @@ Updates database model: no
 
 ### 2.4.9 (2026-01-05) {#v2-4-9}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.9)
+
 * Bug fixes
   * [SIG-1574] Document submission for signing does not work correctly in some cases
 
 Updates database model: no
 
 ### 2.4.8 (2025-12-30) {#v2-4-8}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.8) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.8.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.8.tar.gz)
 
 * Improvements
   * [SIG-1548] Display signature preview in digital signature and Single Signature
@@ -469,12 +555,16 @@ Updates database model: no
 
 ### 2.4.7 (2025-12-18) {#v2-4-7}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.7) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.7.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.7.tar.gz)
+
 * Bug fixes
   * [SIG-1547] Call stack overflow error when submitting certain DOCX templates
 
 Updates database model: no
 
 ### 2.4.6 (2025-12-17) {#v2-4-6}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.6.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.6.tar.gz)
 
 * Bug fixes
   * [SIG-1075] Enable removal of Javascript from PDFs submitted for document creation
@@ -496,12 +586,16 @@ Updates database model: no
 
 ### 2.4.4 (2025-12-05) {#v2-4-4}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.4.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.4.tar.gz)
+
 * Improvements
   * [SIG-1532] Send emails via SMTP using MailKit
 
 Updates database model: no
 
 ### 2.4.3 (2025-11-17) {#v2-4-3}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.3) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.3.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.3.tar.gz)
 
 * Bug fixes
   * [SIG-1537] Fix in Single Signature for signing without positioning the visual representation
@@ -513,6 +607,8 @@ Updates database model: no
 
 ### 2.4.2 (2025-11-08) {#v2-4-2}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.2.tar.gz)
+
 * Improvements
   * [SIG-1529] Update lacuna-facetec-client to version 2.1.0
   * [SIG-1527] Disable autocomplete for blocked users
@@ -521,12 +617,16 @@ Updates database model: no
 
 ### 2.4.1 (2025-11-07) {#v2-4-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.1.tar.gz)
+
 * Bug fixes
   * [SIG-1535] Adjust font size of visual representation on the front-end
 
 Updates database model: no
 
 ### 2.4.0 (2025-10-28) {#v2-4-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.4.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.4.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.4.0.tar.gz)
 
 * Improvements
   * [SIG-858] Define signature rules for more participants
@@ -547,6 +647,8 @@ Updates database model: no
 Updates database model: yes
 
 ### 2.3.0 (2025-09-25) {#v2-3-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.3.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.3.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.3.0.tar.gz)
 
 * Improvements
   * [SIG-1482] Send direct notification when sharing link via WhatsApp
@@ -572,12 +674,16 @@ Updates database model: yes
 
 ### 2.2.1 (2025-08-07) {#v2-2-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.2.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.2.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.2.1.tar.gz)
+
 * Bug fixes
   * [SIG-1488] Error selecting template to create/generate documents
 
 Updates database model: no
 
 ### 2.2.0 (2025-08-06) {#v2-2-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.2.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.2.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.2.0.tar.gz)
 
 * Improvements
   * [SIG-580] Enable/disable or change the type of electronic signature when editing flow
@@ -611,6 +717,8 @@ Before updating to this version make sure your license supports PKI SDK versions
 
 ### 2.1.1 (2025-06-30) {#v2-1-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.1.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.1.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.1.1.tar.gz)
+
 * Bug fixes
   * [SIG-1470] Code authentication notification is not using the organization's custom e-mail settings
   * [SIG-1472] Scrollbar is not visible in file upload
@@ -619,6 +727,8 @@ Before updating to this version make sure your license supports PKI SDK versions
 Updates database model: no
 
 ### 2.1.0 (2025-06-12) {#v2-1-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.1.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.1.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.1.0.tar.gz)
 
 * Improvements
   * [SIG-405] Allow signatures to be positioned when uploading a new version of a document
@@ -635,12 +745,16 @@ Updates database model: yes
 
 ### 2.0.1 (2025-05-26) {#v2-0-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.0.1)
+
 * Bug fixes
   * [SIG-1465] Fix default home page button
 
 Updates database model: no
 
 ### 2.0.0 (2025-05-21) {#v2-0-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=2.0.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-2.0.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-2.0.0.tar.gz)
 
 * Improvements
   * [SIG-1429] Update SPA version
@@ -669,12 +783,16 @@ Before updating to this version make sure your license supports PKI SDK versions
 
 ### 1.80.1 (2025-04-22) {#v1-80-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.80.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.80.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.80.1.tar.gz)
+
 * Bug fixes
   * [SIG-1458] Increased usage of BlobStorage in batch signatures
 
 Updates database model: no
 
 ### 1.80.0 (2025-04-15) {#v1-80-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.80.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.80.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.80.0.tar.gz)
 
 * New Features
   * [SIG-1382] Electronic signature with selfie and ID document
@@ -690,6 +808,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.79.0 (2025-03-13) {#v1-79-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.79.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.79.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.79.0.tar.gz)
 
 * Improvements
   * [SIG-1162] Organizations/personal accounts invoice report
@@ -710,12 +830,16 @@ Updates database model: yes
 
 ### 1.78.1 (2025-02-27) {#v1-78-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.78.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.78.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.78.1.tar.gz)
+
 * Bug fixes
   * [SIG-1443] Incompatibility with SQL Server older than 2017
 
 Updates database model: no
 
 ### 1.78.0 (2025-02-25) {#v1-78-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.78.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.78.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.78.0.tar.gz)
 
 * New Features
   * [SIG-1403] Add document deleted webhook
@@ -746,6 +870,8 @@ to version 1.78.1 or newer.
 
 
 ### 1.77.0 (2025-01-23) {#v1-77-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.77.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.77.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.77.0.tar.gz)
 
 * New Features
   * [SIG-1365] Document option to disable notifications
@@ -781,6 +907,8 @@ if the setting `ASPNETCORE_ENVIRONMENT` is defined with the value `Azure` and th
 
 ### 1.76.0 (2024-12-04) {#v1-76-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.76.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.76.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.76.0.tar.gz)
+
 * New Features
   * [SIG-1357] Send authentication tokens with SMSToken
   * [SIG-1400] Enable liveness to work in embedded signature (iFrame)
@@ -812,12 +940,16 @@ Updates database model: yes
 
 ### 1.75.2 (2024-09-17) {#v1-75-2}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.75.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.75.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.75.2.tar.gz)
+
 * Bug fixes
   * [SIG-1364] Cannot sign terms of use with electronic signature
 
 Updates database model: no
 
 ### 1.75.1 (2024-09-12) {#v1-75-1}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.75.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.75.1.tar.gz)
 
 * Improvements
   * [SIG-1358] Setting to disable display of signature evidences in public document validation page
@@ -843,6 +975,8 @@ Updates database model: yes
 
 ### 1.74.1 (2024-08-08) {#v1-74-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.74.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.74.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.74.1.tar.gz)
+
 * Improvements
   * [SIG-1331] Optimize organization document list performance
   * [SIG-1341] Prevent usage of eval() functions in PDFs opened with PDF.JS
@@ -854,6 +988,8 @@ Updates database model: yes
 
 ### 1.73.0 (2024-07-30) {#v1-73-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.73.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.73.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.73.0.tar.gz)
+
 * Improvements
   * [SIG-1316] Allow observer to view attachments in external observation page
 
@@ -864,6 +1000,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.72.1 (2024-07-03) {#v1-72-1}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.72.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.72.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.72.1.tar.gz)
 
 * Improvements
   * [SIG-1049] Update flow action order by using step numbers
@@ -895,6 +1033,8 @@ Before updating to this version make sure your license supports PKI SDK versions
 
 ### 1.71.0 (2024-05-24) {#v1-71-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.71.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.71.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.71.0.tar.gz)
+
 * New Features
   * [SIG-1230] Cloud signature with CSC protocol
   * [SIG-1232] Procedure to generate iugu invoice again after failure during automated procedure
@@ -917,6 +1057,8 @@ Updates database model: no
 
 ### 1.70.0 (2024-04-16) {#v1-70-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.70.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.70.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.70.0.tar.gz)
+
 * New Features
   * [SIG-1194] Setting to add organization ID to Request Tag when using Datavalid
   * [SIG-1195] Embed signature marks positioning page
@@ -929,6 +1071,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.69.1 (2024-04-02) {#v1-69-1}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.69.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.69.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.69.1.tar.gz)
 
 * New Features
   * [SIG-1183] Multiple signature marks in simple signature
@@ -946,6 +1090,8 @@ Updates database model: no
 
 ### 1.68.1 (2024-03-06) {#v1-68-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.68.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.68.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.68.1.tar.gz)
+
 * Bug fixes
   * [SIG-1186] Printer friendly version of single signature document displays no signers
   * [SIG-1187] Cannot sign document that has prepositioned signature initials
@@ -953,6 +1099,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.68.0 (2024-03-05) {#v1-68-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.68.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.68.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.68.0.tar.gz)
 
 * New Features
   * [SIG-949] Simple document - document with electronic signatures that is validated by ITI
@@ -970,6 +1118,8 @@ Updates database model: yes
 
 ### 1.67.0 (2023-12-19) {#v1-67-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.67.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.67.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.67.0.tar.gz)
+
 * New Features
   * [SIG-1087] Display attachment preview by clicking the icon
   * [SIG-1152] Setting to generate signatures manifest when validating documents
@@ -985,6 +1135,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.66.0 (2023-11-13) {#v1-66-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.66.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.66.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.66.0.tar.gz)
 
 * New Features
   * [SIG-1157] Option to add unsubscribe link in notifications sent by e-mail
@@ -1007,6 +1159,8 @@ Updates database model: yes
 
 ### 1.65.0 (2023-10-11) {#v1-65-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.65.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.65.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.65.0.tar.gz)
+
 * New Features
   * [SIG-1106] Setting to require user to select a folder when creating a document
   * [SIG-1139] Allow creation of multiple webhooks in an organization
@@ -1021,12 +1175,16 @@ Updates database model: no
 
 ### 1.64.1 (2023-10-02) {#v1-64-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.64.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.64.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.64.1.tar.gz)
+
 * Bug fixes
   * [SIG-1140] Welcome email being sent more than once to users after signing documents
 
 Updates database model: no
 
 ### 1.64.0 (2023-09-28) {#v1-64-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.64.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.64.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.64.0.tar.gz)
 
 * New Features
   * [SIG-700] New types of signature visual representation
@@ -1052,6 +1210,8 @@ Before updating to this version make sure your license supports PKI SDK versions
 
 ### 1.63.0 (2023-08-28) {#v1-63-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.63.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.63.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.63.0.tar.gz)
+
 * New Features
   * [SIG-948] Download/display file when validating uploaded P7S (PKCS7) files
 
@@ -1076,6 +1236,8 @@ Updates database model: no
 
 ### 1.62.0 (2023-08-10) {#v1-62-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.62.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.62.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.62.0.tar.gz)
+
 * New Features
   * [SIG-1085] Add input to search for documents in Events page and create organization events page
   * [SIG-1121] Confirm signature positioning with a dialog
@@ -1093,12 +1255,16 @@ Updates database model: no
 
 ### 1.61.1 (2023-08-04) {#v1-61-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.61.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.61.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.61.1.tar.gz)
+
 * Bug fixes
   * [SIG-1130] Cannot edit participant e-mail while updating document flow
 
 Updates database model: no
 
 ### 1.61.0 (2023-08-02) {#v1-61-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.61.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.61.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.61.0.tar.gz)
 
 * Improvements
   * [SIG-974] Allow adding participants after document flow is concluded
@@ -1120,6 +1286,8 @@ This versions marks the start of the notifications content migration from the da
 
 ### 1.60.0 (2023-07-17) {#v1-60-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.60.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.60.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.60.0.tar.gz)
+
 * New Features
   * [SIG-1112] Display document original version when signing documents if Simplified Manifest is enabled
 
@@ -1137,6 +1305,8 @@ This versions marks the start of the notifications content migration from the da
 Updates database model: yes
 
 ### 1.59.0 (2023-07-03) {#v1-59-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.59.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.59.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.59.0.tar.gz)
 
 * Improvements
   * [SIG-1092] Add djp (deep-jungle-princeton) theme
@@ -1158,6 +1328,8 @@ If you use Zoom integration, configure Server to Server credentials before updat
 
 ### 1.58.3 (2023-06-19) {#v1-58-3}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.58.3) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.58.3.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.58.3.tar.gz)
+
 * Improvements
   * [SIG-1102] Support new Whatsapp message policies
   * [SIG-1108] Send neighborhood information when creating receipts with NFE.io
@@ -1169,6 +1341,8 @@ Updates database model: no
 
 ### 1.58.2 (2023-05-30) {#v1-58-2}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.58.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.58.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.58.2.tar.gz)
+
 * Bug fixes
   * [SIG-1097] Cannot sign document in single signature page
 
@@ -1176,12 +1350,16 @@ Updates database model: no
 
 ### 1.58.1 (2023-05-25) {#v1-58-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.58.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.58.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.58.1.tar.gz)
+
 * Improvements
   * [SIG-1094] Add dim palatinate blue theme
 
 Updates database model: no
 
 ### 1.58.0 (2023-05-25) {#v1-58-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.58.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.58.0.tar.gz)
 
 * New Features
   * [SIG-1073] Support to Paraguay's Cédula de Identidad
@@ -1198,6 +1376,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.57.0 (2023-04-24) {#v1-57-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.57.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.57.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.57.0.tar.gz)
 
 * New Features
   * [SIG-1028] Disable/enable timestamp in organization settings
@@ -1216,6 +1396,8 @@ Updates database model: yes
 
 ### 1.56.0 (2023-03-27) {#v1-56-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.56.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.56.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.56.0.tar.gz)
+
 * New Features
   * [SIG-350] Signature notifications via Whatsapp
   * [SIG-1062] Create Zomp Ut Orange theme
@@ -1229,6 +1411,8 @@ Updates database model: yes
 Updates database model: yes
 
 ### 1.55.0 (2023-03-03) {#v1-55-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.55.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.55.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.55.0.tar.gz)
 
 * Improvements
   * [SIG-798] Send multiple documents with document specific flows
@@ -1244,6 +1428,8 @@ Updates database model: no
 
 ### 1.54.0 (2023-02-17) {#v1-54-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.54.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.54.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.54.0.tar.gz)
+
 * New Features
   * [SIG-1032] Push notification for pending signature/approval in Web PKI app
   * [SIG-1040] Organization setting to enable/disable signature visual representation
@@ -1258,6 +1444,8 @@ Updates database model: no
 Updates database model: yes
 
 ### 1.53.0 (2023-02-02) {#v1-53-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.53.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.53.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.53.0.tar.gz)
 
 * New Features
   * [SIG-819] New billing system
@@ -1277,6 +1465,8 @@ Updates database model: yes
 
 ### 1.52.1 (2023-01-18) {#v1-52-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.52.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.52.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.52.1.tar.gz)
+
 * New Features
   * [SIG-978] Create Silver Eerie Black theme
 
@@ -1286,6 +1476,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.52.0 (2023-01-10) {#v1-52-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.52.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.52.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.52.0.tar.gz)
 
 * New Features
   * [SIG-743] Add configuration for forcing pre-position signatures option enabled by default in document creation screen
@@ -1299,6 +1491,8 @@ Updates database model: no
 Updates database model: yes
 
 ### 1.51.0 (2022-12-08) {#v1-51-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.51.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.51.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.51.0.tar.gz)
 
 * New Features
   * [SIG-978] Create yale blue yellow theme
@@ -1316,6 +1510,8 @@ Updates database model: no
 
 ### 1.50.0 (2022-11-16) {#v1-50-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.50.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.50.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.50.0.tar.gz)
+
 * New Features
   * [SIG-445] Add tags to the document and allow them to be used while searching
   * [SIG-1001] Google Tag Manager integration
@@ -1332,6 +1528,8 @@ Updates database model: yes
 
 ### 1.49.2 (2022-11-01) {#v1-49-2}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.49.2) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.49.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.49.2.tar.gz)
+
 * Improvements
   * [SIG-998] Add setting to enable menu loading using iframe
 
@@ -1342,6 +1540,8 @@ Updates database model: no
 
 ### 1.49.1 (2022-11-01) {#v1-49-1}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.49.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.49.1.tar.gz)
+
 * Improvements
   * [SIG-982] Allow migration of documents between instances
 
@@ -1351,6 +1551,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.49.0 (2022-10-18) {#v1-49-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.49.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.49.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.49.0.tar.gz)
 
 * Improvements
   * [SIG-975] Do not display login button after signing a document if hide public area links option is enabled
@@ -1366,6 +1568,8 @@ Updates database model: yes
 
 ### 1.48.1 (2022-09-15) {#v1-48-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.48.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.48.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.48.1.tar.gz)
+
 * Improvements
   * [SIG-967] Add setting to not perform cloud certificate discovery
 
@@ -1375,6 +1579,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.48.0 (2022-09-06) {#v1-48-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.48.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.48.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.48.0.tar.gz)
 
 * New Features
   * [SIG-938] Automatic pending signature reminders
@@ -1392,6 +1598,8 @@ Updates database model: no
 Updates database model: yes
 
 ### 1.47.0 (2022-08-18) {#v1-47-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.47.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.47.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.47.0.tar.gz)
 
 * New Features
   * [SIG-915] Setting to use organization name as notifications sender name
@@ -1411,12 +1619,16 @@ Updates database model: yes
 
 ### 1.46.1 (2022-08-01) {#v1-46-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.46.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.46.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.46.1.tar.gz)
+
 * Bug fixes
   * [SIG-946] Error signing with cloud certificate
 
 Updates database model: no
 
 ### 1.46.0 (2022-07-29) {#v1-46-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.46.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.46.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.46.0.tar.gz)
 
 * New Features
   * [SIG-943] Creation and validation of health documents (prescription, certificate...)
@@ -1439,6 +1651,8 @@ Updates database model: no
 
 ### 1.45.0 (2022-06-30) {#v1-45-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.45.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.45.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.45.0.tar.gz)
+
 * New Features
   * [SIG-904] Option to require a specific certificate holder type
   * [SIG-726] Option to delete certificates in the personal certificates screen
@@ -1459,6 +1673,8 @@ Updates database model: yes
 
 ### 1.44.1 (2022-06-15) {#v1-44-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.44.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.44.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.44.1.tar.gz)
+
 * Improvements
   * [SIG-917] Improvements in embedded signature
   * [SIG-912] Improve performance of user queries with GrantID
@@ -1473,6 +1689,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.44.0 (2022-06-03) {#v1-44-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.44.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.44.0.tar.gz)
 
 * New Features
   * [SIG-898] Allow setup of chat with customized script
@@ -1490,6 +1708,8 @@ Updates database model: no
 
 ### 1.43.3 (2022-05-19) {#v1-43-3}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.43.3.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.43.3.tar.gz)
+
 * Bug fixes
   * [SIG-896] User redirected to login page after embedded signature
   * [SIG-895] Incorrect count of documents in the organization details screen
@@ -1501,6 +1721,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.43.2 (2022-05-09) {#v1-43-2}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.43.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.43.2.tar.gz)
 
 * Bug fixes
   * [SIG-893] Assinaturas ADRA e ADRC inválidas por conta de LCR com formatação errada publicada pelo ITI
@@ -1514,6 +1736,8 @@ Before updating to this version make sure your license supports PKI SDK versions
 
 ### 1.43.1 (2022-05-04) {#v1-43-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.43.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.43.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.43.1.tar.gz)
+
 * New Features
   * [SIG-887] Setting to force usage of ICP Brasil signing policies for PDFs
 
@@ -1526,6 +1750,8 @@ Before updating to this version make sure your license supports PKI SDK versions
 Updates database model: no
 
 ### 1.43.0 (2022-04-29) {#v1-43-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.43.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.43.0.tar.gz)
 
 * New Features
   * [SIG-619] Allow migration of signed documents from other applications
@@ -1555,6 +1781,8 @@ Before updating to this version make sure your license supports PKI SDK versions
 
 ### 1.42.0 (2022-04-11) {#v1-42-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.42.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.42.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.42.0.tar.gz)
+
 * New Features
   * [SIG-859] Option to set the signer title in single signature
 
@@ -1568,6 +1796,8 @@ Before updating to this version make sure your license supports PKI SDK versions
 Updates database model: no
 
 ### 1.41.0 (2022-03-20) {#v1-41-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.41.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.41.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.41.0.tar.gz)
 
 * Improvements
   * [SIG-835] Improvements in upload restrictions
@@ -1583,6 +1813,8 @@ Updates database model: yes
 
 ### 1.40.0 (2022-03-20) {#v1-40-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.40.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.40.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.40.0.tar.gz)
+
 * Improvements
   * [SIG-308] Improve experience for the user that needs to sign the same document twice (with different titles) in the same step
 
@@ -1593,6 +1825,8 @@ Updates database model: no
 
 ### 1.39.1 (2022-03-20) {#v1-39-1}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.39.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.39.1.tar.gz)
+
 * Improvements
   * [SIG-822] Add eminence-cornflower-blue theme
   * [SIG-821] Add "disable pending notifications" field to the create document version API
@@ -1600,6 +1834,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.39.0 (2021-12-13) {#v1-39-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.39.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.39.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.39.0.tar.gz)
 
 * New Features
   * [SIG-722] Define printer friendly options by organization
@@ -1621,6 +1857,8 @@ Updates database model: yes
 
 ### 1.38.0 (2021-11-11) {#v1-38-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.38.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.38.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.38.0.tar.gz)
+
 * New Features
   * [SIG-723] Request access to administrators in closed mode
   * [SIG-665] Monthly limit for transaction type
@@ -1637,6 +1875,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.37.0 (2021-10-21) {#v1-37-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.37.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.37.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.37.0.tar.gz)
 
 * New Features
   * [SIG-774] Allow configuration of payment methods in iugu integration
@@ -1656,6 +1896,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.36.0 (2021-10-06) {#v1-36-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.36.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.36.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.36.0.tar.gz)
 
 * New Features
   * [SIG-769] Route to redirect user to register page
@@ -1681,6 +1923,8 @@ Updates database model: no
 
 ### 1.35.0 (2021-09-15) {#v1-35-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.35.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.35.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.35.0.tar.gz)
+
 * New Features
   * [SIG-752] Instance setting to define which document version is sent in the document conclusion notification
   * [SIG-576] Folder selector that allows to navigate in folder hierarchy
@@ -1698,6 +1942,8 @@ Updates database model: no
 Updates database model: yes
 
 ### 1.34.0 (2021-08-20) {#v1-34-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.34.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.34.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.34.0.tar.gz)
 
 * New Features
   * [SIG-740] Add setting that allows notification of pending actions in batch signature
@@ -1719,6 +1965,8 @@ Updates database model: no
 
 ### 1.33.1 (2021-07-30) {#v1-33-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.33.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.33.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.33.1.tar.gz)
+
 * Improvements
   * [SIG-736] Update Azure blob management library
 
@@ -1728,6 +1976,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.33.0 (2021-07-22) {#v1-33-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.33.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.33.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.33.0.tar.gz)
 
 * New Features
   * [SIG-418] Display update history in document details
@@ -1755,6 +2005,8 @@ Updates database model: yes
 
 ### 1.32.0 (2021-06-25) {#v1-32-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.32.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.32.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.32.0.tar.gz)
+
 * New Features
   * [SIG-670] Electronic signature with PIX authentication
   * [SIG-631] Electronic signature with facial biometric validated by SERPRO
@@ -1769,6 +2021,8 @@ Updates database model: yes
 Updates database model: yes
 
 ### 1.31.1 (2021-06-08) {#v1-31-1}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.31.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.31.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.31.1.tar.gz)
 
 * Bug fixes
   * [SIG-691] Share participant link button should direct approvers to private area
@@ -1797,6 +2051,8 @@ Updates database model: no
 
 ### 1.30.0 (2021-05-25) {#v1-30-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.30.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.30.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.30.0.tar.gz)
+
 * Improvements
   * [SIG-659] Auto retry timestamp request after a failure
   * [SIG-646] Add home page dynamic HTML as a trusted resource
@@ -1813,6 +2069,8 @@ Updates database model: yes
 
 ### 1.29.0 (2021-04-27) {#v1-29-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.29.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.29.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.29.0.tar.gz)
+
 * New Features
   * [SIG-638] Zoom meetings integration
   * [SIG-624] Set notified emails to send documents as attachment after the flow is concluded
@@ -1828,6 +2086,8 @@ Updates database model: yes
 Updates database model: yes
 
 ### 1.28.0 (2021-04-06) {#v1-28-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.28.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.28.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.28.0.tar.gz)
 
 * New Features
   * [SIG-555] Require the selection of a signature representation position
@@ -1847,6 +2107,8 @@ Updates database model: yes
 Updates database model: yes
 
 ### 1.27.0 (2021-03-25) {#v1-27-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.27.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.27.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.27.0.tar.gz)
 
 * New Features
   * [SIG-614] Service receipt generation (NFS-e)
@@ -1870,6 +2132,8 @@ Updates database model: yes
 
 ### 1.26.1 (2021-02-18) {#v1-26-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.26.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.26.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.26.1.tar.gz)
+
 * Bug fixes
   * [SIG-616] File name is required when uploading with API
   * [SIG-615] Error sending document to user with email that is a part of other emails
@@ -1879,6 +2143,8 @@ Updates database model: no
 
 ### 1.26.0 (2021-02-11) {#v1-26-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.26.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.26.0.tar.gz)
+
 * Improvements
   * [SIG-605] Update New Relic Sink to improve exception log
   * [SIG-604] Update Lacuna SPA
@@ -1887,12 +2153,16 @@ Updates database model: no
 
 ### 1.25.0 (2021-02-03) {#v1-25-0}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.25.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.25.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.25.0.tar.gz)
+
 * Improvements
   * [SIG-602] - Improve AWS S3 support
 
 Updates database model: yes
 
 ### 1.24.3 (2021-01-28) {#v1-24-3}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.24.3.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.24.3.tar.gz)
 
 * Improvements
   * [SIG-599] - Do not send invite email if the document was created with the disable notifications option
@@ -1903,6 +2173,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.24.2 (2021-01-18) {#v1-24-2}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.24.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.24.2.tar.gz)
 
 * Bug fixes
   * [SIG-598] - Error opening document creation screen without organizations in the closed system mode
@@ -1937,6 +2209,8 @@ Updates database model: yes
 
 ### 1.23.0 (2021-01-07) {#v1-23-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.23.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.23.0.tar.gz)
+
 * New Features
   * [SIG-430] - Electronic signature with Selfie
   * [SIG-554] - Allow adding attachments to documents
@@ -1951,6 +2225,8 @@ Updates database model: yes
 Updates database model: yes
 
 ### 1.22.0 (2020-12-17) {#v1-22-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.22.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.22.0.tar.gz)
 
 * New Features
   * [SIG-144] - Display electronic signature evidences
@@ -1974,12 +2250,16 @@ Updates database model: yes
 
 ### 1.21.0 (2020-12-03) {#v1-21-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.21.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.21.0.tar.gz)
+
 * New Features
   * [SIG-217] - Allow CPF to be nullable
 
 Updates database model: yes
 
 ### 1.20.0 (2020-11-27) {#v1-20-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.20.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.20.0.tar.gz)
 
 * New Features
   * [SIG-477] - Integration with Securiti to automate LGDP/DSR requests
@@ -1994,6 +2274,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.19.0 (2020-11-18) {#v1-19-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.19.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.19.0.tar.gz)
 
 * Improvements
   * [SIG-468] - Allow creation of subfolders
@@ -2022,6 +2304,8 @@ Updates database model: no
 
 ### 1.17.0 (2020-10-28) {#v1-17-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.17.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.17.0.tar.gz)
+
 * Improvements
   * [SIG-437] - Allow flow edit even with Simplified Manifest enabled
   * [SIG-506] - Add logo to lateral mark (validation stamp)
@@ -2038,6 +2322,8 @@ Updates database model: no
 
 ### 1.16.0 (2020-10-22) {#v1-16-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.16.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.16.0.tar.gz)
+
 * Improvements
   * [SIG-484] - Include billing information in the closed invoice Webhook
   * [SIG-485] - API to Update invoice status
@@ -2051,12 +2337,16 @@ Updates database model: no
 
 ### 1.15.1 (2020-10-21) {#v1-15-1}
 
+📦 Downloads: [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.15.1.tar.gz)
+
 * Bug fixes
   * [SIG-529] - Restricted access screen does not show if basic profiles are set as default
 
 Updates database model: no
 
 ### 1.15.0 (2020-10-08) {#v1-15-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.15.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.15.0.tar.gz)
 
 * New Features
   * [SIG-520] - Document versions direct download API
@@ -2070,6 +2360,8 @@ Updates database model: no
 
 ### 1.14.0 (2020-09-30) {#v1-14-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.14.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.14.0.tar.gz)
+
 * Improvements
   * [SIG-427] - Notify the creator of a document upon flow conclusion
 
@@ -2081,6 +2373,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.13.0 (2020-09-23) {#v1-13-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.13.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.13.0.tar.gz)
 
 * Improvements
   * [SIG-366] - Allow reproval in the approval flow action
@@ -2098,6 +2392,8 @@ Updates database model: yes
 
 ### 1.12.0 (2020-09-14) {#v1-12-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.12.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.12.0.tar.gz)
+
 * New Features
   * [SIG-462] - Add profiles to enable/disable creation of documents and organizations
   * [SIG-464] - Add phone number parameter to document creation API
@@ -2113,6 +2409,8 @@ Updates database model: no
 
 ### 1.11.0 (2020-09-02) {#v1-11-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.11.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.11.0.tar.gz)
+
 * New Features
 
 * Improvements
@@ -2121,6 +2419,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.10.4 (2020-08-31) {#v1-10-4}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.10.4.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.10.4.tar.gz)
 
 * New Features
   * [SIG-455] - Add persian-plum-sand theme
@@ -2140,6 +2440,8 @@ Updates database model: no
 
 ### 1.10.2 (2020-08-25) {#v1-10-2}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.10.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.10.2.tar.gz)
+
 * New Features
   * [SIG-449] - Create viridian green yellow theme
 
@@ -2150,6 +2452,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.10.1 (2020-08-21) {#v1-10-1}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.10.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.10.1.tar.gz)
 
 * New Features
   * [SIG-435] - Create oxford-blue-green theme
@@ -2180,6 +2484,8 @@ Updates database model: yes
 
 ### 1.9.1 (2020-07-23) {#v1-9-1}
 
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.9.1) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.9.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.9.1.tar.gz)
+
 * Bug fixes
   * [SIG-396] - String not translated in folder settings
   * [SIG-410] - Unnecessary scroll in home page
@@ -2187,6 +2493,8 @@ Updates database model: yes
 Updates database model: no
 
 ### 1.9.0 (2020-07-23) {#v1-9-0}
+
+📦 Downloads: [Docker Hub](https://hub.docker.com/r/lacunasoftware/signer/tags?name=1.9.0) · [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.9.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.9.0.tar.gz)
 
 * New Features
   * [SIG-378] - Recovery procedure for deleted documents
@@ -2202,6 +2510,8 @@ Updates database model: no
 Updates database model: no
 
 ### 1.8.0 (2020-07-16) {#v1-8-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.8.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.8.0.tar.gz)
 
 * New Features
   * [SIG-364] - Document Types for medical prescriptions
@@ -2220,6 +2530,8 @@ Updates database model: yes
 
 ### 1.7.0 (2020-07-02) {#v1-7-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.7.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.7.0.tar.gz)
+
 * Bug fixes
   * [SIG-370] - Ticket parameter displayed in the Upload API documentation
   * [SIG-379] - Fix organization creation without Identifier (CNPJ)
@@ -2235,12 +2547,16 @@ Updates database model: no
 
 ### 1.6.2 (2020-06-25) {#v1-6-2}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.6.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.6.2.tar.gz)
+
 * Bug fixes
   * [SIG-377] - Error viewing document details of a document with observer that is not in the flow
 
 Updates database model: no
 
 ### 1.6.1 (2020-06-24) {#v1-6-1}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.6.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.6.1.tar.gz)
 
 * Improvements
   * [SIG-374] - Add metallic-seaweed-emerald (MSE) theme
@@ -2273,6 +2589,8 @@ Updates database model: yes
 
 ### 1.5.0 (2020-06-15) {#v1-5-0}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.5.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.5.0.tar.gz)
+
 * New Features
   * [SIG-331] - Send email to all participants after the document is concluded
   * [SIG-343] - Batch Electronic Signature
@@ -2291,6 +2609,8 @@ Updates database model: yes
 Updates database model: yes
 
 ### 1.4.1 (2020-06-08) {#v1-4-1}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.4.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.4.1.tar.gz)
 
 * Bug fixes
   * [SIG-313] - Wrong internationalization (en) for the approval and sign email
@@ -2318,12 +2638,16 @@ Updates database model: yes
 
 ### 1.3.2 (2020-05-15) {#v1-3-2}
 
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.3.2.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.3.2.tar.gz)
+
 * Bug fixes
   * [SIG-310] - Exceptions while logging special characters from PKI SDK stack traces
 
 Updates database model: no
 
 ### 1.3.1 (2020-05-05) {#v1-3-1}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.3.1.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.3.1.tar.gz)
 
 * Bug fixes
   * [SIG-309] - Hide batch download until Web PKI update
@@ -2356,6 +2680,8 @@ Updates database model: no
 Updates database model: **yes**
 
 ### 1.2.0 (2020-04-29) {#v1-2-0}
+
+📦 Downloads: [ZIP](https://cdn.lacunasoftware.com/signer/signer-1.2.0.zip) · [tar.gz](https://cdn.lacunasoftware.com/signer/signer-1.2.0.tar.gz)
 
 * New Features
   * [SIG-284] - Document validation of an uploaded signed file

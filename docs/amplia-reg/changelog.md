@@ -7,7 +7,464 @@ sidebar_position: 4
 
 {/* <a name="5.25.0" /> // ## 5.25.0 (2026-04-07) // Atualiza modelo do banco de dados: nao // ### Novas funcionalidades // ### Melhorias // ### Correções de bugs // */}
 
-## 5.24.0 (2026-04-07) {#vnext}
+<a name="vnext" />
+
+## 8.1.0 (2026-09-10) {#8.1.0}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-995 Alterar fluxo de certificado do agente de registro
+
+ARNG-996 Refatorar permissões que afetam a entidade de agente de registro
+
+
+
+## 8.0.10 (2026-09-09) {#8.0.10}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+ARNG-994 Cancelamento no PSBio mantém status como Ok Preliminar
+
+
+
+## 8.0.9 (2026-09-08) {#8.0.9}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+ARNG-993 Considerar o status RegulationPending na consulta SelectByUserAndSubscriptionAsync do RegistrationAgentRepository
+
+
+
+## 8.0.8 (2026-08-27) {#8.0.8}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+ARNG-991 Revisar erros não tratados/logados no frontend
+
+ARNG-992 Corrigir documento de identidade no relatório CAR
+
+
+
+## 8.0.7 (2026-08-26) {#8.0.7}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+ARNG-989 Componente de coleta biométrica está recusando coleta quando existem biometrias ausentes ou indisponíveis (inclui ajuste dos escores mínimos de qualidade biométrica configurados por padrão)
+
+
+
+## 8.0.6 (2026-08-25) {#8.0.6}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+ARNG-980 Correções relatório CAR (corrige o fluxo de autenticação do agente de registro quando seu cadastro está com status "Aguardando Regularização")
+
+
+
+## 8.0.5 (2026-08-25) {#8.0.5}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+ARNG-986 Alterar configuração p2p do Jitsi
+
+### Melhorias
+
+Adicionada a opção `--certificate-changed-only` ao comando [fill-registration-agent-report-transactions](on-premises/tool/fill-registration-agent-report-transactions.md), relacionado ao ARNG-980, permitindo reprocessar apenas os eventos de troca de certificado sem duplicar as demais transações já preenchidas
+
+
+
+## 8.0.4 (2026-08-25) {#8.0.4}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-985 Alterar mensagem de aviso de documento da vídeo identificação
+
+### Correções de bugs
+
+ARNG-987 Atualizar integração com PSBio
+
+
+
+## 8.0.2 (2026-08-14) {#8.0.2}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-981 Melhoria no fluxo de cópia de segurança (PFX)
+
+
+
+## 8.0.1 (2026-08-13) {#8.0.1}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+Corrigido o status RegulationPending na geração do CSV do relatório CAR
+
+
+
+## 8.0.0 (2026-08-13) {#8.0.0}
+
+Atualiza modelo do banco de dados: **sim**
+
+### Novas funcionalidades
+
+ARNG-950 Permitir captura de documentos sem validação durante video identificação
+
+ARNG-953 Adicionar transaction de Video Identification no relatório de custos por pedido
+
+### Correções de bugs
+
+ARNG-949 Correções Code100: adiciona o parâmetro de RUC da organização na criação de pedidos do Paraguai, libera a consulta da Chave 1 protegida durante a vídeo identificação prévia e corrige uma validação da vídeo identificação prévia
+
+ARNG-956 CompleteVideoIdentificationAsync está considerando Failure ao invés de Success
+
+ARNG-959 Erro ao entrar com biometria na tela de operação
+
+:::info
+Esta versão adiciona os comandos [fill-video-identification-transactions](on-premises/tool/fill-video-identification-transactions.md) e
+[fill-registration-agent-report-transactions](on-premises/tool/fill-registration-agent-report-transactions.md), que podem ser executados
+para preencher, respectivamente, o histórico de custos de pedidos de Vídeo Identificação e o histórico de transações de relatório de agentes
+de registro criados antes desta versão.
+:::
+
+
+
+## 7.1.0 (2026-07-29) {#7.1.0}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-665 Aumentar o tamanho de exibição das fotos na Consulta SAF
+
+ARNG-807 Exigir "Justificativa de Ausência" obrigatória para cadastros sem coleta de digitais no PSBio (apenas Foto)
+
+ARNG-943 Melhorar UI UX da tela de OTP
+
+### Correções de bugs
+
+ARNG-948 Corrigido erro ao gerar o relatório de validação de documentos da Acertpix para validações de Documentoscopia Lite encaminhadas para revisão da mesa
+
+
+
+## 6.3.2 (2026-07-27) {#6.3.2}
+
+Atualiza modelo do banco de dados: não
+
+:::info
+Esta é uma versão gerada para um ambiente específico (Consulti), a partir da branch da versão 6.3.1. As mudanças abaixo foram, em seguida,
+também aplicadas à branch principal e formalizadas como [ARNG-949](#8.0.0), lançado na versão 8.0.0.
+:::
+
+### Correções de bugs
+
+Adicionado o parâmetro de RUC da organização na criação de pedidos do Paraguai, liberada a consulta da Chave 1 protegida durante a vídeo identificação prévia e corrigida uma validação da vídeo identificação prévia
+
+
+
+## 7.0.2 (2026-07-22) {#7.0.2}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+Melhorada a geração de documentos da Acertpix
+
+
+
+## 7.0.1 (2026-07-16) {#7.0.1}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+Adicionada a data de criação do pedido ao relatório de transações de custo
+
+
+
+## 7.0.0 (2026-07-15) {#7.0.0}
+
+Atualiza modelo do banco de dados: **sim**
+
+### Novas funcionalidades
+
+ARNG-936 Controle de custos por pedido
+
+:::info
+Esta versão adiciona o comando [fill-order-transactions](on-premises/tool/fill-order-transactions.md), que pode ser executado para preencher
+o histórico de custos de pedidos criados antes desta versão.
+:::
+
+
+
+## 6.3.1 (2026-07-13) {#6.3.1}
+
+Atualiza modelo do banco de dados: não
+
+### Novas funcionalidades
+
+ARNG-941 Expor fluxo de vídeo-identificação via API
+
+
+
+## 6.3.0 (2026-07-13) {#6.3.0}
+
+Atualiza modelo do banco de dados: **sim**
+
+### Novas funcionalidades
+
+ARNG-940 Atualização SPA 8.2.0
+
+### Melhorias
+
+ARNG-933 Não enviar email de renovação caso um novo pedido já tenha sido emitido
+
+ARNG-912 Melhorias no projeto de testes
+
+Melhorada a validação de status ao atualizar os dados do titular nos diferentes fluxos (validação, pré-preenchimento e pré-vídeo-identificação)
+
+### Correções de bugs
+
+ARNG-720 Bloquear login se o certificado do AGR for diferente do certificado cadastrado
+
+ARNG-917 Erro ao consultar OrderStatusTransition em SendWebhookNotificationJob.getOrderStatusTransitionEventModelAsync
+
+ARNG-934 Ação de limpar filtros em pedidos, não limpa os campos de CNPJ, Cliente, Nº de Venda e E-mail
+
+ARNG-935 Thumbprint do agente de registro depende do formato de certificado enviado
+
+ARNG-939 Corrigida a exibição do aviso de confirmação ao encerrar a chamada pelo botão personalizado de encerramento, mesmo após a videoconferência já ter sido concluída corretamente (correção inicial já aplicada na versão [6.2.1](#6.2.1))
+
+ARNG-942 Corrigido o suporte ao token SafeSign no macOS, adicionando o caminho da biblioteca PKCS#11 utilizada pelo token (correção inicial já aplicada na versão [6.2.2](#6.2.2))
+
+:::info
+Esta versão adiciona o comando [fill-registration-agents-certificate-thumbprint](on-premises/tool/fill-registration-agents-certificate-thumbprint.md),
+que pode ser executado para preencher a *thumbprint* do certificado de agentes de registro cadastrados antes desta versão.
+:::
+
+
+
+## 6.2.0 (2026-06-18) {#6.2.0}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-930 Adicionar alerta de confirmação para o AVP, ao tentar fechar/sair do Jitsi sem aprovar a videoconferência
+
+ARNG-932 Criar motivo de revogação específico para uso da "Chave de Emissão"
+
+### Correções de bugs
+
+ARNG-832 Dialog de emissão presencial do A3, com ajuda do AVP, não exibe após assinatura do AVP
+
+ARNG-928 Considerar o BryPSBioSource do Order no fluxo de reset de informações do PSBio
+
+
+
+## 6.1.0 (2026-06-03) {#6.1.0}
+
+Atualiza modelo do banco de dados: **sim**
+
+### Novas funcionalidades
+
+ARNG-924 Cancelar TCN e excluir biometria de pedidos parados há mais de 24h
+
+ARNG-925 Criar configuração root e permitir editar tipo de liveness
+
+ARNG-926 Adicionar possibilidade de gerar pendência para pedidos em Aguardando Recursos
+
+### Melhorias
+
+ARNG-657 Enviar e-mail para o agente (AGR) quando o pedido for provado e pronto para emissão/baixa
+
+ARNG-788 Melhorar mensagem de erro na duplicidade biométrica
+
+ARNG-812 Erro na emissão com auxílio de agente, status do PSBio diferente de "OK" ou "OK preliminar"
+
+ARNG-898 Só refazer a biometria facial em caso de nova coleta biométrica
+
+ARNG-922 Incluir campo CEI no Termo de Titularidade
+
+ARNG-927 Desabilitar auto hide no Jitsi
+
+
+
+## 6.0.1 (2026-05-22) {#6.0.1}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-799 Atualizar texto do botão da Consulta Serpro, para "Consultar CNPJ Redesim" e adicionar legenda
+
+
+
+## 6.0.0 (2026-05-20) {#6.0.0}
+
+Atualiza modelo do banco de dados: não
+
+:::warning
+Esta versão atualiza o .NET de 8.0 para **10.0**. Em instalações *on-premises* que não utilizam Docker, certifique-se de instalar o
+[.NET 10.0 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) no servidor **antes** de atualizar para esta versão. Instalações via
+Docker não são afetadas, pois a imagem já inclui o runtime correto.
+:::
+
+### Novas funcionalidades
+
+ARNG-920 Tabelas responsivas
+
+ARNG-921 Permitir CNPJ alfanumérico
+
+### Melhorias
+
+ARNG-586 Alterar IronPDF para utilizar o serviço pdf-service
+
+ARNG-896 Atualizar .NET e Angular (Lacuna SPA 8)
+
+### Correções de bugs
+
+ARNG-916 Erro ao enviar SMS para números estrangeiros quando o provedor de SMS não permitia
+
+ARNG-918 Durante a videoconferência o passo de validação de documentos é concluído antes de ser iniciado
+
+ARNG-919 Remover mensagens "[AREA] home componente"
+
+
+
+## 5.28.3 (2026-05-12) {#5.28.3}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-881 Adicionar aviso de remoção da videoconferência/coleta biometria caso o contato do titular seja alterado
+
+
+
+## 5.28.1 (2026-05-11) {#5.28.1}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+ARNG-784 Corrigir a duplicidade de chamadas ao backend, ao clicar no botão "Pesquisar" em Operação > Pedidos
+
+ARNG-914 Formulário de autoridade de registro permite digitar caracteres não numéricos mas dá erro depois
+
+
+
+## 5.28.0 (2026-05-06) {#5.28.0}
+
+Atualiza modelo do banco de dados: não
+
+### Novas funcionalidades
+
+ARNG-883 Permitir visualização de AC/AR selecionada
+
+ARNG-909 Levantar usuários com o perfil Anti-Fraude
+
+### Melhorias
+
+ARNG-781 Melhorar eventos da videoconferência e liveness relacionado
+
+ARNG-822 Correção da mensagem de erro "Chave 1 ou 2 erradas"
+
+ARNG-897 Não refazer a consulta DataValid básica no fluxo de validação de documentos
+
+### Correções de bugs
+
+ARNG-913 Número do pedido passado de forma incorreta nos parâmetros da rota do StartValidation
+
+
+
+## 5.27.0 (2026-04-29) {#5.27.0}
+
+Atualiza modelo do banco de dados: **sim**
+
+### Melhorias
+
+ARNG-844 Alteração no comportamento de equipamentos auditos para exigir auditoria todo dia primeiro do mês.
+
+ARNG-910 Exigir o envio da CNH física para a Documentoscopia Lite, torna a validação de documentos não automática e permite visualizar as validações após o envio da foto para o PSBio
+
+### Correções de bugs
+
+ARNG-866 Criar possibilidade de emitir um certificado com erro durante a emissão
+
+ARNG-895 Travamento ao avançar após captura de foto na prova de vida
+
+Corrigido o registro indevido do evento de reset de validação de documentos na trilha de auditoria, para pedidos que nunca tiveram validação de documentos executada
+
+
+
+## 5.26.0 (2026-04-27) {#5.26.0}
+
+Atualiza modelo do banco de dados: não
+
+### Novas funcionalidades
+
+ARNG-903 Permitir realizar consulta SAF de pedidos independentemente do status
+
+### Correções de bugs
+
+ARNG-848 Restringir a geração e gravação do relatório SAF apenas à consulta efetuada pelo AVP
+
+ARNG-905 TCN de cadastro no PSBio permanece ativo após cancelamento de pedido
+
+ARNG-906 Pesquisa SAF na tela de validação regera relatório mas não obriga marcar como "encontrado" ou "não encontrado"
+
+:::info
+Esta versão adiciona o comando [cancel-canceled-orders-enrollment-tcn](on-premises/tool/cancel-canceled-orders-enrollment-tcn.md), que pode
+ser executado para corrigir pedidos cancelados antes desta correção (ARNG-905) cujo TCN de cadastro no PSBio permaneceu aberto.
+:::
+
+
+
+## 5.25.0 (2026-04-17) {#5.25.0}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-390 Criada a base do projeto de testes E2E
+
+ARNG-840 Enviar suspeita SAF para o agente de conferencia
+
+ARNG-892 Remover evento de aceite da prévia do Termo de Titularidade na Videoconferência
+
+ARNG-900 Refatoração da integração com o Jitsi
+
+ARNG-901 Ajustes na API de listagem de pedidos adicionando novos possíveis filtros
+
+### Correções de bugs
+
+ARNG-879 Impossibilitar excluir CSR de pedidos já emitidos
+
+ARNG-888 Impedir duplo clique na tela de emissão do pedido
+
+
+
+## 5.24.0 (2026-04-07) {#5.24.0}
 
 Atualiza modelo do banco de dados: não
 
@@ -671,10 +1128,6 @@ ARNG-698 Adicionar descrição das permissões dos usuários
 ### Correções de bugs
 
 ARNG-689 Corrigir campos CNPJ e Razão social da listagem de Autoridades de Registro
-
-### Tarefa
-
-ARNG-691 Migração de dados da Consulti
 
 
 

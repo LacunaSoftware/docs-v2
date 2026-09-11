@@ -1,5 +1,11 @@
 # PKI SDK changelog
 
+### 2.22.6 (2026-09-11) {#v2-22-5}
+
+- \[PKI-159\] Update Lacuna.T8 package v1.22.8.
+- \[PKI-159\] Fix signature visual representation being lost on PDFs with non-conformant metadata.
+
+
 ### 2.22.5 (2026-07-23) {#v2-22-5}
 
 - \[PKI-158\] Fix `PKCertificate.Decode` failing on single-line PEM string.
@@ -7,7 +13,7 @@
 
 ### 2.22.4 (2026-07-06) {#v2-22-4}
 
-- Update Lacuna.T8 package v1.2.27.
+- Update Lacuna.T8 package v1.22.7.
 - Fix PDF signature detection for revisioned signature dictionary object numbers.
 - Fix null AcroForm PDF object loading.
 

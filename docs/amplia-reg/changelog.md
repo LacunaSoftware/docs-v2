@@ -59,7 +59,7 @@ Atualiza modelo do banco de dados: não
 
 ### Correções de bugs
 
-ARNG-989 Componente de coleta biométrica está recusando coleta quando existem biometrias ausentes ou indisponíveis (inclui ajuste dos escores mínimos de qualidade biométrica configurados por padrão)
+ARNG-989 Componente de coleta biométrica está recusando coleta quando existem biometrias ausentes ou indisponíveis
 
 
 
@@ -133,7 +133,7 @@ ARNG-953 Adicionar transaction de Video Identification no relatório de custos p
 
 ### Correções de bugs
 
-ARNG-949 Correções Code100: adiciona o parâmetro de RUC da organização na criação de pedidos do Paraguai, libera a consulta da Chave 1 protegida durante a vídeo identificação prévia e corrige uma validação da vídeo identificação prévia
+ARNG-949 Adiciona o parâmetro de RUC da organização na criação de pedidos do Paraguai, libera a consulta da Chave 1 protegida durante a vídeo identificação prévia e corrige uma validação da vídeo identificação prévia
 
 ARNG-956 CompleteVideoIdentificationAsync está considerando Failure ao invés de Success
 
@@ -163,41 +163,6 @@ ARNG-943 Melhorar UI UX da tela de OTP
 ### Correções de bugs
 
 ARNG-948 Corrigido erro ao gerar o relatório de validação de documentos da Acertpix para validações de Documentoscopia Lite encaminhadas para revisão da mesa
-
-
-
-## 6.3.2 (2026-07-27) {#6.3.2}
-
-Atualiza modelo do banco de dados: não
-
-:::info
-Esta é uma versão gerada para um ambiente específico (Consulti), a partir da branch da versão 6.3.1. As mudanças abaixo foram, em seguida,
-também aplicadas à branch principal e formalizadas como [ARNG-949](#8.0.0), lançado na versão 8.0.0.
-:::
-
-### Correções de bugs
-
-Adicionado o parâmetro de RUC da organização na criação de pedidos do Paraguai, liberada a consulta da Chave 1 protegida durante a vídeo identificação prévia e corrigida uma validação da vídeo identificação prévia
-
-
-
-## 7.0.2 (2026-07-22) {#7.0.2}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-Melhorada a geração de documentos da Acertpix
-
-
-
-## 7.0.1 (2026-07-16) {#7.0.1}
-
-Atualiza modelo do banco de dados: não
-
-### Melhorias
-
-Adicionada a data de criação do pedido ao relatório de transações de custo
 
 
 
@@ -240,8 +205,6 @@ ARNG-933 Não enviar email de renovação caso um novo pedido já tenha sido emi
 
 ARNG-912 Melhorias no projeto de testes
 
-Melhorada a validação de status ao atualizar os dados do titular nos diferentes fluxos (validação, pré-preenchimento e pré-vídeo-identificação)
-
 ### Correções de bugs
 
 ARNG-720 Bloquear login se o certificado do AGR for diferente do certificado cadastrado
@@ -252,9 +215,9 @@ ARNG-934 Ação de limpar filtros em pedidos, não limpa os campos de CNPJ, Clie
 
 ARNG-935 Thumbprint do agente de registro depende do formato de certificado enviado
 
-ARNG-939 Corrigida a exibição do aviso de confirmação ao encerrar a chamada pelo botão personalizado de encerramento, mesmo após a videoconferência já ter sido concluída corretamente (correção inicial já aplicada na versão [6.2.1](#6.2.1))
+ARNG-939 Corrigida a exibição do aviso de confirmação ao encerrar a chamada pelo botão personalizado de encerramento, mesmo após a videoconferência já ter sido concluída corretamente
 
-ARNG-942 Corrigido o suporte ao token SafeSign no macOS, adicionando o caminho da biblioteca PKCS#11 utilizada pelo token (correção inicial já aplicada na versão [6.2.2](#6.2.2))
+ARNG-942 Corrigido o suporte ao token SafeSign no macOS, adicionando o caminho da biblioteca PKCS#11 utilizada pelo token
 
 :::info
 Esta versão adiciona o comando [fill-registration-agents-certificate-thumbprint](on-premises/tool/fill-registration-agents-certificate-thumbprint.md),

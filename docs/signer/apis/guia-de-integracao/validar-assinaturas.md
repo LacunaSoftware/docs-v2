@@ -53,7 +53,7 @@ GET /api/documents/keys/AX4F8FV8NNAX25TENE2S/signatures
 
 ## Validação com arquivo assinado
 
-Para validar um documento a partir do arquivo assinado, primeiro faça o upload do arquivo usando a [API de Upload](https://www.dropsigner.com/swagger/index.html#operations-Upload-post_api_uploads) ou a [API simplificada de Upload (POST /api/uploads/bytes)](https://www.dropsigner.com/swagger/index.html#operations-Upload-post_api_uploads_bytes), assim como descrito em [Criar documentos](/signer/integration/documents).
+Para validar um documento a partir do arquivo assinado, primeiro faça o upload do arquivo usando a [API de Upload](https://www.dropsigner.com/swagger/index.html#operations-Upload-post_api_uploads) ou a [API simplificada de Upload (POST /api/uploads/bytes)](https://www.dropsigner.com/swagger/index.html#operations-Upload-post_api_uploads_bytes), assim como descrito em [Criar documentos](./criar-documentos.md).
 
 Em seguida, utilize a [API de validação de arquivo assinado](https://www.dropsigner.com/swagger/index.html#operations-Documents-post_api_documents_validate_signatures):
 

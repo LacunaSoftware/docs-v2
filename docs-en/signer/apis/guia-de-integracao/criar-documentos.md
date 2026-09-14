@@ -147,7 +147,7 @@ The response presents two URLs:
 }
 ```
 
-Use the `embedUrl` with the **Signing Widget** to display Signer's signing page inside your application. The section [Embedded signature](/signer/embedded-signature) describes how to use the *Widget*.
+Use the `embedUrl` with the **Signing Widget** to display Signer's signing page inside your application. The section [Embedded signature](../embedded-signature.md) describes how to use the *Widget*.
 
 **Examples on GitHub:** [C#](https://github.com/LacunaSoftware/SignerSamples/blob/master/dotnet/console/Console/Scenarios/EmbeddedSignatureScenario.cs) · [Java](https://github.com/LacunaSoftware/SignerSamples/blob/master/java/console/src/main/java/com/lacunasoftware/signer/sample/scenarios/EmbeddedSignatureScenario.java) · [PHP](https://github.com/LacunaSoftware/SignerSamples/blob/master/php/Scenarios/EmbeddedSignatureScenario.php) · [Node.js](https://github.com/LacunaSoftware/SignerSamples/blob/master/nodejs/scenarios/embeddedSignatureScenario.ts)
 
@@ -169,4 +169,4 @@ Merging only works if **all uploaded files are PDFs**.
 
 ## Next steps
 
-With the document created, see how to [track its status and send reminders](/signer/integration/tracking).
+With the document created, see how to [track its status and send reminders](./acompanhar-documentos.md).

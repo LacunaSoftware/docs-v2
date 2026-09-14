@@ -93,8 +93,8 @@ Instead of polling the status repeatedly, you can set up a **Webhook** that will
 
 ![Webhook](/images/signer/org-webhook.png)
 
-See [Webhooks](/signer/webhooks) for the complete list of events, the payload format of each one and the delivery behaviour (authentication, retries and ordering).
+See [Webhooks](../webhooks.md) for the complete list of events, the payload format of each one and the delivery behaviour (authentication, retries and ordering).
 
 ## Next steps
 
-Once the document is concluded, see how to [download and list documents](/signer/integration/download-and-list).
+Once the document is concluded, see how to [download and list documents](./baixar-e-listar.md).

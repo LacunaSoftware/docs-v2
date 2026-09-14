@@ -53,7 +53,7 @@ GET /api/documents/keys/AX4F8FV8NNAX25TENE2S/signatures
 
 ## Validation with the signed file
 
-To validate a document from the signed file, first upload the file using the [Upload API](https://www.dropsigner.com/swagger/index.html#operations-Upload-post_api_uploads) or the [simplified Upload API (POST /api/uploads/bytes)](https://www.dropsigner.com/swagger/index.html#operations-Upload-post_api_uploads_bytes), as described in [Create documents](/signer/integration/documents).
+To validate a document from the signed file, first upload the file using the [Upload API](https://www.dropsigner.com/swagger/index.html#operations-Upload-post_api_uploads) or the [simplified Upload API (POST /api/uploads/bytes)](https://www.dropsigner.com/swagger/index.html#operations-Upload-post_api_uploads_bytes), as described in [Create documents](./criar-documentos.md).
 
 Then use the [Signed File Validation API](https://www.dropsigner.com/swagger/index.html#operations-Documents-post_api_documents_validate_signatures):
 

@@ -147,7 +147,7 @@ A resposta apresenta duas URLs:
 }
 ```
 
-Use a `embedUrl` com o **Widget de assinatura** para exibir a página de assinatura do Signer dentro da sua aplicação. A página [Assinatura embutida](/signer/embedded-signature) descreve como utilizar o *Widget*.
+Use a `embedUrl` com o **Widget de assinatura** para exibir a página de assinatura do Signer dentro da sua aplicação. A página [Assinatura embutida](../embedded-signature.md) descreve como utilizar o *Widget*.
 
 **Exemplos no GitHub:** [C#](https://github.com/LacunaSoftware/SignerSamples/blob/master/dotnet/console/Console/Scenarios/EmbeddedSignatureScenario.cs) · [Java](https://github.com/LacunaSoftware/SignerSamples/blob/master/java/console/src/main/java/com/lacunasoftware/signer/sample/scenarios/EmbeddedSignatureScenario.java) · [PHP](https://github.com/LacunaSoftware/SignerSamples/blob/master/php/Scenarios/EmbeddedSignatureScenario.php) · [Node.js](https://github.com/LacunaSoftware/SignerSamples/blob/master/nodejs/scenarios/embeddedSignatureScenario.ts)
 
@@ -169,4 +169,4 @@ A mesclagem só funciona se **todos os arquivos enviados forem PDFs**.
 
 ## Próximos passos
 
-Com o documento criado, veja como [acompanhar o status e enviar lembretes](/signer/integration/tracking).
+Com o documento criado, veja como [acompanhar o status e enviar lembretes](./acompanhar-documentos.md).

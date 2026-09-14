@@ -93,8 +93,8 @@ Em vez de consultar o status repetidamente, você pode configurar um **Webhook**
 
 ![Webhook](/images/signer/org-webhook.png)
 
-Veja [Webhooks](/signer/webhooks) para a lista completa de eventos, o formato do payload de cada um e o comportamento de entrega (autenticação, retentativas e ordem).
+Veja [Webhooks](../webhooks.md) para a lista completa de eventos, o formato do payload de cada um e o comportamento de entrega (autenticação, retentativas e ordem).
 
 ## Próximos passos
 
-Quando o documento estiver concluído, veja como [baixar e listar documentos](/signer/integration/download-and-list).
+Quando o documento estiver concluído, veja como [baixar e listar documentos](./baixar-e-listar.md).

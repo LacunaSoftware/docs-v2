@@ -111,11 +111,7 @@ chown ampliareg:ampliareg /var/ampliareg
 
 Crie a pasta do site, baixe e extraia os binários:
 
-:::note
-Para testar a [próxima versão](../../changelog.md#vnext) do Amplia Reg, atualmente em estágio *Release Candidate*, substitua `ampliareg-x.y.z.tar.gz` nos comandos abaixo
-por `ampliareg-3.1.0-rc02.tar.gz`. **Cuidado**: versões *Release Candidate* não são adequadas para produção e, portanto, devem ser instaladas apenas em ambientes de
-homologação/testes!
-:::
+{/* :::note Para testar a [próxima versão](../../changelog.md#vnext) do Amplia Reg, atualmente em estágio *Release Candidate*, substitua `ampliareg-x.y.z.tar.gz` nos comandos abaixo por `ampliareg-3.1.0-rc02.tar.gz`. **Cuidado**: versões *Release Candidate* não são adequadas para produção e, portanto, devem ser instaladas apenas em ambientes de homologação/testes! ::: */}
 
 
 ```sh

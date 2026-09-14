@@ -41,6 +41,11 @@ Comandos disponíveis:
 * [test-email](test-email.md)
 * [test-cert-renewal-alert](test-certificate-renewal-alert.md)
 * [migrate-data](migrate-data.md)
+* [cancel-canceled-orders-enrollment-tcn](cancel-canceled-orders-enrollment-tcn.md)
+* [fill-registration-agents-certificate-thumbprint](fill-registration-agents-certificate-thumbprint.md)
+* [fill-order-transactions](fill-order-transactions.md)
+* [fill-video-identification-transactions](fill-video-identification-transactions.md)
+* [fill-registration-agent-report-transactions](fill-registration-agent-report-transactions.md)
 
 ## Veja também
 

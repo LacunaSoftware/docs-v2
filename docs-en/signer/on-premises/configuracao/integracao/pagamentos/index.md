@@ -1,6 +1,6 @@
 ---
 sidebar_label: "Payments"
-sidebar_position: 3
+sidebar_position: 0
 slug: /signer/on-premises/payments
 ---
 

@@ -116,7 +116,7 @@ Atributo                 | Tipo         |  Descrição
 `disableDocumentPreview` | boolean      | Se `true`, esconde a pré-visualização do documento. Nesse caso, será exibido apenas o botão de assinatura e dados do assinante/aprovador. Pode ser definido após a instanciação com método `setDisableDocumentPreview`.
 `enableRefusal`          | boolean      | Se `true`, exibirá a opção para recusar uma assinatura. Pode ser definido após a instanciação com método `setEnableRefusal`.
 `culture` | string | Define o idioma utilizado, as opções disponíveis são `"pt"`(português), `"en"`(inglês) e `"es"`(espanhol)
-`theme` | string | Define o tema do widget, use o código de 3 caracteres de cada tema (ex: amazon-cornell-red: `"acr"`), os temas disponíveis estão na [página de personalização](https://docs.lacunasoftware.com/pt-br/articles/signer/on-premises/customization.html)
+`theme` | string | Define o tema do widget, use o código de 3 caracteres de cada tema (ex: amazon-cornell-red: `"acr"`), os temas disponíveis estão na [página de temas](../on-premises/configuracao/personalizacao/temas.md)
 
 Exemplo:
 

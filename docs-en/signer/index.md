@@ -18,4 +18,5 @@ As mentioned above, Signer can be used in the cloud (modality SaaS, in [dropsign
 
 ## See also
 
+* [Getting started with the API](apis/get-started.md)
 * [Changelog](changelog.md)

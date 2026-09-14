@@ -65,6 +65,46 @@ const ptBrMirrorPlugins: PluginConfig[] = includePtBrMirror
     ]
   : [];
 
+// The .NET API reference (/api and its /en-us/api mirror) is heavy, generated
+// content (~960 dense MDX files across both instances) that is rarely edited
+// while authoring product docs. Loading it makes `docusaurus start` noticeably
+// slower for no benefit, so — like the pt-br mirrors above — it's excluded from
+// the dev server by default. Set DOCS_API_DEV=1 to include it when you actually
+// need to work on the API reference. Always built for production.
+const includeApiRef =
+  process.env.NODE_ENV === 'production' || process.env.DOCS_API_DEV === '1';
+
+const apiRefPlugins: PluginConfig[] = includeApiRef
+  ? [
+      // .NET API reference: a separate docs instance served at /api.
+      // Language-neutral and not in the navbar, but indexed for search (below)
+      // and its own sidebar lists every namespace.
+      [
+        '@docusaurus/plugin-content-docs',
+        {
+          id: 'apiRef',
+          path: 'api-docs',
+          routeBasePath: 'api',
+          sidebarPath: './sidebarsApi.ts',
+        },
+      ],
+      // Same API content mirrored at /en-us/api. The reference is
+      // language-neutral, so both locales serve identical pages; the PT/EN
+      // switch just flips the URL. api-docs-en is a build-time copy of api-docs
+      // (scripts/sync-mirrors.mjs) — two docs instances can't share one path, so
+      // the EN mirror gets its own.
+      [
+        '@docusaurus/plugin-content-docs',
+        {
+          id: 'apiRefEn',
+          path: 'api-docs-en',
+          routeBasePath: 'en-us/api',
+          sidebarPath: './sidebarsApi.ts',
+        },
+      ],
+    ]
+  : [];
+
 const config: Config = {
   title: ' ',
   tagline: 'Documentação para produtos Lacuna Software',
@@ -78,6 +118,25 @@ const config: Config = {
 
   organizationName: 'LacunaSoftware',
   projectName: 'docs-v2',
+
+  // Opt into the Rust-based build pipeline from @docusaurus/faster (already a
+  // dependency): Rspack instead of webpack, SWC for JS/JSX transpilation and
+  // minification, and Lightning CSS. Typically cuts production build time by
+  // 2-4x on a site this size (6 docs instances + .NET API reference). If a
+  // plugin ever proves incompatible with Rspack, replace `faster: true` with
+  // the granular `{ swcJsMinimizer: true, lightningCssMinimizer: true, ... }`.
+  future: {
+    faster: true,
+    // `faster: true` turns on `ssgWorkerThreads`, which requires this single v4
+    // flag. We opt into ONLY this one (it just drops a legacy post-build <head>
+    // attribute) and deliberately leave the behaviour-changing v4 flags off —
+    // `useCssCascadeLayers` (would re-layer CSS and can break custom.css
+    // overrides) and `mdx1CompatDisabledByDefault` (could break existing MDX).
+    // Revisit `v4: true` as a deliberate migration, not a speed tweak.
+    v4: {
+      removeLegacyPostBuildHeadAttribute: true,
+    },
+  },
 
   // Treat broken internal links/anchors as build errors: if a page can't link
   // to something, that's a bug we want to catch at compile time, not ship.
@@ -125,9 +184,15 @@ const config: Config = {
         // No blog on this site — don't index it (also silences the search
         // plugin's "blogDir doesn't exist" build warning).
         indexBlog: false,
-        // Index the main docs (both languages) plus both .NET API reference
-        // instances so the generated SDK classes are reachable from the search bar.
-        docsRouteBasePath: ['/articles', '/en-us/articles', '/api', '/en-us/api'],
+        // Index the main docs (both languages) plus, when they're loaded, both
+        // .NET API reference instances so the generated SDK classes are reachable
+        // from the search bar. The API reference is dev-excluded by default
+        // (includeApiRef), so only reference its routes when it's actually built.
+        docsRouteBasePath: [
+          '/articles',
+          '/en-us/articles',
+          ...(includeApiRef ? ['/api', '/en-us/api'] : []),
+        ],
       },
     ],
     // English articles: docs-en served as its own docs instance at
@@ -145,31 +210,9 @@ const config: Config = {
         editUrl: 'https://github.com/LacunaSoftware/docs-v2/edit/main/',
       },
     ],
-    // .NET API reference: a separate docs instance served at /api.
-    // Language-neutral and not in the navbar, but indexed for search (above) and
-    // its own sidebar lists every namespace.
-    [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: 'apiRef',
-        path: 'api-docs',
-        routeBasePath: 'api',
-        sidebarPath: './sidebarsApi.ts',
-      },
-    ],
-    // Same API content mirrored at /en-us/api. The reference is language-neutral, so
-    // both locales serve identical pages; the PT/EN switch just flips the URL.
-    // api-docs-en is a build-time copy of api-docs (scripts/sync-mirrors.mjs) —
-    // two docs instances can't share one path, so the EN mirror gets its own.
-    [
-      '@docusaurus/plugin-content-docs',
-      {
-        id: 'apiRefEn',
-        path: 'api-docs-en',
-        routeBasePath: 'en-us/api',
-        sidebarPath: './sidebarsApi.ts',
-      },
-    ],
+    // .NET API reference (/api and /en-us/api). Excluded from the dev server by
+    // default for speed — see includeApiRef / apiRefPlugins above.
+    ...apiRefPlugins,
     // Portuguese is served at the root (/articles/...) AND under /pt-br/...,
     // exactly like the classic site, which built the whole pt-BR tree under
     // /pt-br/. These instances re-serve the SAME Portuguese content at the

@@ -116,7 +116,7 @@ Atributo                 | Tipo         |  Descrição
 `disableDocumentPreview` | boolean      | If `true`, it will hide the document preview. In this case, only the signing button and signer/approver data will be displayed. You can set this parameter after instantiation using `setDisableDocumentPreview` method.
 `enableRefusal`          | boolean      | If `true`, it will display the option to decline to sign a document. You can set this parameter after instantiation using `setEnableRefusal` method.
 `culture` | string | Defines the widget language, the options available are `"pt"` (portuguese), `"en"`(english) and `"es"`(spanish).
-`theme` | string | Defines the widget theme with the 3-character string (e.g. Theme: amazon-cornell-red - Code:`"acr"`). The themes are available at [the customization page](https://docs.lacunasoftware.com/pt-br/articles/signer/on-premises/customization.html)
+`theme` | string | Defines the widget theme with the 3-character string (e.g. Theme: amazon-cornell-red - Code:`"acr"`). The themes are available at [the themes page](../on-premises/configuracao/personalizacao/temas.md)
 
 
 

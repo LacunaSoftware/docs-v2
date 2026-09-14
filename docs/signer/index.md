@@ -19,4 +19,5 @@ Conforme citado acima, o Signer pode ser utilizado em nuvem (modalidade SaaS, em
 
 ## Veja também
 
+* [Primeiros passos com a API](apis/get-started.md)
 * [Histórico de versões](changelog.md)

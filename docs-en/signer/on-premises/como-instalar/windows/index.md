@@ -208,4 +208,4 @@ The `appsettings.iis.json` file with your instance settings will be preserved, b
 
 * [Settings](../../configuracao/settings.md)
 * [Access Control](../../configuracao/access-control.md)
-* [Customization](../../configuracao/customization.md)
+* [Customization](../../configuracao/personalizacao/index.md)

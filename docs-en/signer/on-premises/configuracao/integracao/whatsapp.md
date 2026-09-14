@@ -1,11 +1,10 @@
 ---
-unlisted: true
-sidebar_label: "WhatsApp Integration"
+sidebar_label: "Whatsapp"
 sidebar_position: 5
 slug: /signer/on-premises/whatsapp
 ---
 
-# Whatsapp integration
+# Whatsapp
 
 :::warning Unavailable
 

@@ -1,11 +1,10 @@
 ---
-unlisted: true
-sidebar_label: "Integração com Whatsapp"
+sidebar_label: "Whatsapp"
 sidebar_position: 5
 slug: /signer/on-premises/whatsapp
 ---
 
-# Integração com Whatsapp
+# Whatsapp
 
 Na versão 1.56.0 foi adicionada a possibilidade de integração para enviar notificações via Whatsapp. 
 

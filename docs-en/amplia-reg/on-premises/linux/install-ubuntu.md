@@ -85,10 +85,7 @@ chown ampliareg:ampliareg /var/ampliareg
 
 Create the site folder, download and extract the binaries:
 
-:::note
-To test the [next version](../../changelog.md) of Amplia Reg, currently in Release Candidate stage, replace `ampliareg-x.y.z.tar.gz` on the following commands
-with `ampliareg-3.1.0-rc02.tar.gz`. **Beware**: Release Candidate versions are not production-ready and thus should only be installed on staging or test environments!
-:::
+{/* :::note To test the [next version](../../changelog.md#vnext) of Amplia Reg, currently in Release Candidate stage, replace `ampliareg-x.y.z.tar.gz` on the following commands with `ampliareg-3.1.0-rc02.tar.gz`. **Beware**: Release Candidate versions are not production-ready and thus should only be installed on staging or test environments! ::: */}
 
 
 ```sh

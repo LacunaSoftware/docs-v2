@@ -40,7 +40,9 @@ apt-get install aspnetcore-runtime-10.0
 Register the Ubuntu .NET backports package repository, then install the runtime:
 
 ```bash
-add-apt-repository ppa:dotnet/backports
+apt-get update
+apt-get install -y software-properties-common
+add-apt-repository -y ppa:dotnet/backports
 apt-get update
 apt-get install aspnetcore-runtime-10.0
 ```
@@ -85,8 +87,8 @@ Create the site folder, download and extract the binaries:
 
 ```sh
 mkdir /usr/share/restpkicore
-curl -O https://cdn.lacunasoftware.com/restpkicore/restpkicore-4.1.0.tar.gz
-tar xzf restpkicore-4.1.0.tar.gz -C /usr/share/restpkicore
+curl -O https://cdn.lacunasoftware.com/restpkicore/restpkicore-5.0.0.tar.gz
+tar xzf restpkicore-5.0.0.tar.gz -C /usr/share/restpkicore
 chmod -R a=,u+rwX,go+rX /usr/share/restpkicore
 ```
 

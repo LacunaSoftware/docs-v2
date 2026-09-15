@@ -10,13 +10,13 @@ Para instalar uma instância *on premises* do Rest PKI Core no Windows Server, p
 
 <br />
 <center>
-**[Pacote de binários do Rest PKI Core](https://cdn.lacunasoftware.com/restpkicore/restpkicore-4.1.0.zip)**
+**[Pacote de binários do Rest PKI Core](https://cdn.lacunasoftware.com/restpkicore/restpkicore-5.0.0.zip)**
 </center>
 <br />
 
 ## Pré-requisitos
 
-* Windows Server 2012 ou mais recente (qualquer edição)
+* Windows Server 2016 ou mais recente (qualquer edição)
 * SQL Server 2014 ou mais recente (edição Standard ou superior recomendada)
 * Licença do PKI SDK (em formato Base64)
 * Licença do Web PKI (formato Base64/binário)

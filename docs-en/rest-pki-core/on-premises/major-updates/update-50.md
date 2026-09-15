@@ -40,13 +40,19 @@ apt install -y aspnetcore-runtime-10.0
 On **Ubuntu 22.04 (LTS)**, first register the Ubuntu .NET backports package repository, then install the runtime:
 
 ```sh
-add-apt-repository ppa:dotnet/backports
+apt update
+apt install -y software-properties-common
+add-apt-repository -y ppa:dotnet/backports
 apt update
 apt install -y aspnetcore-runtime-10.0
 ```
 
 :::warning
 Ubuntu 20.04 and earlier versions are not supported by .NET 10. Upgrade the operating system before updating Rest PKI Core.
+:::
+
+:::caution
+If the previous ASP.NET Core Runtime was installed from the Microsoft package repository (`packages.microsoft.com`), as was the case on Ubuntu 20.04 and earlier, remove those packages before installing the runtime from the Ubuntu feed. Mixing .NET packages from both repositories causes errors when the application starts. For more information, see [.NET package mix ups on Linux](https://learn.microsoft.com/dotnet/core/install/linux-package-mixup).
 :::
 
 ### Rocky Linux

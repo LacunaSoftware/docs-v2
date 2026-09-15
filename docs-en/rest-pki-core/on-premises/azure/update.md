@@ -11,6 +11,7 @@ Before updating, check whether the new version requires additional migration ste
 * [Update from 2.x to 3.0](../major-updates/update-30.md)
 * [Update from 3.x to 4.0](../major-updates/update-40.md)
 
+* [Update from 4.x to 5.0](../major-updates/update-50.md)
 Then, replicate the new Docker image of the system to your *container registry* (replace `MY_ACR_NAME` with the name chosen during installation
 and `4.2.5` with the desired version):
 

@@ -17,63 +17,37 @@ Para instalar uma instância [*on premises*](../index.md) do [Rest PKI Core](../
 * Licença de uso do componente **Web PKI** (em formato binário/Base64)
 
 
-## Instale o ASP.NET Core Runtime 6.0 {#install-aspnet-core}
+## Instale o ASP.NET Core Runtime 10.0 {#install-aspnet-core}
 
 :::info
 Essas instruções assumem que você está autenticado como **root**. Se você não estiver, execute `sudo su -` antes de continuar!
 :::
 
 
-Siga as instruções abaixo dependendo da versão do seu Ubuntu para:
+Siga as instruções abaixo dependendo da versão do seu Ubuntu.
 
-1. Registrar a chave da Microsoft e adicionar o repositório de pacotes (só precisa ser feito em versões anteriores à versão 22 e uma única vez por máquina)
-1. Instalar o pacote `aspnetcore-runtime-6.0`
+### Ubuntu 24.04 (LTS) ou mais recente
+
+O ASP.NET Core Runtime 10.0 está disponível no repositório de pacotes padrão do Ubuntu:
+
+```bash
+apt-get update
+apt-get install aspnetcore-runtime-10.0
+```
 
 ### Ubuntu 22.04 (LTS)
 
+Registre o repositório de backports do .NET do Ubuntu e depois instale o runtime:
+
 ```bash
+add-apt-repository ppa:dotnet/backports
 apt-get update
-apt-get install aspnetcore-runtime-6.0
+apt-get install aspnetcore-runtime-10.0
 ```
 
-### Ubuntu 20.04 (LTS)
-
-```bash
-curl -O https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-```
-
-```bash
-apt-get update
-apt-get install aspnetcore-runtime-6.0
-```
-
-### Ubuntu 18.04 (LTS)
-
-```bash
-curl -O https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-```
-
-```bash
-apt-get update
-apt-get install aspnetcore-runtime-6.0
-```
-
-### Ubuntu 16.04 (LTS)
-
-```bash
-curl -O https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-```
-
-```bash
-apt-get update
-apt-get install aspnetcore-runtime-6.0
-```
+:::warning
+O Ubuntu 20.04 e versões anteriores não são suportados pelo .NET 10.
+:::
 
 ### Teste a instalação
 
@@ -86,12 +60,12 @@ dotnet --list-runtimes
 A saída esperada é semelhante a:
 
 ```
-Microsoft.AspNetCore.App 6.0.* [*/dotnet/shared/Microsoft.AspNetCore.App]
-Microsoft.NETCore.App 6.0.* [*/dotnet/shared/Microsoft.NETCore.App]
+Microsoft.AspNetCore.App 10.0.* [*/dotnet/shared/Microsoft.AspNetCore.App]
+Microsoft.NETCore.App 10.0.* [*/dotnet/shared/Microsoft.NETCore.App]
 ```
 
 :::tip
-Para outras versões do sistema operacional e métodos alternativos de instalação do ASP.NET Core Runtime, visite [esta página](https://docs.microsoft.com/pt-br/dotnet/core/install/linux)
+Para outras versões do sistema operacional e métodos alternativos de instalação do ASP.NET Core Runtime, visite [esta página](https://learn.microsoft.com/pt-br/dotnet/core/install/linux)
 :::
 
 

@@ -13,12 +13,12 @@ Antes de atualizar, verifique se a nova versão exige passos adicionais de migra
 
 * [Atualização de 4.x para 5.0](../major-updates/update-50.md)
 Em seguida, replique a nova imagem de Docker do sistema para o seu *container registry* (substitua `MY_ACR_NAME` pelo nome escolhido durante a instalação
-e `4.2.5` pela versão desejada):
+e `5.0.0` pela versão desejada):
 
 ```sh
 az login
 az acr login --name MY_ACR_NAME
-az acr import --name MY_ACR_NAME --source docker.io/lacunasoftware/restpkicore:4.2.5 --image restpkicore:4.2.5
+az acr import --name MY_ACR_NAME --source docker.io/lacunasoftware/restpkicore:5.0.0 --image restpkicore:5.0.0
 ```
 
 Por fim, no App Service do sistema, vá em **Deployment Center** e, no campo **Tag**, selecione a nova versão e clique em **Save**.

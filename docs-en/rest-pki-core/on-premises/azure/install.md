@@ -65,11 +65,11 @@ If you have access to more than one Azure account, you may need to pass the `--t
 
 ```sh
 az acr login --name MY_ACR_NAME
-az acr import --name MY_ACR_NAME --source docker.io/lacunasoftware/restpkicore:4.2.5 --image restpkicore:4.2.5
+az acr import --name MY_ACR_NAME --source docker.io/lacunasoftware/restpkicore:5.0.0 --image restpkicore:5.0.0
 ```
 
 :::tip
-Replace `4.2.5` with the currently recommended version (see the [Docker setup](../docker.md))
+Replace `5.0.0` with the currently recommended version (see the [Docker setup](../docker.md))
 :::
 
 

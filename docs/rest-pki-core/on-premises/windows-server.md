@@ -32,7 +32,7 @@ Se precisar de ajuda para preparar o banco de dados, [clique aqui](prepare-datab
 ## Instalação {#install-aspnet-core}
 
 1. Instale o IIS
-1. Instale o <a href="https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-8.0.15-windows-hosting-bundle-installer" target="_blank">.NET 8.0 Hosting Bundle</a>
+1. Instale o <a href="https://dotnet.microsoft.com/download/dotnet/10.0" target="_blank">ASP.NET Core Runtime 10.0 Hosting Bundle</a> (seção *ASP.NET Core Runtime*, item *Hosting Bundle* em *Windows*)
 1. Crie uma pasta para o site do IIS. Exemplo: `C:\inetpub\Rest PKI Core`
 1. Crie uma pasta para logs. Exemplo: `C:\Logs`
 1. Crie o site no IIS

@@ -114,8 +114,7 @@ Atualize os seus containers para a imagem `lacunasoftware/restpkicore:5.0`, conf
 mudança é necessária: a imagem já inclui o ASP.NET Core Runtime 10.0 e todas as suas dependências.
 
 As imagens Linux da versão 5.x são baseadas no **Ubuntu 24.04 (noble)** em vez do Debian 12 (bookworm). Isso não tem efeito se você apenas executa a
-imagem. Se você estende a imagem ou executa comandos dentro do container (por exemplo, para instalar pacotes adicionais), leve em conta o conjunto de
-pacotes e os caminhos de sistema do Ubuntu.
+imagem.
 
 ### Azure App Services
 

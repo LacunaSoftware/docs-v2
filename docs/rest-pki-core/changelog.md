@@ -7,6 +7,53 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 5.0.0 (2026-09-14) {#v5-0-0}
+
+:::warning
+Veja [Atualizando o Rest PKI Core da versão 4.x para 5.0](on-premises/major-updates/update-50.md)
+:::
+
+
+Atualiza modelo do banco de dados: sim
+
+* Novas funcionalidades
+
+  * [RPNG-868] Opção de criar sessões de assinatura apenas com certificados em nuvem, pulando a instalação e seleção do Web PKI
+
+* Melhorias
+
+  * [RPNG-639] Bibliotecas cliente passam a informar sua versão, registrada nas transações e sessões
+
+  * [RPNG-648] Melhoria na consistência das telas de configurações da subscription
+
+  * [RPNG-650] Atualização do ASP.NET Core para a versão 10.0
+
+  * [RPNG-686] Nova tela de demonstrações, com diálogo de parâmetros para as demonstrações de biometria
+
+  * [RPNG-730] Registro da versão do sistema nas sessões de biometria e de assinatura
+
+  * [RPNG-886] Atualização do Browser SDK da FaceTec
+
+  * [RPNG-888] Atualização do SDK FortFace para a versão 2.6.0
+
+* Correções de bugs
+
+  * [RPNG-651] Logs de erro das sessões de biometria enviados pelo navegador eram gravados vazios
+
+  * [RPNG-793] Tipo de evento sem tradução na lista de eventos do dashboard
+
+  * [RPNG-874] Cores de marca visual em PDF com valores fora da faixa causavam erro 500 em vez de 400
+
+
+### 4.5.9 (2026-09-11) {#v4-5-9}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-886] Atualização do Browser SDK da FaceTec
+
+
 ### 4.5.8 (2026-09-10) {#v4-5-8}
 
 Atualiza modelo do banco de dados: não

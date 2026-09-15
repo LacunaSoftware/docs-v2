@@ -7,6 +7,53 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 5.0.0 (2026-09-14) {#v5-0-0}
+
+:::warning
+See [Update Rest PKI Core from 4.x to 5.0](on-premises/major-updates/update-50.md)
+:::
+
+
+Updates database model: yes
+
+* New features
+
+  * [RPNG-868] Add option to create signature sessions that accept cloud certificates only, skipping the Web PKI screens
+
+* Improvements
+
+  * [RPNG-639] Client libraries now report their version, which is recorded on transactions and sessions
+
+  * [RPNG-648] Improve consistency of the subscription settings screens
+
+  * [RPNG-650] Update ASP.NET Core to version 10.0
+
+  * [RPNG-686] Redesigned demonstrations screen, with a parameters dialog for the biometric demos
+
+  * [RPNG-730] Record the system version on biometric and signature sessions
+
+  * [RPNG-886] Update FaceTec Browser SDK
+
+  * [RPNG-888] Update FortFace SDK to v2.6.0
+
+* Bug fixes
+
+  * [RPNG-651] Error logs of biometric sessions sent by the browser were recorded as empty objects
+
+  * [RPNG-793] Untranslated event type on the dashboard's event list
+
+  * [RPNG-874] PDF mark colors with out-of-range values caused error 500 instead of 400
+
+
+### 4.5.9 (2026-09-11) {#v4-5-9}
+
+Updates database model: no
+
+* Improvements
+
+  * [RPNG-886] Update FaceTec Browser SDK
+
+
 ### 4.5.8 (2026-09-10) {#v4-5-8}
 
 Updates database model: no

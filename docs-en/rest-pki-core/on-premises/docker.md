@@ -16,12 +16,12 @@ For Docker-based setup the following image is provided on Docker Hub:
 </center>
 <br />
 
-The currently recommended image is `lacunasoftware/restpkicore:4.5`
+The currently recommended image is `lacunasoftware/restpkicore:5.0`
 
 Available moving tags:
 
-* Tag `4.3` points to the latest 4.3.x image **(recommended)**
-* Tag `4` points to the lastest 4.x image
+* Tag `5.0` points to the latest 5.0.x image **(recommended)**
+* Tag `5` points to the latest 5.x image
 * Tag `stable` points to the latest stable image
 
 {/* <a name="vnext" /> >> [!NOTE] > To test the upcoming version of Rest PKI Core, currently in Release Candidate state, use the image `lacunasoftware/restpkicore:3.3.0-rc12` instead. > **Beware:** Release Candidate versions are not production-ready and thus should only be installed on staging or test environments. */}
@@ -42,13 +42,13 @@ template to fill in the image's settings.
 To fill the `General__EncryptionKey` setting, generate a 256-bit key to encrypt sensitive data stored on the database:
 
 ```sh
-docker run lacunasoftware/restpkicore:4.5 -- gen-enc-key
+docker run lacunasoftware/restpkicore:5.0 -- gen-enc-key
 ```
 
 To fill the `General__RootPasswordHash` setting, choose a strong password for root access to the dashboard and hash it:
 
 ```sh
-docker run -i lacunasoftware/restpkicore:4.5 -- hash-root-pass
+docker run -i lacunasoftware/restpkicore:5.0 -- hash-root-pass
 ```
 
 ## Exposed ports
@@ -113,7 +113,7 @@ BlobStorage__Path=/var/app
 Now, let's run the container with the configuration file, mounting the volume `restpkicore_data` on `/var/app` and exposing the app (which listens on port 80) on the host's port 8080:
 
 ```sh
-docker run --name restpkicore --env-file restpkicore.env -v restpkicore_data:/var/app -p 8080:80 -d lacunasoftware/restpkicore:4.5
+docker run --name restpkicore --env-file restpkicore.env -v restpkicore_data:/var/app -p 8080:80 -d lacunasoftware/restpkicore:5.0
 ```
 
 :::tip

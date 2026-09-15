@@ -17,19 +17,17 @@ To install an [on-premises](../index.md) instance of [Rest PKI Core](../../index
 * **Web PKI license** (Base64/binary format)
 
 
-## Install the ASP.NET Core Runtime 6.0 {#install-aspnet-core}
+## Install the ASP.NET Core Runtime 10.0 {#install-aspnet-core}
 
 :::info
 These instructions assume you are logged in as **root**. If you are not, run `sudo su -` before continuing!
 :::
 
 
-Install the ASP.NET Core runtime package:
-
-{/* No additional package feeds are required to install ASP.NET Core 6.0 on Rocky Linux 8 */}
+Install the ASP.NET Core runtime package, available on the AppStream repository:
 
 ```sh
-yum install aspnetcore-runtime-6.0
+dnf install aspnetcore-runtime-10.0
 ```
 
 To test the installation, run:
@@ -41,12 +39,12 @@ dotnet --list-runtimes
 The expected output is similar to:
 
 ```
-Microsoft.AspNetCore.App 6.0.* [*/dotnet/shared/Microsoft.AspNetCore.App]
-Microsoft.NETCore.App 6.0.* [*/dotnet/shared/Microsoft.NETCore.App]
+Microsoft.AspNetCore.App 10.0.* [*/dotnet/shared/Microsoft.AspNetCore.App]
+Microsoft.NETCore.App 10.0.* [*/dotnet/shared/Microsoft.NETCore.App]
 ```
 
 :::tip
-For other operating system versions and alternative ways to install the ASP.NET Core Runtime, see [this page](https://docs.microsoft.com/en-us/dotnet/core/install/linux)
+For other operating system versions and alternative ways to install the ASP.NET Core Runtime, see [this page](https://learn.microsoft.com/dotnet/core/install/linux)
 :::
 
 
@@ -66,8 +64,8 @@ Create the site folder, download and extract the binaries:
 
 ```sh
 mkdir /usr/share/restpkicore
-curl -O https://cdn.lacunasoftware.com/restpkicore/restpkicore-4.1.0.tar.gz
-tar xzf restpkicore-4.1.0.tar.gz -C /usr/share/restpkicore
+curl -O https://cdn.lacunasoftware.com/restpkicore/restpkicore-5.0.0.tar.gz
+tar xzf restpkicore-5.0.0.tar.gz -C /usr/share/restpkicore
 chmod -R a=,u+rwX,go+rX /usr/share/restpkicore
 ```
 

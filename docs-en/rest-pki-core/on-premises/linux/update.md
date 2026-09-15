@@ -14,10 +14,10 @@ These instructions assume you are logged in as **root**. If you are not, run `su
 
 
 ```sh
-curl -O https://cdn.lacunasoftware.com/restpkicore/restpkicore-4.1.0.tar.gz
+curl -O https://cdn.lacunasoftware.com/restpkicore/restpkicore-5.0.0.tar.gz
 systemctl stop restpkicore
 rm -fR /usr/share/restpkicore/*
-tar xzf restpkicore-4.1.0.tar.gz -C /usr/share/restpkicore
+tar xzf restpkicore-5.0.0.tar.gz -C /usr/share/restpkicore
 chmod -R a=,u+rwX,go+rX /usr/share/restpkicore
 systemctl start restpkicore
 ```

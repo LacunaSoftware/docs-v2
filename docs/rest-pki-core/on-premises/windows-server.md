@@ -10,13 +10,13 @@ Para instalar uma instância *on premises* do Rest PKI Core no Windows Server, p
 
 <br />
 <center>
-**[Pacote de binários do Rest PKI Core](https://cdn.lacunasoftware.com/restpkicore/restpkicore-4.1.0.zip)**
+**[Pacote de binários do Rest PKI Core](https://cdn.lacunasoftware.com/restpkicore/restpkicore-5.0.0.zip)**
 </center>
 <br />
 
 ## Pré-requisitos
 
-* Windows Server 2012 ou mais recente (qualquer edição)
+* Windows Server 2016 ou mais recente (qualquer edição)
 * SQL Server 2014 ou mais recente (edição Standard ou superior recomendada)
 * Licença do PKI SDK (em formato Base64)
 * Licença do Web PKI (formato Base64/binário)
@@ -32,7 +32,7 @@ Se precisar de ajuda para preparar o banco de dados, [clique aqui](prepare-datab
 ## Instalação {#install-aspnet-core}
 
 1. Instale o IIS
-1. Instale o <a href="https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-aspnetcore-8.0.15-windows-hosting-bundle-installer" target="_blank">.NET 8.0 Hosting Bundle</a>
+1. Instale o <a href="https://dotnet.microsoft.com/download/dotnet/10.0" target="_blank">ASP.NET Core Runtime 10.0 Hosting Bundle</a> (seção *ASP.NET Core Runtime*, item *Hosting Bundle* em *Windows*)
 1. Crie uma pasta para o site do IIS. Exemplo: `C:\inetpub\Rest PKI Core`
 1. Crie uma pasta para logs. Exemplo: `C:\Logs`
 1. Crie o site no IIS

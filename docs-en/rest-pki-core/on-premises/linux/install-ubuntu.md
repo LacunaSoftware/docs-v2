@@ -17,63 +17,39 @@ To install an [on-premises](../index.md) instance of [Rest PKI Core](../../index
 * **Web PKI license** (Base64/binary format)
 
 
-## Install the ASP.NET Core Runtime 6.0 {#install-aspnet-core}
+## Install the ASP.NET Core Runtime 10.0 {#install-aspnet-core}
 
 :::info
 These instructions assume you are logged in as **root**. If you are not, run `sudo su -` before continuing!
 :::
 
 
-Follow the instructions below depending on your Ubuntu version to:
+Follow the instructions below depending on your Ubuntu version.
 
-1. Register the Microsoft key and add the product repository (this only needs to be done on versions prior to 22 and once per machine)
-1. Install the package `aspnetcore-runtime-6.0`
+### Ubuntu 24.04 (LTS) or later
+
+The ASP.NET Core Runtime 10.0 is available on the built-in Ubuntu package feed:
+
+```bash
+apt-get update
+apt-get install aspnetcore-runtime-10.0
+```
 
 ### Ubuntu 22.04 (LTS)
 
-```bash
-apt-get update
-apt-get install aspnetcore-runtime-6.0
-```
-
-### Ubuntu 20.04 (LTS)
-
-```bash
-curl -O https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-```
+Register the Ubuntu .NET backports package repository, then install the runtime:
 
 ```bash
 apt-get update
-apt-get install aspnetcore-runtime-6.0
-```
-
-### Ubuntu 18.04 (LTS)
-
-```bash
-curl -O https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-```
-
-```bash
+apt-get install -y software-properties-common
+add-apt-repository -y ppa:dotnet/backports
 apt-get update
-apt-get install aspnetcore-runtime-6.0
+apt-get install aspnetcore-runtime-10.0
 ```
 
-### Ubuntu 16.04 (LTS)
-
-```bash
-curl -O https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb
-dpkg -i packages-microsoft-prod.deb
-rm packages-microsoft-prod.deb
-```
-
-```bash
-apt-get update
-apt-get install aspnetcore-runtime-6.0
-```
+:::warning
+Ubuntu 20.04 and earlier versions are not supported by .NET 10.
+:::
 
 ### Test the installation
 
@@ -86,12 +62,12 @@ dotnet --list-runtimes
 The expected output is similar to:
 
 ```
-Microsoft.AspNetCore.App 6.0.* [*/dotnet/shared/Microsoft.AspNetCore.App]
-Microsoft.NETCore.App 6.0.* [*/dotnet/shared/Microsoft.NETCore.App]
+Microsoft.AspNetCore.App 10.0.* [*/dotnet/shared/Microsoft.AspNetCore.App]
+Microsoft.NETCore.App 10.0.* [*/dotnet/shared/Microsoft.NETCore.App]
 ```
 
 :::tip
-For other operating system versions and alternative ways to install the ASP.NET Core Runtime, see [this page](https://docs.microsoft.com/en-us/dotnet/core/install/linux)
+For other operating system versions and alternative ways to install the ASP.NET Core Runtime, see [this page](https://learn.microsoft.com/dotnet/core/install/linux)
 :::
 
 
@@ -111,8 +87,8 @@ Create the site folder, download and extract the binaries:
 
 ```sh
 mkdir /usr/share/restpkicore
-curl -O https://cdn.lacunasoftware.com/restpkicore/restpkicore-4.1.0.tar.gz
-tar xzf restpkicore-4.1.0.tar.gz -C /usr/share/restpkicore
+curl -O https://cdn.lacunasoftware.com/restpkicore/restpkicore-5.0.0.tar.gz
+tar xzf restpkicore-5.0.0.tar.gz -C /usr/share/restpkicore
 chmod -R a=,u+rwX,go+rX /usr/share/restpkicore
 ```
 

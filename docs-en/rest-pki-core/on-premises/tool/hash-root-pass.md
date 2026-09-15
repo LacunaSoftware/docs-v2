@@ -19,7 +19,7 @@ dotnet Lacuna.RestPki.Site.dll -- hash-root-pass
 Or, on Docker:
 
 ```sh
-docker run -i lacunasoftware/restpkicore:4.5 -- hash-root-pass
+docker run -i lacunasoftware/restpkicore:5.0 -- hash-root-pass
 ```
 
 ## Description

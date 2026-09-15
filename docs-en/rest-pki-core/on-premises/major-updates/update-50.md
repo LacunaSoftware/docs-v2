@@ -10,18 +10,20 @@ Version [5.0](../../changelog.md#v5-0-0) of [Rest PKI Core](../../index.md) has 
 of ASP.NET Core, [supported by Microsoft until November 2028](https://dotnet.microsoft.com/platform/support/policy/dotnet-core#lifecycle) (support for
 ASP.NET Core 8.0 ends in November 2026).
 
-Because of that, before updating your [on-premises](../index.md) instance, you must follow a few extra steps.
+Because of that, before updating your [on-premises](../index.md) instance, you may need to follow a few extra steps, depending on how it is deployed.
 
-## 1. Install the ASP.NET Core Runtime 10.0
+## 1. Check how your instance is deployed
+
+- If your instance runs on **Docker** or on **Azure App Services**, the 5.x image already ships with the ASP.NET Core Runtime 10.0 and everything else it
+  needs. There is nothing to install: **skip directly to step 3**.
+- If your instance runs directly on **Linux** (Ubuntu, Rocky Linux) or on **Windows Server**, you must install the new runtime first: **proceed to step 2**.
+
+## 2. Install the ASP.NET Core Runtime 10.0
 
 Install the runtime corresponding to your platform, as described below.
 
 :::tip
 It is not necessary to uninstall previous versions of ASP.NET Core Runtime, multiple versions can co-exist in the same system without issues
-:::
-
-:::note
-On Docker and on Azure App Services this step is not necessary since the new 5.x image already ships with the ASP.NET Core Runtime 10.0 embedded
 :::
 
 ### Ubuntu
@@ -94,13 +96,9 @@ Microsoft.AspNetCore.App 10.0.* [*/dotnet/shared/Microsoft.AspNetCore.App]
 For other operating system versions and alternative ways to install the ASP.NET Core Runtime, see [this page](https://learn.microsoft.com/dotnet/core/install/)
 :::
 
-## 2. Update Rest PKI Core
+## 3. Update Rest PKI Core
 
-After installing the runtime, proceed with the standard update instructions:
-
-- [Docker](../docker.md): update to the `lacunasoftware/restpkicore:5.0` image
-- [Linux](../linux/update.md)
-- [Azure App Services](../azure/update.md)
+Proceed with the standard update instructions for your platform.
 
 :::note
 Version 5.0 updates the database model. On the default installation, in which the application has owner privileges over the database, the model is
@@ -108,13 +106,24 @@ updated automatically the first time version 5.0 starts. If your instance runs [
 [update-db](../tool/update-db.md) command before starting the new version.
 :::
 
-:::note Docker image
+### Docker
+
+Update your containers to the `lacunasoftware/restpkicore:5.0` image, as described in the [Docker setup](../docker.md). No other change is required:
+the image ships with the ASP.NET Core Runtime 10.0 and all of its dependencies.
+
 The Linux images of version 5.x are based on **Ubuntu 24.04 (noble)** instead of Debian 12 (bookworm). This has no effect if you simply run the image.
 If you extend the image or execute commands inside the container (for instance, to install additional packages), take into account the Ubuntu
 package set and system paths.
-:::
 
-## 3. Check the installed version
+### Azure App Services
+
+Follow the [Azure App Services update instructions](../azure/update.md) with the `5.0.0` image. The note above about the Docker image applies here as well.
+
+### Linux
+
+Follow the [Linux update instructions](../linux/update.md) with the `restpkicore-5.0.0.tar.gz` package.
+
+## 4. Check the installed version
 
 After the update, [check the version](../check-version.md) of your instance. The `productVersion` field should start with `5.0`.
 

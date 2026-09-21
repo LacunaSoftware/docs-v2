@@ -7,6 +7,19 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 5.0.2 (2026-09-21) {#v5-0-2}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-910] Dashboard de biometrias: campos de prova de vida 2D ocultos quando a verificação está desativada e exibição das últimas capturas de frente e verso do documento
+
+* Correções de bugs
+
+  * [RPNG-911] Uploads segmentados (multipart) falhavam com HTTP 500 no Azure Blob Storage desde a 5.0.0
+
+
 ### 5.0.1 (2026-09-21) {#v5-0-1}
 
 Atualiza modelo do banco de dados: não

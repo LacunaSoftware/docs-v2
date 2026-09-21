@@ -7,6 +7,19 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 5.0.2 (2026-09-21) {#v5-0-2}
+
+Updates database model: no
+
+* Improvements
+
+  * [RPNG-910] Biometric sessions dashboard: hide the 2D liveness fields when the check is off and show the last front and back document captures
+
+* Bug fixes
+
+  * [RPNG-911] Segmented (multipart) uploads failed with HTTP 500 on Azure Blob Storage since 5.0.0
+
+
 ### 5.0.1 (2026-09-21) {#v5-0-1}
 
 Updates database model: no

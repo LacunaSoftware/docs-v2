@@ -7,6 +7,23 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 5.0.1 (2026-09-21) {#v5-0-1}
+
+Updates database model: no
+
+* New features
+
+  * [RPNG-908] Add the video-identification session parameters and results to the biometric sessions dashboard
+
+* Improvements
+
+  * [RPNG-894] Update the wording of the document validation screen ("Certidão" replaced by "documento")
+
+* Bug fixes
+
+  * [RPNG-807] PDF/A conversion and validation transactions performed during signature preparation were not recorded
+
+
 ### 5.0.0 (2026-09-14) {#v5-0-0}
 
 :::warning

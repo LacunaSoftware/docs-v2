@@ -7,6 +7,23 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 5.0.1 (2026-09-21) {#v5-0-1}
+
+Atualiza modelo do banco de dados: não
+
+* Novas funcionalidades
+
+  * [RPNG-908] Exibição dos parâmetros e resultados da sessão de vídeo identificação no dashboard de biometrias
+
+* Melhorias
+
+  * [RPNG-894] Troca de "Certidão" por "documento" na tela de validação de documentos
+
+* Correções de bugs
+
+  * [RPNG-807] Transações de conversão e validação de PDF/A realizadas no preparo da assinatura não eram registradas
+
+
 ### 5.0.0 (2026-09-14) {#v5-0-0}
 
 :::warning

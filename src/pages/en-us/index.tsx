@@ -113,6 +113,12 @@ const SECTIONS: Section[] = [
         href: '/en-us/articles/bulk-signer',
       },
       {
+        id: 'trustbridge',
+        name: 'TrustBridge',
+        description: 'Remote signing with certificates held on users’ workstations or in a server-side vault, through the SignSession API.',
+        href: '/en-us/articles/trustbridge',
+      },
+      {
         id: 'scanner',
         name: 'Scanner',
         description: 'Service for scanning, recognition and processing of documents.',

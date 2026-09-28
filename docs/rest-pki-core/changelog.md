@@ -7,6 +7,30 @@ sidebar_position: 5
 # Histórico de versões - Rest PKI Core
 {/* <a name="vnext" /> */}
 
+### 5.0.4 (2026-09-28) {#v5-0-4}
+
+Atualiza modelo do banco de dados: não
+
+* Correções de bugs
+
+  * [RPNG-930] Política CAdES AD-RT sem LCRs não estava registrada (`SignaturePolicyNotFound`)
+
+  * [RPNG-933] Renotarização e inspeção de XML inconsistente com a própria assinatura retornavam HTTP 500 em vez de `InvalidXml`
+
+
+### 5.0.3 (2026-09-25) {#v5-0-3}
+
+Atualiza modelo do banco de dados: não
+
+* Melhorias
+
+  * [RPNG-935] Novo campo `archiveTimestamps` nas respostas de abertura e inspeção de assinaturas
+
+* Correções de bugs
+
+  * [RPNG-935] Assinaturas XML retornavam `timestamps` nulo na abertura e inspeção
+
+
 ### 5.0.2 (2026-09-21) {#v5-0-2}
 
 Atualiza modelo do banco de dados: não

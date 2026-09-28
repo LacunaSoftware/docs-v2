@@ -14,6 +14,7 @@ Atualiza modelo do banco de dados: não
 * Correções de bugs
 
   * [RPNG-930] Política CAdES AD-RT sem LCRs não estava registrada (`SignaturePolicyNotFound`)
+
   * [RPNG-933] Renotarização e inspeção de XML inconsistente com a própria assinatura retornavam HTTP 500 em vez de `InvalidXml`
 
 

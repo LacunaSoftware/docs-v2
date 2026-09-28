@@ -14,6 +14,7 @@ Updates database model: no
 * Bug fixes
 
   * [RPNG-930] The CAdES AD-RT without CRLs policy was not registered (`SignaturePolicyNotFound`)
+
   * [RPNG-933] XML renotarization and inspection returned HTTP 500 instead of `InvalidXml` for documents inconsistent with their own signature
 
 

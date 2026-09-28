@@ -14,6 +14,13 @@ precondição para a [etapa de aprovação](approvals.md) — um aprovador a que
 não está aprovando nada significativo, então um perfil com um bloco `Approval` precisa também carregar
 `CheckCNAB240`.
 
+A página do perfil impõe esse par pelos dois lados: **Editar aprovação** recusa uma regra em um perfil
+cuja verificação está desligada, e **Editar comportamento** recusa desligar a verificação enquanto houver
+uma regra de aprovação, nomeando o remédio — remova a regra primeiro. Um job que chegue à etapa de
+aprovação sem interpretação mesmo assim (em um perfil gravado antes de essa segunda recusa existir) falha
+pelo nome com `approval.content-unmeasured`, em vez de ficar retido como um job sobre o qual ninguém
+jamais conseguiria decidir — veja [Aprovações](approvals.md#diagnóstico-de-problemas).
+
 ## Habilitando a verificação
 
 ```json
@@ -34,8 +41,17 @@ Todo arquivo roteado por aquele perfil é interpretado antes de ser assinado. Li
 recebe remessas e deixe-a desligada em todo o resto — um PDF roteado por um perfil com `CheckCNAB240` é
 recusado, porque ele não é uma remessa.
 
+:::note Onde ligá-la depois do primeiro boot
+Os perfis de assinatura vivem na base operacional, e o `Signing:Profiles[]` é apenas a semente importada
+no primeiro boot. Em uma implantação em execução, a verificação é a chave **Validar arquivos de
+pagamento CNAB240** em `/profiles/_new` e **validar CNAB240** no painel **Editar comportamento** do
+perfil; uma mudança chega ao próximo job sem reinicialização. Veja
+[Configuração](configuration.md#signingprofiles--perfis-de-assinatura-por-pasta).
+:::
+
 O banner de inicialização acrescenta `cnab240=on` à linha do perfil, de modo que a postura fique visível
-no boot.
+no boot, e `payment-dates=unchecked` ao lado em um perfil que
+[desligou a guarda das datas de pagamento](#desligando-a-guarda).
 
 A chave vincula sem diferenciar maiúsculas: `CheckCNAB240` e `CheckCnab240` são a mesma chave.
 
@@ -169,7 +185,8 @@ BB ou o recusará ou o processará em uma data que ninguém pretendeu, e uma ass
 parecer deliberada.
 
 > Imediatamente antes da assinatura, a **mais antiga** *Data do Pagamento* registrada para o arquivo é
-> comparada com hoje. Se ela já passou, o job falha e nenhuma assinatura é produzida.
+> comparada com hoje. Se ela já passou, o job falha e nenhuma assinatura é produzida — a menos que o
+> perfil tenha [desligado a guarda](#desligando-a-guarda).
 
 A comparação é sobre a data mais antiga, não a mais recente — um pagamento já vencido em um arquivo que
 também paga na semana que vem continua sendo um pagamento que o BB vai rejeitar ou datar errado. Um
@@ -186,6 +203,71 @@ O código é deliberadamente distinto do `cnab240.invalid`: um arquivo inválido
 corrigido, um obsoleto precisa ser reexportado com datas atuais. **Repetir o mesmo arquivo falha da mesma
 forma**, porque as datas dentro dele não mudaram — reexporte do sistema de origem e passe o novo arquivo
 por Upload, Retry ou Rescan.
+
+### Desligando a guarda
+
+:::tip Novo na 2.15.0 — `CheckCnab240PaymentDates`
+Até a 2.14.x todo perfil com `CheckCNAB240` recusava uma remessa cuja data de pagamento mais antiga já
+tivesse passado. A partir da 2.15.0 essa recusa é uma chave por perfil, ligada por padrão.
+:::
+
+Alguns bancos aceitam um pagamento com data passada e o processam no próximo dia útil, e para eles a
+recusa bloqueia uma remessa que o banco teria tratado. Um perfil pode desligar a guarda sozinha,
+mantendo o resto da superfície do CNAB240:
+
+```json
+{
+  "Name": "folha",
+  "CheckCNAB240": true,
+  "CheckCnab240PaymentDates": false
+}
+```
+
+— ou, em uma implantação em execução, a chave **Recusar remessas com data de pagamento vencida** sob
+**Validar arquivos de pagamento CNAB240** em `/profiles/_new`, e **validar datas de pagamento** sob
+**validar CNAB240** no painel **Editar comportamento** do perfil. Ela é **ligada por padrão**, e todo
+perfil que existia antes de a chave existir a mantém ligada. Ela só é lida junto com o `CheckCNAB240`:
+com ele desligado não há interpretação nem data a comparar, e o valor gravado é mantido, de modo que
+religar o CNAB240 o restaura.
+
+**O que ela desliga é a recusa, e somente a recusa.** A validação estrutural (`cnab240.invalid`), os
+números registrados, o hash de conteúdo, a tabela de pagamentos e a etapa de aprovação continuam iguais.
+Um arquivo cuja data de pagamento mais antiga já passou é assinado — no caminho local, no despacho ao
+Lacuna Signer e no caminho assinado pelos aprovadores — e deixa um rastro onde a recusa teria deixado:
+
+| | |
+|---|---|
+| Status do job | inalterado — o job segue em direção à sua assinatura |
+| Histórico do job | `CNAB240 payment date has passed and the payment-date check is disabled on profile 'folha': earliest payment date 05/08/2026, today 11/08/2026.` |
+| Evento operacional | `Cnab240PaymentDateCheckSkipped`, redigido como uma decisão (`…; not refused because the payment-date check is disabled: …`) — um tipo próprio, de modo que um filtro por `Cnab240PaymentDatePassed` conta apenas recusas |
+| Métrica | `bulksigner_cnab240_payment_date_checks_skipped_total{profile}` |
+| Log | um Warning pelo log estruturado (de modo que os destinos de arquivo e de tabela o vejam mesmo sob o dashboard ao vivo, que suprime a narração de console), e um evento de span no trace do job |
+| Banner de inicialização | ` · payment-dates=unchecked` na linha do perfil |
+
+O rastro registra uma **decisão, não uma assinatura**. Ele é escrito antes de a assinatura ser tentada,
+então sobrevive a uma falha de assinatura — e pelo mesmo motivo nunca diz "assinado": o job ainda pode
+ser vetado, falhar na verificação do hash de conteúdo ou falhar no assinador, e em um perfil do Lacuna
+Signer um sucesso é apenas um despacho.
+
+**Desligar o `CheckCNAB240` deixa o mesmo rastro.** Um job interpretado enquanto o CNAB240 estava ligado
+carrega uma data de pagamento registrada; se um operador então desliga o CNAB240 enquanto aquele job está
+retido para aprovação, o job liberado não é recusado, mas seu histórico diz
+`… and CNAB240 checking is disabled on profile …` e o mesmo evento e a mesma métrica são registrados. Um
+job interpretado com o CNAB240 desligado não tem data registrada, e nada muda para ele.
+
+A chave é **lida na assinatura, e não congelada no job**, assim como o próprio `CheckCNAB240`. Uma
+mudança chega ao próximo job que o pipeline assina sem reinicialização, inclusive a um já retido para
+aprovação. Um aprovador que olha um job assim em `/approve/{jobId}` vê um aviso **A data de pagamento já
+passou** em qualquer dos casos — de que o arquivo será recusado na assinatura, ou de que será assinado;
+veja [Aprovações](approvals.md#o-que-o-aprovador-vê). A linha do portal do aprovador e a confirmação em
+lote **Aprovar N selecionados** não dizem nada sobre uma data vencida.
+
+:::warning Com a guarda desligada, os aprovadores são a única verificação de datas vencidas
+Em um perfil com aprovação, a guarda das datas de pagamento é o que normalmente fica entre uma folha de
+pagamento que ficou parada tempo demais e a sua assinatura. Desligue-a apenas para um banco que de fato
+processa pagamentos com data passada, e garanta que os aprovadores saibam ler o aviso da página por
+arquivo.
+:::
 
 ### Por que a guarda fica na chamada de assinatura
 

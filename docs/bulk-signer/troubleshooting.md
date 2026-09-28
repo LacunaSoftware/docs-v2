@@ -20,6 +20,22 @@ chegar nele. Olhe o local de log específico do alvo para encontrar a exceção 
 
 ## O serviço não inicia
 
+:::warning Alterado na 2.1.0 — um certificado que não abre não impede mais o host de subir
+Os perfis de assinatura vivem na base operacional, e o lugar onde um certificado quebrado é corrigido é a
+própria página do perfil no dashboard. Um host que se recusasse a iniciar não conseguiria servir essa
+página, então um perfil cujo certificado não pode ser aberto — um arquivo ausente, uma senha errada, um
+thumbprint que não corresponde a nada, um Key Vault inalcançável ou sem autorização, um blob ilegível —
+agora é reportado como **`DEGRADED`** e o host sobe. Somente aquele perfil não consegue assinar; seus jobs
+falham com `profile.degraded` (veja [Um job falha com `profile.degraded`](#um-job-falha-com-profiledegraded))
+e todos os outros perfis continuam funcionando.
+
+O que ainda recusa o boot é a *validação* de configuração: as regras abaixo que são verificadas contra o
+arquivo de configuração ou o ambiente — a licença do PKI, o formato do bloco `Blob`, um PIN de PKCS#11
+escrito em um arquivo, uma origem de repositório do Windows em um host não Windows, e as verificações
+sobre uma seção `Signing:Profiles[]` que está sendo importada em um primeiro boot. As mesmas regras recusam
+um salvamento na página do perfil.
+:::
+
 ### `Signing:PkiSdkLicense is required`
 
 **Sintoma.** O bootstrap lança uma exceção de validação reclamando de `Signing:PkiSdkLicense`.
@@ -35,6 +51,25 @@ carrega um valor não vazio.
 | Windows | `[Environment]::SetEnvironmentVariable("Signing__PkiSdkLicense", "<base64>", "Machine"); Restart-Service LacunaBulkSigner` |
 | Docker | Acrescente `Signing__PkiSdkLicense=<base64>` a `deploy/docker/.env`, então `docker compose up -d`. |
 
+### `Signing:TrustLacunaTestRoot is true while the environment is 'Production'`
+
+**Sintoma.** O boot é recusado com essa frase, terminando em "unset the key, or run the homologation host
+as Staging (ASPNETCORE_ENVIRONMENT=Staging)".
+
+**Causa raiz.** O host foi instruído a confiar na raiz PKI de **teste** da Lacuna — a emissora dos
+certificados de teste Turing / Fermat (veja [Certificados](certificates.md#certificados-de-teste-e-o-conjunto-de-confiança)) — e também se declara
+produção. As duas coisas são recusadas juntas, deliberadamente: um host de produção nunca confia em uma
+raiz que não é uma autoridade certificadora. No Azure App Service o nome do ambiente tem padrão
+`Production` quando nada o define, então um host de homologação que copiou um bloco de configurações de
+produção e acrescentou a chave cai aqui.
+
+**Correção.** Uma de duas, conforme o que o host é:
+
+- Um host de produção: remova `Signing__TrustLacunaTestRoot` (ou defina-a como `false`). Certificados reais
+  não precisam de nada.
+- Um host de homologação: defina `ASPNETCORE_ENVIRONMENT=Staging` ao lado da chave. Qualquer nome que não
+  seja `Production` é aceito; as linhas `environment` e `trust set` do banner então dizem o que o host é.
+
 ### `Auth:ApiKey is required`
 
 **Sintoma.** O bootstrap lança erro reclamando de `Auth:ApiKey`.
@@ -44,15 +79,24 @@ carrega um valor não vazio.
 **Correção.** Gere uma chave forte (veja [Segurança](security.md#rotação-da-chave-de-api)) e defina a
 variável de ambiente correspondente.
 
+:::note Depois de atualizar para a 2.3.1 ou posterior
+Imagens anteriores à 2.3.1 traziam uma chave de API provisória dentro do seu próprio arquivo de
+configurações padrão. Uma implantação que nunca definiu `Auth:ApiKey` estava rodando silenciosamente sobre
+esse valor provisório, e se recusa a iniciar após a atualização, nomeando a chave. Defina `Auth__ApiKey`
+como todo caminho de instalação documenta.
+:::
+
 ### `Pkcs11 PIN env var <nome> is empty`
 
-**Sintoma.** O bootstrap falha com uma mensagem referenciando o `PinEnvVar` configurado.
+**Sintoma.** O serviço sobe, mas o perfil é reportado como `DEGRADED` — no banner de inicialização, em
+`/profiles` e em `/api/ready/details` — com o motivo
+`PKCS#11 PIN environment variable '<nome>' is empty`. Antes da 2.1.0, isso impedia o boot.
 
 **Causa raiz.** `Signing:Certificate:Source = Pkcs11`, mas a variável de ambiente configurada não está
 definida ou está vazia.
 
 **Correção.** Defina a variável de ambiente nomeada por `Signing:Certificate:Pkcs11:PinEnvVar` (padrão
-`BULK_SIGNER_PKCS11_PIN`). Veja [Certificados](certificates.md#tratamento-do-pin).
+`BULK_SIGNER_PKCS11_PIN`) e reinicie. Veja [Certificados](certificates.md#tratamento-do-pin).
 
 ### `WindowsStore source is not supported on this OS`
 
@@ -75,14 +119,19 @@ nome puro, de outro modo, falharia lá no fundo do cliente do Azure com uma mens
 
 ### `Certificate '<caminho>' does not match Azure Key Vault key '<nome>'`
 
-**Sintoma.** O bootstrap falha reportando que a chave pública do `.cer` difere da chave do cofre.
+**Sintoma.** O banner de inicialização reporta o perfil como `DEGRADED`, com um motivo dizendo que a
+chave pública do certificado difere da chave do cofre, e os jobs do perfil falham com `profile.degraded`.
+(Antes da 2.1.0 isso impedia o boot.)
 
-**Causa raiz.** `CerPath` e `KeyName` se referem a pares de chaves diferentes. Geralmente o certificado
-foi renovado contra uma **nova** chave de cofre enquanto o `KeyName` ainda aponta para a antiga, ou o
-`CerPath` ficou apontando para um certificado sem relação após uma edição de configuração.
+**Causa raiz.** `CerPath` — ou `Blob:Url`, quando o certificado é lido
+[de um blob](certificates.md#lendo-o-arquivo-de-um-blob) — e `KeyName` se referem a pares de chaves
+diferentes. Geralmente o certificado foi renovado contra uma **nova** chave de cofre enquanto o `KeyName`
+ainda aponta para a antiga, ou o local do certificado ficou apontando para um certificado sem relação após
+uma edição. A mensagem nomeia o local que o perfil usa, como `file '<caminho>'` ou
+`blob '<conta>/<container>/<blob>'`.
 
-Esta verificação existe porque a alternativa é pior: sem ela, o serviço sobe alegremente e produz
-assinaturas que verificador nenhum aceita, e a falha aparece somente por job — e somente em perfis com
+Esta verificação existe porque a alternativa é pior: sem ela, o perfil assinaria alegremente e produziria
+assinaturas que verificador nenhum aceita, e a falha apareceria somente por job — e somente em perfis com
 `Verify = true`.
 
 **Correção.** Confirme qual lado está desatualizado comparando as duas chaves públicas diretamente:
@@ -92,13 +141,16 @@ openssl x509 -in signer.cer -noout -pubkey
 az keyvault key download --vault-name my-vault --name bulk-signer-signing-key --encoding PEM --file -
 ```
 
-Os dois blocos PEM precisam ser idênticos byte a byte. Depois atualize o lado que estiver errado.
+Os dois blocos PEM precisam ser idênticos byte a byte. Depois atualize o lado que estiver errado — o local
+do certificado ou o nome da chave são corrigidos na página do perfil com **Edit certificate** — e
+reinicie.
 
 ### Falha de autenticação ou autorização no Azure Key Vault na inicialização
 
-**Sintoma.** O bootstrap falha ao carregar o certificado, com um erro do Azure como `AADSTS7000215`
-(client secret inválido), `AADSTS700016` (aplicação não encontrada), ou um `Forbidden` na operação de
-chave.
+**Sintoma.** O banner de inicialização reporta o perfil como `DEGRADED` ao carregar seu certificado, com um
+erro do Azure como `AADSTS7000215` (client secret inválido), `AADSTS700016` (aplicação não encontrada), ou
+um `Forbidden` na operação de chave. O host sobe; os jobs do perfil falham com `profile.degraded`. (Antes da
+2.1.0 isso impedia o boot.)
 
 **Causas possíveis.**
 
@@ -112,8 +164,115 @@ chave.
 - **Sem caminho de rede.** O host precisa alcançar `*.vault.azure.net` e `login.microsoftonline.com`.
   Confira as regras de saída e a configuração de proxy.
 
-As falhas são reportadas por perfil e agregadas, então uma implantação com múltiplos perfis vê cada
-perfil mal configurado em um único erro de boot, em vez de um por reinicialização.
+As falhas são reportadas por perfil, e todo perfil com falha é nomeado no mesmo banner, então uma
+implantação com múltiplos perfis vê cada perfil mal configurado em um único boot, em vez de um por
+reinicialização. Depois de corrigir o segredo ou a atribuição de role, **reinicie** — um certificado é
+aberto uma vez, na inicialização.
+
+### Um blob de material de assinatura não pode ser lido na inicialização
+
+**Sintoma.** O banner de inicialização reporta um perfil como `DEGRADED`, citando um blob como
+`<conta>/<container>/<blob>`. **O host sobe.** O perfil não consegue assinar até que o blob esteja legível
+e o serviço seja reiniciado; todos os outros perfis não são afetados, e os jobs roteados para este falham
+com `profile.degraded`.
+
+:::warning Alterado na 2.1.0
+Antes da 2.1.0 um blob ilegível impedia o boot. Agora ele degrada apenas aquele perfil, pelo motivo dado
+no início desta seção.
+:::
+
+Três mensagens distintas, porque elas têm três correções distintas:
+
+| Mensagem | Causa raiz | Correção |
+|---|---|---|
+| `… does not exist` | O nome do container ou do blob está errado. Ambos diferenciam maiúsculas de minúsculas, e a URL é lida exatamente como escrita. | Corrija `Blob:Url`. Confirme com `az storage blob exists --account-name <a> --container-name <c> --name <b>`. |
+| `… credential was refused (HTTP 403)` | A credencial se autenticou, mas não tem permissão para ler o blob. | Para `ManagedIdentity` / `ServicePrincipal`, conceda **Storage Blob Data Reader** no container ou na conta — nada mais amplo é necessário, nunca. Para `AccountKey`, a chave está errada ou foi rotacionada. |
+| `… the <modo> credential could not be obtained` | A credencial não pôde ser obtida de forma alguma, antes de qualquer requisição ser feita. | `ManagedIdentity`: o host precisa de uma identidade **atribuída pelo sistema**, e um host fora do Azure não tem nenhuma. `ServicePrincipal`: confira `TenantId` / `AppId` / `AppSecret` — um segredo expirado reporta de forma idêntica. |
+
+Qualquer outra coisa (um 5xx, uma falha de transporte) é reportada com o status que o serviço retornou e
+aponta para alcance de rede: o host precisa de HTTPS de saída para o endpoint de blob. A leitura já foi
+repetida três vezes com backoff exponencial, então um soluço isolado não chega a esta mensagem.
+
+**A renovação não se corrige sozinha.** O blob é lido uma vez, no boot, então substituir seu conteúdo exige
+uma reinicialização exatamente como substituir um arquivo local — e corrigir o blob não tira a degradação
+de um host em execução.
+
+### O logo do cliente não aparece nas páginas de login ou de aprovador
+
+O serviço está no ar e as páginas mostram apenas a marca do produto. Isso é por design: um logo configurado
+(`Branding:CustomerLogo`, veja [Configuração](configuration.md#branding--o-logotipo-do-cliente-nas-páginas-de-login-e-de-aprovação)) cujos **bytes** não puderam ser usados
+não impede o serviço de subir. Leia o motivo em qualquer um de três lugares:
+
+- a linha `customer logo` do banner de resumo de prontidão — `not loaded from file '…': <motivo>`;
+- o log de inicialização, um Warning com o texto `Customer logo not loaded from …`;
+- a página **Sistema**, um alerta no topo do painel de armazenamento.
+
+O motivo é um de: o arquivo ou blob está ausente ou não pode ser lido (confira o caminho, a montagem no
+Docker, a atribuição de role do blob); o arquivo está vazio ou tem mais de **256 KiB** (exporte um menor —
+ele é renderizado com no máximo 80 px de altura); ou os bytes não são o que a extensão diz (um JPEG
+renomeado para `.png`, uma página HTML salva como `.svg` — renomeie ou reexporte). Corrija e **reinicie**: o
+logo é lido uma vez, no boot.
+
+Se o serviço *não* subiu, a mensagem nomeia `Branding:CustomerLogo:…` e uma das regras de formato: `Path` e
+`Blob` ambos definidos, uma extensão fora de `.png` / `.jpg` / `.jpeg` / `.webp` / `.svg`, ou um bloco de
+blob sem seu `Url` ou sua `Credential`. Esses são recusados no boot como qualquer outro erro de
+configuração.
+
+### A inicialização é recusada porque `Signing:ProfileSecretsKey` não está definida
+
+**Sintoma.** Uma de duas recusas, e qual delas lhe diz onde a implantação está:
+
+```
+Refusing to start: this deployment's operational store holds signing profile secrets that were
+encrypted under Signing:ProfileSecretsKey, and that key is not set. …
+```
+
+```
+Refusing to start: signing profiles are being imported into the operational store for the first
+time, and some of them carry a secret — 'folha', 'nfe' — while Signing:ProfileSecretsKey is not set. …
+```
+
+A primeira é um host que já detém dados de perfil criptografados. A segunda é o **primeiro boot** após uma
+atualização, recusando no momento em que os dados passariam a existir — de modo que a base nunca chega a
+guardar um valor que nada consegue abrir. A segunda nomeia os perfis.
+
+**Causa raiz.** Os perfis de assinatura são linhas na base operacional, e uma senha de PKCS#12, um segredo
+de aplicativo do Key Vault, uma credencial de blob de material de assinatura e **bytes de PKCS#12 enviados
+por upload** são criptografados em repouso sob uma chave mantida *fora* do banco de dados. A recusa é o
+**par** — dados que foram criptografados, e nada com que descriptografá-los — nunca uma das metades
+sozinha. Uma implantação cujos perfis não carregam segredo nunca é solicitada a fornecer uma chave, e é por
+isso que a maioria das instalações atualiza sem jamais encontrar isto.
+
+**Por que isto recusa quando um certificado ruim apenas degrada.** A correção aqui é uma variável de
+ambiente, não algo em uma página do dashboard, então recusar não cria impasse — e uma chave ausente
+desabilitaria de uma vez todo perfil que carrega segredo, um host que se reporta saudável enquanto não
+consegue assinar para ninguém.
+
+**Correção.** Defina a chave e inicie de novo:
+
+```bash
+Signing__ProfileSecretsKey='<o valor sob o qual os segredos foram salvos>'
+```
+
+Ela precisa ser o **mesmo valor** sob o qual os segredos foram salvos — veja
+[Um perfil está degradado dizendo que um segredo armazenado não pôde ser descriptografado](#um-perfil-está-degradado-dizendo-que-um-segredo-armazenado-não-pôde-ser-descriptografado)
+se você não o tem mais. Mantenha-a fora do controle de versão, fora do mesmo backup do banco de dados, e
+onde quer que os outros segredos irrecuperáveis estejam guardados (veja [Segurança](security.md#a-chave-de-segredos-dos-perfis-de-assinatura-signingprofilesecretskey)).
+
+**Se a segunda recusa nomeia um perfil que você nunca declarou** — ou nomeia os seus ao lado de um que você
+não declarou — o host está lendo um array `Signing:Profiles[]` de um arquivo de configurações *por baixo*
+do seu. A configuração mescla arrays por índice e consegue sobrescrever uma chave, mas nunca removê-la: as
+suas configurações `Signing__Profiles__0__*` se mesclam sobre o que quer que aquele arquivo declare no
+índice 0 e herdam toda chave que não nomearam, inclusive uma senha de PFX. Imagens anteriores à 2.3.1
+traziam perfis de exemplo de desenvolvimento em seu próprio arquivo de configurações padrão dessa forma.
+Atualize a imagem, ou remova o arquivo que os declara. **Não responda definindo a chave**: a importação
+acontece uma única vez e nada apaga um perfil, então isso importaria os perfis intrusos permanentemente.
+Nada foi escrito — a recusa dispara antes da importação — então o próximo boot importa de forma limpa.
+
+**Um aviso relacionado que não é esta recusa.** Se a base operacional não respondeu na inicialização *e* a
+chave não está definida, o host **sobe** e avisa que não conseguiu verificar se existem segredos de perfil,
+e que o próximo boot que alcançar a base pode recusar. Trate isso como um lembrete para definir a chave
+antes de a base voltar.
 
 ### `Encryption.Salt must decode to at least 16 bytes`
 
@@ -137,22 +296,52 @@ decodificados.
 **Sintoma.** O `Get-Service` mostra Iniciado / o `systemctl` mostra ativo, mas o `/api/ready` retorna
 503.
 
-**Causa raiz.** Uma sondagem de prontidão está falhando. O corpo da resposta lista cada sondagem —
-banco, pasta de entrada, licença.
+**Causa raiz.** Uma sondagem de prontidão está falhando. O corpo da resposta lista cada sondagem pelo
+nome, com `ok` verdadeiro ou falso — banco, pasta de entrada, licença.
 
-**Correção.** Inspecione o corpo, e então:
+:::warning Alterado na 2.6.0 — o detalhe foi para `/api/ready/details`
+O `/api/ready` anônimo agora carrega apenas o veredito: `ready`, e o `name` e o `ok` de cada verificação.
+O `detail` por verificação — que nomeava o host do SQL Server, cada compartilhamento de entrada e o local de
+um certificado degradado — está em `GET /api/ready/details`, protegido pela chave de API (`X-API-Key`) ou
+por uma sessão de operador, com a mesma regra de 200 / 503. Um monitor que lia o `detail` na rota anônima
+passa para a rota de detalhes e acrescenta o cabeçalho. `Readiness:RequireApiKey = true` coloca o próprio
+`/api/ready` atrás da chave também — deixe desligado onde a sonda não consegue enviar o cabeçalho (a
+verificação de integridade do App Service não consegue).
+:::
+
+**Se já tiver se resolvido** quando você for olhar, o log durável guarda o ocorrido: toda mudança de
+veredito de uma verificação é escrita uma vez, como `Readiness check <nome> went red: <detalhe>` em Warning
+e `Readiness check <nome> recovered` em Information. Um vermelho constante é escrito uma vez, não a cada
+sondagem, então busque pelo nome da verificação em vez de ler as últimas linhas.
+
+**Correção.** Inspecione o `/api/ready/details`, e então:
 
 | Sondagem que falhou | Onde olhar |
 |---------------------|------------|
-| `database` | Sob `Sqlite`: o caminho sob `Storage:Root` é gravável pela conta de serviço? Sob `SqlServer`: o servidor está alcançável, e a sondagem de boot respondeu? O detalhe da verificação nomeia a base que ela verificou. |
+| `database` | O detalhe nomeia a base que foi verificada — `SQLite (…)` ou `SQL Server (servidor/banco)`. Sob `Sqlite`: o caminho sob `Storage:Root` é gravável pela conta de serviço? Sob `SqlServer`: o servidor está alcançável, e o login ainda autentica? Quando o detalhe lê `unreachable` com um tipo de exceção depois do nome da base, o log durável carrega aquela exceção, com a mensagem, em Warning — uma linha por sondagem que falhou, então leia a primeira. |
 | `input-folder:<nome>` | A pasta existe? A conta de serviço tem permissão para enumerá-la? Semântica estrita — qualquer pasta ausente ou `Stopped` reprova a resposta inteira. |
 | `storage-share:<conta>/<compartilhamento>` | Somente em compartilhamento de trabalho remoto. Credencial, alcance de rede, ou a string de escopo da atribuição de role — veja [Segurança](security.md#credenciais-de-armazenamento-do-azure-files). |
 | `work-share-owner` | Somente em compartilhamento de trabalho remoto. Outra instância detinha o marcador na inicialização, ou a reivindicação não pôde ser feita. Veja abaixo. |
 | `license` | A licença do PKI foi carregada? A impressão digital está no banner de resumo de prontidão; ausente significa que a string de licença foi rejeitada no boot. |
 
+Algumas linhas reportam `ok: false` **sem** transformar a resposta em 503, deliberadamente, porque um 503
+tiraria a instância do seu balanceador de carga enquanto o dashboard necessário para corrigir o problema é
+servido justamente por aquela instância: `signing-profile:<nome>` (um perfil degradado — veja
+[Um job falha com `profile.degraded`](#um-job-falha-com-profiledegraded)), `profile-input-folder:<nome>`
+(um perfil vinculado a uma pasta que este host não configura) e, no modo cluster, `cluster-instance` (uma
+instância deslocada se retirando). Uma linha `signing-profile-keyless:<nome>` é `ok: true` por design, e
+uma pasta de entrada que nenhum perfil escolheu é reportada como verde. **Alerte sobre as entradas
+individuais de `checks[]`, e não apenas sobre o booleano `ready` de nível superior.**
+
 ### A inicialização falha com `Signing:Profiles[N].Approval …`
 
 **Sintoma.** O host se recusa a iniciar com uma mensagem nomeando uma chave de aprovação.
+
+**Quando isto pode acontecer.** Desde que os perfis passaram para a base operacional (2.1.0), o
+`Signing:Profiles[]` é importado apenas no **primeiro boot contra uma tabela de perfis vazia**, e estas
+regras são verificadas nesse momento. Depois disso, as mesmas regras recusam um salvamento do formulário
+`Edit approval` do perfil no dashboard, com o mesmo texto; editar o arquivo de configuração não muda mais
+perfil algum.
 
 **Causas raiz**, todas recusadas antes de o primeiro job rodar:
 
@@ -174,9 +363,11 @@ muito mais distante do que se pretendia.
 primeiro número for 23 ou menos; em 24 ou mais o .NET o lê como **dias**, então `"48:00:00"` são
 quarenta e oito *dias*.
 
-**Correção.** Escreva o componente de dias: `"2.00:00:00"`. O boot é o único momento em que isso é
-detectável — toda outra superfície mostra o prazo quando um job já ficou retido sob ele, e o orçamento
-fica congelado naqueles jobs. Cancele e reexecute qualquer coisa já retida sob a janela errada.
+**Correção.** Escreva o componente de dias: `"2.00:00:00"` — no formulário `Edit approval` do perfil no
+dashboard, já que depois do primeiro boot o arquivo de configuração não muda mais um perfil armazenado. O
+boot é o único momento em que isso é sinalizado — toda outra superfície mostra o prazo quando um job já
+ficou retido sob ele, e o orçamento fica congelado naqueles jobs. A correção vale apenas para jobs
+**novos**: cancele e reexecute qualquer coisa já retida sob a janela errada.
 
 ### A inicialização é recusada porque tanto um caminho quanto um blob estão configurados
 
@@ -232,7 +423,8 @@ para o total.
 ### A sondagem reporta um compartilhamento como inalcançável na inicialização
 
 **Sintoma.** O banner lê `azure shares = 1 of 2 reachable`, o `/api/ready` está vermelho em uma linha
-`storage-share:`, e o host subiu mesmo assim.
+`storage-share:` (cujo detalhe, em `/api/ready/details`, é a própria frase do serviço de armazenamento), e
+o host subiu mesmo assim.
 
 **Causa raiz.** Credencial, alcance de rede, ou escopo de role. A mais comum é a **string de escopo**: uma
 atribuição construída com a grafia do plano de gerência `shares` em vez da do plano de dados `fileshares`
@@ -303,6 +495,33 @@ presença da role independentemente da configuração do tenant.
 role no manifesto precisam coincidir exatamente com aquelas strings. Não há mapeamento por grupo de
 segurança, deliberadamente.
 
+### Os eventos de auditoria de um operador do Entra dizem `(anonymous)`, e o menu do usuário também
+
+**Sintoma.** Um `Administrator` conectado cria ou edita um perfil, pausa o pipeline ou executa um backup,
+e o evento operacional nomeia `(anonymous)`. O menu do usuário lê *Signed in as (anonymous)*, e uma
+execução manual de backup na página Backup lê *manual · (anonymous)*.
+
+**Causa raiz.** Desde a 2.2.1 o nome registrado do operador é a claim `preferred_username` do token (o
+UPN), e a sessão que esse operador detém não foi nomeada por ela. Antes da 2.2.1 os eventos de todo
+operador do Entra saíam assim, qualquer que fosse o token, e **essas linhas não podem ser reparadas** —
+apenas eventos escritos por uma sessão iniciada depois da atualização carregam o autor.
+
+**Causas possíveis, em ordem de probabilidade:**
+
+- **Uma sessão anterior à atualização.** O nome vive no cookie de sessão, e o cookie desliza por oito
+  horas, então um operador que permaneceu conectado durante a atualização mantém a sessão antiga. **Saia
+  e entre de novo uma vez.** Nenhuma linha de log acompanha este caso.
+- **O token não carregava `preferred_username`.** O Bulk Signer sempre solicita o escopo `profile`, que
+  carrega a claim, então o tenant a reteve — consentimento do usuário ao `profile` recusado ou restrito,
+  ou uma customização de token no registro de aplicativo. Este caso é anunciado: o login escreve um aviso
+  no log nomeando os tipos de claim que recebeu (nunca seus valores), então busque no log por
+  `preferred_username`. Um `Administrator` convidado é registrado sob a forma `#EXT#` do UPN, o que está
+  correto.
+- **O host é anterior à 2.2.1.** Atualize; depois saia e entre de novo.
+
+O nome de exibição deliberadamente não é usado como alternativa, então os eventos permanecem `(anonymous)`
+em vez de serem registrados sob um nome que duas pessoas podem compartilhar.
+
 ### Um `Approver` do Entra entra, mas o portal está vazio
 
 **Causa raiz.** A role abre a porta; o **pool congelado** ainda decide quais jobs a pessoa vê, casado
@@ -322,14 +541,160 @@ Planeje a virada como um "desconectar todo mundo". Clientes REST que usam `X-API
 ### Sair e entrar de novo acontece instantaneamente, sem pedir senha
 
 **Não é uma falha.** Sair é apenas local: limpa a sessão do Bulk Signer e deliberadamente não encerra a
-sessão Microsoft da pessoa. Isso é comportamento normal de SSO.
+sessão Microsoft da pessoa. Isso é comportamento normal de SSO. Desde a 2.2.1 sair encerra, sim, a janela
+de verificação do segundo fator de um aprovador, então a reentrada silenciosa de um colega em uma estação
+de trabalho compartilhada volta a pedir o código.
 
 ## A assinatura falha
+
+### Um job falha com `profile.degraded`
+
+**Sintoma.** Os jobs vão de `Queued → Failed` com o erro `profile.degraded`. O histórico do job diz que o
+perfil está degradado e cita o motivo. Jobs em outros perfis continuam concluindo normalmente. O banner de
+inicialização reportou o mesmo perfil como `DEGRADED`, e o `/api/ready` carrega uma linha
+`signing-profile:<nome>` com `ok: false` — o motivo está em `/api/ready/details`, com a chave de API.
+
+**Causa raiz.** O certificado daquele perfil não pôde ser aberto quando o host iniciou — um arquivo PKCS#12
+ausente, uma senha errada, um thumbprint que não corresponde a nada no token ou no repositório, um Key
+Vault inalcançável, ou um blob de material de assinatura ilegível. O motivo nomeia qual. Três textos que
+vale conhecer:
+
+- **Uma senha de PKCS#12 errada** lê *did not open with the PKCS#12 password given — check the PKCS#12
+  password on the profile, and if it is right, supply the file again*, seguido da frase do próprio PKI
+  SDK, que fala de um **PIN** incorreto: o SDK usa uma só palavra para uma senha de PKCS#12 e um PIN de
+  token, e o perfil não tem PIN a corrigir. A segunda metade está lá porque a verificação por trás dela é a
+  tag de integridade do arquivo, na qual um arquivo danificado falha do mesmo jeito com a senha certa.
+- **Um PKCS#12 com o envelope moderno** lê *is encrypted with PBES2, which the signing library does not
+  open*. A biblioteca de assinatura abre apenas o envelope clássico, e tanto o OpenSSL 3 por padrão quanto
+  uma exportação do Windows configurada como AES256-SHA256 escrevem PBES2 / AES-256. No Windows, reexporte
+  a partir do repositório de certificados com a opção TripleDES-SHA1. A partir do `.pfx` que você tem,
+  reexporte pelo OpenSSL e forneça o novo arquivo:
+
+  ```bash
+  openssl pkcs12 -in modern.pfx -nodes -passin pass:<senha> -out tmp.pem
+  openssl pkcs12 -export -legacy -in tmp.pem -passout pass:<senha> -out signing.pfx
+  shred -u tmp.pem   # a chave privada está em claro no tmp.pem
+  ```
+
+  (`-legacy` precisa do provider legado do OpenSSL 3; em uma build sem ele,
+  `-keypbe PBE-SHA1-3DES -certpbe PBE-SHA1-3DES` produz um envelope clássico que a biblioteca também
+  abre.) A mesma frase volta também com uma senha errada, deliberadamente — o envelope é o bloqueio, seja
+  qual for a senha.
+- **Um arquivo, blob ou upload vazio** é recusado antes de qualquer decodificação, como
+  *Certificate file '…' is empty (0 bytes)*, nomeando o local — geralmente um marcador criado enquanto se
+  esperava o arquivo real, ou uma cópia que nunca terminou.
+
+**Isto não é um arquivo ruim.** `profile.degraded` e `cnab240.invalid` são as duas falhas mais facilmente
+confundidas, e os remédios não têm nada em comum: um perfil degradado significa que todo arquivo roteado
+para ele vai falhar até que a implantação seja corrigida, enquanto um arquivo recusado significa que aquele
+arquivo precisa ser reexportado. Repetir o job antes de corrigir o certificado falha de forma idêntica.
+
+**Nem é um perfil sem chave.** Um perfil cuja regra de aprovação faz os **aprovadores** assinarem
+(`Approval.Signers = Approvers`) não detém certificado próprio, por design: o banner prefixa sua linha com
+`KEYLESS` em vez de `DEGRADED`, o `/api/ready` o reporta em uma linha `signing-profile-keyless:<nome>` com
+`ok: true`, e nenhum job nele falha com `profile.degraded`. O que falha ali, por nome, é um envelope de
+assinaturas dos aprovadores ausente (`approval.signatures-missing`) ou um conjunto de signatários congelado
+que o pipeline não consegue honrar (`approval.signer-set-unsupported`). Mais um código pertence a este
+caso: um job que ficou retido **antes** de a regra passar para `Approvers` foi congelado sobre a chave do
+perfil, e em uma instância que subiu depois da mudança — e por isso nunca abriu uma chave — ele falha com
+`profile.key-unavailable`. Voltar a regra para um conjunto com chave e reiniciar é um remédio; uma
+repetição em uma instância que ainda detém a chave também é.
+
+**Correção.**
+
+1. Leia o motivo. Ele está no banner de inicialização, no log em `Critical`, em `/api/ready/details`, na
+   página do próprio perfil em `/profiles/<nome>`, e no histórico do job que falhou — todos os cinco dizem
+   a mesma coisa.
+2. Corrija o certificado. Se as coordenadas estão erradas — um caminho digitado errado, um thumbprint que
+   não corresponde a nada, o cofre errado — corrija-as naquela página com **Edit certificate**; o
+   salvamento as armazena e marca o perfil como aguardando uma reinicialização. Se as coordenadas estão
+   certas e o material não, os modos de falha são os de sempre: veja
+   [O boot tem sucesso, mas todo job falha com "Certificate not found by thumbprint"](#o-boot-tem-sucesso-mas-todo-job-falha-com-certificate-not-found-by-thumbprint),
+   [Falha de autenticação ou autorização no Azure Key Vault na inicialização](#falha-de-autenticação-ou-autorização-no-azure-key-vault-na-inicialização)
+   e [Um blob de material de assinatura não pode ser lido na inicialização](#um-blob-de-material-de-assinatura-não-pode-ser-lido-na-inicialização).
+3. **Reinicie o serviço.** Um certificado é aberto uma vez na inicialização e nunca recarregado, então nem
+   corrigir o arquivo nem salvar novas coordenadas muda qualquer coisa por baixo de um host em execução — o
+   marcador no perfil diz exatamente isso.
+4. Repita os jobs que falharam, ou solte os arquivos de volta em sua pasta monitorada. As entradas deles
+   foram deixadas no lugar: nada foi assinado, então nada conquistou o direito de apagá-las.
+
+**Não é motivo para tirar a instância de serviço.** A linha do `/api/ready` reporta `ok: false`, mas **não**
+transforma a resposta em 503 — veja
+[O serviço inicia mas o `/api/ready` retorna 503 persistentemente](#o-serviço-inicia-mas-o-apiready-retorna-503-persistentemente).
+
+### Um perfil está degradado dizendo que um segredo armazenado não pôde ser descriptografado
+
+**Sintoma.** O banner de inicialização reporta um ou mais perfis como `DEGRADED` com um motivo nomeando
+`Signing:ProfileSecretsKey` — *"A stored signing profile secret (Pkcs12Password) could not be
+decrypted"* — e o `/api/ready` carrega uma linha `signing-profile:<nome>` com `ok: false`. Os jobs
+roteados para esses perfis falham com `profile.degraded`. **O host subiu**, e todo perfil que não carrega
+segredo continua assinando normalmente. Na página do perfil, o painel de certificado mostra as coordenadas
+— o caminho, o thumbprint, o endpoint do cofre — e nenhuma linha de segredo.
+
+**Causa raiz.** A `Signing:ProfileSecretsKey` está definida, mas não é o valor sob o qual os segredos desses
+perfis foram salvos. Quatro coisas causam isso, e elas são deliberadamente indistinguíveis — a
+descriptografia é autenticada, então uma chave errada e uma linha adulterada parecem idênticas:
+
+- a chave foi **rotacionada** e o material armazenado não foi reinserido depois;
+- a base operacional foi **restaurada** de, ou copiada de, uma implantação com uma chave diferente;
+- a chave está **digitada errado**, na maioria das vezes via `Signing__ProfileSecretsKey`, em que o
+  sublinhado duplo é fácil de errar;
+- alguém **editou uma coluna protegida** diretamente, ou uma restauração moveu bytes entre colunas.
+
+**Esta não é a recusa por chave ausente**
+([A inicialização é recusada porque `Signing:ProfileSecretsKey` não está definida](#a-inicialização-é-recusada-porque-signingprofilesecretskey-não-está-definida)).
+Aqui a chave *está* definida, e definir uma diferente não vai ajudar: os valores armazenados foram escritos
+sob a antiga.
+
+**Correção, se você ainda tem a chave original.**
+
+1. Coloque-a de volta — `Signing__ProfileSecretsKey`, exatamente como era. Confira espaços em branco no
+   final e um sublinhado simples onde são necessários dois.
+2. **Reinicie o serviço.** Um certificado é aberto uma vez na inicialização e nunca recarregado.
+
+**Correção, se a chave foi perdida ou rotacionada deliberadamente.** Não há recuperação dos valores em si;
+isso é por construção, não uma lacuna. Para cada perfil que o banner nomeou:
+
+1. Abra a página do perfil no dashboard e pressione **Edit certificate**.
+2. Digite de novo a senha do PKCS#12, o segredo de aplicativo do Key Vault ou a credencial do blob, ou envie
+   o PKCS#12 de novo. Um campo em branco *mantém* o valor armazenado, que não é o que você quer aqui —
+   digite-o.
+3. Salve. O perfil é marcado como aguardando uma reinicialização.
+4. **Reinicie o serviço** quando todo perfil afetado tiver sido reinserido.
+5. Repita os jobs que falharam, ou solte os arquivos de volta em sua pasta monitorada. Nada foi assinado,
+   então as entradas ainda estão em `input/`.
+
+Um perfil sem segredo — um PFX sem senha, um token PKCS#11, um certificado do repositório do Windows — não é
+afetado e não precisa de nada.
+
+:::tip Trate a rotação da chave como uma operação agendada
+Rotacionar a `Signing:ProfileSecretsKey` invalida de uma vez todo segredo de perfil armazenado. Rotacione
+reinserindo o material de cada perfil sob a nova chave *enquanto a antiga ainda funciona*, e aposente o
+valor antigo apenas quando nada mais estiver protegido sob ele.
+:::
+
+### Certificados de teste da Lacuna (Turing / Fermat) são recusados
+
+**Sintoma.** Com os certificados de teste da Lacuna, todo job sob o perfil falha com um erro de cadeia ou
+de confiança, ou todo **Sign and approve** de um aprovador é recusado como `approval.certificate-invalid`
+nomeando uma raiz não confiável. A linha `trust set` do banner lê `production`.
+
+**Causa raiz.** Não é uma falha. O produto publicado submete toda assinatura apenas às raízes da
+ICP-Brasil; a raiz de teste da Lacuna só é confiável sob `Signing:TrustLacunaTestRoot = true` (disponível
+a partir da 2.3.0). Um único conjunto de confiança vale para o host inteiro: a chave do perfil no momento
+da assinatura, o verificador depois, e o certificado de um aprovador.
+
+**Correção.** Em um host de homologação, defina `Signing__TrustLacunaTestRoot=true` **e**
+`ASPNETCORE_ENVIRONMENT=Staging` — a chave sozinha é recusada sob o nome `Production` (veja
+[a entrada em *O serviço não inicia*](#signingtrustlacunatestroot-is-true-while-the-environment-is-production)).
+Em qualquer coisa que assine documentos reais, use certificados reais; a chave não é para isso.
 
 ### O boot tem sucesso, mas todo job falha com "Certificate not found by thumbprint"
 
 **Sintoma.** Todo job vai de `Queued → Failed`. A mensagem de erro menciona uma divergência de
-thumbprint.
+thumbprint. Desde a 2.1.0 isso é detectado quando o certificado do perfil é aberto na inicialização: o
+banner reporta o perfil como `DEGRADED` com o thumbprint no motivo, e os jobs dele falham com
+`profile.degraded`.
 
 **Causa raiz.** O thumbprint configurado não corresponde a nenhum certificado visível à origem
 configurada.
@@ -413,6 +778,16 @@ política é desconhecida ou que a cadeia está incompleta.
 - O worker não está saudável. O log mostra as linhas de iteração do worker; se elas pararam, o worker
   pode ter caído (raro; procure uma exceção registrada).
 
+### A pausa responde `pipeline.state-missing` (SQL Server)
+
+**Sintoma.** Em uma implantação com `Database:Provider = SqlServer`, o `POST /api/pipeline/pause` responde
+`pipeline.state-missing`, o log carrega `PipelineState singleton row is missing` em Critical, e o pipeline
+continua rodando, peça o operador o que pedir.
+
+**Causa raiz.** Bases SQL Server criadas antes da 2.4.3 nunca receberam a linha de estado do pipeline sobre
+a qual a pausa e a retomada atuam. **Correção.** Atualize para a 2.4.3 ou posterior: a linha é inserida por
+uma migração aplicada no próximo boot.
+
 ### Os jobs travam quando `MaxConcurrency > 1` com um token PKCS#11 ou CSP do Windows
 
 **Sintoma.** Com `Pipeline:MaxConcurrency > 1` e `Signing:Certificate:Source = Pkcs11` (ou
@@ -456,10 +831,92 @@ chamadores.
 - O prefixo do nome do arquivo está na lista de prefixos efetiva (padrão global: `.`, `~$`).
 - O arquivo ainda está sendo escrito pelo produtor. O detector de estabilidade exige
   `WatchedFolder:StabilityRequiredSamples` amostras idênticas consecutivas antes do enfileiramento.
-  Espere, ou faça `POST /api/rescan` depois que o escritor terminar.
+  Espere, ou faça `POST /api/rescan` (ou `POST /api/rescan?folder=<nome>` para apenas uma pasta) depois
+  que o escritor terminar.
 - **O observador da pasta está em `Status: Stopped`.** Veja abaixo.
+- **Nenhum perfil de assinatura escolheu a pasta.** O card dela mostra um chip cinza `unassigned` onde
+  estaria o do perfil. Veja
+  [Arquivos ficam em uma pasta cujo card diz `unassigned`](#arquivos-ficam-em-uma-pasta-cujo-card-diz-unassigned).
+- **O perfil de assinatura da pasta está desabilitado.** Veja
+  [Arquivos são recusados com `profile.disabled`](#arquivos-são-recusados-com-profiledisabled).
+- **O job mais recente do arquivo terminou `Failed` ou `Canceled`.** O observador não oferece esse arquivo
+  de novo por conta própria (desde a 2.11.0 para `Failed`: antes, uma pasta por sondagem produzia um novo
+  job `Failed` a cada tique enquanto a causa persistisse). Rode-o de novo com Retry, Rescan ou Upload —
+  isso vale também para um arquivo corrigido solto com o mesmo nome.
+- **O nome já está tomado por um job concluído.** O arquivo vira um job, sim, mas um que falha na hora —
+  veja [Um arquivo falha na hora com `file.already-processed`](#um-arquivo-falha-na-hora-com-filealready-processed).
 - (Docker) Problema de permissão de bind mount — o UID do container (1654) precisa conseguir ler arquivos
   soltos pelo processo do host. `chown -R 1654:1654 ./data` no host.
+
+### Arquivos ficam em uma pasta cujo card diz `unassigned`
+
+**Sintoma.** Arquivos se acumulam em uma pasta configurada e nenhum job é criado. A página Entradas mostra
+a pasta com um chip cinza com o texto `unassigned — no profile has chosen this folder`; o `/api/folders`
+retorna `profileName: null` e, assim que o observador percebe, `"status": "Unassigned"`; o `/api/ready`
+está **verde** para aquela pasta; um rescan reporta a pasta como `unassigned: true`, com todas as contagens
+em zero; e o log carrega um Warning, `Watched folder '<nome>' is unassigned — no signing profile has
+chosen it`.
+
+**Causa raiz.** Desde a 2.2.0 uma pasta monitorada é assinada sob o perfil que a escolheu, uma pasta por
+perfil, e nenhum a escolheu. Ou a importação do primeiro boot a deixou assim — a pasta nomeava um perfil
+que o `Signing:Profiles[]` não declarava, ou uma pasta anterior já tinha tomado o perfil que ela nomeava, e
+o banner de inicialização disse qual — ou um perfil a liberou depois, pela sua página, ou a tabela de
+perfis foi importada por uma versão anterior à 2.2.0, que não registrava vínculos de pasta. Uma pasta sem
+perfil **não** recai para `default`.
+
+**Por que a pasta não é reportada como quebrada.** Ela não está quebrada: o armazenamento responde, o
+observador está esperando em vez de ter falhado, e uma linha de prontidão vermelha diria a um orquestrador
+para tirar uma instância por causa de uma pasta que ninguém pediu para ela monitorar ainda. Os arquivos
+estão onde o produtor os deixou e são listados no momento em que um perfil escolhe a pasta.
+
+**Correção.** Abra um perfil na página de perfis de assinatura do dashboard, clique em **Edit behaviour**,
+escolha a pasta em **Input folder** e salve; ou crie um perfil com a pasta escolhida. O observador começa
+dentro de um ou dois intervalos de sondagem e lista tudo o que está ali — sem reinicialização e sem rescan.
+Editar `Storage:Inputs[].Profile` **não** resolve depois do primeiro boot: essa chave só é lida pela
+primeira importação, e o boot diz que ela está sendo ignorada. Veja
+[Operação](operations.md#roteando-uma-pasta-monitorada-para-um-perfil-de-assinatura).
+
+### Arquivos são recusados com `profile.disabled`
+
+**Sintoma.** Arquivos se acumulam em uma pasta configurada e nenhum job é criado, mas a pasta *não* está
+parada: o card dela está verde, o `/api/ready` está satisfeito, e o console exibiu uma linha com o texto
+`files are not being enqueued — signing profile '<nome>' is disabled`. Um upload para aquele perfil
+responde `409` com `code = "profile.disabled"`; o mesmo acontece com a repetição de um job que o nomeava.
+
+**Causa raiz.** Alguém desligou a chave **accept new work** do perfil em sua página. Isso impede que novo
+trabalho seja roteado para ali e nada mais: os jobs já enfileirados no perfil rodaram até o fim, e nenhum
+arquivo foi modificado — cada um está onde o produtor o deixou.
+
+**Correção.** Ou reabilite o perfil em sua página — a próxima passada da pasta ingere tudo o que está nela,
+inclusive os arquivos recusados enquanto ele esteve desligado — ou escolha a pasta na página de outro
+perfil. (O salvamento se recusa a desabilitar um perfil que é alimentado por uma pasta, nomeando-a, então
+este estado só surge de um vínculo de pasta feito *depois* de o perfil ter sido desabilitado.)
+
+### Um arquivo falha na hora com `file.already-processed`
+
+**Sintoma.** Um arquivo solto em uma pasta monitorada vira um job que já nasce `Failed` com
+`file.already-processed`, nomeando o job que detém o nome, e o arquivo é movido para a pasta
+`error/<jobid>/` do novo job. Um upload responde `409` com o mesmo código e não armazena nada. Um rescan
+conta esses casos em `alreadyProcessed`.
+
+**Causa raiz.** Desde a 2.13.0 um arquivo que chega com um nome que um job `Completed` ou ainda ativo já
+carrega **nunca é assinado**. A comparação vale para o host inteiro — toda pasta monitorada, todo perfil e
+todo upload — e ignora maiúsculas e minúsculas, porque todos escrevem na mesma pasta `output/`. Um job
+`Failed` ou `Canceled` não reserva nome.
+
+**Correção.** A repetição é recusada para esta falha (uma repetição é isenta da regra, então assinaria o
+arquivo que a regra recusou). Para aceitar o nome de novo, **apague o job que o detém** na página Jobs. Para
+um produtor que legitimamente reutiliza um mesmo nome de arquivo fixo todo dia, desligue a regra com
+`Pipeline:RejectAlreadyProcessedFileNames = false`. Veja
+[Operação](operations.md#nomes-de-arquivo-já-processados).
+
+### Uploads são recusados com `upload.disabled`, ou não há botão Upload files
+
+**Não é uma falha.** `Upload:Enabled = false` (disponível a partir da 2.10.0) desliga a superfície de
+upload dos dois lados de uma vez: o `POST /api/files` responde `409` com `upload.disabled`, e a página Jobs
+não renderiza o botão **Upload files**. O host recebe arquivos apenas de suas pastas monitoradas; Rescan e
+Retry não são afetados. A chave é lida uma vez no boot, então religar os uploads exige uma
+reinicialização.
 
 ### Um observador de pasta está em `Status: Stopped`
 
@@ -523,24 +980,67 @@ processaria em uma data que ninguém pretendeu, e uma assinatura faria a data er
 **Correção.** Reexporte do sistema de origem com datas atuais. **Repetir o mesmo arquivo falha da mesma
 forma** — as datas dentro dele não mudaram.
 
+Se o seu banco processa um pagamento com data passada no próximo dia útil, o perfil pode desligar a
+proteção em vez disso (a partir da 2.15.0): `CheckCnab240PaymentDates = false` no comportamento do perfil
+(ou `Signing:Profiles[].CheckCnab240PaymentDates` para um perfil sendo importado em um primeiro boot). O
+arquivo então passa, e a decisão fica registrada — no histórico do job, em um evento operacional
+`Cnab240PaymentDateCheckSkipped`, no contador `bulksigner_cnab240_payment_date_checks_skipped_total` e em
+uma linha de log em Warning. A configuração é lida no momento da assinatura, então uma mudança chega ao
+próximo job sem reinicialização. Veja [CNAB240](cnab240.md#desligando-a-guarda).
+
 :::tip Confira o fuso horário do host primeiro
 "Hoje" é a data local do host. Em um host rodando em UTC enquanto o pagador está em
 `America/Sao_Paulo`, a fronteira vira três horas mais cedo e um arquivo com vencimento hoje começa a ser
 recusado às 21:00 no horário local. Defina `TZ=America/Sao_Paulo` no container ou na unit do systemd.
 :::
 
+### Um aprovador é informado de que o registro de aprovação está incompleto
+
+**Sintoma.** O clique ou a assinatura de um aprovador é recusado com *cannot be decided — its approval
+record is incomplete. Contact whoever operates the service.* Pela REST o código é
+`approval.job-incomplete`. O job permanece em `AwaitingApproval`.
+
+**Diagnóstico.** Antes de aceitar uma decisão, o Bulk Signer confere o registro ao qual a decisão fica
+vinculada, e algo de que ele precisa está ausente ou não confere mais: a regra congelada, o hash de
+conteúdo do job, a cópia em stage em `processing/<jobid>/` ou seus bytes, o envelope de assinaturas dos
+aprovadores ao lado dela, ou o thumbprint de certificado de uma linha aprovada. Abra a página do job como
+operador: desde a 2.8.0 a seção **Approval record** roda as mesmas verificações e marca a que falhou, com
+o valor encontrado e o caminho da pasta de processamento.
+
+Qual verificação falhou diz o que aconteceu. **Um hash de conteúdo ausente** muito provavelmente significa
+que o job ficou retido sob um perfil cujo `CheckCNAB240` estava desligado — a interpretação do CNAB240 é a
+única coisa que o registra. O histórico do perfil mostrará a verificação sendo desligada
+(`Changed: CheckCNAB240 on → off`) enquanto a regra de aprovação continuava de pé. Desde a 2.9.0 a página
+do perfil recusa esse salvamento, e a barreira reprova tal job por nome em vez de retê-lo (veja
+[a entrada abaixo](#um-job-falhou-com-approvalcontent-unmeasured-em-vez-de-ficar-retido)), então um job
+nesse estado ficou retido antes de qualquer das duas recusas existir. **Qualquer outra verificação**
+falhando significa que a linha ou a pasta foi modificada fora da aplicação — um backup restaurado, uma
+quarentena-e-restauração de antivírus, um cliente de sincronização, uma edição manual.
+
+**Correção.** Cancele o job (o botão Cancel, ou `POST /api/jobs/{id}/cancel`). Para o hash de conteúdo,
+religue primeiro o `CheckCNAB240` pelo **Edit behaviour** do perfil — ou remova a regra de aprovação, se o
+perfil não deve reter jobs — e então reexecute o arquivo por Rescan ou Upload, para que ele seja
+interpretado, totalizado e aprovado do zero; o original ainda está em `input/`. Nada repara o registro no
+lugar, por design. Para as outras verificações, descubra o que tem acesso de escrita à base operacional ou
+a `processing/` por fora da aplicação e interrompa-o, ou o próximo job retido vai pelo mesmo caminho.
+
 ### Um job fica em `AwaitingApproval` e nada acontece
 
 **Não é uma falha por si só** — o job está esperando por uma pessoa, e vai esperar indefinidamente a menos
 que o perfil defina `Approval.ExpiresAfter`. Coisas a conferir:
 
-- **O link chegou a alguém?** O produto não envia e-mail. O link de aprovação está na página do job
-  enquanto o job está retido; os links duráveis por aprovador estão na página Sistema.
-- **O pool está certo?** A página do job mostra o pool **congelado no momento da retenção**, não o que
-  está no seu arquivo de configuração. Se as pessoas listadas estiverem erradas, cancele o job, corrija o
-  perfil e reexecute o arquivo — editar a configuração nunca muda o que um job retido exige.
-- **Acompanhe o `bulksigner_approvals_expired_total`.** Uma taxa de expiração que sobe é o sinal de que
-  os links não estão chegando às pessoas.
+- **Alguém sabe?** O produto não envia e-mail. Os aprovadores chegam a um arquivo retido pela própria fila
+  em `/approvals` — pelo seu link durável do portal (listado por aprovador na página Sistema) ou por um
+  login do Entra. Desde a 2.9.0 a página do job não mostra mais um link de aprovação por job para copiar;
+  a página anônima em `/approve/<jobId>` ainda existe para uma implantação que dependa dela, e tudo o que
+  está em [Segurança](security.md#a-página-de-aprovação-por-job-não-é-autenticada) sobre distribuí-la se
+  aplica.
+- **O pool está certo?** A página do job mostra o pool **congelado no momento da retenção**, não a regra
+  atual do perfil. Se as pessoas listadas estiverem erradas, cancele o job, corrija o perfil e reexecute o
+  arquivo — editar um perfil nunca muda o que um job retido exige. A coluna **Approvals** da página Jobs (a
+  partir da 2.12.0) mostra quantas aprovações cada job retido ainda precisa.
+- **Acompanhe o `bulksigner_approvals_expired_total`.** Uma taxa de expiração que sobe é o sinal de que os
+  aprovadores não estão olhando sua fila.
 
 ### Um aprovador recebe "Esse endereço não está no pool de aprovadores deste job"
 
@@ -562,6 +1062,25 @@ ninguém aprovou.
 **Correção.** **Não** o reassine. Descubra o que escreveu em `processing/`, e então reexecute o arquivo
 original de `input/`, para que ele seja interpretado, totalizado e aprovado do zero. Este contador deveria
 ficar em zero para sempre; qualquer outra coisa vale investigar em vez de repetir por cima.
+
+### Um job falhou com `approval.content-unmeasured` em vez de ficar retido
+
+**Sintoma.** Um arquivo roteado para um perfil com barreira de aprovação vai para `Failed` em vez de
+`AwaitingApproval`. O histórico diz que ele foi recusado antes da retenção porque a verificação CNAB240 do
+perfil está desligada, a pasta está sob `error/<jobid>/`, e o log carrega `Job … was refused before parking
+for approval: profile … requires approval but its CNAB240 check is off`. Todo arquivo naquele perfil falha
+da mesma forma.
+
+**Diagnóstico.** O perfil carrega uma regra de aprovação e `CheckCNAB240 = false`. A interpretação é a
+única coisa que registra o hash de conteúdo ao qual uma decisão fica vinculada, então sem ela o job não tem
+sob o que ficar retido — e um job retido sem ele nunca poderia ser decidido. Desde a 2.9.0 a barreira o
+recusa por nome, e a página do perfil recusa salvar esse par por qualquer dos dois lados, então um perfil
+nesse estado foi editado antes de essa recusa existir, ou teve sua linha editada fora da aplicação.
+
+**Correção.** Na página do perfil, religue o `CheckCNAB240` pelo **Edit behaviour**, ou remova a regra de
+aprovação pelo **Edit approval** se o perfil não deve reter jobs. Sem reinicialização: o próximo job
+reivindicado roda sob a regra corrigida. Depois reexecute os arquivos que falharam por Rescan ou Upload; os
+originais ainda estão em `input/`.
 
 ### Um job falhou com `approval.rejected` em vez de ser cancelado
 
@@ -598,10 +1117,24 @@ seu caminho), e uma pasta cujo observador não está rodando. Veja
 
 **Causa raiz.** Em um compartilhamento de trabalho do Azure Files, a cópia em stage de um job ativo carrega
 um lease infinito que recusa escritas e exclusões de tudo, inclusive do seu próprio ferramental de
-armazenamento. Isso é o ponto enquanto o job está em andamento.
+armazenamento. Isso é o ponto enquanto o job está em andamento. A retenção normalmente termina junto com o
+job; se o job é terminal e o lease ainda está detido, encerrar a retenção falhou — o compartilhamento
+estava inalcançável, a credencial tinha sido rotacionada, ou a realocação foi recusada — e o log disse isso
+quando o job terminou (por exemplo `Cancel of job … could not end the hold on its staged copy`, ou
+`Recovery: failed to relocate processing/…`).
 
-**Correção.** Se o job é terminal e o lease ainda está detido, isso é uma falha — reinicie o serviço, o
-que libera os leases que ele detém, e reporte.
+**Correção.** O lease vive na conta de armazenamento, e não neste processo, então **reiniciar o Bulk Signer
+não o libera.** Confirme pela página do job que o job é terminal, e então quebre o lease e apague ou mova o
+arquivo normalmente:
+
+```bash
+az storage file lease break --account-name <conta> --share-name <compartilhamento> --path 'processing/<jobid>/<arquivo>'
+```
+
+ou, no portal, selecione o arquivo e use **Break lease**. Nunca quebre o lease da cópia em stage de um job
+*ativo*: isso remove a proteção que o novo cálculo de hash anterior à assinatura teria então de pegar, e o
+job vai falhar com `approval.content-changed` em vez de assinar os bytes errados. Uma árvore de trabalho
+local não tem esse lease — a retenção dela some no momento em que o serviço reinicia.
 
 ### O `/api/ready` está em 503 com `work-share-owner` vermelho
 
@@ -619,10 +1152,56 @@ anterior.
   de trabalho, o que não é suportado. Pare uma, e então decida qual base é a autoritativa. **O estado de
   aprovação é o que exige ação rápida**: um job retido existe na base de uma instância somente.
 
-Se a linha, em vez disso, lê `not claimed cleanly at startup: …`, o marcador não pôde ser alcançado de
-forma alguma — um compartilhamento inalcançável ou uma credencial rotacionada. Se outra instância o detém
-passa a ser simplesmente desconhecido, e desconhecido não é reportado como a resposta tranquilizadora. A
-linha `storage-share:` do próprio compartilhamento geralmente diz por quê.
+Se o detalhe da linha em `/api/ready/details`, em vez disso, lê `not claimed cleanly at startup: …`, o
+marcador não pôde ser alcançado de forma alguma — um compartilhamento inalcançável ou uma credencial
+rotacionada. Se outra instância o detém passa a ser simplesmente desconhecido, e desconhecido não é
+reportado como a resposta tranquilizadora. A linha `storage-share:` do próprio compartilhamento geralmente
+diz por quê. A reivindicação é tentada de novo no próximo boot, e não em segundo plano.
+
+### Um arquivo rejeitado não foi devolvido a `output/`
+
+**Sintoma.** Um aprovador rejeitou um arquivo. O job está `Canceled`, mas o `output/` não tem
+`<nome>.reject<ext>` e a página do job diz *"The file could not be returned to the output folder, so the
+staged copy is in the error folder and the original is still in its input folder."* O console carrega um
+aviso e o log uma entrada `RejectionHandbackFailed` nomeando o motivo.
+
+**De longe a causa mais provável: o nome já estava tomado.** Um arquivo vetado é um que o financeiro
+corrige e reenvia com o mesmo nome, então uma segunda rejeição dele tenta escrever `folha.reject.rem` onde
+o primeiro já está. O Bulk Signer se recusa em vez de sobrescrever — aqueles bytes são de alguém — e recai
+para deixar a cópia em stage em `error/`. A mensagem de log nomeia o destino.
+
+**O que é verdade quando isso acontece**, e esta é a parte tranquilizadora: o veto continua valendo, nada
+foi assinado, o arquivo anterior em `output/` está intocado, os bytes desta rejeição estão íntegros em
+`error/<jobid>/`, e **a entrada ainda está em sua pasta monitorada** — a exclusão dela só é conquistada por
+uma devolução bem-sucedida.
+
+**O que fazer.** Colete ou arquive o `output/<nome>.reject<ext>` mais antigo, e então ou deixe a cópia
+atual em `error/` (a trilha de auditoria aponta para ela) ou mova-a você mesmo para `output/` com um nome
+de sua escolha. Nada precisa ser reiniciado.
+
+**Outras causas**, todas mais raras e todas se nomeando no log: o compartilhamento de trabalho parou de
+responder entre a escrita e a movimentação; o processo não tem permissão de escrita em `output/`; em um
+compartilhamento, um lease que outra pessoa detém no destino. Se em vez disso você vê
+`RejectionHandbackFallbackFailed`, nenhum dos dois destinos funcionou — o job continua terminal e correto,
+e `processing/<jobid>/` precisa ser limpo à mão. Um `RejectionHandbackUnavailable` em Error é um defeito do
+produto, e não uma falha operacional: reporte-o ao suporte da Lacuna Software.
+
+## Dashboard
+
+### Toda página renderiza mas nenhum botão faz nada, e o console do navegador mostra 404 em `_framework/blazor.web.js`
+
+**Sintoma.** Em uma implantação Docker o dashboard carrega e as tabelas se preenchem, mas *Upload files*,
+*Retry*, *Cancel*, os filtros e todo outro controle estão inertes. O console do navegador tem exatamente um
+erro: um 404 para `/_framework/blazor.web.js`. O `/api/ready` está verde e o log do servidor não registra
+nada.
+
+**Causa.** Imagens de container anteriores à 2.4.1 construídas sobre o .NET 10 — entre elas a 2.3.2 e a
+2.4.0 — foram publicadas sem o script de cliente do dashboard, então as páginas renderizavam mas nunca se
+tornavam interativas. Instalações como Windows Service, systemd e em primeiro plano nunca foram afetadas.
+
+**Correção.** Baixe a imagem 2.4.1 ou posterior e reimplante. Para conferir uma imagem antes de
+implantá-la: `docker run --rm --entrypoint ls <imagem> /app/wwwroot/_framework` precisa listar
+`blazor.web.js`.
 
 ## Criptografia
 
@@ -674,13 +1253,29 @@ daquele caminho.
 
 **Sintoma.** O bootstrap falha com uma exceção de validação contra `Signer:Endpoint` ou `Signer:ApiKey`.
 
-**Causa raiz.** Ao menos uma entrada de `Signing:Profiles[]` tem `Method = LacunaSigner`, mas o bloco de
-nível superior `Signer:*` está vazio. O validador é autocondicionado: ele só exige aquelas chaves quando um
-perfil de fato precisa delas.
+**Causa raiz.** Parte do bloco `Signer:*` está definida e o resto não. O validador se autocondiciona à
+seção: omita-a por inteiro e nada é exigido; escreva qualquer parte dela e o bloco inteiro é validado,
+porque uma conexão configurada pela metade é uma que falharia no seu primeiro despacho em vez de no boot.
 
-**Correção.** Ou defina `Signer__Endpoint` + `Signer__ApiKey` (variáveis de ambiente), ou remova o perfil
-com `Method = LacunaSigner` se ele foi acrescentado por engano. O formato da chave de API é
-`application-id|secret`.
+:::warning Alterado na 2.1.0
+Esta verificação não olha mais quais perfis existem — os perfis vivem na base operacional e podem ser
+passados para o Lacuna Signer pelo dashboard a qualquer momento. A exigência passou para o perfil: veja a
+próxima entrada.
+:::
+
+**Correção.** Defina tanto `Signer__Endpoint` quanto `Signer__ApiKey` (variáveis de ambiente), ou remova a
+seção se este host assina tudo localmente. O formato da chave de API é `application-id|secret`.
+
+### `Method = LacunaSigner, but this host has no Signer: settings`
+
+**Sintoma.** Uma recusa de boot nomeando o `Method` de um perfil, ou a mesma frase no formulário do perfil
+quando um salvamento é recusado.
+
+**Causa raiz.** Um perfil de assinatura seleciona o serviço remoto e este host nunca foi informado de onde
+ele está. A recusa é a mesma seja qual for a origem do perfil — uma entrada de `Signing:Profiles[]` sendo
+importada em um primeiro boot, ou um salvamento pelas páginas de perfil do dashboard.
+
+**Correção.** Defina `Signer__Endpoint` + `Signer__ApiKey` e reinicie, ou dê ao perfil `Method = Local`.
 
 ### Todo documento despachado falha com `signer.unreachable`
 
@@ -707,9 +1302,11 @@ auditoria `signer.unreachable`.
 1. **O participante não assinou.** Abra a administração do Lacuna Signer e confira o status do documento
    com o id correspondente. Se ele estiver `Pending` além do `Signer:TimeoutHours`, o worker de consulta
    vai reprovar o job local com `signer.timeout` em seu próximo tique — esse é o contrato.
-2. **O worker de consulta não está rodando.** Procure no log por `SignerPollWorker started`. Se ausente,
-   nenhum perfil tem `Method = LacunaSigner`, então o worker não está registrado — corrija a configuração
-   do perfil e reinicie.
+2. **O worker de consulta não está rodando.** Procure no log por `SignerPollWorker started`. Se ausente, o
+   host não tem configurações `Signer:*`, então nem o gateway nem o worker de consulta estão registrados —
+   defina `Signer__Endpoint` + `Signer__ApiKey` e reinicie. (Desde a 2.1.0 o registro segue essas
+   configurações, e não os perfis, então um host que as tem está pronto para um perfil passado para o
+   Lacuna Signer depois de ele ter subido.)
 3. **O pipeline está pausado.** O `GET /api/pipeline/state` retorna `{ paused: true }`. O worker de
    consulta honra a flag de pausa. Faça `POST /api/pipeline/resume` para desbloquear.
 
@@ -730,12 +1327,16 @@ corretamente `Canceled` e não precisa de mais nada.
 **Sintoma.** Um perfil está configurado com `Method = LacunaSigner`, mas o dashboard não mostra o card
 Aguardando assinador e a página Sistema não mostra o painel do Lacuna Signer.
 
-**Causa raiz.** O conjunto de perfis é lido uma vez no boot. Se você editou o
-`appsettings.Production.json` depois de o serviço iniciar, a página vê o conjunto de perfis anterior à
-edição.
+**Causa raiz.** Desde a 2.1.0 os perfis vivem na base operacional, e o `Signing:Profiles[]` só é
+importado no primeiro boot contra uma tabela de perfis vazia. Se você acrescentou ou alterou o perfil no
+`appsettings.Production.json` depois desse primeiro boot, a edição não teve efeito — o banner de
+inicialização diz que a seção está sendo ignorada — e nenhum perfil armazenado tem
+`Method = LacunaSigner`.
 
-**Correção.** Reinicie o serviço. Acompanhe o banner — o novo perfil LacunaSigner deve aparecer no painel
-**Signing profiles**.
+**Correção.** Confira a [página de perfis de assinatura](dashboard.md#profiles--perfis-de-assinatura) do dashboard, que mostra o que a base realmente
+guarda. Crie o perfil ali, ou passe um existente para o Lacuna Signer (o host precisa das configurações
+`Signer:*` — veja acima). Um perfil salvo chega ao host em execução dentro de um intervalo de sondagem, sem
+reinicialização; recarregue a página Dashboard ou Sistema para ver o card e o painel.
 
 ### O contador de erros transitórios sobe mas nenhum job falha
 
@@ -806,7 +1407,7 @@ confirme que o banner não reporta mais a linha — quando está ligado, nada é
 
 **Não é uma falha.** Um banco de dados fora do ar durante uma janela de manutenção não pode transformar uma
 reinicialização em indisponibilidade, então o host sobe, a migração é **pulada**, e o `/api/ready` fica
-vermelho.
+vermelho (o detalhe da verificação `database`, em `/api/ready/details`, nomeia a base).
 
 **Correção.** Conserte a base, e então **reinicie**. O veredito de prontidão é tomado por requisição, mas
 ele também permanece vermelho por toda a vida de uma instância cujo boot pulou a migração — isso limpa no
@@ -835,6 +1436,30 @@ efetivamente a exige, e deliberadamente não há chave de configuração: um or�
 operador consegue ajustar é um orçamento de repetição que é ajustado para zero durante um incidente.
 
 Se as repetições estão se esgotando, olhe o caminho de rede em vez do orçamento.
+
+### Comandos na base estouram o tempo em 35 s alguns segundos depois de o App Service substituir o container
+
+**Sintoma.** No Azure App Service com `Database:Provider = SqlServer`, de um a três comandos falham com
+`Execution Timeout Expired` alguns segundos depois de a plataforma parar o container *anterior* no mesmo
+worker — cada um medindo 35 s, nunca 30 — e nada falha depois disso. As vítimas são o que quer que tenha
+pedido em seguida: `Takeover sweep failed`, `Pipeline worker iteration failed`, um tique de heartbeat, ou o
+carregamento de uma página. O `/api/ready` continua verde e a próxima sondagem tem sucesso.
+
+**Causa.** Não é a base. Quando a plataforma remove o container antigo, conexões que o novo container
+colocou no pool durante seu aquecimento podem morrer na rede sem serem fechadas, e ainda parecer vivas para
+o pool de conexões. O primeiro comando em uma delas espera o timeout de comando inteiro de 30 s, e depois
+5 s para que o servidor confirme um cancelamento que ele nunca recebe — 35 s é a assinatura de uma conexão
+que parou de responder, enquanto uma consulta que o servidor de fato está bloqueando falha em 30 s. A
+conexão morta então sai do pool, e é por isso que o episódio termina sozinho; um timeout não é repetido,
+então cada conexão morta custa exatamente uma falha.
+
+**Correção.** Nenhuma no produto: a varredura pergunta de novo na próxima sondagem, um tique de heartbeat
+perdido está a 15 s do próximo, e o carregamento de uma página tem sucesso ao recarregar. Quando a janela
+importa, implante com uma parada — parado primeiro, o container antigo já se foi antes de o novo abrir uma
+conexão (veja [Alta disponibilidade](high-availability.md#atualizações-param-o-mundo)). Não aumente o
+timeout de comando nem acrescente uma repetição para isto — um alonga a espera e o outro a repete. Uma
+travada real da base tem outra cara: falhas em 30 s, e sinal de DTU, deadlock ou `blocked_by_firewall` no
+Azure Monitor.
 
 ### A inicialização é recusada porque a connection string não corresponde ao provider
 
@@ -890,6 +1515,17 @@ fazer isso da próxima vez.
 `db/bulksigner-archive-AAAAMM.db`, inicie o serviço. Um banco novo é inicializado; o arquivo morto é
 somente leitura. Abra o arquivo morto em um cliente SQLite para consultas históricas.
 
+Sob `Database:Provider = SqlServer` o crescimento é o mesmo e a receita não: não há arquivo para mover, e
+começar uma base nova à mão descartaria as aprovações registradas junto com todo o resto. Arquive linhas
+com o ferramental do seu próprio SGBD.
+
+:::warning Clear Jobs não é um arquivamento
+O **Clear Jobs** na página Sistema (ou `DELETE /api/jobs`) apaga **todo** registro de job, seja qual for o
+status (desde a 2.9.0), os arquivos que esses jobs deixaram para trás — entradas, cópias em stage, pastas de
+erro e saídas assinadas — e (desde a 2.10.0) todo evento operacional registrado antes dele. Nada é mantido
+para consulta posterior. Veja [Operação](operations.md#clear-jobs).
+:::
+
 ## Modo cluster
 
 Tudo nesta seção exige `Cluster:Enabled = true`. Fora da chave, nada disso se aplica — veja
@@ -916,25 +1552,70 @@ então uma leitura basta:
 instância única, sem mudanças. Um compartilhamento NFS do Azure Files é recusado nominalmente; o
 compartilhamento de trabalho precisa ser SMB.
 
-### Boot recusado nomeando uma identidade de instância que já está batendo
+### Boot recusado: uma identidade de instância `could not be registered in 3 attempts`
 
-**Sintoma.** O host sai nomeando sua própria identidade derivada de instância, e diz que aquela identidade
-já tem um heartbeat vivo.
+**Sintoma.** O host sai nomeando sua própria identidade derivada de instância, o log carrega o mesmo em
+`Critical`, e a mensagem diz que a identidade não pôde ser registrada — toda escrita da linha de heartbeat
+deste boot perdeu uma corrida para outra encarnação — informando o último batimento e a versão de quem
+venceu.
 
-**Diagnóstico.** Dois processos estão atendendo por um nome. A identidade é aquilo sobre o que a
-recuperação, a assunção e toda superfície por instância são construídas, então não há modo degradado a
-oferecer. As causas usuais, em ordem de probabilidade:
+:::warning Alterado na 2.5.0 — uma identidade viva é deslocada, não recusada
+Até a 2.4.x um boot que encontrava a própria identidade com um heartbeat vivo se recusava a iniciar (a
+2.4.3 esperava antes). Desde a 2.5.0 ele **desloca** o detentor — veja a próxima entrada. A recusa acima é a
+única que restou.
+:::
 
-1. **Um deployment slot carregando a connection string de produção.** A troca não introduz isso — o
-   primeiro boot do slot introduz. Slots não são suportados nesta topologia de forma alguma; veja
-   [Alta disponibilidade](high-availability.md#atualizações-param-o-mundo).
-2. Uma segunda implantação apontada para o mesmo banco de dados.
-3. Dois hosts genuinamente apresentando o mesmo nome (fora do App Service, onde a identidade recai para o
-   nome da máquina).
+**Diagnóstico.** Algo está reescrevendo a linha desta identidade mais depressa do que um boot consegue
+tomá-la: dois hosts apresentando o mesmo nome **e subindo no mesmo momento** contra um mesmo banco de
+dados, ou uma falha na base. A identidade é o id de instância do App Service onde a plataforma define um, e
+o nome da máquina onde não define. A recusa é fatal de propósito: um boot que não consegue ter sua linha
+escrita não pode ser distinguido de nada mais pela recuperação, pela assunção ou pela visão Instances.
 
-**Correção.** Se o detentor de fato se foi, a linha dele fica obsoleta sozinha — **esperar o
-`Cluster:StaleAfterSeconds` passar é a correção suportada**, e não apagar linhas à mão. Caso contrário,
-pare a implantação que não deveria estar ali.
+**Correção.** Leia a visão Instances na página Sistema de uma instância que *está* rodando, encontre a linha
+que detém aquela identidade, e ou pare o que mais a estiver apresentando, ou aponte-o para o seu próprio
+banco de dados. **Não** apague a linha para passar pela recusa enquanto o detentor ainda estiver rodando —
+isso remove o relato, não a condição.
+
+### Depois de uma reimplantação, a instância antiga registra `has been displaced` e se retira
+
+**Sintoma.** Trocar a imagem de um app em execução (`az webapp config container set`) produz, no log, um
+Warning `displaced the previous incarnation … which was still live` e, cerca de três segundos depois, um
+Critical `has been displaced`. O `/api/ready` de um dos containers carrega uma linha `cluster-instance`
+vermelha (e continua 200), sua página Sistema mostra um aviso, e um evento operacional `InstanceStoodDown`
+é registrado.
+
+**Diagnóstico. Isto é uma reimplantação normal no lugar no App Service (desde a 2.5.0).** A plataforma
+inicia o novo container **ao lado** do antigo na mesma instância — ambos derivam a mesma identidade — e
+mantém o antigo servindo até que o novo passe na sua sondagem de aquecimento. O novo container toma a
+identidade de imediato e registra qual encarnação deslocou; o antigo descobre isso no seu próximo batimento
+e **se retira**: não reivindica job novo, não roda assunção, não consulta o Lacuna Signer à toa, termina o
+que detém, e serve a web até a plataforma pará-lo. O que ele deixar inacabado é assumido um
+`Cluster:StaleAfterSeconds` depois do deslocamento, sob a política de assunção comum. Nenhuma falha de
+inicialização e nenhum `ContainerStartupFailure`; a visão Instances mostra a encarnação deslocada sob a
+linha da sucessora. Veja
+[Operação](operations.md#quando-um-boot-encontra-a-própria-identidade-ainda-viva).
+
+**Lendo o log da sobreposição.** Enquanto os dois containers rodam, o App Service escreve a saída dos dois
+processos em um só log, sem nada dizendo de qual container veio cada linha, então o Critical do container
+antigo aparece entre as linhas de boot do novo e dá a impressão de que o *novo* container se retirou. Não se
+retirou: o Critical em um log de sobreposição é sempre do container antigo — o recém-chegado registra um
+Warning nomeando a encarnação que deslocou.
+
+**Se o novo container então falhar no aquecimento** — uma imagem ruim, um erro de configuração pego depois
+do registro — o App Service para o **site inteiro**, inclusive o container antigo já retirado, e o reinicia
+com a imagem *nova*, em um laço de 503s. No App Service o remédio é seu: aponte o app de volta para a tag
+anterior com `az webapp config container set`, e ele fica pronto de novo em cerca de dois minutos. Parar o
+app antes de trocar a imagem e iniciá-lo depois (veja
+[Alta disponibilidade](high-availability.md#atualizações-param-o-mundo)) evita a sobreposição por completo
+e continua sendo a implantação mais limpa.
+
+**Uma duplicata genuína — dois hosts apresentando um nome, ou um deployment slot carregando a connection
+string de produção — também não é mais recusada.** O boot posterior desloca o anterior, e uma
+reinicialização do host deslocado toma a identidade de volta, então os dois se alternam ruidosamente: um
+Warning em cada recém-chegado, um Critical em cada processo que se retira, e uma encarnação deslocada na
+visão Instances que não para de mudar. A cada momento, exatamente um deles reivindica trabalho. Encontre o
+host que não deveria estar apresentando esta identidade, e renomeie-o ou aponte-o para o seu próprio banco
+de dados. Slots não são suportados nesta topologia.
 
 ### Boot recusado nomeando duas bases operacionais
 
@@ -987,7 +1668,8 @@ implantação que falhou.
 
 **Correção.** Termine a implantação — pare toda instância, implante, inicie. Se nada está sendo implantado,
 procure um slot ou uma segunda implantação neste banco de dados. Trate o Critical como o alarme que ele é;
-nada mais vai parar isso.
+nada mais vai parar isso. (Um container antigo sendo deslocado durante uma reimplantação no lugar não o
+dispara: aquela é a vida anterior da própria identidade, e não uma irmã.)
 
 ### Um job está travado e instância nenhuma o toca
 
@@ -1068,6 +1750,22 @@ comando de verificação.
 aqueles diretórios precisam pertencer ao UID 1654.
 
 **Correção.** Antes do primeiro start: `sudo chown -R 1654:1654 ./data ./logs`.
+
+### Uploads falham com `Access to the path '/app/entrada' is denied`
+
+**Sintoma.** Um upload pelo dashboard ou pelo `POST /api/files` falha com
+`System.UnauthorizedAccessException: Access to the path '/app/<primeiro segmento de Storage:Inputs[0].Path>' is denied`,
+em um container cuja primeira pasta monitorada está em um compartilhamento do Azure Files. Arquivos soltos
+no compartilhamento são pegos normalmente.
+
+**Causa raiz.** Antes da 2.4.2 a pasta de destino dos uploads era derivada como um caminho *local* a partir
+do `Path` da primeira pasta, fosse qual fosse o provider da pasta, então `entrada/remessas` no
+compartilhamento virava `/app/entrada/remessas` no disco do container — o diretório de trabalho, de
+propriedade do root. Em uma instalação como Windows Service ou systemd a mesma falha era mais silenciosa: o
+upload era aceito em uma pasta local que nenhum observador lê.
+
+**Correção.** Atualize para a 2.4.2 ou posterior e reinicie. Nenhuma mudança de configuração: os uploads
+caem na primeira pasta monitorada, no provider dela.
 
 ## Específico do Windows
 
@@ -1163,7 +1861,12 @@ Quando o acima não ajuda:
    licença vs. origem do certificado vs. criptografia).
 3. **Faça bisseção por ambiente.** Rode o mesmo binário em primeiro plano em modo `Development` — o
    terminal mostra o detalhe completo da exceção (o envelope de erro de Production o remove).
-4. **Inspecione o banco de dados.** `sqlite3 db/bulksigner.db` e consultas como
+4. **Leia o log de eventos operacionais.** Desde a 2.13.0 a [página **Events**](dashboard.md#events--eventos-operacionais) do dashboard (e o
+   `GET /api/events`) lista todo evento operacional — pausa e retomada, edições de perfil, decisões de
+   aprovação, assunções, inícios e paradas do serviço — do mais recente para o mais antigo, com filtros por
+   tipo, intervalo de datas e texto. Uma trilha que começa com um evento `JobsCleared` começa ali porque o
+   Clear Jobs apagou o que veio antes.
+5. **Inspecione o banco de dados.** `sqlite3 db/bulksigner.db` e consultas como
    `SELECT * FROM Jobs ORDER BY CreatedAt DESC LIMIT 20;` dão um quadro completo da atividade recente.
 
 Se, depois de tudo isso, o sintoma continuar inexplicado, entre em contato com o suporte da Lacuna

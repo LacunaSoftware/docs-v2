@@ -56,6 +56,21 @@ which is exactly the moment an operator needs them up, because it is the moment 
 
 So mixed versions are detected and reported, never prevented. Treat the Critical as the alarm it is.
 
+**An in-place image change is survivable, but it is not the recipe.** Since 2.5.0, changing the image on
+a running app (`az webapp config container set`) no longer costs a refused start. App Service starts the
+new container beside the old one under the same instance id and keeps the old one serving until the new
+one is warm; the new container **displaces** the old, which stands down — it finishes what it holds and
+claims nothing new — and says so in its log, as an `InstanceStoodDown` event and on its System page. See
+[Operations](operations.md#when-a-boot-finds-its-own-identity-already-live). An instance that shuts down
+cleanly retires its heartbeat row (since 2.4.3), so after *stop, set, start* there is nothing to
+displace at all, which is why that remains the tidier deploy.
+
+**A failed deploy takes the site down, and setting the previous tag back is the recovery.** If the new
+container fails its warm-up after displacing the old one, App Service does not keep routing to the old
+container: it stops the **whole site**, the stood-down container included, and keeps restarting it with
+the new image. Nothing the product does can prevent that. Point the app back at the previous image tag
+with `az webapp config container set`; it is ready again within about two minutes.
+
 ## Session affinity is required
 
 The dashboard is Blazor Server, and a circuit is a stateful SignalR connection that must keep landing
@@ -144,6 +159,14 @@ The mirror image is also stated: an instance that goes stale to its siblings **k
 not stopped, because this product's standing rule is that an in-flight job runs to natural completion.
 It never takes over its own jobs, whatever the table says.
 
+**The same window paces the question about a displaced instance.** After a redeploy overlap, the new
+container's sweep asks the store, once the window has passed, for jobs the displaced incarnation left
+behind. Once that question has come back empty it is asked again once per `Cluster:StaleAfterSeconds`,
+not once per poll (since 2.8.0) — on App Service every roll overlaps, so the displacement record never
+clears. The cost is that a displaced process which never stood down and claims a job late has it taken
+over within one window and one poll rather than within one poll, which is the wager above, not a new
+one.
+
 ## Rows nobody owns are reconciled by nobody
 
 A job row carrying **no owner** — left by a build older than the ownership column, or by a run with the
@@ -190,6 +213,35 @@ instead, because a wait budget is a wall-clock deadline that pausing does not ex
 The wake signal is process-local. An enqueue on instance A does not wake instance B's worker; B picks
 the job up on its next poll. `Pipeline:PollIntervalSeconds` is therefore the cluster's cross-instance
 latency bound — accepted and documented, not engineered around.
+
+**A signing profile edit rides the same bound, by design.** Signing profiles live in the operational
+store and are edited from the dashboard; a profile write bumps a counter in the store inside its own
+transaction, and every instance reads that counter on the poll it already runs — so a change made on
+instance A reaches instance B within one poll interval, with no message path between them to
+configure, secure or debug. What propagates is *behaviour*: format, verification, encryption, CNAB240
+checking and the whole approval rule. A **certificate** change does not, on any instance: each host
+opens its certificate once at startup and keeps the key handle, so changing one is a restart — on this
+topology, the stop-the-world restart described above.
+
+Two consequences worth expecting:
+
+- **Between a certificate edit and the restart, two instances can honestly report different sources
+  for the same profile** — each naming the key it would sign with, which is also the source it stamps on
+  the jobs it signs. A scrape or a dashboard request lands on an arbitrary instance, so read the answer
+  as "what would sign here", not "what the row says".
+- **The pending-restart marker a certificate edit raises is per instance, and truthful.** An instance
+  that has restarted shows nothing and one that has not shows the marker — both correct about
+  themselves — which is what makes a partial recycle readable. On the stop-the-world restart every
+  instance loses the marker together.
+
+**Two certificate sources cannot be chosen at all on this topology.** A PKCS#11 token and the host's own
+Windows certificate store live on one machine, and these instances are created and destroyed by scale
+operations — so creating a profile on either source, or re-pointing one onto them, is refused in the form
+while `Cluster:Enabled` is on. Configuration that states one is still a boot refusal. A profile **saved
+before the switch was turned on** is the one case neither catches: nothing re-validates a stored profile,
+so it is a startup warning instead, naming the profile and its source. Expect it to look asymmetric
+across the fleet: the instance that has the token signs and warns, while every instance without it
+reports the profile as degraded and fails the jobs routed to it.
 
 The same locality is what makes re-ingestion keep working for free: under all-watch, the instance that
 finishes a job always watches the folder it came from, so the process-local signal still reaches a
@@ -267,17 +319,24 @@ none of them is:
   The takeover policy walks that edge deliberately: a job that never reached the sign call is
   re-enqueued because *nothing was attempted*; a job past it fails. `Failed` is an honest terminal
   outcome, not "stuck", and the operator's manual retry remains the retry.
-- **In-flight jobs are sacred.** `POST /api/jobs/{id}/cancel` is valid for `Queued` jobs only, on every
-  instance.
-- **Signing profiles and watched folders stay in configuration.** Moving them into the database was
-  considered as a prerequisite and dropped when the topology settled — its motive was cross-instance
-  consistency, which App Service provides by construction.
+- **In-flight jobs are sacred.** `POST /api/jobs/{id}/cancel` is valid only for jobs no worker is
+  running — `Queued`, `AwaitingSigner` and `AwaitingApproval` — on every instance.
+- **Watched folders stay in configuration; signing profiles no longer do.** Moving profiles into the
+  database was considered as a prerequisite here and dropped when the topology settled, because App
+  Service provides cross-instance consistency by construction. It has since landed on its own terms:
+  profiles are rows in the operational store, edited from the dashboard, which moves approver-pool edits
+  from host-file access to dashboard authorization. What that adds here is the propagation bound above
+  and nothing else — no new topology and no coordination between instances. Watched folders are still
+  configuration, and every instance still watches every folder.
 - **The approval gate is unchanged.** The rule is still frozen onto the job at the park, a rejection is
   still a veto, and the staged bytes are still re-hashed before any signature exists.
-- **`ClearJobs` is terminal-only, and that landed for everyone.** It reports a skipped count on both
-  surfaces. Deleting the row under a running sibling's job was the sharpest operator-action hazard in
-  the inventory — and deleting it under one's own running worker was already dubious, which is why the
-  fix is not gated on the switch.
+- **Clear Jobs takes every job, a sibling's included — by decision, not by omission.** From 2.0.0 to
+  2.8.x it was terminal-only for everyone, because deleting the row under a running sibling's job was the
+  sharpest operator-action hazard in the inventory. Since 2.9.0 it deletes every job whatever its
+  status: an operator wiping the system from the danger zone has wiped a system with a job in it, on
+  purpose, and the dialog says so. The abandoned job's worker fails it, finds no row, and logs both — and
+  the per-file lease, not this action, is still what stops two instances signing one file. See
+  [Clear Jobs](operations.md#clear-jobs).
 
 ## What is not a limitation, despite looking like one
 

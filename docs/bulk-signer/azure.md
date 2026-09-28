@@ -204,7 +204,8 @@ az webapp identity assign --name bulksigner --resource-group bulksigner-rg
 Conceda a essa identidade `AcrPull` no registry, `Storage File Data Privileged Contributor` no
 compartilhamento, um login SQL mapeado para ela em `db_datareader` + `db_datawriter` + `db_ddladmin`,
 `Storage Blob Data Reader` no container que guarda o certificado, e `Storage Table Data Contributor` na
-conta da tabela de logs. O passo 3 adiciona a sexta e última delas.
+própria tabela de logs — restrita àquela tabela, que é tudo de que o destino precisa. O passo 3 adiciona
+a sexta e última delas.
 
 :::warning O que *não* entra nessa lista é o direito de assinar
 Sob `AzureKeyVault`, a chave do cofre é alcançada pelo registro de aplicativo do Entra nomeado em
@@ -301,12 +302,29 @@ az webapp config appsettings set --name bulksigner --resource-group bulksigner-r
   Signing__Profiles__0__Certificate__AzureKeyVault__AppSecret='@Microsoft.KeyVault(VaultName=bulksigner-kv;SecretName=bulksigner-app-secret)' \
   Signing__Profiles__0__Certificate__AzureKeyVault__Blob__Url='https://contosocerts.blob.core.windows.net/certificates/signer.cer' \
   Signing__Profiles__0__Certificate__AzureKeyVault__Blob__Credential=ManagedIdentity \
+  Signing__ProfileSecretsKey='@Microsoft.KeyVault(VaultName=bulksigner-kv;SecretName=bulksigner-profile-secrets-key)' \
   Pipeline__MaxConcurrency=4
 ```
 
 O `0` é o índice do perfil em `Signing:Profiles[]` e é posicional — reordenar aquele array
 silenciosamente reaponta estas configurações para um perfil diferente. O `Endpoint` precisa ser uma URL
 `https://` absoluta; um nome DNS puro é recusado no boot, nomeando a chave.
+
+**As configurações `Signing__Profiles__0__*` são uma semente de uso único.** No primeiro boot contra uma
+tabela de perfis vazia elas são importadas para a base operacional como a linha do perfil; depois disso
+são ignoradas — o log de boot diz isso toda vez que as encontra — e o perfil, certificado incluído, é
+editado na página **Perfis de assinatura** do dashboard. Mantenha-as até o primeiro boot ter rodado, e
+então apague-as. Veja
+[Configuração](configuration.md#signingprofiles--perfis-de-assinatura-por-pasta).
+
+**O `Signing__ProfileSecretsKey` é a chave sob a qual a importação criptografa o `AppSecret`**, porque a
+base nunca guarda um segredo em claro, e a importação se recusa sem ele. Crie-o uma vez como um segredo
+do cofre — qualquer valor aleatório longo, `openssl rand -base64 32` por exemplo — lido pelo mesmo tipo de
+Key Vault reference, e trate perdê-lo como perder todo segredo de perfil armazenado: não há caminho de
+recuperação. Veja
+[Configuração](configuration.md#signingprofilesecretskey--sob-o-que-os-segredos-dos-perfis-armazenados-são-criptografados).
+Sob `Pfx` como blob, a senha do PFX também é um segredo desses; só um PFX sem senha lido com
+`ManagedIdentity` dispensaria a chave.
 
 :::warning `Blob` e `CerPath` são exclusivos — os dois é recusado no boot, e nenhum também
 Essa recusa é deliberada em vez de implicante: dois certificados válidos para uma chave de cofre
@@ -353,18 +371,26 @@ tratado como seguro para concorrência e está isento do aviso de inicializaçã
 ### Renovação e rotação são janelas de mudança
 
 Três coisas aqui são lidas **uma vez, no boot**, e nada as reconsulta: os bytes do certificado no blob,
-a chave do cofre nomeada por `KeyName`, e o client secret por trás da Key Vault reference. Mudar
-qualquer uma delas exige, portanto, um restart — e um restart nesta topologia é a parada do mundo do
+a chave do cofre nomeada por `KeyName`, e o client secret do registro de aplicativo. Mudar qualquer uma
+delas exige, portanto, um restart — e um restart nesta topologia é a parada do mundo do
 [passo 8](#8-atualizações-param-o-mundo), não um restart rolante nem uma troca de slot. Planeje uma
 renovação ICP-Brasil, e a expiração de `-SecretValidityYears 2`, como indisponibilidades agendadas, e
 não como manutenção que se pode fazer a qualquer momento.
 
-:::danger Renove um artefato sem o outro e o boot recusa
+**Depois do primeiro boot, o client secret vive no perfil armazenado, e não no app setting.** A semente
+o copiou para a base operacional, criptografado, e a Key Vault reference do `…__AppSecret` não é lida de
+novo. Rotacioná-lo é, portanto: crie o segredo novo no registro de aplicativo, informe-o na página do
+perfil (*Editar certificado*, digitando o valor novo — um campo em branco mantém o armazenado), e então
+reinicie. O mesmo formulário é onde se aponta um `.cer` renovado ou um `KeyName` novo; o salvamento marca
+o perfil como aguardando reinicialização, e é na reinicialização que a mudança entra em vigor.
+
+:::danger Renove um artefato sem o outro e o perfil não consegue assinar
 Um certificado novo contra o `KeyName` antigo, ou uma chave nova contra o `.cer` antigo, falha na
-verificação de pareamento — o que nesta topologia significa que a janela de mudança termina sem nada
-rodando. Rode novamente o script de importação contra o novo PFX, para que ambos os artefatos se movam
-juntos, e leia a linha `profile` no [passo 6](#6-primeiro-boot-em-uma-instância) antes de considerar a
-janela encerrada.
+verificação de pareamento. O host ainda sobe, mas aquele perfil fica **degradado** e todo job roteado
+para ele falha com `profile.degraded` — em uma implantação de perfil único, a janela de mudança termina
+sem nada assinando. Rode novamente o script de importação contra o novo PFX, para que ambos os artefatos
+se movam juntos, e leia a linha `profile` no [passo 6](#6-primeiro-boot-em-uma-instância) antes de
+considerar a janela encerrada.
 :::
 
 ### O que este passo assume sobre a rede
@@ -408,11 +434,15 @@ e em qualquer outro alvo, e foi definido no [passo 3](#3-a-chave-de-assinatura-v
 passo atrás. Pegue o restante no arquivo `appsettings.Example.Azure.json.sample` do pacote de
 implantação, que é um formato trabalhado e preenchido de ponta a ponta, e traduza cada chave para sua
 forma com duplo sublinhado (`Signing:Profiles[0].Certificate.Source` →
-`Signing__Profiles__0__Certificate__Source`). Um boot sem certificado resolvível é fatal por design: um
-perfil que não consegue assinar não é representável.
+`Signing__Profiles__0__Certificate__Source`). Toda configuração `Signing__Profiles__*` e
+`Storage__Inputs__*__Profile` é **entrada da semente**, lida somente no primeiro boot; uma vez que os
+perfis estão na base, eles — pool, quórum, pasta de entrada e certificado incluídos — são editados pelo
+dashboard, de forma idêntica para toda instância. Um perfil cujo certificado não pode ser resolvido não
+interrompe o boot: ele sobe **degradado**, nomeado no banner e no `/api/ready`, e todos os outros perfis
+continuam assinando.
 
-Segredos — `Signing__PkiSdkLicense`, `Auth__ApiKey`, `ApproverPortal__LinkSecret`, qualquer
-`AppSecret` — pertencem a Key Vault references em vez de app settings literais, resolvidos pela managed
+Segredos — `Signing__PkiSdkLicense`, `Auth__ApiKey`, `Signing__ProfileSecretsKey`,
+`ApproverPortal__LinkSecret`, `CloudHub__ApiKey`, qualquer `AppSecret` — pertencem a Key Vault references em vez de app settings literais, resolvidos pela managed
 identity do web app que detém `Key Vault Secrets User`. O passo 3 usa exatamente esse mecanismo para o
 próprio client secret do cofre, e explica lá por que isso não é circular. Toda chave que este produto
 aceita, com seu tipo, padrão e forma de variável de ambiente, está em
@@ -443,6 +473,14 @@ conhecer:
   Um redirecionamento em processo responde ao ping do health check com um 307, que o App Service lê
   como falha — veja [a nota sobre o health check](#o-health-check-lê-o-endpoint-de-readiness) abaixo.
 
+:::note Um cluster de homologação com os certificados de teste da Lacuna
+O App Service não define nome de ambiente, então o app roda como `Production` — sob o qual o
+[`Signing:TrustLacunaTestRoot`](configuration.md#signingtrustlacunatestroot--certificados-de-teste-para-uma-homologação)
+é recusado no boot. Um app de homologação que queira os certificados de teste Turing / Fermat define
+`Signing__TrustLacunaTestRoot=true` **e** `ASPNETCORE_ENVIRONMENT=Staging` no mesmo comando. Nunca defina
+o primeiro em um app que assine qualquer coisa real.
+:::
+
 ## 5. Configurações de plataforma
 
 ```bash
@@ -471,6 +509,15 @@ O `/api/ready` é anônimo, por instância, e retorna `503` quando qualquer uma 
 que é precisamente a pergunta que o App Service está fazendo. Aponte o Health check para ele e a
 plataforma para de rotear para uma instância que não consegue servir, e eventualmente substitui uma que
 permaneça assim.
+
+Ele é anônimo *por causa* desse consumidor: o Health check não consegue enviar a chave de API (a
+Microsoft documenta que o caminho precisa permitir acesso anônimo quando o app roda a própria
+autenticação), então o `Readiness:RequireApiKey` fica no seu padrão `false` aqui. Ligá-lo faria a
+plataforma ler um `401` em toda instância como "não saudável" de uma vez — nenhuma é removida da rotação,
+a plataforma começa a substituí-las uma por hora, e a métrica do Health check fica vermelha enquanto o
+portão estiver ligado. O que o corpo anônimo carrega é o nome e o veredito de cada verificação e nada
+mais; o diagnóstico — servidor e catálogo, URLs de compartilhamentos, a frase de falha de um SDK — fica
+no `/api/ready/details`, atrás da chave de API.
 
 Três consequências a aceitar conscientemente:
 
@@ -506,11 +553,12 @@ O que procurar no painel **Service ready**:
 | `azure shares` | alcançáveis. Um compartilhamento inalcançável **não** impede o host de subir, mas reprova o `/api/ready` e não ingere nada até responder. |
 | `forwarded headers` | o conjunto de confiança nominalmente, não apenas `on`. |
 | `logs` | o destino de tabela entre os destinos. Se estiver ausente, você também terá visto o Critical sobre arquivos de log rotacionados em disco efêmero. |
-| `profile` | o certificado que de fato carregou — `cades · cert=AzureKeyVault · blob=contosocerts/certificates/signer.cer · verify=on · …`. As duas metades são evidência: `cert=AzureKeyVault` significa que o cofre respondeu e a chave foi encontrada, `blob=…` significa que o `.cer` foi lido **e pareado** contra ela. Esta é a linha para ler após qualquer renovação de certificado — é a única confirmação de que ambos os artefatos se moveram juntos. |
+| `profile` | o certificado que de fato carregou — `cades · cert=AzureKeyVault · blob=contosocerts/certificates/signer.cer · verify=on · …`. As duas metades são evidência: `cert=AzureKeyVault` significa que o cofre respondeu e a chave foi encontrada, `blob=…` significa que o `.cer` foi lido **e pareado** contra ela. Uma linha com o prefixo `DEGRADED · ` significa que o certificado não foi resolvido, com o motivo ao lado. Esta é a linha para ler após qualquer renovação de certificado — é a única confirmação de que ambos os artefatos se moveram juntos. |
 
-Depois, faça `GET /api/ready` e confirme que toda verificação está verde, e abra **Sistema →
-Instâncias** no dashboard: uma linha, marcada como a instância na qual você está lendo, com um chip
-**Live**.
+Depois, faça `GET /api/ready/details` com a chave de API e confirme que toda verificação está verde,
+abra **Perfis de assinatura** para confirmar que a semente importou o que você pretendia, e abra
+**Sistema → Instâncias** no dashboard: uma linha, marcada como a instância na qual você está lendo, com
+um chip **Live**.
 
 :::warning Atualizando uma implantação de instância única existente em vez de construir uma nova?
 Suba **uma vez** com `Cluster:Enabled = false` e deixe a recuperação rodar antes de ligar o modo. Uma
@@ -582,6 +630,28 @@ az webapp start --name bulksigner --resource-group bulksigner-rg
 Não é um restart rolante, e **não é uma troca de deployment slot** — um slot de staging carregando a
 connection string de produção é um segundo conjunto de instâncias entrando no cluster em uma versão
 diferente da aplicação, que é o único formato que este desenho não suporta.
+
+**O `stop` é a implantação mais limpa, e não uma exigência.** Mudar a imagem de um app em execução
+inicia o container novo ao lado do antigo na mesma instância; ambos derivam uma única identidade do
+`WEBSITE_INSTANCE_ID`, e a plataforma mantém o antigo rodando até o novo estar aquecido. Desde a 2.5.0 o
+container novo **desloca** o antigo na hora e o antigo **se retira** — não captura nada novo e termina o
+que detém —, então um `container set` no lugar funciona, ao custo de um aviso nomeando a encarnação
+deslocada, e com os jobs inacabados do container antigo assumidos `Cluster:StaleAfterSeconds` depois se a
+plataforma o derrubar antes. Parando primeiro, nada se sobrepõe: o container antigo aposenta sua linha de
+heartbeat na descida e o novo não tem nada a deslocar. (Até a 2.4.x uma troca no lugar custava ao menos
+um início recusado.)
+
+Duas coisas a saber sobre uma troca no lugar:
+
+- **Se o container novo falhar no aquecimento, volte a tag anterior.** O App Service para o site
+  inteiro — o container que se retirou incluído — e continua reiniciando-o com a imagem nova; o container
+  antigo não tem a chance de retomar ali. A recuperação é
+  `az webapp config container set … --container-image-name <nome-do-registry>.azurecr.io/bulksigner:<versão-anterior>`.
+- **Alguns segundos depois de a plataforma remover o container antigo**, o primeiro comando à base em
+  cada conexão que o novo abriu durante o aquecimento pode falhar uma vez com um
+  `Execution Timeout Expired` de 35 segundos. É uma conexão cortada junto com o container antigo, não a
+  base: uma falha por conexão desse tipo, e depois o pool se recupera sozinho. Uma implantação que para
+  primeiro não produz isso.
 
 A marca de versão no heartbeat é o fio de alarme, não a guarda: uma instância subindo que enxergue
 heartbeats vivos de uma versão diferente registra um **Critical e continua**. Deliberadamente não é uma
@@ -815,14 +885,16 @@ arquivos de log rotacionados de um container vão embora com o container
 ## Quando alguma coisa recusa
 
 Todo modo de falha de cluster, com sua mensagem exata e sua correção, está em
-[Diagnóstico de problemas](troubleshooting.md#modo-cluster). Os cinco que você tem mais chance de
-encontrar em uma primeira implantação:
+[Diagnóstico de problemas](troubleshooting.md#modo-cluster). Os que você tem mais chance de encontrar
+em uma primeira implantação:
 
 | Sintoma | Causa |
 |---|---|
 | `Cluster mode refused to start`, nomeando chaves | Uma das recusas de boot em [Antes de começar](#antes-de-começar). A mensagem nomeia todas as chaves com problema de uma vez, em vez de uma por tentativa. |
-| **O container nunca inicia** | Duas causas bem diferentes compartilham este sintoma, e a do passo 2 é a primeira em que você vai pensar. Ou o pull da imagem falhou (`acrUseManagedIdentityCreds` nunca definido — passo 2), ou um perfil não conseguiu resolver seu certificado, o que é **fatal por design**: um cofre inalcançável, um client secret expirado, ou um `.cer` que não pareia com o `KeyName` ([passo 3](#3-a-chave-de-assinatura-vive-em-um-cofre)). O fluxo de log os distingue — uma falha de pull o deixa vazio porque ainda não há aplicação, enquanto uma falha de certificado escreve o motivo antes de sair. Leia-o antes de presumir que é o registry. |
-| Boot recusado nomeando uma identidade de instância que já bate | Dois hosts apresentando um nome, ou uma segunda implantação apontada para este banco de dados — mais comumente um slot carregando a connection string de produção. Se o detentor de fato se foi, a linha dele fica obsoleta sozinha; esperar o `Cluster:StaleAfterSeconds` passar é a correção suportada. |
+| **O container nunca inicia** | Ou o pull da imagem falhou (`acrUseManagedIdentityCreds` nunca definido — passo 2), ou uma recusa de boot disparou. O fluxo de log os distingue — uma falha de pull o deixa vazio porque ainda não há aplicação, enquanto uma recusa nomeia a chave antes de sair. A importação do primeiro boot se recusa, por exemplo, quando um perfil carrega um segredo e o `Signing__ProfileSecretsKey` não está definido ([passo 3](#as-configurações)). Leia o fluxo antes de presumir que é o registry. |
+| O app sobe mas o perfil está `DEGRADED` e todo job falha com `profile.degraded` | O perfil não conseguiu resolver seu certificado: um cofre inalcançável, um client secret expirado, ou um `.cer` que não pareia com o `KeyName` ([passo 3](#3-a-chave-de-assinatura-vive-em-um-cofre)). O motivo está na linha `profile` do banner e no `/api/ready/details`. Corrija na página do perfil (*Editar certificado*) ou no cofre, e então reinicie. |
+| O boot avisa `displaced the previous incarnation … which was still live` | Uma **reimplantação no lugar** ([passo 8](#8-atualizações-param-o-mundo)): o container novo tomou a identidade e o antigo se retirou — esperado em toda troca no lugar. Se este host **não** está no meio de uma reimplantação, dois hosts estão apresentando uma mesma identidade e vão se revezar: leia os dois logs e renomeie um, ou aponte-o para o próprio banco de dados. |
+| Boot recusado dizendo que a identidade `could not be registered in 3 attempts` | Toda escrita da linha de heartbeat perdeu uma corrida para outra encarnação: dois hosts apresentando um mesmo nome subindo no mesmo instante contra um mesmo banco de dados, ou uma falha da base. Encontre o outro host na visão Instâncias de uma instância que esteja rodando. |
 | Boot recusado nomeando duas bases operacionais | O marcador do compartilhamento de trabalho diz que ele pertence a uma base diferente. Dois clusters sobre um compartilhamento de trabalho é destruição mútua de dados que banco de dados nenhum consegue enxergar, que é o que aquele gate existe para pegar. |
 | Operadores jogados de volta ao login de forma intermitente | As instâncias não estão compartilhando um key ring — geralmente um host cujo `Cluster:Enabled` é falso, ou instâncias apontadas para bases diferentes. |
 

@@ -80,10 +80,13 @@ carrega um [bloco `Approval`](approvals.md).
         │         │           │        │
         │         │           │        └─ recusado / expirado / timeout ─▶ Failed
         │         │           └─ concluído → bytes baixados ────────────▶ Verifying
-        │         └─ rejeitado / cancel do operador / orçamento expirado ▶ Canceled
+        │         └─ rejeitado* / cancel do operador / orçamento expirado ▶ Canceled
         └─ quórum atingido ──▶ volta a Queued (reentra na fila comum)
 
    Failed ──retry do operador──▶ um NOVO job Queued (ParentJobId definido; o job falho segue Failed)
+
+   * um arquivo rejeitado é devolvido a output/ como <nome>.reject<ext>; a cópia em stage de um
+     job cancelado ou expirado vai para error/
 ```
 
 Regras principais:
@@ -95,13 +98,27 @@ Regras principais:
   operador e — em um perfil que define `Approval.ExpiresAfter` — o esgotamento do orçamento de espera.
   Todas as três significam "este arquivo não será assinado, deliberadamente"; a trilha de auditoria é o
   que as distingue.
+- **Uma rejeição é um veto, e ela devolve o arquivo.** Uma única rejeição interrompe o job, diga o que
+  disser a aritmética do quórum. O job termina `Canceled`, o arquivo é devolvido a `output/` como
+  `<nome>.reject<ext>` — `folha.rem` vira `folha.reject.rem`, criptografado como todo outro artefato
+  quando o perfil criptografa — e o original é removido de `input/`. O arquivo devolvido **não está
+  assinado**: qualquer coisa que leia `output/` como uma pasta de assinaturas precisa olhar o nome. Se
+  esse nome já estiver ocupado em `output/`, nada é sobrescrito: a cópia em stage vai para
+  `error/<jobid>/` e a entrada permanece em `input/`. O retry não se aplica — o arquivo é corrigido e
+  enviado de novo. Veja [A rejeição é um veto](approvals.md#a-rejeição-é-um-veto).
 - **A liberação reentra na fila comum** em vez de retomar no lugar, de modo que um job liberado passa
   pela mesma reivindicação e pelas mesmas etapas pré-assinatura que qualquer outro — inclusive a
   [guarda de obsolescência das datas de pagamento](cnab240.md#datas-de-pagamento-que-já-passaram), que é
-  exatamente a verificação que uma demora humana sem prazo definido precisa que se refaça. Ele retoma
+  exatamente a verificação que uma demora humana sem prazo definido precisa que se refaça (a menos que o
+  perfil desligue essa guarda com `CheckCnab240PaymentDates`, para um banco que processa um pagamento
+  com data passada no próximo dia útil — veja [Arquivos de pagamento CNAB240](cnab240.md)). Ele retoma
   sobre a cópia com que ficou retido, e os bytes em stage são re-hasheados imediatamente antes de a
   assinatura existir; uma divergência reprova o job com `approval.content-changed`. Veja
   [Aprovações](approvals.md#o-que-é-aprovado).
+- **Um job retido também pode expirar, se o perfil assim disser.** Com `Approval.ExpiresAfter`
+  definido, um job retido além da janela é cancelado com o motivo `Approval window expired.`, sua cópia
+  em stage é movida para `error/` e um evento operacional `ApprovalExpired` é registrado. A janela é de
+  relógio de parede: **uma pausa não a estende**. Veja [O orçamento de espera](approvals.md#o-orçamento-de-espera).
 - **O cancelamento é válido somente a partir de `Queued`, `AwaitingSigner` ou `AwaitingApproval`.** Jobs
   locais em andamento (`Processing`, `Verifying`) não podem ser cancelados — eles rodam até a conclusão
   ou a falha natural. O endpoint de cancelamento retorna `409` com `code = "job.not-queued"` contra um
@@ -112,6 +129,15 @@ Regras principais:
 - **`Canceled` é terminal.** Os arquivos de jobs cancelados permanecem em `input/`; o observador honra
   cancelamentos recentes e não os ressuscita automaticamente. Ações dirigidas pelo operador (Upload,
   Retry, Rescan) reenfileiram.
+- **`Failed` é terminal, e o seu arquivo espera da mesma forma.** Uma falha deixa a entrada onde estava,
+  e desde a 2.11.0 o observador não a enfileira de novo por conta própria — nem no próximo tique de uma
+  pasta por sondagem, nem na enumeração que uma inicialização do serviço executa — até que um operador a
+  reexecute via Retry, Rescan ou Upload. (Antes da 2.11.0, uma pasta por sondagem — toda pasta do Azure
+  Files, e uma local configurada para sondar — reoferecia um arquivo que falhou a cada tique, de modo que
+  uma falha cuja causa persistia produzia um novo job `Failed` por tique; logo depois de um Clear Jobs,
+  parecia que a limpeza não tinha limpado.) A decisão é tomada somente pelo status do job mais recente,
+  então um arquivo corrigido deixado com o mesmo nome é capturado por essas mesmas ações do operador, e
+  não pelo observador.
 - **`Failed → Queued` não é uma transição — é um novo job.** O retry cria um job novo com
   `ParentJobId = (o job falho).Id`, copiando a entrada original. O job falho permanece `Failed` para
   sempre, para fins de auditoria.
@@ -226,8 +252,8 @@ nos padrões**, e até um intervalo inteiro em um tique ruim.
   arquivo morto consulta a cada 5 minutos.
 - O piso é 5 s, e a troca é dinheiro: todo tique é uma transação de listagem, tenha chegado algo ou não.
   Uma pasta consultada a cada 5 s custa seis vezes o que a mesma pasta custa a cada 30 s, ociosa ou não.
-- Dois caminhos **não** são por temporizador e continuam imediatos: `POST /api/files` e
-  `POST /api/rescan`. Se alguém precisa de um arquivo assinado *agora*, faça rescan naquela pasta em vez
+- Dois caminhos **não** são por temporizador e continuam imediatos: um upload (`POST /api/files`, ou
+  **Upload files** na página Jobs) e `POST /api/rescan`. Se alguém precisa de um arquivo assinado *agora*, faça rescan naquela pasta em vez
   de baixar o intervalo para sempre.
 
 Não leia um primeiro job lento como uma pasta quebrada. Leia a página Entradas: uma pasta que está
@@ -291,7 +317,8 @@ devolve o lease; o arquivo permanece como o registro de quem rodou por último.
 2. a mesma linha é impressa na saída padrão, e a linha `work share owner` do banner lê
    `CONTENDED at startup by …`;
 3. a página Sistema a exibe acima dos caminhos de armazenamento;
-4. o `/api/ready` retorna **503** com uma verificação `work-share-owner` vermelha;
+4. o `/api/ready` retorna **503** com uma verificação `work-share-owner` vermelha, cujo detalhe em
+   `/api/ready/details` é a mesma frase;
 5. o lease é quebrado, tomado, e o boot segue em frente.
 
 **Por que um aviso e não uma recusa.** Um lease vive no serviço de armazenamento, e não no processo que o
@@ -338,16 +365,67 @@ outras. **Sistema → Instâncias** no dashboard é aquela tabela.
 | Coluna | O que ela lhe diz |
 |---|---|
 | Instância | A identidade derivada. No App Service ela vem do `WEBSITE_INSTANCE_ID` da plataforma, então é estável por toda a vida da instância e distinta entre irmãs. |
-| Estado | **Live** enquanto o último heartbeat está dentro de `Cluster:StaleAfterSeconds`; **Stale** passado ele. Stale é uma presunção, não uma morte confirmada — veja [a aposta](high-availability.md#uma-morte-presumida-é-uma-aposta). |
+| Estado | **Live** enquanto o último heartbeat está dentro de `Cluster:StaleAfterSeconds`; **Stopped** quando o processo aposentou sua linha em um desligamento limpo — o rastro comum de uma reimplantação; **Stale** quando ficou em silêncio além do limiar sem avisar. Stale é uma presunção, não uma morte confirmada — veja [a aposta](high-availability.md#uma-morte-presumida-é-uma-aposta). |
 | Versão | A versão da aplicação que aquela instância está rodando. Dois valores diferentes aqui em qualquer momento que não seja uma janela de implantação é a condição de versões mistas, e ela é reportada como um Critical no boot da instância mais nova. |
 | Última batida | Idade do heartbeat mais recente. A legenda sob a tabela nomeia a cadência (`Cluster:HeartbeatSeconds`, padrão 15) e o limiar de obsolescência (padrão 60) de fato em vigor. |
 
 Uma linha é marcada como a instância que respondeu à sua requisição. Como o balanceador de carga escolhe
 por requisição, recarregar a página move aquela marcação entre linhas — que é a confirmação mais barata
-disponível de que o tráfego realmente está distribuído.
+disponível de que o tráfego realmente está distribuído. Uma linha cuja instância **deslocou** uma
+predecessora viva nomeia essa predecessora, e quando, sob a identidade — veja a próxima seção.
 
 O `GET /api/folders` carrega um campo `instance` pelo mesmo motivo: um cliente de máquina que o consulta
 precisa distinguir "a pasta mudou" de "uma instância diferente respondeu".
+
+### Quando um boot encontra a própria identidade ainda viva
+
+:::warning Mudou na 2.5.0 — uma predecessora viva é deslocada, não recusada
+Até a 2.4.x, uma instância subindo que encontrava a própria identidade ainda batendo se recusava a
+iniciar (a 2.4.3 primeiro esperava por ela, e depois recusava). Desde a 2.5.0 o novo boot **desloca** a
+detentora viva e segue em frente.
+:::
+
+É assim que uma reimplantação no lugar no App Service se parece: a plataforma inicia o novo container ao
+lado do antigo, sob o mesmo id de instância, e mantém o antigo servindo — e batendo — até que o novo
+passe na sua sondagem de aquecimento. Nem uma recusa nem uma espera conseguiriam atender isso, então:
+
+- **O novo boot** toma a identidade de imediato e registra um `Warning` nomeando a encarnação deslocada,
+  a sua build e a sua última batida. Não há inicialização que falha.
+- **O processo deslocado se retira** na sua próxima batida: um `Critical` no log *dele*, um evento
+  operacional `InstanceStoodDown`, uma linha `cluster-instance` vermelha no seu `/api/ready` — que
+  **não** reprova a sondagem, já que um 503 faria a plataforma retirar o único container para o qual
+  ainda está roteando — e um banner acima da tabela Instâncias na sua página Sistema. Ele não reivindica
+  nenhum job novo, não executa assunção e não consulta o Lacuna Signer sobre nada; o que ele detém roda
+  até a conclusão, e ele continua servindo a web até que a plataforma o pare.
+- **Ele retoma por conta própria** se a linha da encarnação mais nova depois ficar parada ou obsoleta —
+  uma recém-chegada que aposentou sua linha em uma parada graciosa, ou um segundo host desde então
+  parado — com um `Warning`, um evento `InstanceResumed` e um `/api/ready` verde de novo. Ele nunca
+  toma a identidade de volta de uma detentora que ainda está batendo.
+- **O que a vida deslocada deixou por terminar** é deixado em paz pela
+  [recuperação na inicialização](#recuperação-na-inicialização) do novo boot e assumido um
+  `Cluster:StaleAfterSeconds` depois do deslocamento, sob a política comum de
+  [assunção](#quando-uma-instância-para-de-responder-uma-sobrevivente-assume-seus-jobs).
+- **Um boot cuja base não respondeu** se registra no seu primeiro heartbeat que alcança a base,
+  deslocando exatamente como o boot teria feito.
+- **Um desligamento limpo aposenta sua linha primeiro**, então um reinício após uma parada graciosa não
+  desloca nada — e é por isso que *parar, trocar, iniciar* continua sendo a implantação mais limpa.
+
+:::note No App Service, uma implantação que falha é desfeita reapontando a tag de imagem anterior
+Se o novo container falha no aquecimento depois de deslocar o antigo, o App Service **não** volta para o
+container antigo: ele para o **site inteiro** — inclusive o container que se retirou, antes que a linha
+da sucessora pudesse ficar obsoleta — e continua reiniciando-o com a imagem nova. A retomada descrita
+acima não consegue acontecer ali. Aponte o app de volta para a tag de imagem anterior
+(`az webapp config container set`) e ele fica pronto de novo em cerca de dois minutos. Veja
+[Atualizações param o mundo](high-availability.md#atualizações-param-o-mundo).
+:::
+
+**Dois hosts apresentando um mesmo nome, portanto, também não são recusados**: eles se revezam, de forma
+ruidosa dos dois lados, e exatamente um reivindica trabalho a cada momento. Se você vir um deslocamento
+quando ninguém está reimplantando, leia os dois logs e renomeie um dos hosts ou aponte-o para a sua
+própria base. A única recusa de boot que resta é um registro que perdeu toda corrida de escrita pela sua
+linha; ela nomeia a build e a última batida da vencedora. Apagar a linha enquanto uma detentora está
+rodando remove o relato, e não a condição. Veja
+[Diagnóstico de problemas](troubleshooting.md#modo-cluster).
 
 ## Quando uma instância para de responder, uma sobrevivente assume seus jobs
 
@@ -434,12 +512,24 @@ ganhar vazão (somente PFX — veja a ressalva sobre PKCS#11 / WindowsStore em
    processamento.
 5. Em qualquer falha: move o conteúdo de `processing/<jobid>/` para `error/<jobid>/`, marca o job como
    `Failed`, e registra a mensagem de exceção no campo de erro do job e no histórico.
-6. **A entrada original é removida de `input/` somente após verificação bem-sucedida.** A verificação
-   acontece antes da exclusão, nunca o contrário.
+6. **A entrada original é removida de `input/` somente após verificação bem-sucedida, e somente quando
+   ainda é o arquivo que foi colocado em stage.** A verificação acontece antes da exclusão, nunca o
+   contrário — e um arquivo que o pipeline não processou nunca é apagado. Veja
+   [Quando um arquivo de entrada muda no meio de um job](#quando-um-arquivo-de-entrada-muda-no-meio-de-um-job).
 
 **Drenagem na pausa.** Quando um operador pausa enquanto há jobs em andamento, o worker para de
 reivindicar novos, mas os que já estão rodando vão até o fim. O card "Slots ocupados" do dashboard vai
 diminuindo conforme eles drenam.
+
+**Três portas de entrada.** Um arquivo chega à fila por uma pasta monitorada, pelo `POST /api/files` ou
+pelo botão **Upload files** da página Jobs, que envia cada arquivo pelo mesmo tratador da rota REST — o
+mesmo limite de tamanho, a mesma sanitização do nome do arquivo e as mesmas verificações de perfil —, de
+modo que os dois recusam um arquivo nos mesmos termos. O diálogo pede um perfil de assinatura habilitado
+e termina com um relatório por arquivo, com um link para cada job que criou. `Upload:Enabled = false`
+desliga **os dois** caminhos de upload de uma vez: o `POST /api/files` responde `409` com
+`upload.disabled`, e a página Jobs não mostra o botão de upload. Pastas monitoradas, Rescan e Retry não
+são afetados; a chave é lida no boot, então religá-la exige um reinício. Veja
+[Configuração](configuration.md#upload).
 
 ### Perfis LacunaSigner — worker de consulta separado
 
@@ -449,6 +539,95 @@ concorrência é liberado tão logo o despacho tem sucesso. Um worker de consult
 linha `AwaitingSigner` em sua própria cadência (`Signer:PollIntervalSeconds`, padrão 30 s), baixa os
 bytes quando o documento remoto é concluído, e roda a mesma cauda de verificar → opcionalmente
 criptografar → promover. Veja [Integração com o Lacuna Signer](lacuna-signer.md).
+
+## Roteando uma pasta monitorada para um perfil de assinatura
+
+:::warning Mudou na 2.2.0 — o perfil escolhe a sua pasta
+Uma pasta monitorada é assinada sob **o perfil que a escolheu**, e um perfil escolhe a sua pasta pela
+própria página no dashboard — uma pasta por perfil, um perfil por pasta. O `Storage:Inputs[].Profile`
+passou a ser **entrada de semeadura**: ele é lido uma única vez, no primeiro boot contra uma tabela de
+perfis vazia, e ignorado (e reportado como ignorado) em todo boot depois disso. Depois do primeiro boot,
+o arquivo de configuração não consegue rotear uma pasta. Veja
+[`Storage:Inputs[].Profile`](configuration.md#storageinputsprofile--roteamento-por-pasta).
+:::
+
+Nada mais sobre a pasta muda de lugar: seu nome, caminho, provider, credenciais e intervalo de sondagem
+continuam em `Storage:Inputs[]`, validados no boot, e são o que a página Entradas lista. O que a página do
+perfil decide é qual pasta alimenta qual perfil — qual certificado e qual regra de aprovação os arquivos
+da pasta recebem.
+
+### Pela página do perfil
+
+1. Abra a página do perfil no dashboard (`/profiles/{name}`) e clique em **Edit behaviour**. O seletor
+   **Input folder** oferece *nenhuma*, toda pasta que este host configurou e que nenhum outro perfil
+   usa, e a pasta atual do próprio perfil.
+2. Escolha a pasta e salve. O observador da pasta começa a monitorá-la em um ou dois intervalos de
+   `Pipeline:PollIntervalSeconds`, em toda instância, sem reinício. Arquivos que já estão na pasta são
+   capturados sem rescan.
+3. Confira a página Entradas: o card da pasta agora carrega o chip do perfil, com um link de volta para
+   ele.
+
+Um perfil criado em `/profiles/_new` escolhe a sua pasta no mesmo formulário. O evento de auditoria
+registra a mudança pelo nome da pasta, nunca pelo caminho — `InputFolder (none) → remessas` em uma
+edição e `Input folder: remessas.` em uma criação.
+
+**Duas recusas, ambas no salvamento.** Uma pasta que este host não configurou em `Storage:Inputs[]`, e
+uma pasta que outro perfil já usa — a segunda nomeia o dono; limpe a pasta lá primeiro, ou escolha outra.
+Dois salvamentos escolhendo a mesma pasta no mesmo instante deixam exatamente um dono, e o perdedor é
+informado de quem a levou. Nenhuma das recusas é feita no boot: um vínculo armazenado não é revalidado,
+então uma pasta renomeada ou removida da configuração depois de um perfil tê-la escolhido é um **relato
+de degradação** — no banner de inicialização, como uma linha `profile-input-folder:<profile>` no
+`/api/ready` que não reprova o veredito, e como um alerta em `/profiles` e na própria página do perfil —
+enquanto o perfil continua atendendo uploads.
+
+### O que significa *não atribuída*
+
+Uma pasta que nenhum perfil escolheu está **não atribuída**, e nada a está monitorando. Ela aparece
+como:
+
+- um chip cinza na página Entradas com o texto `unassigned — no profile has chosen this folder`;
+- `status: "Unassigned"`, sem `profileName`, no `GET /api/folders`;
+- uma linha `input-folder:<nome>` **verde** no `/api/ready` — nada está quebrado, e uma linha vermelha
+  diria a um orquestrador para retirar uma instância por causa de uma pasta que ninguém pediu para ela
+  monitorar;
+- um `Warning` no log, no boot e sempre que um perfil libera a pasta.
+
+Arquivos deixados em uma pasta não atribuída **esperam**: não são ignorados, nem movidos, nem recusados,
+e são capturados no momento em que um perfil escolhe a pasta. Uma pasta não atribuída **não** recai no
+`default` — isso colocaria os seus arquivos sob uma regra que ninguém escolheu. O `default` é o recurso
+para um upload que não nomeia perfil, e para uma pasta que não nomeia nenhum na única leitura da
+semeadura, nunca para uma pasta deixada sem escolha depois.
+
+Uma pasta fica não atribuída de uma de três formas: a semeadura a deixou assim no primeiro boot (uma
+pasta nomeando um perfil que a seção não declara, ou uma segunda pasta nomeando um perfil que uma pasta
+anterior já levou), um perfil a liberou pela sua página, ou a tabela de perfis foi semeada por uma versão
+anterior à 2.2.0 e nunca foi vinculada. O remédio é o mesmo em todos os casos: escolha a pasta na página
+de um perfil.
+
+### Movendo uma pasta entre perfis
+
+Limpe a pasta no perfil que a tem, **depois** escolha-a no perfil que deve tê-la — nessa ordem, porque o
+segundo salvamento é recusado enquanto o primeiro perfil ainda é dono dela. No intervalo, a pasta fica
+brevemente não atribuída; um arquivo que chegar nessa janela é capturado assim que o segundo salvamento
+tiver efeito, então nada se perde e nada é assinado duas vezes. Jobs já enfileirados a partir da pasta
+mantêm o perfil sob o qual foram enfileirados, de modo que o nome de uma pasta em um job sempre se lê como
+exatamente um certificado e uma regra de aprovação.
+
+Duas pastas que devem seguir uma mesma regra são dois perfis com as mesmas configurações.
+
+### Desabilitando um perfil que usa uma pasta
+
+Desligar **accept new work** é recusado enquanto o formulário ainda carrega uma pasta, nomeando-a — a
+alternativa é uma pasta cujos arquivos param silenciosamente de ser assinados. Limpe a pasta no mesmo
+salvamento e a desabilitação é aceita; a pasta fica não atribuída, diz isso na página Entradas, e espera
+por outro perfil.
+
+### O que um rescan e um retry fazem com o vínculo
+
+- Um **rescan** pula uma pasta não atribuída inteira e diz isso — veja [Rescan](#rescan).
+- Um **retry mantém o perfil que o job que falhou registrou**, seja qual for o perfil que a pasta
+  alimenta hoje — veja [Repetindo jobs que falharam](#repetindo-jobs-que-falharam). Um job que deve ser
+  assinado sob o novo perfil da pasta é cancelado e enviado de novo.
 
 ## Pausar e retomar
 
@@ -477,9 +656,20 @@ Quando uma pausa está em vigor:
 - Jobs já em `Processing` / `Verifying` concluem normalmente. A pausa impede a **próxima** captura, não
   o trabalho em andamento.
 - O gauge `bulksigner_pipeline_paused` vira `1`.
-- Um evento de sistema é escrito com o `reason` opcional:
+- Um evento operacional é escrito com o `reason` opcional:
   `"Pipeline paused by operator. Reason: Manutenção trimestral."`. A mesma convenção se aplica à
-  retomada.
+  retomada. Ambos podem ser lidos na página `/events` do dashboard.
+
+Uma pausa e uma retomada emitidas no mesmo instante não se sobrescrevem silenciosamente: exatamente uma
+das duas escritas vence, e a perdedora recebe `409` com o código `pipeline.race-lost`, sem ter registrado
+nada. Releia o `GET /api/pipeline/state` e repita se a sua intenção continuar valendo.
+
+:::note Implantações com SQL Server antes da 2.4.3
+A base operacional em SQL Server era criada sem a linha de estado do pipeline onde a flag de pausa vive,
+então nessas versões o `POST /api/pipeline/pause` respondia `pipeline.state-missing` e o pipeline rodava
+mesmo assim. Desde a 2.4.3, uma migração aplicada no boot acrescenta a linha, e pausar e retomar
+funcionam nos dois providers.
+:::
 
 ## Cancelando jobs
 
@@ -488,11 +678,25 @@ curl -X POST http://localhost:8080/api/jobs/$JOB_ID/cancel \
   -H "X-API-Key: $BULK_SIGNER_API_KEY"
 ```
 
-Válido para `Queued` e `AwaitingSigner` (este último só existe para perfis LacunaSigner). O endpoint
-retorna `409 { code: "job.not-queued" }` se o job já avançou além desses estados (por exemplo, um job
-local que o worker pegou entre a decisão do operador e a requisição). Jobs locais em andamento são
-sagrados — removê-los no meio da assinatura deixaria conteúdo órfão em `processing/` e uma saída não
-verificada.
+Válido para `Queued`, `AwaitingSigner` e `AwaitingApproval`. Os dois estados de espera podem ser
+cancelados justamente porque nada os segura — um job `AwaitingSigner` espera por um serviço remoto, um
+job `AwaitingApproval` por uma pessoa, e qualquer uma das esperas pode acabar sendo uma que você não quer
+mais concluir. O endpoint retorna `409 { code: "job.not-queued" }` se o job já avançou além desses
+estados (por exemplo, um job local que o worker pegou entre a decisão do operador e a requisição). Jobs
+locais em andamento são sagrados — removê-los no meio da assinatura deixaria conteúdo órfão em
+`processing/` e uma saída não verificada.
+
+- **`AwaitingSigner`:** a transição local para `Canceled` é confirmada primeiro, e então o documento
+  remoto no Lacuna Signer é cancelado em melhor esforço; uma falha remota é registrada e **não** desfaz o
+  cancelamento local. Veja [Semântica do cancelamento](lacuna-signer.md#semântica-do-cancelamento).
+- **`AwaitingApproval`:** depois que o cancelamento é confirmado, a cópia em stage do job é movida de
+  `processing/<jobid>/` para `error/<jobid>/`, também em melhor esforço. O snapshot de aprovação do job é
+  **mantido** — ele registra a regra que o job aguardava, que é o que uma auditoria pergunta depois.
+
+No dashboard, o **Cancel** da página do job pergunta antes: um diálogo de confirmação nomeia o arquivo,
+diz o que o cancelamento faz a partir do status atual do job, e lembra que um job cancelado não tem
+Retry — o arquivo precisa de um rescan ou de um upload para ser assinado de novo. *Keep job* não cancela
+nada. A rota REST não mudou e não pergunta.
 
 Depois do cancelamento:
 
@@ -514,12 +718,86 @@ Cria um novo job com um `Id` novo, os mesmos `FileName` / `OriginalPath` / `Form
 `ParentJobId = (o job falho).Id`, e estado inicial `Queued`. O job falho permanece `Failed`; a cadeia é
 reconstruível a partir do `ParentJobId`.
 
+**O retry é assinado sob o perfil que o job que falhou registrou**, e não sob o perfil que a sua pasta
+alimenta hoje: um retry é "assine do jeito que ia ser assinado", e seguir o vínculo atual da pasta
+assinaria sob uma regra que o job nunca carregou. Um arquivo que deve ir para o novo perfil da pasta é
+cancelado e enviado de novo. (Um job de antes da existência de perfis de assinatura não registrou nome e
+é repetido sob o `default`.)
+
 Retorna `404 { code: "job.not-found" }` para ids desconhecidos, `409 { code: "job.not-failed" }` para
 jobs que não estão `Failed`, `409 { code: "job.input-missing" }` se o arquivo de entrada original não
-está mais em disco.
+está mais em disco, e duas recusas que são decisões, e não falhas — o botão Retry é ocultado na página do
+job para ambas:
+
+- `409 { code: "job.rejected-not-retriable" }` para um job que terminou `Failed` com
+  `approval.rejected`, porque a rejeição de um aprovador chegou depois de um worker tê-lo reivindicado. O
+  arquivo rejeitado já foi devolvido a `output/` com o seu nome `.reject` e a sua entrada removida, então
+  um retry só poderia falhar. Corrija o arquivo e envie-o de novo. (Uma rejeição comum termina
+  `Canceled`, ao qual o Retry também não se aplica.)
+- `409 { code: "file.already-processed" }` para um job recusado porque outro job já carrega o nome do
+  seu arquivo. Um retry é isento dessa regra, então repetir essa falha específica assinaria justamente o
+  arquivo que a regra recusou. Em vez disso, exclua o job que detém o nome — veja
+  [Nomes de arquivo já processados](#nomes-de-arquivo-já-processados).
 
 A página de detalhe do job no dashboard expõe links de pai/filho, para que operadores possam percorrer
 uma cadeia de repetições de volta até a falha raiz.
+
+## Nomes de arquivo já processados
+
+:::warning Mudou na 2.13.0 — um nome que já foi assinado é recusado
+Com `Pipeline:RejectAlreadyProcessedFileNames` ligado — o padrão —, um arquivo que chega com um nome que
+um job `Completed` ou ainda ativo já carrega **nunca é assinado**. Versões anteriores o assinavam de
+novo. Defina a chave como `false` para manter o comportamento antigo. Veja
+[Configuração](configuration.md#pipeline).
+:::
+
+A comparação vale para o host inteiro e ignora maiúsculas e minúsculas, porque toda pasta monitorada,
+todo perfil e todo upload gravam na mesma pasta `output/`.
+
+- **Pasta monitorada ou rescan:** o arquivo vira um job que já nasce `Failed` com
+  `file.already-processed`, nomeando o job que detém o nome, e os seus bytes são movidos para a pasta
+  `error/<jobid>/` do novo job, para que o arquivo não seja oferecido de novo. O console avisa arquivo a
+  arquivo, e um evento operacional `FileAlreadyProcessed` é escrito. Um rescan conta esses casos em um
+  número separado, `alreadyProcessed`. Se o arquivo não puder ser movido (outra coisa o detém), nada é
+  registrado e ele permanece na pasta; um rescan o conta em `errors`.
+- **Upload:** `409` com `file.already-processed`; nada é armazenado.
+- **O que não reserva um nome:** um job `Failed` ou `Canceled`. Deixar o arquivo de novo na pasta depois
+  de uma falha é a forma de tentar outra vez.
+
+**Para aceitar um nome de novo, exclua o job que o detém** em `/jobs` — veja
+[Excluindo um job](#excluindo-um-job). Depois que ele se vai, um arquivo reenviado com esse nome é
+capturado pelo observador sem rescan. Nada impõe a regra no banco de dados: duas instâncias em um cluster
+podem aceitar o mesmo nome no mesmo instante, e é a recusa em sobrescrever um arquivo que já está em
+`output/` que barra a segunda.
+
+## Excluindo um job
+
+Para remover **um** job — por exemplo, o que detém um nome de arquivo que você quer que volte a ser
+aceito —, exclua-o em `/jobs`: uma linha por vez, atrás de um diálogo de confirmação com um motivo
+opcional. Não há rota REST para isso.
+
+- **Um job que um worker está executando** (`Processing` / `Verifying`) não pode ser excluído. Um job que
+  não terminou (`Queued`, `AwaitingApproval`, `AwaitingSigner`) é cancelado primeiro, exatamente como um
+  cancelamento faria — inclusive o cancelamento em melhor esforço do documento remoto no Lacuna Signer —
+  e é registrado sob o status que tinha (`'<name>', Queued, canceled to delete it`).
+- **O que vai embora:** o job, seu histórico, tempos, detalhe CNAB240, snapshot de aprovação e aprovações
+  registradas; suas pastas `processing/` e `error/<jobid>/`; o arquivo de saída que **ele registrou** ter
+  gravado em `output/` — nunca um arquivo que apenas compartilha o seu nome, e nada para um job concluído
+  antes da 2.13.0, que não registrava nenhum; e a sua entrada, **somente** se o job a colocou em stage e
+  ela não mudou desde então.
+- **O que é mantido:** uma entrada que o job nunca colocou em stage, ou uma reescrita desde então — exceto
+  a cópia do próprio upload, que o produto nomeou e colocou na pasta de destino, e que é removida; uma
+  entrada que outro job não terminado (um retry deste, por exemplo) ainda nomeia; e uma que não pôde ser
+  comparada porque outro processo a detém ou ela não pode ser lida. A próxima varredura trata cada entrada
+  mantida como uma nova chegada, e o aviso em `/jobs` nomeia o que foi mantido.
+- **O que a trilha de auditoria mantém:** todo evento operacional existente, inclusive os que mencionam o
+  job excluído, mais um — um evento `JobDeleted`: `Job <id> ('<name>', <status>) deleted by <actor>.`,
+  seguido do que foi removido e do que foi mantido, um resumo de eventuais aprovações (decisão, nome do
+  aprovador, endereço mascarado, horário) e `Reason: <reason>.` quando um motivo foi informado.
+
+**Como isso difere do Clear Jobs**, deliberadamente: o Clear Jobs é uma ordem para esvaziar o sistema,
+então ele abandona jobs em andamento, apaga entradas sem compará-las e apaga os eventos operacionais.
+Excluir um job não faz nada disso.
 
 ## Rescan
 
@@ -537,52 +815,111 @@ Reenfileira cada arquivo atualmente na(s) pasta(s) de entrada configurada(s) que
 ativo. Útil após uma pausa longa ou após colocar arquivos manualmente. A resposta é um detalhamento por
 pasta mais contagens agregadas. Cada arquivo reescaneado é marcado com o nome da pasta correspondente.
 
-O rescan **de fato** reenfileira arquivos que foram recentemente cancelados (diferentemente do caminho
-de captura automática do observador, que deixa arquivos cancelados em paz).
+O rescan **de fato** reenfileira arquivos que foram recentemente cancelados ou cujo último job falhou
+(diferentemente do caminho de captura automática do observador, que deixa ambos em paz).
+
+- **Uma pasta cujo perfil de assinatura está desabilitado contribui para `ignored`, e não para
+  `errors`.** Desabilitar um perfil é um pedido para pular os seus arquivos, então o acúmulo de um perfil
+  aposentado não aparece como um número vermelho. A linha de log que explica o número é escrita uma vez
+  por pasta, nomeando o perfil. Reabilite o perfil e faça o rescan de novo, ou escolha a pasta na página
+  de outro perfil.
+- **Uma pasta que nenhum perfil escolheu é pulada inteira, e a resposta diz isso.** A sua linha volta
+  com `unassigned: true` e todas as contagens em zero, `totals.unassigned` conta essas pastas, o aviso
+  da página Entradas termina com `… N folder(s) unassigned and skipped`, e o log carrega uma linha
+  `Information` por pasta. Não é um erro nem `ignored` — ninguém pediu para assinar a partir daquela
+  pasta ainda. Escolha a pasta na página de um perfil; o observador então a lista sem outro rescan. Veja
+  [Roteando uma pasta monitorada para um perfil de assinatura](#roteando-uma-pasta-monitorada-para-um-perfil-de-assinatura).
+- **Um arquivo cujo nome um job concluído ou ativo já carrega** é contado em `alreadyProcessed` — veja
+  [Nomes de arquivo já processados](#nomes-de-arquivo-já-processados).
+- **Uma pasta que não pode ser lida não interrompe as outras.** A sua linha volta com `errors: 1` e
+  `scanned: 0`, toda outra pasta é reescaneada normalmente, e a chamada continua sendo um `200`. O log em
+  arquivo carrega a exceção subjacente.
 
 ## Clear Jobs
 
-Uma ação de manutenção que **apaga permanentemente registros de jobs finalizados** — as linhas de job e
-suas linhas do tempo de histórico — para limpeza administrativa. Ela **não** toca em eventos
-operacionais, no estado do pipeline, nos perfis de assinatura, na configuração, em arquivos assinados ou
-processados, nem nos logs.
+Uma ação de manutenção que **apaga permanentemente todo registro de job e todo arquivo que esses jobs
+deixaram para trás** — as linhas de job em qualquer status, seu histórico, suas evidências de aprovação e
+o detalhe das linhas CNAB240, e, na árvore de armazenamento, o arquivo de entrada de cada job, sua pasta
+`processing/<jobid>/`, sua pasta `error/<jobid>/` e sua saída assinada — **junto com todo evento
+operacional registrado antes do início da limpeza**. O que resta da trilha de eventos é o evento
+`JobsCleared` que registra a limpeza, mais o que um worker confirmar enquanto ela roda. Ela **não** toca
+no estado do pipeline, nos perfis de assinatura, na configuração, nos logs, nem nas raízes das pastas.
 
-:::warning Mudou na 2.0.0 — somente registros finalizados
-O Clear Jobs agora apaga somente jobs **terminais**. Um job `Queued`, retido ou em andamento sobrevive à
-ação, e as duas superfícies reportam o que deixaram para trás ao lado do que removeram. Um script que
-limpa a tabela e depois espera que ela esteja vazia precisa antes drenar ou cancelar os jobs não
-finalizados.
-
-Apagar a linha sob um job em execução era o risco de ação de operador mais afiado do produto — sob um
-cluster seria o job em execução de uma *irmã* — então o estreitamento não está condicionado ao
-`Cluster:Enabled` e se aplica a toda implantação.
+:::warning Mudou na 2.9.0 e na 2.10.0 — todo job, seus arquivos e os eventos operacionais
+Da 2.0.0 à 2.8.x, o Clear Jobs apagava somente registros de jobs *finalizados* e reportava os não
+finalizados que pulava. Desde a 2.9.0 ele leva **todo** job, qualquer que seja o status — um arquivo
+`Queued`, um job retido à espera de um aprovador, um job que um worker está assinando naquele momento e,
+sob `Cluster:Enabled`, o job de uma instância irmã — e apaga os arquivos que esses jobs deixaram para
+trás; a contagem `skipped` saiu da resposta. Desde a 2.10.0 ele também apaga os eventos operacionais
+registrados antes da limpeza. Um operador que limpa o sistema pela zona de perigo quer um sistema vazio,
+e o diálogo de confirmação diz exatamente o que vai embora.
 :::
 
-Pelo dashboard: **Sistema → Zona de perigo → Clear Jobs**. Um diálogo de confirmação protege a ação;
-cancelar não apaga nada. Por REST:
+**Uma vez confirmada, ela roda até o fim, quer você fique na página ou não.** Os arquivos são varridos
+antes das linhas, então em um compartilhamento de trabalho remoto uma limpeza com muitos jobs acumulados
+leva algum tempo, e navegar para `/jobs` para ver a tabela esvaziar não tem problema. Só a parada do host
+a interrompe; se isso acontecer, a transação é desfeita com todas as linhas ainda presentes, os arquivos
+já varridos continuam apagados, e um aviso no log diz isso — execute a limpeza de novo. (Antes da
+2.11.1, sair da página Sistema cancelava a limpeza silenciosamente, o que parecia uma limpeza que não
+tinha funcionado.) O aviso de resultado é a única parte que precisa de você na página; o evento
+`JobsCleared` e a linha de log são o registro de qualquer forma.
+
+Pelo dashboard: **Sistema → Zona de perigo → Clear Jobs**. Um diálogo de confirmação — irreversível; todo
+job, inclusive os não finalizados; todo arquivo que esses jobs deixaram; todo evento operacional
+registrado até então, restando o registro da limpeza — protege a ação; cancelar não apaga nada. Por REST:
 
 ```bash
 curl -X DELETE http://localhost:8080/api/jobs \
   -H "X-API-Key: $BULK_SIGNER_API_KEY"
-# → {"deleted": 1230, "skipped": 4, "message": "Cleared 1230 job record(s); skipped 4 unfinished."}
+# → {"deleted": 1234, "filesDeleted": 2460, "foldersDeleted": 7, "eventsDeleted": 318, "itemsFailed": 0, "message": "Cleared 1234 job record(s), 2460 file(s), 7 folder(s) and 318 operational event(s)."}
 ```
 
 O que acontece ao confirmar:
 
-- Cada linha de job **terminal** e seu histórico são apagados em uma transação (os links de pai de
+- **Os arquivos de cada job são apagados primeiro** — entrada, `processing/<jobid>/`, `error/<jobid>/` e
+  a saída assinada no local que o job registrou (mais a devolução `.reject` de um arquivo rejeitado) —
+  em qualquer armazenamento que os guarde. É em melhor esforço item a item: um arquivo sobre o qual outra
+  coisa detém um lease, ou uma pasta que o armazenamento recusa, é deixado no lugar, nomeado em uma linha
+  de aviso no log e contado em `itemsFailed` (um aviso no dashboard), e o registro do seu job vai embora
+  mesmo assim. Um armazenamento inalcançável faz a limpeza falhar antes de qualquer linha ser apagada.
+- **Depois, cada linha de job e seu histórico são apagados** em uma transação (os links de pai de
   cadeias de repetição são dissolvidos primeiro, para que a chave estrangeira autorreferente não bloqueie
   a exclusão).
-- Linhas não finalizadas são contadas e reportadas como `skipped` — no dashboard como uma linha na
-  mensagem de resultado, na resposta REST como um campo próprio.
-- Um evento operacional `JobsCleared` registra o ator (identidade por cookie ou por chave de API), o
-  timestamp e ambas as contagens; o mesmo é emitido para o log estruturado. Em caso de falha a transação
-  é desfeita, um erro é registrado, e o operador permanece na página.
+- **Todo evento operacional registrado antes do início da limpeza é apagado** na mesma transação, e então
+  um evento `JobsCleared` é escrito — a primeira linha da trilha dali em diante — registrando o ator
+  (identidade por cookie ou por chave de API), o timestamp e as contagens de jobs, arquivos, pastas e
+  eventos apagados, seguidas de `N file(s) or folder(s) could not be deleted.` quando algo foi recusado.
+  O mesmo é emitido para o log estruturado. Em caso de falha no banco de dados a transação é desfeita, um
+  erro é registrado, e o operador permanece na página — os arquivos já varridos não são restaurados,
+  então execute a limpeza de novo.
 - Um **marcador de reset** de escopo da implantação se move dentro da mesma transação, de modo que o
-  [painel de desempenho](statistics.md#zerando-o-painel) conta apenas jobs concluídos depois dele. Nada
-  é apagado para limpar o painel, e uma limpeza que falha o deixa exatamente como estava.
+  [painel de desempenho](statistics.md#zerando-o-painel) volta a zero em toda instância. Nada é apagado
+  *para* limpar o painel, e uma limpeza que falha o deixa exatamente como estava.
+
+**Ressalvas.**
+
+- **Ela não espera por nada.** Um job que o worker está assinando naquele momento tem sua cópia em stage
+  apagada debaixo dele; o worker reprova o job, não encontra linha onde escrever a falha, e registra as
+  duas coisas. Se um lote está no meio do caminho e importa, **pause o pipeline e deixe-o drenar
+  antes**. Sob `Cluster:Enabled` o mesmo vale para o job de toda irmã.
+- **As entradas são apagadas sem a comparação** com a impressão digital do stage que todo outro caminho
+  faz — o Clear Jobs é uma ordem para esvaziar o sistema, não um job terminando.
+- **Nada é forçado do lado do armazenamento.** Confira o log depois de qualquer limpeza que reporte
+  `itemsFailed` diferente de zero, e remova esses itens à mão — tipicamente um produtor ainda gravando em
+  uma pasta de entrada, ou uma posse que uma irmã deixou sobre uma cópia em stage. O gêmeo com sufixo de
+  timestamp de uma pasta `error/` (criado quando um mesmo id de job foi realocado duas vezes) não é
+  derivável da linha e também é deixado.
+- **Um job enfileirado enquanto a limpeza está rodando** não estava no retrato da varredura: ele mantém o
+  seu arquivo de entrada e perde só a linha, e a próxima varredura de pasta — inicialização do serviço ou
+  Rescan — ingere o arquivo de novo.
+- O card *último desligamento* da página Sistema fica vazio depois de uma limpeza até o próximo
+  desligamento — um fato sobre o sistema limpo, e não um defeito.
+
+Para remover um único job em vez de todos, veja [Excluindo um job](#excluindo-um-job).
 
 :::warning Não há como desfazer
-Faça backup da base operacional primeiro, se o histórico de jobs tiver valor de auditoria —
+Colete antes de `output/` tudo de que ainda precisar — os arquivos assinados vão embora com os jobs.
+Faça backup da base operacional se o histórico de jobs ou a trilha de eventos tiver valor de auditoria —
 `db/bulksigner.db` sob SQLite, ou o backup do regime do seu SGBD sob SQL Server. Veja
 [Retenção](retention.md#disciplina-de-backup).
 :::
@@ -639,6 +976,11 @@ heartbeat do dono em vez do boot.
 A consequência é a única coisa a fazer na atualização: uma linha deixada em andamento por uma build mais
 antiga não carrega **nenhum** dono, e nada sob a chave jamais a varrerá. Suba uma vez com
 `Cluster:Enabled = false` antes do primeiro boot em cluster e esta varredura limpa todas elas.
+
+Depois que um boot [deslocou](#quando-um-boot-encontra-a-própria-identidade-ainda-viva) uma predecessora
+viva, a varredura deixa em paz **toda** vida anterior da identidade — o processo deslocado ainda pode
+estar terminando seus jobs — e a assunção os alcança um `Cluster:StaleAfterSeconds` depois do
+deslocamento.
 :::
 
 ## O banner de resumo de prontidão
@@ -648,28 +990,53 @@ mais crítico para decisão:
 
 ```
 ================================ Service ready ================================
-host mode      = systemd
-environment    = Production
-https redirect = off (terminate TLS at reverse proxy)
-content root   = /opt/bulksigner
-storage root   = /var/lib/bulksigner
-db             = /var/lib/bulksigner/db/bulksigner.db
-pki license    = <impressão digital SHA-256 de 16 caracteres hex>
-cert source    = Pkcs11 (module=/usr/lib/...)
-signing policy = ADR-Básica (PAdES + CAdES + XAdES)
-encryption     = enabled (BSENC v1, salt loaded)
-poll interval  = 2s
-pipeline       = running
+host mode         = systemd
+environment       = Production
+https redirect    = off (terminate TLS at reverse proxy)
+content root      = /opt/bulksigner
+storage root      = /var/lib/bulksigner
+operational store = SQLite (/var/lib/bulksigner/db/bulksigner.db)
+pki license       = <impressão digital SHA-256 de 16 caracteres hex>
+cert source       = Pkcs11 (module=/usr/lib/...)
+signing policy    = ADR-Básica (PAdES + CAdES + XAdES)
+encryption        = enabled (BSENC v1, salt loaded)
+poll interval     = 2s
+pipeline          = running
+version           = 2.15.0+9a3f2c1e4b…
 ================================================================================
 ```
+
+A linha `version` carrega a versão **completa**, com os metadados de build — a build que uma implantação
+roda é o que um pedido de suporte acaba perguntando. O banner com a marca, impresso acima dele no topo de
+toda inicialização, carrega a forma curta (`v2.15.0`).
 
 Esta é a forma mais rápida de verificar se uma mudança de configuração teve efeito. Uma chave digitada
 errado aparece como o valor padrão, em vez do valor que você pretendia.
 
-Um segundo painel — **Signing profiles** — lista cada perfil resolvido (ou o perfil `default` legado
-sintetizado). Perfis configurados com `Verify=false` ou `ValidateCertificate=false` emitem linhas `WARN`
-adicionais (tanto na saída padrão quanto no arquivo de log), para que a postura de baixa confiança seja
-capturada de forma durável.
+Um segundo painel — **Signing profiles** — lista cada perfil da base operacional (semeados a partir de
+`Signing:Profiles[]`, ou do bloco de certificado legado como um `default` derivado, no primeiro boot
+contra uma tabela de perfis vazia), uma linha por perfil. Perfis configurados com `Verify=false` ou
+`ValidateCertificate=false` emitem linhas `WARN` adicionais (tanto na saída padrão quanto no arquivo de
+log), para que a postura de baixa confiança seja capturada de forma durável. Três outros estados
+aparecem nesse painel, e nenhum deles impede o boot:
+
+- **`DEGRADED · `** — o certificado do perfil não pôde ser aberto. Uma linha `FAIL` ao lado nomeia o
+  perfil e o motivo, e a mesma linha chega ao log como `Critical`. O host inicia e o restante da
+  implantação continua assinando; jobs roteados para esse perfil falham com `profile.degraded`, e o
+  `/api/ready` carrega uma linha `signing-profile:<nome>` reportando `ok: false` sem reprovar a
+  resposta. Corrija o certificado e reinicie. Um perfil cujos **segredos armazenados** não puderam ser
+  descriptografados é degradado da mesma forma, e o seu motivo nomeia `Signing:ProfileSecretsKey`; o
+  remédio aí é informar de novo o material de certificado desse perfil, e depois reiniciar.
+- **`KEYLESS · `** — o conjunto de signatários do perfil é `Approvers`, então quem assina são os
+  aprovadores e não há chave. A linha diz `cert=none (approvers sign)`, nada é aberto para ele na
+  inicialização, e o `/api/ready` carrega uma linha `signing-profile-keyless:<nome>` reportando
+  `ok: true`. Ele não está degradado e não precisa de remédio.
+- **Avisos sobre pastas** — no primeiro boot, uma linha por pasta que a semeadura não conseguiu vincular a
+  um perfil (ela fica não atribuída); em todo boot posterior que ainda encontre chaves
+  `Storage:Inputs[].Profile`, uma linha dizendo que elas são ignoradas; e em qualquer boot, uma linha por
+  perfil vinculado a uma pasta que este host não configurou. Os três são resolvidos pela página do
+  perfil — veja
+  [Roteando uma pasta monitorada para um perfil de assinatura](#roteando-uma-pasta-monitorada-para-um-perfil-de-assinatura).
 
 ### Execuções em console em primeiro plano: dashboard ao vivo
 
@@ -687,8 +1054,10 @@ não são afetadas. Veja
 | `journalctl -u bulksigner` / Visualizador de Eventos / `docker compose logs` | Bootstrap, eventos de ciclo de vida, erros fatais, saída padrão |
 | `/var/log/bulksigner/bulksigner-yyyyMMdd.log` (etc.) | O log estruturado durável; segredos mascarados |
 | `GET /api/metrics` | Exposição Prometheus — veja [API REST](rest-api.md#métricas) |
-| `GET /api/ready` | JSON de prontidão por sondagem (banco, pasta de entrada, licença) |
-| Página Sistema do dashboard | Impressão digital da licença, origem do certificado, tamanho da fila, estado de pausa |
+| `GET /api/ready` | Veredito de prontidão por sondagem (base operacional, pastas de entrada, licença, …): o nome e o `ok` de cada verificação, sem detalhe |
+| `GET /api/ready/details` | As mesmas sondagens com o detalhe de cada verificação; exige a chave de API ou uma sessão de operador |
+| Página `/events` do dashboard / `GET /api/events` | O log de eventos operacionais — pausa e retomada, edições de perfil, decisões de aprovação, assunções, exclusões de job, Clear Jobs, desligamento do serviço — do mais novo para o mais antigo, filtrável por tipo, intervalo de datas e texto |
+| Página Sistema do dashboard | Impressão digital da licença, origem do certificado, tamanho da fila, estado de pausa, último desligamento, e um card **Recent events** com os dez mais novos |
 | Histórico de jobs (no banco de dados) | Uma linha por transição de estado, para cada job |
 
 ## Tarefas rotineiras do operador
@@ -697,9 +1066,14 @@ não são afetadas. Veja
 |--------|------|
 | Acompanhar a entrada ao vivo | Card "Status do pipeline" do dashboard ou `tail -f bulksigner-*.log` |
 | Investigar uma falha | Detalhe do job no dashboard → linha do tempo → clique na mensagem de erro; ou `error/<jobid>/` em disco |
-| Reexecutar um job que falhou | Botão `Retry` do dashboard ou `POST /api/jobs/{id}/retry` |
+| Reexecutar um job que falhou | Botão `Retry` do dashboard ou `POST /api/jobs/{id}/retry` — sob o perfil que o job registrou, e não o atual da pasta |
+| Rotear uma pasta monitorada para um perfil de assinatura, ou movê-la | Página do perfil → **Edit behaviour** → **Input folder**; nunca um arquivo de configuração. Veja [Roteando uma pasta monitorada para um perfil de assinatura](#roteando-uma-pasta-monitorada-para-um-perfil-de-assinatura) |
+| Descobrir por que os arquivos de uma pasta não andam | Página Entradas: um chip cinza `unassigned — no profile has chosen this folder` significa exatamente isso — escolha a pasta na página de um perfil; um chip vermelho `stopped` é [uma falha do observador](#isolamento-de-falhas-do-observador-por-pasta) |
+| Aceitar um nome de arquivo de novo | Exclua o job que o detém em `/jobs`; veja [Excluindo um job](#excluindo-um-job) |
+| Descobrir quem pausou o pipeline, alterou um perfil, decidiu uma aprovação ou limpou os jobs | `/events` no dashboard, ou `GET /api/events` |
 | Planejar uma indisponibilidade | `POST /api/pipeline/pause` com um `reason`; aguarde os jobs em andamento se esgotarem; então pare o serviço |
-| Aplicar uma atualização | Faça backup de `db/bulksigner.db`, rode o script de instalação com o novo bundle, acompanhe o banner de bootstrap |
+| Aplicar uma atualização | Faça backup da base operacional (`db/bulksigner.db` sob SQLite, o backup do seu próprio banco sob SQL Server), rode o script de instalação com o novo bundle, acompanhe o banner de bootstrap |
+| Apagar todo job e seus arquivos | Sistema no dashboard → Zona de perigo → **Clear Jobs** (ou `DELETE /api/jobs`); veja [Clear Jobs](#clear-jobs) — irreversível, e os jobs não finalizados e os eventos operacionais vão junto |
 
 Veja [Diagnóstico de problemas](troubleshooting.md) para o catálogo de modos de falha.
 

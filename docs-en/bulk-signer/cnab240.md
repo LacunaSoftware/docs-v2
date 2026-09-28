@@ -13,6 +13,13 @@ The check is **opt-in per signing profile and off by default**. It is also the p
 [approval gate](approvals.md) — an approver who cannot be shown the amount is not approving anything
 meaningful, so a profile with an `Approval` block must also carry `CheckCNAB240`.
 
+The profile page enforces that pairing from both sides: **Edit approval** refuses a rule on a profile
+whose check is off, and **Edit behaviour** refuses turning the check off while an approval rule stands,
+naming the remedy — remove the rule first. A job that reaches the approval gate without a parse anyway
+(on a profile stored before that second refusal existed) fails by name with
+`approval.content-unmeasured` instead of parking as a job nobody could ever decide — see
+[Approvals](approvals.md#troubleshooting).
+
 ## Enabling the check
 
 ```json
@@ -33,7 +40,16 @@ Every file routed through that profile is parsed before it is signed. Turn it on
 receives remessas and leave it off everywhere else — a PDF routed through a `CheckCNAB240` profile is
 refused, because it is not a remessa.
 
-The startup banner appends `cnab240=on` to the profile's row, so the posture is visible at boot.
+:::note Where you set it after the first boot
+Signing profiles live in the operational store, and `Signing:Profiles[]` is only the seed imported on
+the first boot. On a running deployment the check is the **Validate CNAB240 payment files** switch on
+`/profiles/_new` and **check CNAB240** on the profile's **Edit behaviour** panel; a change reaches the
+next job with no restart. See [Configuration](configuration.md#signingprofiles--per-folder-signing-profiles).
+:::
+
+The startup banner appends `cnab240=on` to the profile's row, so the posture is visible at boot, and
+`payment-dates=unchecked` beside it on a profile that has
+[turned the payment-date guard off](#turning-the-guard-off).
 
 The key binds case-insensitively: `CheckCNAB240` and `CheckCnab240` are the same key.
 
@@ -167,7 +183,8 @@ refuse it or process it on a date nobody intended, and a signature makes the wro
 deliberate.
 
 > Immediately before signing, the **earliest** *Data do Pagamento* recorded for the file is compared
-> against today. If it has passed, the job fails and no signature is produced.
+> against today. If it has passed, the job fails and no signature is produced — unless the profile
+> has [turned the guard off](#turning-the-guard-off).
 
 The comparison is on the earliest date, not the latest — one already-due payment in a file that also
 pays out next week is still one payment BB will reject or misdate. A file with no dated payments is
@@ -184,6 +201,70 @@ The code is deliberately distinct from `cnab240.invalid`: an invalid file needs 
 stale one needs re-exporting with current dates. **Retrying the same file fails the same way**,
 because the dates inside it have not changed — re-export from the originating system and run the new
 file through Upload, Retry or Rescan.
+
+### Turning the guard off
+
+:::tip New in 2.15.0 — `CheckCnab240PaymentDates`
+Up to 2.14.x every `CheckCNAB240` profile refused a remessa whose earliest payment date had passed.
+From 2.15.0 that refusal is a per-profile switch, on by default.
+:::
+
+Some banks accept a past-dated payment and process it on the next business day, and for them the
+refusal blocks a remessa the bank would have handled. A profile can switch the guard off on its own,
+keeping the rest of the CNAB240 surface:
+
+```json
+{
+  "Name": "folha",
+  "CheckCNAB240": true,
+  "CheckCnab240PaymentDates": false
+}
+```
+
+— or, on a running deployment, the **Refuse remessas whose payment date has passed** switch under
+**Validate CNAB240 payment files** on `/profiles/_new`, and **check payment dates** under **check
+CNAB240** on the profile's **Edit behaviour** panel. It is **on by default**, and every profile that
+existed before the switch did keeps it on. It is read only alongside `CheckCNAB240`: with that off
+there is no parse and no date to compare, and the stored value is kept so switching CNAB240 back on
+restores it.
+
+**What it turns off is the refusal, and only the refusal.** Structural validation (`cnab240.invalid`),
+the recorded figures, the content hash, the payment table and the approval gate are all unchanged. A
+file whose earliest payment date has passed signs — on the local path, at Lacuna Signer dispatch, and
+on the approver-signed path — and leaves a trace where the refusal would have:
+
+| | |
+|---|---|
+| Job status | unchanged — the job continues towards its signature |
+| Job history | `CNAB240 payment date has passed and the payment-date check is disabled on profile 'folha': earliest payment date 05/08/2026, today 11/08/2026.` |
+| Operational event | `Cnab240PaymentDateCheckSkipped`, worded as a decision (`…; not refused because the payment-date check is disabled: …`) — its own type, so a filter on `Cnab240PaymentDatePassed` counts only refusals |
+| Metric | `bulksigner_cnab240_payment_date_checks_skipped_total{profile}` |
+| Log | a Warning through the structured log (so the file and table sinks see it even under the live dashboard, which suppresses console narration), and a span event on the job's trace |
+| Startup banner | ` · payment-dates=unchecked` on the profile's row |
+
+The trace records a **decision, not a signature**. It is written before the signature is attempted, so
+it survives a signing failure — and for the same reason it never says "signed": the job can still be
+vetoed, fail its content-hash check or fail at the signer, and on a Lacuna Signer profile a success is
+only a dispatch.
+
+**Turning `CheckCNAB240` off leaves the same trace.** A job parsed while CNAB240 was on carries a
+recorded payment date; if an operator then turns CNAB240 off while that job is parked for approval, the
+released job is not refused, but its history reads `… and CNAB240 checking is disabled on profile …`
+and the same event and metric are recorded. A job parsed with CNAB240 off has no recorded date, and
+nothing about it changes.
+
+The switch is **read at the signature, not frozen onto the job**, like `CheckCNAB240` itself. A change
+reaches the next job the pipeline signs without a restart, including one already parked for approval.
+An approver looking at such a job on `/approve/{jobId}` sees a **Payment date has passed** warning
+either way — that the file will be refused at signature, or that it will be signed; see
+[Approvals](approvals.md#what-the-approver-sees). The approver portal's row and its bulk
+**Approve N selected** confirmation say nothing about a passed date.
+
+:::warning With the guard off, the approvers are the only check on stale dates
+On an approval profile the payment-date guard is what normally stands between a payroll that sat too
+long and its signature. Turn it off only for a bank that genuinely processes past-dated payments, and
+make sure approvers know to read the per-file page's warning.
+:::
 
 ### Why the guard sits at the sign call
 

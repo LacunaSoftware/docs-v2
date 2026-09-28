@@ -194,7 +194,8 @@ az webapp identity assign --name bulksigner --resource-group bulksigner-rg
 Grant that identity `AcrPull` on the registry, `Storage File Data Privileged Contributor` on the
 share, a SQL login mapped to it in `db_datareader` + `db_datawriter` + `db_ddladmin`,
 `Storage Blob Data Reader` on the container holding the certificate, and
-`Storage Table Data Contributor` on the log table's account. Step 3 adds the sixth and last of them.
+`Storage Table Data Contributor` on the log table itself — scoped to the one table, which is all the
+sink needs. Step 3 adds the sixth and last of them.
 
 :::warning What does *not* go on that list is the right to sign
 Under `AzureKeyVault` the vault key is reached by the Entra app registration named in `AppId`, never
@@ -292,12 +293,27 @@ az webapp config appsettings set --name bulksigner --resource-group bulksigner-r
   Signing__Profiles__0__Certificate__AzureKeyVault__AppSecret='@Microsoft.KeyVault(VaultName=bulksigner-kv;SecretName=bulksigner-app-secret)' \
   Signing__Profiles__0__Certificate__AzureKeyVault__Blob__Url='https://contosocerts.blob.core.windows.net/certificates/signer.cer' \
   Signing__Profiles__0__Certificate__AzureKeyVault__Blob__Credential=ManagedIdentity \
+  Signing__ProfileSecretsKey='@Microsoft.KeyVault(VaultName=bulksigner-kv;SecretName=bulksigner-profile-secrets-key)' \
   Pipeline__MaxConcurrency=4
 ```
 
 The `0` is the profile's index in `Signing:Profiles[]` and it is positional — reordering that array
 silently repoints these settings at a different profile. `Endpoint` must be an absolute `https://`
 URL; a bare DNS name is refused at boot naming the key.
+
+**The `Signing__Profiles__0__*` settings are a one-time seed.** On the first boot against an empty
+profile table they are imported into the operational store as the profile's row; after that they are
+ignored — the boot log says so every time it finds them — and the profile, its certificate included, is
+edited from the dashboard's **Signing profiles** page. Keep them until the first boot has run, then
+delete them. See [Configuration](configuration.md#signingprofiles--per-folder-signing-profiles).
+
+**`Signing__ProfileSecretsKey` is what the import encrypts `AppSecret` under**, because the store never
+holds a secret in the clear, and the import refuses without it. Create it once as a vault secret — any
+long random value, `openssl rand -base64 32` for instance — read through the same kind of Key Vault
+reference, and treat losing it as losing every stored profile secret: there is no recovery path. See
+[Configuration](configuration.md#signingprofilesecretskey--what-stored-profile-secrets-are-encrypted-under).
+Under `Pfx`-as-blob the PFX password is such a secret too; only a passwordless PFX read with
+`ManagedIdentity` would need no key.
 
 :::warning `Blob` and `CerPath` are exclusive — both is refused at boot, and so is neither
 That refusal is deliberate rather than fussy: two valid certificates for one vault key would both
@@ -342,17 +358,25 @@ exempt from the startup warning that covers `Pkcs11` and `WindowsStore`.
 ### Renewal and rotation are change windows
 
 Three things here are read **once, at boot**, and nothing polls any of them: the certificate bytes in
-the blob, the vault key named by `KeyName`, and the client secret behind the Key Vault reference.
-Changing any one therefore takes a restart — and a restart on this topology is
+the blob, the vault key named by `KeyName`, and the app registration's client secret. Changing any one
+therefore takes a restart — and a restart on this topology is
 [step 8's](#8-upgrades-are-stop-the-world) stop-the-world, not a rolling one and not a slot swap. Plan
 an ICP-Brasil renewal, and the `-SecretValidityYears 2` expiry, as scheduled outages rather than as
 maintenance you can do at any time.
 
-:::danger Renew one artifact without the other and the boot refuses
+**After the first boot, the client secret lives on the stored profile, not in the app setting.** The
+seed copied it into the operational store, encrypted, and the `…__AppSecret` Key Vault reference is not
+read again. Rotating it is therefore: create the new secret on the app registration, enter it on the
+profile's page (*Edit certificate*, typing the new value — a blank field keeps the stored one), then
+restart. The same form is where a renewed `.cer` or a new `KeyName` is pointed at; the save marks the
+profile as waiting for a restart, and the restart is when it takes effect.
+
+:::danger Renew one artifact without the other and the profile cannot sign
 A new certificate against the old `KeyName`, or a new key against the old `.cer`, fails the pairing
-check — which on this topology means the change window ends with nothing running. Re-run the import
-script against the new PFX so both artifacts move together, and read the `profile` row in
-[step 6](#6-first-boot-on-one-instance) before you call the window closed.
+check. The host still starts, but that profile comes up **degraded** and every job routed to it fails
+with `profile.degraded` — on a single-profile deployment, the change window ends with nothing signing.
+Re-run the import script against the new PFX so both artifacts move together, and read the `profile`
+row in [step 6](#6-first-boot-on-one-instance) before you call the window closed.
 :::
 
 ### What this step assumes about the network
@@ -396,11 +420,15 @@ approval pools. The one exception is a profile's **certificate**, which is empha
 here as on any other target and was set in [step 3](#3-the-signing-key-lives-in-a-vault) a step ago.
 Take the rest from the `appsettings.Example.Azure.json.sample` file in the deployment package, which
 is one worked shape filled in end to end, and translate each key to its double-underscore form
-(`Signing:Profiles[0].Certificate.Source` → `Signing__Profiles__0__Certificate__Source`). A boot with
-no resolvable certificate is fatal by design: a profile that cannot sign is not representable.
+(`Signing:Profiles[0].Certificate.Source` → `Signing__Profiles__0__Certificate__Source`). Every
+`Signing__Profiles__*` and `Storage__Inputs__*__Profile` setting is **seed input**, read on the first
+boot only; once the profiles are in the store they — pool, quorum, input folder and certificate
+included — are edited from the dashboard, identically for every instance. A profile whose certificate
+cannot be resolved does not stop the boot: it comes up **degraded**, named on the banner and on
+`/api/ready`, and every other profile keeps signing.
 
-Secrets — `Signing__PkiSdkLicense`, `Auth__ApiKey`, `ApproverPortal__LinkSecret`, any `AppSecret` —
-belong in Key Vault references rather than literal app settings, resolved by the web app's managed
+Secrets — `Signing__PkiSdkLicense`, `Auth__ApiKey`, `Signing__ProfileSecretsKey`,
+`ApproverPortal__LinkSecret`, `CloudHub__ApiKey`, any `AppSecret` — belong in Key Vault references rather than literal app settings, resolved by the web app's managed
 identity holding `Key Vault Secrets User`. Step 3 uses exactly this mechanism for the vault's own
 client secret, and explains there why that is not circular. Every key this product accepts, with its
 type, default and environment-variable form, is in [Configuration](configuration.md).
@@ -427,6 +455,14 @@ knowing:
 - **Leave `Hosting__RequireHttps` unset.** Terminate TLS at the platform with `httpsOnly` below. An
   in-process redirect answers the health-check ping with a 307, which App Service reads as a failure —
   see [the health-check note](#the-health-check-reads-the-readiness-endpoint) below.
+
+:::note A homologation cluster on Lacuna's test certificates
+App Service sets no environment name, so the app runs as `Production` — under which
+[`Signing:TrustLacunaTestRoot`](configuration.md#signingtrustlacunatestroot--test-certificates-for-a-homologation)
+is refused at boot. A homologation app that wants the Turing / Fermat test certificates sets
+`Signing__TrustLacunaTestRoot=true` **and** `ASPNETCORE_ENVIRONMENT=Staging` in the same command. Never
+set the first on an app that signs anything real.
+:::
 
 ## 5. Platform settings
 
@@ -455,6 +491,14 @@ error anywhere.
 `/api/ready` is anonymous, per-instance, and returns `503` when any of its probes fail — which is
 precisely the question App Service is asking. Point Health check at it and the platform stops routing
 to an instance that cannot serve, and eventually replaces one that stays that way.
+
+It is anonymous *because* of this consumer: Health check cannot carry the API key (Microsoft documents
+that the path must allow anonymous access when the app runs its own authentication), so
+`Readiness:RequireApiKey` stays at its default `false` here. Turning it on would have the platform read
+a `401` on every instance as "unhealthy" at once — none is removed from rotation, the platform starts
+replacing them one an hour, and the Health check metric stays red for as long as the gate is on. What
+the anonymous body carries is each check's name and verdict and nothing else; the diagnosis — server and
+catalogue, share URLs, an SDK's failure sentence — is on `/api/ready/details`, behind the API key.
 
 Three consequences to accept knowingly:
 
@@ -489,9 +533,10 @@ What to look for in the **Service ready** panel:
 | `azure shares` | reachable. An unreachable share does **not** stop the host, but it fails `/api/ready` and ingests nothing until it answers. |
 | `forwarded headers` | the trust set by name, not just `on`. |
 | `logs` | the table sink among the destinations. If it is absent you will also have seen the Critical about rolled log files on an ephemeral disk. |
-| `profile` | the certificate that actually loaded — `cades · cert=AzureKeyVault · blob=contosocerts/certificates/signer.cer · verify=on · …`. Both halves are evidence: `cert=AzureKeyVault` means the vault answered and the key was found, `blob=…` means the `.cer` was read **and paired** against it. This is the line to read after any certificate renewal — it is the only confirmation that both artifacts moved together. |
+| `profile` | the certificate that actually loaded — `cades · cert=AzureKeyVault · blob=contosocerts/certificates/signer.cer · verify=on · …`. Both halves are evidence: `cert=AzureKeyVault` means the vault answered and the key was found, `blob=…` means the `.cer` was read **and paired** against it. A row prefixed `DEGRADED · ` means the certificate did not resolve, with the reason beside it. This is the line to read after any certificate renewal — it is the only confirmation that both artifacts moved together. |
 
-Then `GET /api/ready` and confirm every check is green, and open **System → Instances** on the
+Then `GET /api/ready/details` with the API key and confirm every check is green, open **Signing
+profiles** to confirm the seed imported what you meant, and open **System → Instances** on the
 dashboard: one row, badged as the instance you are reading it on, with a **Live** chip.
 
 :::warning Upgrading an existing single-instance deployment rather than building a new one?
@@ -562,6 +607,27 @@ az webapp start --name bulksigner --resource-group bulksigner-rg
 Not a rolling restart, and **not a deployment-slot swap** — a staging slot carrying production's
 connection string is a second set of instances joining the cluster on a different application version,
 which is the one shape this design does not support.
+
+**The `stop` is the tidier deploy rather than a requirement.** Changing the image on a running app
+starts the new container beside the old one on the same instance; both derive one identity from
+`WEBSITE_INSTANCE_ID`, and the platform keeps the old one running until the new one is warm. Since 2.5.0
+the new container **displaces** the old one at once and the old one **stands down** — it claims nothing
+new and finishes what it holds — so an in-place `container set` works, at the cost of one warning naming
+the displaced incarnation, and with the old container's unfinished jobs taken over
+`Cluster:StaleAfterSeconds` later if the platform kills it first. Stopped first, nothing overlaps: the
+old container retires its heartbeat row on the way down and the new one has nothing to displace. (Up to
+2.4.x an in-place change cost at least one refused start.)
+
+Two things to know about an in-place roll:
+
+- **If the new container fails its warm-up, set the previous tag back.** App Service stops the whole
+  site — the stood-down container included — and keeps restarting it with the new image; the old
+  container does not get to resume there. The recovery is
+  `az webapp config container set … --container-image-name <registry-name>.azurecr.io/bulksigner:<previous-version>`.
+- **A few seconds after the platform removes the old container**, the first store command on each
+  connection the new one opened during its warm-up may fail once with a 35-second
+  `Execution Timeout Expired`. That is a connection cut along with the old container, not the store: one
+  failure per such connection, and then the pool heals itself. A stop-first deploy does not produce it.
 
 The heartbeat's version stamp is the tripwire rather than the guard: a booting instance that sees live
 heartbeats from a different version logs a **Critical and continues**. It is deliberately not a
@@ -783,14 +849,16 @@ it logs a Critical at startup, because a container's rolled log files go away wi
 ## When something refuses
 
 Every cluster failure mode, with its exact message and its fix, is in
-[Troubleshooting](troubleshooting.md#cluster-mode). The five you are most likely to meet on a first
+[Troubleshooting](troubleshooting.md#cluster-mode). The ones you are most likely to meet on a first
 deployment:
 
 | Symptom | Cause |
 |---|---|
 | `Cluster mode refused to start`, naming keys | One of the boot refusals in [Before you start](#before-you-start). The message names every failing key at once rather than one per attempt. |
-| **The container never starts** | Two very different causes share this symptom, and step 2's is the one you will think of first. Either the image pull failed (`acrUseManagedIdentityCreds` never set — step 2), or a profile could not resolve its certificate, which is **fatal by design**: an unreachable vault, an expired client secret, or a `.cer` that does not pair with `KeyName` ([step 3](#3-the-signing-key-lives-in-a-vault)). The log stream tells them apart — a pull failure leaves it empty because there is no application yet, while a certificate failure writes the reason before exiting. Read it before assuming the registry. |
-| Boot refused naming an instance identity already beating | Two hosts presenting one name, or a second deployment pointed at this database — most often a slot carrying production's connection string. If the holder is genuinely gone its row goes stale on its own; waiting out `Cluster:StaleAfterSeconds` is the supported fix. |
+| **The container never starts** | Either the image pull failed (`acrUseManagedIdentityCreds` never set — step 2), or a boot refusal fired. The log stream tells them apart — a pull failure leaves it empty because there is no application yet, while a refusal names the key before exiting. The first boot's import refuses, for instance, when a profile carries a secret and `Signing__ProfileSecretsKey` is not set ([step 3](#the-settings)). Read the stream before assuming the registry. |
+| The app starts but the profile is `DEGRADED` and every job fails with `profile.degraded` | The profile could not resolve its certificate: an unreachable vault, an expired client secret, or a `.cer` that does not pair with `KeyName` ([step 3](#3-the-signing-key-lives-in-a-vault)). The reason is on the banner's `profile` row and on `/api/ready/details`. Fix it on the profile's page (*Edit certificate*) or at the vault, then restart. |
+| Boot warns `displaced the previous incarnation … which was still live` | An **in-place redeploy** ([step 8](#8-upgrades-are-stop-the-world)): the new container took the identity and the old one stood down — expected on every in-place roll. If this host is **not** mid-redeploy, two hosts are presenting one identity and will take turns: read both logs and rename one or point it at its own database. |
+| Boot refused saying the identity `could not be registered in 3 attempts` | Every write of the heartbeat row lost a race to another incarnation: two hosts presenting one name booting at the same moment against one database, or a store fault. Find the other host on the Instances view of an instance that is running. |
 | Boot refused naming two operational stores | The work share's marker says it belongs to a different store. Two clusters over one work share is mutual data destruction that no database can see, which is what that gate exists to catch. |
 | Operators bounced to sign-in intermittently | The instances are not sharing one key ring — usually one host whose `Cluster:Enabled` is false, or instances pointed at different stores. |
 

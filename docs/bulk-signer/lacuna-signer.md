@@ -90,24 +90,72 @@ cada perfil que usa `Method = LacunaSigner`.
 
 | Chave | Tipo | Padrão | Override por env | Obrigatória quando |
 |-------|------|--------|------------------|--------------------|
-| `Signer:Endpoint` | string | `""` | `Signer__Endpoint` | Ao menos um perfil tem `Method = LacunaSigner`. Padrão na nuvem: `https://signer.lacunasoftware.com`. |
+| `Signer:Endpoint` | string | `""` | `Signer__Endpoint` | Qualquer parte de `Signer:*` está definida. Padrão na nuvem: `https://signer.lacunasoftware.com`. |
 | `Signer:ApiKey` | string | `""` | `Signer__ApiKey` | **REQUIRED, SECRET**, mesma condição. Formato: `application-id\|secret`. |
 | `Signer:PollIntervalSeconds` | int | `30` | `Signer__PollIntervalSeconds` | opcional |
 | `Signer:TimeoutHours` | int | `168` (7 dias) | `Signer__TimeoutHours` | opcional |
 | `Signer:MaxConsecutiveApiFailures` | int | `5` | `Signer__MaxConsecutiveApiFailures` | opcional |
 
-O validador é **autocondicionado** — ele só exige `Endpoint` + `ApiKey` quando ao menos um perfil tem
-`Method = LacunaSigner`. Implantações puramente Locais não precisam definir nada sob `Signer:*`.
+O validador é **autocondicionado a esta seção** — omita `Signer:*` por inteiro e nada aqui é exigido,
+que é o que uma implantação puramente Local faz. Escreva qualquer parte dela e o bloco inteiro é
+validado.
+
+:::warning Mudou na 2.1.0 — o bloco `Signer:*` é julgado por si só
+Até a 2.0.x o bloco só era validado quando algum perfil selecionava `Method = LacunaSigner`. Os perfis
+agora vivem na base operacional e podem ser trocados para o Lacuna Signer pelo dashboard sem
+reinicialização, então a regra é enunciada ao contrário:
+
+- **Um bloco `Signer:` escrito pela metade recusa o boot** mesmo que nenhum perfil o use — um endpoint
+  sem chave de API, digamos, deixado para depois. A mensagem nomeia as duas chaves e oferece remover a
+  seção como remédio.
+- **Selecionar `Method = LacunaSigner` é recusado quando o host não tem configurações `Signer:*`** — no
+  boot, para um perfil ainda semeado a partir da configuração, e na página do perfil, para um que está
+  sendo salvo.
+- **Ter ou não configurações `Signer:*` é o que inicia o gateway do assinador remoto e o worker de
+  consulta**, então um perfil trocado para o Lacuna Signer depois do boot começa a despachar sem
+  reinicialização. Em um host com o bloco inteiro definido e nenhum perfil o usando, o worker de consulta
+  roda e não encontra nada a fazer a cada intervalo — remova a seção se este host assina tudo
+  localmente.
+:::
 
 :::warning A chave de API é um segredo.
 Defina-a como `Signer__ApiKey` no `bulksigner.env` (Linux) / uma variável de ambiente de máquina
 (Windows) / `.env` (Docker). O valor literal é removido dos logs.
 :::
 
+### Escolhendo o método pelo dashboard
+
+**É aqui que você escolhe o método em uma implantação em execução.** O `Signing:Profiles[]` é uma
+semente de uso único, importada no primeiro boot (veja
+[Configuração](configuration.md#signingprofiles--perfis-de-assinatura-por-pasta)), então a próxima seção
+descreve como é uma semente, e não aonde você vai para mudar uma.
+
+O painel **Certificado** em `/profiles/{name}` carrega o método, e o formulário em `/profiles/_new`
+também. Ele fica nesse painel, e não no de Comportamento, porque o método decide se o perfil tem uma
+chave local: escolha **Lacuna Signer** e a origem do certificado e suas coordenadas são substituídas
+pelos três campos do participante — nome, e-mail, identificador —, que são tudo de onde vem a assinatura
+de um perfil assim.
+
+As duas direções diferem, e o formulário diz qual antes de você salvar:
+
+| Troca | Quando passa a valer | O que acontece com o outro bloco |
+|---|---|---|
+| Local → **Lacuna Signer** | O próximo job reivindicado. **Sem reinicialização** — o gateway roda em todo host que tem configurações `Signer:*`, e não só para os perfis que existiam no boot. | As coordenadas do certificado são apagadas, senha inclusive: uma credencial em repouso para uma chave que vive no serviço é uma que nada jamais abrirá. |
+| **Lacuna Signer** → Local | A próxima **reinicialização**, porque uma chave privada precisa ser aberta e nenhum salvamento abre uma. Até lá o perfil é reportado como **degradado** em sua própria página, e jobs roteados para ele falham com `profile.degraded`. | O participante é apagado. |
+
+As recusas acontecem no salvamento, no seu idioma de exibição: um participante sem algum de seus três
+campos, um e-mail sem `@`, e **selecionar o Lacuna Signer em um host sem configurações `Signer:*`** — a
+única recusa cujo remédio é uma mudança de configuração e uma reinicialização, e não um campo do
+formulário, razão pela qual sua redação nomeia as chaves.
+
+O identificador do participante **não** tem os dígitos verificadores validados. Diferentemente do CPF de
+um aprovador — que este produto grava em seus próprios registros de auditoria —, este é entregue ao
+serviço remoto, e o serviço é a autoridade sobre se conhece o participante.
+
 ### `Signing:Profiles[].Method` + bloco `Signer`
 
-Seleção de método por perfil. O padrão é `Method = Local`, então perfis preexistentes não precisam de
-mudança.
+Seleção de método por perfil **como semente**, importada no primeiro boot contra uma tabela de perfis
+vazia. O padrão é `Method = Local`, então perfis preexistentes não precisam de mudança.
 
 ```json
 "Signing": {
@@ -137,8 +185,12 @@ Validação em nível de perfil:
 - `Method = LacunaSigner` **proíbe** `ValidateCertificate = true` (não há certificado local a validar).
 - As regras de `Method = Local` não mudam: bloco de certificado obrigatório, bloco `Signer` ignorado se
   presente.
+- `Method = LacunaSigner` não pode ser combinado com uma regra de aprovação cujo conjunto de assinantes
+  seja `ProfileKeyAndApprovers` — o assinador remoto receberia um envelope de assinaturas de aprovadores
+  em vez do arquivo de pagamento. Veja [Aprovações](approvals.md#o-conjunto-de-assinantes).
 
-O perfil `default` sintetizado (quando `Signing:Profiles[]` é omitido) é sempre `Method = Local`.
+As mesmas regras recusam um salvamento na página do perfil. O perfil `default` derivado (semeado quando
+`Signing:Profiles[]` é omitido) é sempre `Method = Local`.
 
 ## Fluxo do operador
 
@@ -175,6 +227,17 @@ Quando um operador cancela um job `AwaitingSigner`:
    registradas como Warning, mas **não** desfazem o cancelamento local.
 3. Se o cancelamento remoto falhou, o participante ainda pode ver o documento em sua caixa de entrada do
    Signer. O job local está corretamente `Canceled` de qualquer forma.
+
+O botão **Cancelar** na página do job pergunta antes: seu diálogo de confirmação nomeia o arquivo e diz o
+que o cancelamento faz a partir do status atual do job — para um job aguardando o Lacuna Signer, que seu
+documento remoto é cancelado em melhor esforço. O `POST /api/jobs/{id}/cancel` não pergunta nada.
+
+:::warning O Clear Jobs não cancela documentos remotos
+O **Clear Jobs** apaga todo registro de job, qualquer que seja o status, `AwaitingSigner` inclusive, mas
+não faz chamada alguma ao Lacuna Signer: um documento já despachado continua na caixa de entrada do
+participante. Cancele esses jobs antes se o participante não deve assiná-los. Veja
+[Operação](operations.md#clear-jobs).
+:::
 
 :::note O cancelamento em melhor esforço é uma troca deliberada.
 Desfazer o cancelamento local porque uma ida e volta de rede falhou deixaria o operador no limbo e
@@ -237,6 +300,15 @@ Instrumentos Prometheus específicos do Signer são expostos em `/api/metrics`:
 | `bulksigner_jobs_awaiting_signer` | Gauge | Contagem viva de linhas `AwaitingSigner`. |
 | `bulksigner_signer_poll_duration_seconds` | Histogram | Duração por tique de uma passada completa sobre as linhas `AwaitingSigner`. |
 | `bulksigner_signer_api_errors_total{op}` | Counter | Falhas da API do Signer, rotuladas por operação. |
+
+## Em modo cluster
+
+Com o modo cluster ligado, **cada instância consulta o Lacuna Signer apenas sobre os documentos que ela
+mesma despachou**, de modo que duas instâncias nunca baixam os mesmos bytes assinados. Duas consequências
+para dashboards e alertas: o `bulksigner_jobs_awaiting_signer` é por instância — some-o sobre a frota —,
+e um job que uma instância despachou antes de morrer é reatribuído a uma sobrevivente pela varredura de
+takeover. Uma linha sem dono algum não é consultada por ninguém. Veja
+[Alta disponibilidade](high-availability.md) para os detalhes e o remédio.
 
 ## Referências cruzadas de diagnóstico
 

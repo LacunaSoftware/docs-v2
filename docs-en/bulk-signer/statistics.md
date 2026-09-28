@@ -16,8 +16,8 @@ and how to read them when processing feels slow.
 | How do I turn it on or off? | `Statistics:Enabled` (default `true`). When `false`, nothing is recorded and the dashboard panel disappears. |
 | What is measured? | Four stages per job — **queue wait, signing, verification, output creation** — plus a **total** (their sum). |
 | What is *not* measured? | The two human waits: the Lacuna Signer **`AwaitingSigner` wait** and the **`AwaitingApproval` wait**. Both are deliberately excluded — see [below](#why-the-human-waits-are-excluded). |
-| Where do I see it? | The **Dashboard** home page, "Processing performance" panel. Refreshes on the normal dashboard poll (`Dashboard:PollIntervalSeconds`). |
-| How do I clear it? | [Clear Jobs](operations.md#clear-jobs) moves a deployment-wide **reset marker**. Nothing is deleted — see [Resetting the panel](#resetting-the-panel). |
+| Where do I see it? | The **Dashboard** home page, "Processing performance" panel, refreshed on the normal dashboard poll (`Dashboard:PollIntervalSeconds`) — and, for one job, the **Processing time** section on its job page (see [below](#one-jobs-own-numbers)). |
+| How do I clear it? | [Clear Jobs](operations.md#clear-jobs) moves a deployment-wide **reset marker** and deletes every job with its timing row — see [Resetting the panel](#resetting-the-panel). |
 | Want durable history *outside* the product? | Scrape `/api/metrics` — `bulksigner_signing_duration_seconds` is the external record (see [REST API](rest-api.md)). |
 
 :::note Changed in 2.0.0
@@ -82,8 +82,17 @@ The "Processing performance" panel shows:
 | **Average by stage — Queue wait / Output** | Mean intake-backlog time and mean output-materialisation time (encryption + promote). |
 | **By method — Local (n) / Remote (n)** | Mean total for locally-signed vs Lacuna-Signer jobs, with the sample count in parentheses. |
 | **Lifetime** | Completed jobs ÷ the window the rows cover, expressed per minute. |
+| **Slowest job** | The single completed job behind **Max** — named, with its total in `hh:mm:ss.fff` and when it completed, linked to its page so you can see what was slow about it. Computed over the same rows as everything above, so a reset moves it too. Absent when nothing has completed since the reset. |
 
 The caption shows how many jobs have completed and the start of that window.
+
+One more card sits in the stat grid at the top of the page rather than in this panel, because it is not
+a statistic: **Running for** (**Longest running** when `Pipeline:MaxConcurrency > 1`) shows the in-flight
+job the pipeline has held the longest, ticking live once a second, linked to its page. It is measured from
+the job's most recent pickup — a job released from approval is picked up twice, and the human's
+deliberation in between is not running time — or, on a job back from Lacuna Signer, from the download that
+brought it back, since a remote job's pickup may be days old. It is present only while something is in
+flight, and does not depend on `Statistics:Enabled`.
 
 Durations render in two forms: rounded prose on the stat cards (`2 min 14 sec`, `3.4 sec`, `421 ms`) and
 fixed `hh:mm:ss.fff` in the min/avg/max row (`00:00:03.421`). A stage with no samples yet shows an em
@@ -97,6 +106,36 @@ lifetime, so under a cluster it would have described one instance's luck, and th
 reconstruct a deployment-wide equivalent from completion timestamps. It was **retired rather than
 approximated**. "Throughput (last min)" answers the question it was mostly being read for, and
 `bulksigner_signing_duration_seconds` on `/api/metrics` is unchanged and still the external record.
+
+## One job's own numbers
+
+The row the panel aggregates is also one job's breakdown, and the job's page (`/jobs/{id}`) shows it in a
+**Processing time** section, in one of two shapes:
+
+- **A completed job** shows the four stages and the total exactly as they were recorded, in
+  `hh:mm:ss.fff`, beside when the pipeline picked the job up and when it completed. The **Output** stage
+  is the post-processing — encryption, promotion to `output/` and the original's deletion. A stage that
+  did not happen — verification on a profile with `Verify = false` — reads **skipped**, never
+  `00:00:00.000`, the same distinction the panel's averages keep. The caption says what "total" means
+  here: for a Lacuna Signer job it is the document's creation and download and never the wait for the
+  signer, and for either method the wait for an approver is not in it. So on a remote or approval-gated
+  job, the total is far smaller than the gap between the timeline's first and last entries — and that
+  difference is the [exclusion below](#why-the-human-waits-are-excluded).
+- **A job in flight** (`Processing` or `Verifying`) shows how long the pipeline has held it, live — the
+  same figure, and the same rule, as the dashboard's *Running for* card. The stage breakdown does not
+  exist yet; it is written when the job completes.
+
+Every other job shows **no section**: a failed, canceled or expired job records no timings (there is one
+row per *completed* job), and a completed job with no row — statistics were off, or the host died mid-job
+— shows nothing rather than a row of dashes. `Statistics:Enabled = false` hides the stage breakdown along
+with the panel; the live figure on a job in flight is not a statistic and stays. An approver who can open
+the job page sees the section too — it is a record about the job, not a capability.
+
+What the section deliberately does **not** offer: grouping or filtering by profile, folder or date
+range; a failed job's elapsed time until failure or error counts by type; per-attempt timings (a retry is
+a new job, and is timed as one); a split of the Lacuna Signer signing span into create and download (the
+two are summed into **Signing**); and median, percentile or "ten slowest" views. For analysis of that
+kind, use the `bulksigner_signing_duration_seconds` histogram on `/api/metrics`.
 
 ## How elapsed time is calculated
 
@@ -140,16 +179,22 @@ Running [Clear Jobs](operations.md#clear-jobs) records a **deployment-wide reset
 the aggregates count only jobs that completed after it. It takes effect on every instance at once,
 because the marker is a row rather than a variable in one process.
 
-Three things follow, and the second one is the point:
+Three things follow:
 
-- **Nothing is deleted to clear the panel.** The rows a reset hides are still stored and still queryable.
-  What *does* remove a row is the job going — a deleted job takes its timings with it, through the
-  foreign key.
-- **A job the clear left alone keeps its measurement.** Clear Jobs deletes only jobs the pipeline has
-  finished with; an unfinished one survives, and when it later completes its row lands after the marker
-  and counts.
+- **The marker itself deletes nothing — the jobs going does.** A timing row is removed only when its job
+  is, through the foreign key. Since 2.9.0 Clear Jobs deletes **every** job, so the rows it hides are
+  normally gone with their jobs anyway; deleting a single job from the Jobs page likewise takes its
+  timings with it.
+- **A job that completes after the clear counts from the marker.** The marker covers the job that was
+  enqueued while the clear was running: its row lands after the marker and counts.
 - **The reset rolls back with the clear.** The marker moves inside the clear's transaction, so a clear
   that fails leaves the panel exactly as it was.
+
+:::warning Changed in 2.9.0
+Until 2.9.0 Clear Jobs spared unfinished jobs, and the marker was what let such a job keep its
+half-finished measurement and count once it completed. Clear Jobs now deletes every job whatever its
+status, so there is no surviving job for the marker to protect.
+:::
 
 The Prometheus histogram is a monotonic counter and is **not** affected by any of this.
 

@@ -79,10 +79,13 @@ carries an [`Approval` block](approvals.md).
         │         │           │        │
         │         │           │        └─ refused / expired / timeout ─▶ Failed
         │         │           └─ concluded → bytes downloaded ─────────▶ Verifying
-        │         └─ rejected / operator cancel / budget expired ──────▶ Canceled
+        │         └─ rejected* / operator cancel / budget expired ─────▶ Canceled
         └─ quorum met ──▶ back to Queued (re-enters the ordinary queue)
 
    Failed ──operator retry──▶ a NEW Queued job (ParentJobId set; the failed job stays Failed)
+
+   * a rejected file is handed back to output/ as <name>.reject<ext>; a cancelled or expired
+     job's staged copy goes to error/
 ```
 
 Key rules:
@@ -93,12 +96,26 @@ Key rules:
   that one cancel edge: an approver's **rejection**, an operator's cancel, and — on a profile that sets
   `Approval.ExpiresAfter` — the wait budget running out. All three mean "this file will not be signed,
   deliberately"; the audit trail is what tells them apart.
+- **A rejection is a veto, and it hands the file back.** One rejection stops the job whatever the quorum
+  arithmetic says. The job ends `Canceled`, the file is returned to `output/` as `<name>.reject<ext>` —
+  `folha.rem` becomes `folha.reject.rem`, encrypted like every other artifact where the profile encrypts
+  — and the original is removed from `input/`. The returned file is **not signed**: anything that reads
+  `output/` as a folder of signatures has to look at the name. If that name is already taken in
+  `output/`, nothing is overwritten: the staged copy goes to `error/<jobid>/` and the input stays in
+  `input/`. Retry does not apply — the file is corrected and submitted again. See
+  [Rejection is a veto](approvals.md#rejection-is-a-veto).
 - **Release re-enters the ordinary queue** rather than resuming in place, so a released job passes
   through the same claim and the same pre-sign gates as any other — including the
   [payment-date staleness guard](cnab240.md#payment-dates-that-have-passed), which is exactly the check
-  an open-ended human delay needs re-run. It resumes on the copy it parked with, and the staged bytes
+  an open-ended human delay needs re-run (unless the profile turns that guard off with
+  `CheckCnab240PaymentDates`, for a bank that processes a past-dated payment on the next business day —
+  see [CNAB240 payment files](cnab240.md)). It resumes on the copy it parked with, and the staged bytes
   are re-hashed immediately before the signature exists; a mismatch fails the job with
   `approval.content-changed`. See [Approvals](approvals.md#what-is-approved).
+- **A parked job can also time out, if the profile says so.** With `Approval.ExpiresAfter` set, a job
+  parked past the window is canceled with the reason `Approval window expired.`, its staged copy moved to
+  `error/` and an `ApprovalExpired` operational event recorded. The window is wall-clock: **a pause does
+  not extend it**. See [The wait budget](approvals.md#the-wait-budget).
 - **Cancel is valid only from `Queued`, `AwaitingSigner` or `AwaitingApproval`.** In-flight local jobs
   (`Processing`, `Verifying`) cannot be canceled — they run to natural completion or failure. The
   cancel endpoint returns `409` with `code = "job.not-queued"` against an in-flight local job. For
@@ -108,6 +125,14 @@ Key rules:
 - **`Canceled` is terminal.** Files for canceled jobs remain in `input/`; the watcher honors recent
   cancellations and will not auto-resurrect them. Operator-driven actions (Upload, Retry, Rescan)
   will re-enqueue.
+- **`Failed` is terminal, and its file waits the same way.** A failure leaves the input where it was,
+  and since 2.11.0 the watcher does not enqueue it again on its own — not on a polling folder's next
+  tick, and not on the enumeration a service start runs — until an operator re-runs it through Retry,
+  Rescan or Upload. (Before 2.11.0 a polling folder — every Azure Files folder, and a local one
+  configured to poll — re-offered a failed file on every tick, so a failure whose cause stood produced a
+  new `Failed` job per tick; right after a Clear Jobs it looked as if the clear had not cleared.) The
+  decision is made on the most recent job's status alone, so a corrected file dropped under the same
+  name is picked up by those same operator actions, not by the watcher.
 - **`Failed → Queued` is not a transition — it is a new job.** Retry creates a fresh job with
   `ParentJobId = (the failed job).Id`, copying the original input. The failed job stays `Failed`
   forever for audit purposes.
@@ -215,7 +240,8 @@ trip — **about half a minute on the defaults**, and up to a full interval on a
   minutes.
 - The floor is 5 s, and the trade is money: every tick is a listing transaction whether or not anything
   arrived. A folder polled at 5 s costs six times what the same folder costs at 30 s, idle or not.
-- Two paths are **not** on the timer and stay immediate: `POST /api/files` and `POST /api/rescan`. If
+- Two paths are **not** on the timer and stay immediate: an upload (`POST /api/files`, or **Upload
+  files** on the Jobs page) and `POST /api/rescan`. If
   somebody needs a file signed *now*, rescan that folder rather than lowering the interval for ever.
 
 Do not read a slow first job as a broken folder. Read the Input page: a folder that is `Running` with
@@ -276,7 +302,8 @@ stays behind as the record of who ran last.
 2. the same line is printed to stdout, and the banner's `work share owner` row reads
    `CONTENDED at startup by …`;
 3. the System page shows it above the storage paths;
-4. `/api/ready` returns **503** with a red `work-share-owner` check;
+4. `/api/ready` returns **503** with a red `work-share-owner` check, whose detail on
+   `/api/ready/details` is the same sentence;
 5. the lease is broken, taken, and the boot carries on.
 
 **Why a warning and not a refusal.** A lease lives on the storage service, not in the process that took
@@ -322,16 +349,65 @@ last beat, and which application version it is running — and every instance ca
 | Column | What it tells you |
 |---|---|
 | Instance | The derived identity. On App Service this comes from the platform's `WEBSITE_INSTANCE_ID`, so it is stable for the life of the instance and distinct between siblings. |
-| State | **Live** while the last heartbeat is inside `Cluster:StaleAfterSeconds`; **Stale** past it. Stale is a presumption, not a confirmed death — see [the wager](high-availability.md#a-presumed-death-is-a-wager). |
+| State | **Live** while the last heartbeat is inside `Cluster:StaleAfterSeconds`; **Stopped** when the process retired its row on a clean shutdown — the ordinary trace of a redeploy; **Stale** when it fell silent past the threshold without saying so. Stale is a presumption, not a confirmed death — see [the wager](high-availability.md#a-presumed-death-is-a-wager). |
 | Version | The application version that instance is running. Two different values here during anything but a deploy window is the mixed-version condition, and it is reported as a Critical at the newer instance's boot. |
 | Last beat | Age of the most recent heartbeat. The caption under the table names the cadence (`Cluster:HeartbeatSeconds`, default 15) and the staleness threshold (default 60) actually in force. |
 
 One row is badged as the instance answering your request. Because the load balancer picks per request,
 reloading the page moves that badge between rows — which is the cheapest confirmation available that
-traffic really is spread.
+traffic really is spread. A row whose instance **displaced** a live predecessor names that predecessor,
+and when, under the identity — see the next section.
 
 `GET /api/folders` carries an `instance` field for the same reason: a machine client polling it needs to
 tell "the folder changed" from "a different instance answered".
+
+### When a boot finds its own identity already live
+
+:::warning Changed in 2.5.0 — a live predecessor is displaced, not refused
+Up to 2.4.x, a booting instance that found its own identity still beating refused to start (2.4.3 first
+waited for it, then refused). Since 2.5.0 the new boot **displaces** the live holder and carries on.
+:::
+
+This is what an in-place redeploy on App Service looks like: the platform starts the new container beside
+the old one under the same instance id, and keeps the old one serving — and beating — until the new one
+passes its warm-up probe. Neither a refusal nor a wait could serve that, so:
+
+- **The new boot** takes the identity at once and logs one `Warning` naming the displaced incarnation,
+  its build and its last beat. There is no failed start.
+- **The displaced process stands down** on its next beat: one `Critical` in *its* log, an
+  `InstanceStoodDown` operational event, a red `cluster-instance` row on its `/api/ready` — which does
+  **not** fail the probe, since a 503 would have the platform pull the one container it is still routing
+  to — and a banner above the Instances table on its System page. It claims no new job, runs no takeover
+  and polls Lacuna Signer for nothing; whatever it holds runs to completion, and it keeps serving the web
+  until the platform stops it.
+- **It resumes on its own** if the newer incarnation's row is later stopped or stale — a newcomer that
+  retired its row on a graceful stop, or a second host since stopped — with a `Warning`, an
+  `InstanceResumed` event and a green `/api/ready` again. It never takes the identity back from a holder
+  that is still beating.
+- **Whatever the displaced life left unfinished** is left alone by the new boot's
+  [startup recovery](#startup-recovery) and taken over one `Cluster:StaleAfterSeconds` after the
+  displacement, under the ordinary [takeover](#when-an-instance-stops-answering-a-survivor-takes-its-jobs-over)
+  policy.
+- **A boot whose store did not answer** registers on its first heartbeat that reaches the store,
+  displacing exactly as the boot would have.
+- **A clean shutdown retires its row first**, so a restart after a graceful stop displaces nothing — which
+  is why *stop, set, start* stays the tidier deploy.
+
+:::note On App Service a failed deploy is undone by setting the previous image tag back
+If the new container fails its warm-up after displacing the old one, App Service does **not** fall back
+to the old container: it stops the **whole site** — the stood-down container included, before its
+successor's row could go stale — and keeps restarting it with the new image. The resume above cannot
+happen there. Point the app back at the previous image tag (`az webapp config container set`) and it is
+ready again within about two minutes. See
+[Upgrades are stop-the-world](high-availability.md#upgrades-are-stop-the-world).
+:::
+
+**Two hosts presenting one name are therefore not refused** either: they take turns, loudly on both
+sides, and exactly one claims work at any moment. If you see a displacement when nobody is redeploying,
+read both logs and rename one host or point it at its own database. The one boot refusal left is a
+registration that lost every write race for its row; it names the last winner's build and last beat.
+Deleting the row while a holder is running removes the report rather than the condition. See
+[Troubleshooting](troubleshooting.md#cluster-mode).
 
 ## When an instance stops answering, a survivor takes its jobs over
 
@@ -410,12 +486,23 @@ The worker:
    encrypts, then promotes to `output/`. Each job runs in isolation with its own processing folder.
 5. On any failure: moves the `processing/<jobid>/` content to `error/<jobid>/`, marks the job
    `Failed`, and records the exception message in the job's error field and history.
-6. **The original input is removed from `input/` only after successful verification.** Verification
-   happens before delete, never the other way around.
+6. **The original input is removed from `input/` only after successful verification, and only when it
+   is still the file that was staged.** Verification happens before delete, never the other way around —
+   and a file the pipeline did not process is never deleted. See
+   [When an input file changes mid-job](#when-an-input-file-changes-mid-job).
 
 **Drain on pause.** When an operator pauses while jobs are in flight, the worker stops claiming new
 ones but already-running jobs run to completion. The dashboard's "Slots busy" card counts down as
 they drain.
+
+**Three ways in.** A file reaches the queue from a watched folder, from `POST /api/files`, or from the
+**Upload files** button on the Jobs page, which sends each file through the same handler as the REST
+route — the same size cap, file-name sanitising and profile checks — so the two refuse a file on
+identical terms. The dialog asks for an enabled signing profile and ends with a per-file report linking
+every job it created. `Upload:Enabled = false` turns **both** upload paths off at once: `POST /api/files`
+answers `409` with `upload.disabled`, and the Jobs page shows no upload button. Watched folders, Rescan
+and Retry are unaffected; the key is read at boot, so turning it back on is a restart. See
+[Configuration](configuration.md#upload).
 
 ### LacunaSigner profiles — separate poll worker
 
@@ -425,6 +512,88 @@ is released as soon as dispatch succeeds. A separate poll worker walks every `Aw
 its own cadence (`Signer:PollIntervalSeconds`, default 30 s), downloads the bytes when the remote
 document concludes, and runs the same verify → optionally-encrypt → promote tail. See
 [Lacuna Signer integration](lacuna-signer.md).
+
+## Routing a watched folder to a signing profile
+
+:::warning Changed in 2.2.0 — the profile chooses its folder
+A watched folder is signed under **the profile that chose it**, and a profile chooses its folder from its
+own page in the dashboard — one folder per profile, one profile per folder. `Storage:Inputs[].Profile`
+is now **seed input**: it is read once, on the first boot against an empty profile table, and ignored
+(and reported as ignored) on every boot after that. After the first boot, the settings file cannot route
+a folder. See [`Storage:Inputs[].Profile`](configuration.md#storageinputsprofile--per-folder-routing).
+:::
+
+Nothing else about the folder moves: its name, path, provider, credentials and poll interval stay in
+`Storage:Inputs[]`, validated at boot, and are what the Input page lists. What the profile's page decides
+is which folder feeds which profile — which certificate and which approval rule the folder's files get.
+
+### From the profile's page
+
+1. Open the profile's page in the dashboard (`/profiles/{name}`) and click **Edit behaviour**. The
+   **Input folder** picker offers *none*, every folder this host has configured that no other profile
+   feeds from, and the profile's own current folder.
+2. Choose the folder and save. The folder's watcher starts watching it within a poll interval or two of
+   `Pipeline:PollIntervalSeconds`, on every instance, with no restart. Files already sitting in the
+   folder are picked up without a rescan.
+3. Check the Input page: the folder's card now carries the profile's chip, linking back to the profile.
+
+A profile created from `/profiles/_new` chooses its folder on the same form. The audit event records the
+move by the folder's name, never its path — `InputFolder (none) → remessas` on an edit and
+`Input folder: remessas.` on a creation.
+
+**Two refusals, both on the save.** A folder this host has not configured under `Storage:Inputs[]`, and a
+folder another profile already feeds from — the second names the owner; clear the folder there first, or
+pick another. Two saves choosing one folder at the same instant leave exactly one owner, and the loser is
+told who took it. Neither refusal is ever made at boot: a stored binding is not re-validated, so a folder
+renamed or removed from the configuration after a profile chose it is a **degraded report** — on the
+startup banner, as a `profile-input-folder:<profile>` row on `/api/ready` that does not fail the verdict,
+and as an alert on `/profiles` and on the profile's own page — while the profile keeps serving uploads.
+
+### What *unassigned* means
+
+A folder no profile has chosen is **unassigned**, and nothing is watching it. It shows as:
+
+- a grey chip on the Input page reading `unassigned — no profile has chosen this folder`;
+- `status: "Unassigned"`, with no `profileName`, in `GET /api/folders`;
+- a **green** `input-folder:<name>` row on `/api/ready` — nothing is broken, and a red row would tell an
+  orchestrator to pull an instance for a folder nobody has asked it to watch;
+- one `Warning` in the log, at boot and whenever a profile lets the folder go.
+
+Files dropped into an unassigned folder **wait**: they are not ignored, not moved and not refused, and
+they are picked up the moment a profile chooses the folder. An unassigned folder does **not** fall back
+to `default` — that would put its files under a rule nobody chose. `default` is the fallback for an
+upload that names no profile, and for a folder naming none on the seed's one read, never for a folder
+left unchosen afterwards.
+
+A folder ends up unassigned in one of three ways: the seed left it so on the first boot (a folder naming
+a profile the section does not declare, or a second folder naming a profile an earlier folder already
+took), a profile cleared it from its page, or the profile table was seeded by a version older than 2.2.0
+and never bound. The remedy is the same in every case: choose the folder on a profile's page.
+
+### Moving a folder between profiles
+
+Clear the folder on the profile that has it, **then** choose it on the profile that should — in that
+order, because the second save is refused while the first profile still owns it. In between, the folder
+is briefly unassigned; a file arriving in that window is picked up once the second save takes effect, so
+nothing is lost and nothing is signed twice. Jobs already queued from the folder keep the profile they
+were enqueued under, so a folder name on a job always reads as exactly one certificate and one approval
+rule.
+
+Two folders that should follow one rule are two profiles with the same settings.
+
+### Disabling a profile that feeds from a folder
+
+Turning **accept new work** off is refused while the form still carries a folder, naming it — the
+alternative is a folder whose files silently stop being signed. Clear the folder in the same save and
+the disable is accepted; the folder goes unassigned, says so on the Input page, and waits for another
+profile.
+
+### What a rescan and a retry do with the binding
+
+- A **rescan** skips an unassigned folder whole and says so — see [Rescan](#rescan).
+- A **retry keeps the profile the failed job recorded**, whatever profile the folder feeds today — see
+  [Retrying failed jobs](#retrying-failed-jobs). A job that should be signed under the folder's new
+  profile is cancelled and submitted again instead.
 
 ## Pause and resume
 
@@ -453,9 +622,20 @@ When a pause is in effect:
 - Jobs already in `Processing` / `Verifying` complete normally. Pause stops the **next** pickup, not
   the in-flight work.
 - The `bulksigner_pipeline_paused` gauge flips to `1`.
-- A system event is written with the optional `reason`:
+- An operational event is written with the optional `reason`:
   `"Pipeline paused by operator. Reason: Quarterly maintenance."`. The same convention applies to
-  resume.
+  resume. Both are readable on the dashboard's `/events` page.
+
+A pause and a resume issued at the same moment do not silently overwrite each other: exactly one of the
+two writes wins, and the loser is answered `409` with code `pipeline.race-lost` having recorded nothing.
+Re-read `GET /api/pipeline/state` and retry if your intent still stands.
+
+:::note SQL Server deployments before 2.4.3
+The SQL Server operational store was created without the pipeline-state row that the pause flag lives
+in, so on those versions `POST /api/pipeline/pause` answered `pipeline.state-missing` and the pipeline ran
+regardless. Since 2.4.3 a migration applied at boot adds the row, and pause and resume work on both
+providers.
+:::
 
 ## Canceling jobs
 
@@ -464,11 +644,25 @@ curl -X POST http://localhost:8080/api/jobs/$JOB_ID/cancel \
   -H "X-API-Key: $BULK_SIGNER_API_KEY"
 ```
 
-Valid for `Queued` and `AwaitingSigner` (the latter only exists for LacunaSigner profiles). The
-endpoint returns `409 { code: "job.not-queued" }` if the job has already advanced past those states
+Valid for `Queued`, `AwaitingSigner` and `AwaitingApproval`. The two parked states are cancelable
+precisely because nothing holds them — an `AwaitingSigner` job waits on a remote service, an
+`AwaitingApproval` job on a person, and either wait can turn out to be one you no longer want to finish.
+The endpoint returns `409 { code: "job.not-queued" }` if the job has already advanced past those states
 (e.g. a local job the worker picked up between the operator's decision and the request). In-flight
 local jobs are sacred — removing them mid-sign would leave orphaned `processing/` content and an
 unverified output.
+
+- **`AwaitingSigner`:** the local `Canceled` transition commits first, then the remote Lacuna Signer
+  document is canceled best-effort; a remote failure is logged and does **not** roll back the local
+  cancel. See [Cancel semantics](lacuna-signer.md#cancel-semantics).
+- **`AwaitingApproval`:** after the cancel commits, the job's staged copy is moved from
+  `processing/<jobid>/` to `error/<jobid>/`, again best-effort. The job's approval snapshot is **kept** —
+  it records the rule the job was waiting on, which is what an audit asks for afterwards.
+
+On the dashboard, the job page's **Cancel** asks first: a confirmation dialog names the file, says what
+the cancel does from the job's current status, and reminds you that a canceled job has no Retry — the
+file needs a rescan or an upload to be signed again. *Keep job* cancels nothing. The REST route is
+unchanged and does not ask.
 
 After cancel:
 
@@ -489,12 +683,83 @@ Creates a new job with a fresh `Id`, the same `FileName` / `OriginalPath` / `For
 `ParentJobId = (the failed job).Id`, and initial state `Queued`. The failed job stays `Failed`; the
 chain is reconstructable from `ParentJobId`.
 
+**The retry is signed under the profile the failed job recorded**, not whichever profile its folder feeds
+today: a retry is "sign it the way it was going to be signed", and following the folder's current binding
+would sign under a rule the job never carried. A file that should go under the folder's new profile is
+cancelled and submitted again instead. (A job from before signing profiles existed recorded no name and
+retries under `default`.)
+
 Returns `404 { code: "job.not-found" }` for unknown ids, `409 { code: "job.not-failed" }` for jobs
 that are not `Failed`, `409 { code: "job.input-missing" }` if the original input file is no longer on
-disk.
+disk, and two refusals that are decisions rather than faults — the Retry button is withheld on the job
+page for both:
+
+- `409 { code: "job.rejected-not-retriable" }` for a job that ended `Failed` with `approval.rejected`,
+  because an approver's rejection landed after a worker had claimed it. The rejected file has already
+  been handed back to `output/` under its `.reject` name and its input removed, so a retry could only
+  fail. Correct the file and submit it again. (An ordinary rejection ends `Canceled`, which Retry does
+  not apply to either.)
+- `409 { code: "file.already-processed" }` for a job refused because another job already carries its
+  file name. A retry is exempt from that rule, so retrying this one failure would sign the very file the
+  rule refused. Delete the job that holds the name instead — see
+  [Already-processed file names](#already-processed-file-names).
 
 The dashboard's Job detail page surfaces parent/child links so operators can walk a retry chain back
 to the root failure.
+
+## Already-processed file names
+
+:::warning Changed in 2.13.0 — a name that was already signed is refused
+With `Pipeline:RejectAlreadyProcessedFileNames` on — the default — a file arriving under a name that a
+`Completed` or still-active job already carries is **never signed**. Earlier versions signed it again.
+Set the key to `false` to keep the old behaviour. See [Configuration](configuration.md#pipeline).
+:::
+
+The comparison is host-wide and ignores case, because every watched folder, profile and upload writes
+into the one `output/` folder.
+
+- **Watched folder or rescan:** the file becomes a job that is `Failed` from the start with
+  `file.already-processed`, naming the job that holds the name, and its bytes are moved into the new
+  job's `error/<jobid>/` folder so the file is not offered again. The console says so per file, and a
+  `FileAlreadyProcessed` operational event is written. A rescan counts these in a separate
+  `alreadyProcessed` figure. If the file cannot be moved (something else holds it), nothing is recorded
+  and it stays in the folder; a rescan counts that one under `errors`.
+- **Upload:** `409` with `file.already-processed`; nothing is stored.
+- **What does not reserve a name:** a `Failed` or `Canceled` job. Re-dropping a file after a failure is how
+  you try again.
+
+**To accept a name again, delete the job that holds it** from `/jobs` — see [Deleting a job](#deleting-a-job).
+Once it is gone, a file re-sent under that name is picked up by the watcher without a rescan. Nothing
+enforces the rule in the database: two instances in a cluster can accept the same name at the same
+moment, and it is the refusal to overwrite a file already in `output/` that stops the second.
+
+## Deleting a job
+
+To remove **one** job — for instance the one that holds a file name you want accepted again — delete it
+from `/jobs`: one row at a time, behind a confirmation dialog with an optional reason. There is no REST
+route for it.
+
+- **A job a worker is running** (`Processing` / `Verifying`) cannot be deleted. A job that has not
+  finished (`Queued`, `AwaitingApproval`, `AwaitingSigner`) is canceled first, exactly as a cancel would
+  do it — including the best-effort cancel of the remote Lacuna Signer document — and is recorded under
+  the status it had (`'<name>', Queued, canceled to delete it`).
+- **What goes:** the job, its history, timings, CNAB240 detail, approval snapshot and recorded approvals;
+  its `processing/` and `error/<jobid>/` folders; the output file **it recorded** writing to `output/` —
+  never a file that merely shares its name, and nothing for a job completed before 2.13.0, which recorded
+  none; and its input, **only** if the job staged it and it is unchanged since.
+- **What is kept:** an input the job never staged, or one rewritten since — except an upload's own copy,
+  which the product named and put in the landing folder, and which is removed; an input that another
+  unfinished job (a retry of this one, say) still names; and one that could not be compared because
+  another process holds it or it cannot be read. The next scan treats each kept input as a new arrival,
+  and the `/jobs` notice names what was kept.
+- **What the audit trail keeps:** every existing operational event, including those that mention the
+  deleted job, plus one more — a `JobDeleted` event: `Job <id> ('<name>', <status>) deleted by <actor>.`,
+  then what was removed and what was kept, a summary of any approvals (decision, approver name, masked
+  address, time), and `Reason: <reason>.` when one was given.
+
+**How it differs from Clear Jobs**, deliberately: Clear Jobs is an order to empty the system, so it
+abandons in-flight jobs, deletes inputs without comparing them, and deletes the operational events.
+Deleting one job does none of those.
 
 ## Rescan
 
@@ -512,49 +777,104 @@ Re-enqueues every file currently in the configured input folder(s) that is not a
 Useful after a long pause or after manually placing files. The response is a per-folder breakdown plus
 aggregate counts. Each rescanned file is tagged with the matching folder's name.
 
-Rescan **does** re-enqueue files that were recently canceled (unlike the watcher's auto-pickup path,
-which leaves canceled files alone).
+Rescan **does** re-enqueue files that were recently canceled or whose last job failed (unlike the
+watcher's auto-pickup path, which leaves both alone).
+
+- **A folder whose signing profile is disabled contributes to `ignored`, not to `errors`.** Disabling a
+  profile is a request to skip its files, so a retired profile's backlog is not shown as a red figure.
+  The log line explaining the number is written once per folder, naming the profile. Re-enable the
+  profile and rescan again, or choose the folder on another profile's page.
+- **A folder no profile has chosen is skipped whole, and the response says so.** Its row comes back with
+  `unassigned: true` and every count at zero, `totals.unassigned` counts such folders, the Input page's
+  notice ends `… N folder(s) unassigned and skipped`, and the log carries one `Information` line per
+  folder. It is neither an error nor `ignored` — nobody has asked to sign from that folder yet. Choose
+  the folder on a profile's page; the watcher then lists it without a further rescan. See
+  [Routing a watched folder to a signing profile](#routing-a-watched-folder-to-a-signing-profile).
+- **A file whose name a completed or active job already carries** is counted under `alreadyProcessed` —
+  see [Already-processed file names](#already-processed-file-names).
+- **A folder that cannot be read does not stop the others.** Its row comes back with `errors: 1` and
+  `scanned: 0`, every other folder is rescanned normally, and the call is still a `200`. The file log
+  carries the underlying exception.
 
 ## Clear Jobs
 
-A maintenance action that **permanently deletes finished job records** — the job rows and their history
-timelines — for administrative cleanup. It does **not** touch operational events, pipeline state,
-signing profiles, configuration, signed or processed files, or logs.
+A maintenance action that **permanently deletes every job record and every file those jobs left
+behind** — the job rows in every status, their history, their approval evidence and CNAB240 line detail,
+and on the storage tree each job's input file, its `processing/<jobid>/` folder, its `error/<jobid>/`
+folder and its signed output — **together with every operational event recorded before the clear
+started**. What is left of the event trail is the `JobsCleared` event that records the clear, plus
+anything a worker commits while it runs. It does **not** touch pipeline state, signing profiles,
+configuration, logs, or the folder roots themselves.
 
-:::warning Changed in 2.0.0 — finished records only
-Clear Jobs now deletes **terminal** jobs only. A `Queued`, parked or in-flight job survives the action,
-and both surfaces report what they left behind alongside what they removed. A script that clears the
-table and then expects it to be empty has to drain or cancel the unfinished jobs first.
-
-Deleting the row under a running job was the sharpest operator-action hazard in the product — under a
-cluster it would be a *sibling's* running job — so the narrowing is not gated on `Cluster:Enabled` and
-applies to every deployment.
+:::warning Changed in 2.9.0 and 2.10.0 — every job, its files and the operational events
+From 2.0.0 to 2.8.x, Clear Jobs deleted only *finished* job records and reported the unfinished ones it
+skipped. Since 2.9.0 it takes **every** job whatever its status — a `Queued` file, a job parked on an
+approver, a job a worker is signing at that moment and, under `Cluster:Enabled`, a sibling instance's job
+— and deletes the files those jobs left behind; the `skipped` count is gone from the response. Since
+2.10.0 it also deletes the operational events recorded before the clear. An operator clearing the system
+from the danger zone wants an empty system, and the confirmation dialog says exactly what goes.
 :::
 
-From the dashboard: **System → Danger zone → Clear Jobs**. A confirmation dialog gates the action;
-cancelling deletes nothing. From REST:
+**Once confirmed, it runs to completion whether or not you stay on the page.** The files are swept before
+the rows, so on a remote work share a clear with many jobs behind it takes a while, and navigating to
+`/jobs` to watch the table empty is fine. Only the host stopping interrupts it; if that happens the
+transaction rolls back with every row still present, the files already swept stay deleted, and a warning
+in the log says so — re-run the clear. (Before 2.11.1, leaving the System page canceled the clear
+silently, which looked like a clear that had not worked.) The result notice is the only part that needs
+you on the page; the `JobsCleared` event and the log line are the record either way.
+
+From the dashboard: **System → Danger zone → Clear Jobs**. A confirmation dialog — irreversible; every
+job, unfinished ones too; every file those jobs left behind; every operational event recorded so far,
+leaving the record of the clear — gates the action; cancelling deletes nothing. From REST:
 
 ```bash
 curl -X DELETE http://localhost:8080/api/jobs \
   -H "X-API-Key: $BULK_SIGNER_API_KEY"
-# → {"deleted": 1230, "skipped": 4, "message": "Cleared 1230 job record(s); skipped 4 unfinished."}
+# → {"deleted": 1234, "filesDeleted": 2460, "foldersDeleted": 7, "eventsDeleted": 318, "itemsFailed": 0, "message": "Cleared 1234 job record(s), 2460 file(s), 7 folder(s) and 318 operational event(s)."}
 ```
 
 What happens on confirm:
 
-- Every **terminal** job row and its history is deleted in one transaction (retry-chain parent links
-  are dissolved first so the self-referencing foreign key does not block the delete).
-- Unfinished rows are counted and reported as `skipped` — on the dashboard as a line in the result
-  message, in the REST response as its own field.
-- A `JobsCleared` operational event records the actor (cookie or API-key identity), timestamp, and both
-  counts; the same is emitted to the structured log. On failure the transaction rolls back, an error is
-  logged, and the operator stays on the page.
+- **Each job's files are deleted first** — input, `processing/<jobid>/`, `error/<jobid>/`, and the signed
+  output at the location the job recorded (plus a rejected file's `.reject` hand-back) — on whichever
+  storage holds them. This is best-effort per item: a file something else holds a lease on, or a folder
+  the storage refuses, is left in place, named in a warning log line and counted in `itemsFailed` (a
+  warning notice on the dashboard), and its job's record still goes. A storage that is unreachable fails
+  the clear before any row is deleted.
+- **Then every job row and its history are deleted** in one transaction (retry-chain parent links are
+  dissolved first so the self-referencing foreign key does not block the delete).
+- **Every operational event recorded before the clear started is deleted** in the same transaction, and
+  then a `JobsCleared` event is written — the first row of the trail from then on — recording the actor
+  (cookie or API-key identity), the timestamp, and the deleted job, file, folder and event counts,
+  followed by `N file(s) or folder(s) could not be deleted.` when anything was refused. The same is
+  emitted to the structured log. On a database failure the transaction rolls back, an error is logged,
+  and the operator stays on the page — the files already swept are not restored, so re-run the clear.
 - A deployment-wide **reset marker** moves inside the same transaction, so the
-  [performance panel](statistics.md#resetting-the-panel) counts only jobs completed after it. Nothing
-  is deleted to clear the panel, and a clear that fails leaves it exactly as it was.
+  [performance panel](statistics.md#resetting-the-panel) returns to zero on every instance. Nothing is
+  deleted *to* clear the panel, and a clear that fails leaves it exactly as it was.
+
+**Caveats.**
+
+- **It does not wait for anything.** A job the worker is signing at that moment has its staged copy
+  deleted out from under it; the worker fails the job, finds no row to write the failure to, and logs
+  both. If a batch is mid-flight and matters, **pause the pipeline and let it drain first**. Under
+  `Cluster:Enabled` the same is true of every sibling's job.
+- **Inputs are deleted without the comparison** every other path makes against the staging fingerprint —
+  Clear Jobs is an order to empty the system, not a job finishing.
+- **Nothing is forced on the storage side.** Check the log after any clear that reports a non-zero
+  `itemsFailed`, and remove those items by hand — typically a producer still writing into an input
+  folder, or a hold a sibling left on a staged copy. The timestamp-suffixed twin of an `error/` folder
+  (created when one job id was relocated twice) is not derivable from the row and is left too.
+- **A job enqueued while the clear is running** was not in the sweep's snapshot: it keeps its input file
+  and loses only its row, and the next folder scan — service start or Rescan — ingests the file again.
+- The System page's *last shutdown* card is empty after a clear until the next shutdown — a fact about
+  the cleared system, not a defect.
+
+To remove a single job rather than all of them, see [Deleting a job](#deleting-a-job).
 
 :::warning There is no undo
-Back up the operational store first if the job history has audit value — `db/bulksigner.db` under
+Collect anything you still need from `output/` first — the signed files go with the jobs. Back up the
+operational store if the job history or the event trail has audit value — `db/bulksigner.db` under
 SQLite, or your DBMS regime's backup under SQL Server. See [Retention](retention.md#backup-discipline).
 :::
 
@@ -606,6 +926,10 @@ owner's heartbeat rather than the boot.
 The consequence is the one thing to do at the upgrade: a row left in progress by an older build carries
 **no** owner, and nothing under the switch will ever sweep it. Boot once with `Cluster:Enabled = false`
 before the first cluster boot and this sweep clears them all.
+
+After a boot has [displaced](#when-a-boot-finds-its-own-identity-already-live) a live predecessor, the
+sweep leaves **every** earlier life of the identity alone — the displaced process may still be finishing
+its jobs — and takeover reaches them one `Cluster:StaleAfterSeconds` after the displacement.
 :::
 
 ## The ready-summary banner
@@ -615,28 +939,52 @@ decision-critical state:
 
 ```
 ================================ Service ready ================================
-host mode      = systemd
-environment    = Production
-https redirect = off (terminate TLS at reverse proxy)
-content root   = /opt/bulksigner
-storage root   = /var/lib/bulksigner
-db             = /var/lib/bulksigner/db/bulksigner.db
-pki license    = <16-hex-char SHA-256 fingerprint>
-cert source    = Pkcs11 (module=/usr/lib/...)
-signing policy = ADR-Básica (PAdES + CAdES + XAdES)
-encryption     = enabled (BSENC v1, salt loaded)
-poll interval  = 2s
-pipeline       = running
+host mode         = systemd
+environment       = Production
+https redirect    = off (terminate TLS at reverse proxy)
+content root      = /opt/bulksigner
+storage root      = /var/lib/bulksigner
+operational store = SQLite (/var/lib/bulksigner/db/bulksigner.db)
+pki license       = <16-hex-char SHA-256 fingerprint>
+cert source       = Pkcs11 (module=/usr/lib/...)
+signing policy    = ADR-Básica (PAdES + CAdES + XAdES)
+encryption        = enabled (BSENC v1, salt loaded)
+poll interval     = 2s
+pipeline          = running
+version           = 2.15.0+9a3f2c1e4b…
 ================================================================================
 ```
+
+The `version` row carries the version **in full**, build metadata included — the build a deployment runs
+is what a support request ends up asking for. The branded banner printed above it, at the very top of
+every start, carries the short form (`v2.15.0`).
 
 This is the fastest way to verify a config change took effect. A mistyped key surfaces as the default
 value rather than the value you intended.
 
-A second panel — **Signing profiles** — lists every resolved profile (or the synthesised legacy
-`default` profile). Profiles configured with `Verify=false` or `ValidateCertificate=false` emit
-additional `WARN` lines (to both stdout and the log file) so the low-trust posture is captured
-durably.
+A second panel — **Signing profiles** — lists every profile in the operational store (seeded from
+`Signing:Profiles[]`, or from the legacy certificate block as a derived `default`, on the first boot
+against an empty profile table), one row per profile. Profiles configured with `Verify=false` or
+`ValidateCertificate=false` emit additional `WARN` lines (to both stdout and the log file) so the
+low-trust posture is captured durably. Three other states show on that panel, and none of them stops the
+boot:
+
+- **`DEGRADED · `** — the profile's certificate could not be opened. A `FAIL` line beside it names the
+  profile and the reason, and the same line reaches the log at `Critical`. The host starts and the rest
+  of the deployment keeps signing; jobs routed to that profile fail with `profile.degraded`, and
+  `/api/ready` carries a `signing-profile:<name>` row reporting `ok: false` without failing the
+  response. Fix the certificate and restart. A profile whose **stored secrets** could not be decrypted is
+  degraded the same way, and its reason names `Signing:ProfileSecretsKey`; the remedy there is entering
+  that profile's certificate material again, then a restart.
+- **`KEYLESS · `** — the profile's signer set is `Approvers`, so the approvers sign and there is no key.
+  The row reads `cert=none (approvers sign)`, nothing is opened for it at startup, and `/api/ready`
+  carries a `signing-profile-keyless:<name>` row reporting `ok: true`. It is not degraded and needs no
+  remedy.
+- **Folder warnings** — on the first boot, one line per folder the seed could not bind to a profile (it
+  stays unassigned); on every later boot that still finds `Storage:Inputs[].Profile` keys, one line saying
+  they are ignored; and on any boot, one line per profile bound to a folder this host has not configured.
+  All three are remedied from the profile's page — see
+  [Routing a watched folder to a signing profile](#routing-a-watched-folder-to-a-signing-profile).
 
 ### Foreground console runs: live dashboard
 
@@ -653,8 +1001,10 @@ deployments (Windows Service, systemd, Docker) are unaffected. See
 | `journalctl -u bulksigner` / Event Viewer / `docker compose logs` | Bootstrap, lifecycle events, fatal errors, stdout |
 | `/var/log/bulksigner/bulksigner-yyyyMMdd.log` (etc.) | The durable structured log; secrets redacted |
 | `GET /api/metrics` | Prometheus exposition — see [REST API](rest-api.md#metrics) |
-| `GET /api/ready` | Per-probe readiness JSON (DB, input folder, license) |
-| Dashboard System page | License fingerprint, certificate source, queue length, pause state |
+| `GET /api/ready` | Per-probe readiness verdict (operational store, input folders, license, …): each check's name and `ok`, no detail |
+| `GET /api/ready/details` | The same probes with each check's detail; API key or operator session required |
+| Dashboard `/events` page / `GET /api/events` | The operational event log — pause and resume, profile edits, approval decisions, takeovers, job deletions, Clear Jobs, service shutdown — newest first, filterable by type, date range and text |
+| Dashboard System page | License fingerprint, certificate source, queue length, pause state, last shutdown, and a **Recent events** card with the newest ten |
 | Job history (in the database) | One row per state transition for every job |
 
 ## Routine operator tasks
@@ -663,9 +1013,14 @@ deployments (Windows Service, systemd, Docker) are unaffected. See
 |------|-------|
 | Watch live ingestion | Dashboard's "Pipeline status" card or `tail -f bulksigner-*.log` |
 | Investigate a failure | Dashboard Job detail → timeline → click the error message; or `error/<jobid>/` on disk |
-| Re-run a failed job | Dashboard `Retry` button or `POST /api/jobs/{id}/retry` |
+| Re-run a failed job | Dashboard `Retry` button or `POST /api/jobs/{id}/retry` — under the profile the job recorded, not the folder's current one |
+| Route a watched folder to a signing profile, or move it | The profile's page → **Edit behaviour** → **Input folder**; never a settings file. See [Routing a watched folder to a signing profile](#routing-a-watched-folder-to-a-signing-profile) |
+| Find out why a folder's files are not moving | Input page: a grey `unassigned — no profile has chosen this folder` chip means exactly that — choose the folder on a profile's page; a red `stopped` chip is [a watcher failure](#per-folder-watcher-failure-isolation) |
+| Accept a file name again | Delete the job that holds it from `/jobs`; see [Deleting a job](#deleting-a-job) |
+| Find out who paused the pipeline, changed a profile, decided an approval or cleared the jobs | Dashboard `/events`, or `GET /api/events` |
 | Plan downtime | `POST /api/pipeline/pause` with a `reason`; wait for in-flight jobs to clear; then stop the service |
-| Apply an upgrade | Back up `db/bulksigner.db`, run the install script with the new bundle, watch the bootstrap banner |
+| Apply an upgrade | Back up the operational store (`db/bulksigner.db` under SQLite, your own database backup under SQL Server), run the install script with the new bundle, watch the bootstrap banner |
+| Wipe every job and its files | Dashboard System → Danger zone → **Clear Jobs** (or `DELETE /api/jobs`); see [Clear Jobs](#clear-jobs) — irreversible, and unfinished jobs and the operational events go too |
 
 See [Troubleshooting](troubleshooting.md) for the failure-mode catalog.
 

@@ -135,10 +135,31 @@ O nome do envelope criptografado simplesmente acrescenta `.enc` ao nome assinado
 | PAdES | `report.signed.pdf` | `report.signed.pdf.enc` |
 | CAdES | `data.bin.p7m` | `data.bin.p7m.enc` |
 | XAdES | `contract.signed.xml` | `contract.signed.xml.enc` |
+| *(nenhum — um arquivo rejeitado)* | `folha.reject.rem` | `folha.reject.rem.enc` |
 
 O `GET /api/jobs/{id}/output` troca sua resposta para `Content-Type: application/octet-stream` e o nome
 de arquivo `.enc` quando a saída do job está criptografada. A página de detalhe do job no dashboard
 mostra um chip "Saída criptografada" na mesma condição.
+
+### Um arquivo rejeitado também é criptografado, e isso tem uma consequência
+
+Quando um aprovador **rejeita** um arquivo de pagamento, ele é devolvido ao `output/` sob um nome
+`.reject` — a última linha acima — e, se o perfil criptografa, esse arquivo também é criptografado. O
+`output/` mantém sua propriedade de que tudo nele é opaco, o que importa mais aqui do que em qualquer
+outro lugar: uma remessa não assinada é a maior concentração de dados pessoais que o produto manipula, e
+é o único arquivo que ninguém aprovou.
+
+**A consequência, dita com todas as letras:** a devolução também remove o original de sua pasta
+monitorada, então, com a criptografia ligada, **a senha do BSENC é o único caminho de volta a esses
+bytes.** Na prática isso não lhe pede nada de novo — uma implantação que recolhe a saída assinada do
+`output/` já precisa da senha e de um dos [descriptografadores de exemplo](samples.md) para ler qualquer
+coisa. Mas, se a sua automação só consumia arquivos `.enc` que reconhecia como assinaturas, ela agora
+precisa tratar também nomes `.reject`, e perder a senha perde os arquivos rejeitados exatamente como
+perde os assinados.
+
+Reconheça um arquivo rejeitado pelo **nome**, e não pela página do job: o chip "Saída criptografada" e o
+`GET /api/jobs/{id}/output` descrevem apenas a saída assinada — o download não serve um arquivo
+rejeitado —, então o chip não aparece em um job rejeitado mesmo quando sua devolução é um envelope `.enc`.
 
 ## A receita de descriptografia
 

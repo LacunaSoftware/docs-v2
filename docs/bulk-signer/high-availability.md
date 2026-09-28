@@ -58,6 +58,23 @@ porque é o momento seguinte a uma implantação que falhou.
 Portanto versões mistas são detectadas e reportadas, nunca impedidas. Trate o Critical como o alarme que
 ele é.
 
+**Trocar a imagem no lugar é sobrevivível, mas não é a receita.** Desde a 2.5.0, trocar a imagem de um
+app em execução (`az webapp config container set`) não custa mais uma inicialização recusada. O App
+Service inicia o novo container ao lado do antigo, sob o mesmo id de instância, e mantém o antigo
+servindo até que o novo esteja aquecido; o novo container **desloca** o antigo, que se retira — termina o
+que detém e não reivindica nada novo — e diz isso no seu log, como um evento `InstanceStoodDown` e na sua
+página Sistema. Veja
+[Operação](operations.md#quando-um-boot-encontra-a-própria-identidade-ainda-viva). Uma instância que
+desliga de forma limpa aposenta a sua linha de heartbeat (desde a 2.4.3), então depois de *parar, trocar,
+iniciar* não há nada a deslocar, e é por isso que essa continua sendo a implantação mais limpa.
+
+**Uma implantação que falha derruba o site, e reapontar a tag anterior é a recuperação.** Se o novo
+container falha no aquecimento depois de deslocar o antigo, o App Service não continua roteando para o
+container antigo: ele para o **site inteiro**, inclusive o container que se retirou, e continua
+reiniciando-o com a imagem nova. Nada que o produto faça consegue impedir isso. Aponte o app de volta
+para a tag de imagem anterior com `az webapp config container set`; ele fica pronto de novo em cerca de
+dois minutos.
+
 ## A afinidade de sessão é obrigatória
 
 O dashboard é Blazor Server, e um circuito é uma conexão SignalR com estado que precisa continuar
@@ -150,6 +167,14 @@ A imagem espelhada também é declarada: uma instância que fica obsoleta para s
 assinando**. Ela não é parada, porque a regra permanente deste produto é que um job em andamento roda
 até sua conclusão natural. Ela nunca assume seus próprios jobs, diga a tabela o que disser.
 
+**A mesma janela dá o ritmo da pergunta sobre uma instância deslocada.** Depois da sobreposição de uma
+reimplantação, a varredura do novo container pergunta à base, passada a janela, pelos jobs que a
+encarnação deslocada deixou para trás. Depois que essa pergunta volta vazia, ela é feita de novo uma vez
+por `Cluster:StaleAfterSeconds`, e não a cada consulta (desde a 2.8.0) — no App Service toda troca se
+sobrepõe, então o registro de deslocamento nunca se limpa. O custo é que um processo deslocado que nunca
+se retirou e reivindica um job tardiamente o tem assumido em uma janela mais uma consulta, em vez de em
+uma consulta, o que é a aposta acima, e não uma nova.
+
 ## Linhas que ninguém possui não são reconciliadas por ninguém
 
 Uma linha de job sem **nenhum dono** — deixada por uma build anterior à coluna de propriedade, ou por
@@ -200,6 +225,37 @@ parede que pausar não estende.
 O sinal de acordar é local ao processo. Um enfileiramento na instância A não acorda o worker da
 instância B; B pega o job na sua próxima consulta. O `Pipeline:PollIntervalSeconds` é, portanto, o
 limite de latência entre instâncias do cluster — aceito e documentado, não contornado por engenharia.
+
+**A edição de um perfil de assinatura segue o mesmo limite, por desenho.** Os perfis de assinatura vivem
+na base operacional e são editados pelo dashboard; uma escrita de perfil incrementa um contador na base,
+dentro da sua própria transação, e toda instância lê esse contador na consulta que já executa — então
+uma mudança feita na instância A chega à instância B em um intervalo de consulta, sem nenhum caminho de
+mensagens entre elas para configurar, proteger ou depurar. O que se propaga é o *comportamento*: formato,
+verificação, criptografia, checagem CNAB240 e toda a regra de aprovação. Uma mudança de **certificado**
+não se propaga, em nenhuma instância: cada host abre o seu certificado uma vez na inicialização e mantém
+o handle da chave, então trocar um certificado é um reinício — nesta topologia, o reinício que para o
+mundo descrito acima.
+
+Duas consequências a esperar:
+
+- **Entre a edição de um certificado e o reinício, duas instâncias podem honestamente reportar origens
+  diferentes para o mesmo perfil** — cada uma nomeando a chave com que assinaria, que é também a origem
+  que ela carimba nos jobs que assina. Uma coleta ou uma requisição ao dashboard cai em uma instância
+  arbitrária, então leia a resposta como "o que assinaria aqui", e não "o que a linha diz".
+- **O marcador de reinício pendente que uma edição de certificado levanta é por instância, e é fiel.**
+  Uma instância que já reiniciou não mostra nada e uma que não reiniciou mostra o marcador — ambas
+  corretas sobre si mesmas —, o que torna legível uma reciclagem parcial. No reinício que para o mundo,
+  toda instância perde o marcador junto.
+
+**Duas origens de certificado não podem ser escolhidas nesta topologia.** Um token PKCS#11 e o
+repositório de certificados do Windows do próprio host vivem em uma única máquina, e estas instâncias são
+criadas e destruídas por operações de escala — então criar um perfil com qualquer uma dessas origens, ou
+reapontar um para elas, é recusado no formulário enquanto `Cluster:Enabled` estiver ligado. Uma
+configuração que declare uma delas continua sendo uma recusa de boot. Um perfil **salvo antes de a chave
+ser ligada** é o único caso que nenhuma das duas pega: nada revalida um perfil armazenado, então ele vira
+um aviso de inicialização, nomeando o perfil e a sua origem. Espere que isso pareça assimétrico na frota:
+a instância que tem o token assina e avisa, enquanto toda instância sem ele reporta o perfil como
+degradado e reprova os jobs roteados para ele.
 
 A mesma localidade é o que faz a reingestão continuar funcionando de graça: sob o esquema em que todas
 monitoram tudo, a instância que termina um job sempre monitora a pasta de onde ele veio, então o sinal
@@ -282,18 +338,26 @@ tenha relaxado, e nenhuma delas foi:
   isso. A política de assunção percorre essa borda deliberadamente: um job que nunca chegou à chamada de
   assinatura é reenfileirado porque *nada foi tentado*; um job além dela falha. `Failed` é um desfecho
   terminal honesto, não "travado", e a repetição manual do operador continua sendo a repetição.
-- **Jobs em andamento são sagrados.** O `POST /api/jobs/{id}/cancel` é válido apenas para jobs
-  `Queued`, em toda instância.
-- **Perfis de assinatura e pastas monitoradas continuam na configuração.** Movê-los para o banco de
-  dados foi considerado como pré-requisito e descartado quando a topologia se assentou — seu motivo era
-  consistência entre instâncias, que o App Service fornece por construção.
+- **Jobs em andamento são sagrados.** O `POST /api/jobs/{id}/cancel` é válido apenas para jobs que
+  nenhum worker está executando — `Queued`, `AwaitingSigner` e `AwaitingApproval` —, em toda instância.
+- **As pastas monitoradas continuam na configuração; os perfis de assinatura, não mais.** Mover os perfis
+  para o banco de dados foi considerado como pré-requisito aqui e descartado quando a topologia se
+  assentou, porque o App Service fornece consistência entre instâncias por construção. Depois isso
+  chegou por mérito próprio: os perfis são linhas na base operacional, editadas pelo dashboard, o que
+  move a edição dos pools de aprovadores do acesso a arquivos do host para a autorização do dashboard. O
+  que isso acrescenta aqui é o limite de propagação acima e nada mais — nenhuma topologia nova e nenhuma
+  coordenação entre instâncias. As pastas monitoradas continuam sendo configuração, e toda instância
+  continua monitorando toda pasta.
 - **A etapa de aprovação não mudou.** A regra continua congelada no job no momento da retenção, uma
   rejeição continua sendo um veto, e os bytes em stage continuam sendo re-hasheados antes de qualquer
   assinatura existir.
-- **O `ClearJobs` é somente-terminal, e isso valeu para todo mundo.** Ele reporta uma contagem de
-  pulados nas duas superfícies. Apagar a linha sob o job de uma irmã em execução era o risco de ação de
-  operador mais afiado do inventário — e apagá-la sob o próprio worker em execução já era duvidoso,
-  razão pela qual a correção não está condicionada à chave.
+- **O Clear Jobs leva todo job, inclusive o de uma irmã — por decisão, não por omissão.** Da 2.0.0 à
+  2.8.x ele era somente-terminal para todo mundo, porque apagar a linha sob o job de uma irmã em execução
+  era o risco de ação de operador mais afiado do inventário. Desde a 2.9.0 ele apaga todo job, qualquer
+  que seja o status: um operador que apaga o sistema pela zona de perigo apagou um sistema com um job
+  dentro, de propósito, e o diálogo diz isso. O worker do job abandonado o reprova, não encontra linha, e
+  registra as duas coisas — e é o lease por arquivo, e não esta ação, que continua impedindo duas
+  instâncias de assinarem o mesmo arquivo. Veja [Clear Jobs](operations.md#clear-jobs).
 
 ## O que não é uma limitação, apesar de parecer
 

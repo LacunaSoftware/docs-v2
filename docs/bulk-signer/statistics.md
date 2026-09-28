@@ -16,8 +16,8 @@ calculado, e como lê-los quando o processamento parece lento.
 | Como ligo ou desligo? | `Statistics:Enabled` (padrão `true`). Quando `false`, nada é registrado e o painel do dashboard desaparece. |
 | O que é medido? | Quatro etapas por job — **espera na fila, assinatura, verificação, criação da saída** — mais um **total** (a soma delas). |
 | O que *não* é medido? | As duas esperas humanas: a espera em **`AwaitingSigner`** do Lacuna Signer e a espera em **`AwaitingApproval`**. Ambas são deliberadamente excluídas — veja [abaixo](#por-que-as-esperas-humanas-são-excluídas). |
-| Onde eu vejo isso? | Na página inicial do **Dashboard**, painel "Desempenho de processamento". Atualiza na consulta normal do dashboard (`Dashboard:PollIntervalSeconds`). |
-| Como eu limpo isso? | O [Clear Jobs](operations.md#clear-jobs) move um **marcador de reset** de escopo da implantação. Nada é apagado — veja [Zerando o painel](#zerando-o-painel). |
+| Onde eu vejo isso? | Na página inicial do **Dashboard**, painel "Desempenho de processamento", atualizado na consulta normal do dashboard (`Dashboard:PollIntervalSeconds`) — e, para um job, na seção **Tempo de processamento** da página dele (veja [abaixo](#os-números-de-um-único-job)). |
+| Como eu limpo isso? | O [Clear Jobs](operations.md#clear-jobs) move um **marcador de reset** de escopo da implantação e apaga todo job com a sua linha de tempos — veja [Zerando o painel](#zerando-o-painel). |
 | Quer histórico durável *fora* do produto? | Colete o `/api/metrics` — o `bulksigner_signing_duration_seconds` é o registro externo (veja [API REST](rest-api.md)). |
 
 :::note Mudou na 2.0.0
@@ -83,8 +83,17 @@ O painel "Desempenho de processamento" mostra:
 | **Média por etapa — Espera na fila / Saída** | Tempo médio de acúmulo na entrada e tempo médio de materialização da saída (criptografia + promoção). |
 | **Por método — Local (n) / Remoto (n)** | Total médio para jobs assinados localmente vs. pelo Lacuna Signer, com a contagem de amostras entre parênteses. |
 | **Tempo de vida** | Jobs concluídos ÷ a janela que as linhas cobrem, expresso por minuto. |
+| **Job mais lento** | O único job concluído por trás do **Máx.** — nomeado, com o seu total em `hh:mm:ss.fff` e quando concluiu, linkado para a sua página, para que você veja o que foi lento nele. Calculado sobre as mesmas linhas que todo o resto acima, então um reset também o move. Ausente quando nada concluiu desde o reset. |
 
 A legenda mostra quantos jobs concluíram e o início daquela janela.
+
+Mais um card fica na grade de estatísticas no topo da página, e não neste painel, porque não é uma
+estatística: **Em execução há** (**Há mais tempo em execução** quando `Pipeline:MaxConcurrency > 1`)
+mostra o job em andamento que o pipeline mantém há mais tempo, avançando ao vivo a cada segundo, linkado
+para a sua página. Ele é medido a partir da captura mais recente do job — um job liberado da aprovação é
+capturado duas vezes, e a deliberação humana entre as duas não é tempo de execução — ou, em um job que
+voltou do Lacuna Signer, a partir do download que o trouxe de volta, já que a captura de um job remoto
+pode ter dias. Ele aparece somente enquanto há algo em andamento, e não depende de `Statistics:Enabled`.
 
 As durações são renderizadas de duas formas: texto arredondado nos cards de estatística (`2 min 14 sec`,
 `3.4 sec`, `421 ms`) e `hh:mm:ss.fff` fixo na linha de mín./méd./máx. (`00:00:03.421`). Uma etapa ainda
@@ -99,6 +108,38 @@ honesta de reconstruir um equivalente de escopo da implantação a partir de tim
 foi **aposentado em vez de aproximado**. A "Vazão (último min)" responde à pergunta para a qual ele era
 lido na maior parte das vezes, e o `bulksigner_signing_duration_seconds` em `/api/metrics` não mudou e
 continua sendo o registro externo.
+
+## Os números de um único job
+
+A linha que o painel agrega também é o detalhamento de um job, e a página do job (`/jobs/{id}`) a mostra
+em uma seção **Tempo de processamento**, em uma de duas formas:
+
+- **Um job concluído** mostra as quatro etapas e o total exatamente como foram registrados, em
+  `hh:mm:ss.fff`, ao lado de quando o pipeline pegou o job e de quando ele concluiu. A etapa **Saída** é o
+  pós-processamento — criptografia, promoção para `output/` e exclusão do original. Uma etapa que não
+  aconteceu — a verificação em um perfil com `Verify = false` — lê **não executada**, nunca
+  `00:00:00.000`, a mesma distinção que as médias do painel mantêm. A legenda diz o que "total" significa
+  ali: para um job do Lacuna Signer é a criação e o download do documento, e nunca a espera pelo
+  signatário, e para qualquer método a espera por um aprovador não está nele. Então, em um job remoto ou
+  com etapa de aprovação, o total é bem menor que o intervalo entre a primeira e a última entrada da linha
+  do tempo — e essa diferença é a [exclusão abaixo](#por-que-as-esperas-humanas-são-excluídas).
+- **Um job em andamento** (`Processing` ou `Verifying`) mostra há quanto tempo o pipeline o mantém, ao
+  vivo — o mesmo número, e a mesma regra, do card *Em execução há* do dashboard. O detalhamento por etapa
+  ainda não existe; ele é escrito quando o job conclui.
+
+Todo outro job **não mostra a seção**: um job com falha, cancelado ou expirado não registra tempos (há uma
+linha por job *concluído*), e um job concluído sem linha — as estatísticas estavam desligadas, ou o host
+morreu no meio do job — não mostra nada, em vez de uma linha de travessões. `Statistics:Enabled = false`
+oculta o detalhamento por etapa junto com o painel; o número ao vivo de um job em andamento não é uma
+estatística e permanece. Um aprovador que pode abrir a página do job também vê a seção — ela é um registro
+sobre o job, e não uma capacidade.
+
+O que a seção deliberadamente **não** oferece: agrupar ou filtrar por perfil, pasta ou intervalo de datas;
+o tempo decorrido de um job com falha até a falha, ou contagens de erros por tipo; tempos por tentativa (uma
+repetição é um job novo, e é cronometrada como tal); a divisão do intervalo de assinatura do Lacuna Signer
+entre criação e download (os dois são somados em **Assinatura**); e visões de mediana, percentil ou "dez
+mais lentos". Para uma análise desse tipo, use o histograma `bulksigner_signing_duration_seconds` do
+`/api/metrics`.
 
 ## Como o tempo decorrido é calculado
 
@@ -144,16 +185,22 @@ Rodar o [Clear Jobs](operations.md#clear-jobs) registra um **marcador de reset d
 implantação**: daí em diante os agregados contam apenas jobs que concluíram depois dele. Ele tem efeito
 em toda instância de uma vez, porque o marcador é uma linha em vez de uma variável em um processo.
 
-Três coisas decorrem, e a segunda é o ponto:
+Três coisas decorrem:
 
-- **Nada é apagado para limpar o painel.** As linhas que um reset esconde continuam armazenadas e
-  continuam consultáveis. O que *de fato* remove uma linha é o job ir embora — um job apagado leva seus
-  tempos consigo, pela chave estrangeira.
-- **Um job que a limpeza deixou em paz mantém sua medição.** O Clear Jobs apaga somente jobs com os quais
-  o pipeline terminou; um não finalizado sobrevive, e quando ele conclui depois, sua linha aterrissa após
-  o marcador e conta.
+- **O marcador em si não apaga nada — quem apaga é a saída dos jobs.** Uma linha de tempos só é removida
+  quando o seu job é, pela chave estrangeira. Desde a 2.9.0 o Clear Jobs apaga **todo** job, então as
+  linhas que ele esconde normalmente já se foram junto com os seus jobs; excluir um único job pela página
+  de Jobs da mesma forma leva os tempos dele consigo.
+- **Um job que conclui depois da limpeza conta a partir do marcador.** O marcador cobre o job que foi
+  enfileirado enquanto a limpeza rodava: a linha dele aterrissa após o marcador e conta.
 - **O reset é desfeito junto com a limpeza.** O marcador se move dentro da transação da limpeza, então
   uma limpeza que falha deixa o painel exatamente como estava.
+
+:::warning Mudou na 2.9.0
+Até a 2.9.0 o Clear Jobs poupava os jobs não finalizados, e o marcador era o que permitia a um job desses
+manter a sua medição incompleta e contar quando concluísse. Agora o Clear Jobs apaga todo job, qualquer que
+seja o status, então não há job sobrevivente para o marcador proteger.
+:::
 
 O histograma do Prometheus é um contador monotônico e **não** é afetado por nada disso.
 

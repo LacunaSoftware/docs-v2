@@ -14,10 +14,10 @@ O que envelhece e sai automaticamente, o que não sai, e como planejar a capacid
 | Arquivos de log (`/var/log/bulksigner/bulksigner-*.log`) | **Sim** | O destino de arquivo rotaciona diariamente e retém 14 arquivos (`Logging:File:RetainedFileCountLimit`). |
 | Arquivos em `data/input/` | Não | Removidos apenas após um ciclo bem-sucedido de assinar-verificar-promover, ou por ação do operador. |
 | Diretórios em `data/processing/` | Não | Criados e removidos pelo worker, por job. Diretórios remanescentes pertencem a jobs falhados/interrompidos e são movidos para `error/` pela varredura de recuperação na inicialização. |
-| Arquivos em `data/output/` (assinados ou envelopes `.enc`) | **Não** | A ação de limpeza é atualmente um stub que não faz nada. |
+| Arquivos em `data/output/` (assinados, envelopes `.enc`, e a devolução `.reject` de um arquivo rejeitado) | **Não** | A ação de limpeza é atualmente um stub que não faz nada. Os arquivos só saem por ordem do operador — [o Clear Jobs, ou a exclusão de um job](#o-que-um-operador-pode-apagar-clear-jobs-e-exclusão-de-job). |
 | Diretórios em `data/error/` | **Não** | Idem. |
-| Linhas de job / histórico / evento na base operacional | **Não** | Idem. |
-| Regras de aprovação congeladas e aprovações registradas | **Não — nunca** | Quem autorizou um pagamento, e sob qual regra, é exatamente o que uma auditoria pergunta depois do fato. Retidos mesmo depois de o job ficar terminal. |
+| Linhas de job / histórico / evento na base operacional | **Não** | Idem — exceto por ordem do operador: o **Clear Jobs** apaga toda linha de job e todo evento operacional registrado antes de a limpeza começar, deixando o evento `JobsCleared`; **excluir um job** remove as linhas daquele job e mantém todo evento. |
+| Regras de aprovação congeladas e aprovações registradas | **Não** | Nunca podadas. Quem autorizou um pagamento, e sob qual regra, é exatamente o que uma auditoria pergunta depois do fato, então elas são retidas depois de o job ficar terminal — até que um operador limpe ou exclua o job, quando vão junto com ele. |
 | **Detalhe de linhas do CNAB240** (uma linha por pagamento) | **Sim** | Apagado na transição para `Completed`, `Failed` ou `Canceled`. A única exceção — veja [abaixo](#a-única-exceção-detalhe-de-linhas-do-cnab240). |
 
 ## O que é retido não muda; onde é retido pode diferir
@@ -114,10 +114,41 @@ Comportamento padrão:
 - Saídas assinadas se acumulam em `output/`. Operadores ou automação a jusante as retiram de lá.
 - Diretórios de erro se acumulam em `error/`. Operadores inspecionam e depois apagam com comandos comuns
   de sistema de arquivos.
-- Linhas de job se acumulam na base operacional, que cresce linearmente com a vazão. A única ferramenta
-  embutida para recuperar aquele espaço é o [Clear Jobs](operations.md#clear-jobs), que apaga cada
-  registro de job **finalizado** e deixa os não finalizados no lugar. Não existe poda por idade nem poda
-  seletiva do histórico de jobs nesta versão.
+- Linhas de job se acumulam na base operacional, que cresce linearmente com a vazão — o arquivo SQLite
+  sob `Sqlite`, o seu próprio banco de dados sob `SqlServer`. Não existe poda por idade do histórico de
+  jobs nesta versão; as duas ações de operador abaixo são as únicas coisas que o removem.
+
+### O que um operador pode apagar: Clear Jobs e exclusão de job
+
+Nada envelhece e sai, mas duas ações deliberadas do operador apagam — e ambas levam arquivos, além de
+linhas.
+
+:::warning Alterado na 2.9.0 e na 2.10.0 — o Clear Jobs leva tudo
+O Clear Jobs apagava apenas registros de job **finalizados** e deixava todo arquivo e todo evento
+operacional no lugar. Desde a 2.9.0 ele apaga **todo** registro de job, qualquer que seja o status, e
+todo arquivo que esses jobs deixaram para trás; desde a 2.10.0 ele apaga também os eventos operacionais.
+:::
+
+- **O [Clear Jobs](operations.md#clear-jobs)** (Sistema → Zona de perigo, ou `DELETE /api/jobs`) apaga
+  todo job em todo status — com seu histórico, sua regra de aprovação congelada e as aprovações
+  registradas, seu detalhe de linhas do CNAB240 e seus tempos de etapa — e os arquivos de cada job: a
+  entrada, suas pastas em `processing/` e `error/`, a saída assinada (ou o envelope `.enc`) e a devolução
+  `.reject` de um arquivo rejeitado. **Todo evento operacional registrado antes de a limpeza começar vai
+  junto**, e um evento `JobsCleared` é escrito como o registro do corte, nomeando quem limpou e quantos
+  jobs, arquivos, pastas e eventos se foram. Estado do pipeline, perfis de assinatura, configuração e
+  arquivos de log não são tocados. A resposta traz as contagens (`deleted`, `filesDeleted`,
+  `foldersDeleted`, `eventsDeleted`, `itemsFailed`); um arquivo que outro processo detém, ou uma pasta
+  que o armazenamento recusa, fica no lugar, contado e nomeado no log.
+- **Excluir um job** (o botão de excluir da linha em `/jobs`, um job por vez, atrás de uma confirmação
+  com motivo opcional; não há rota REST) remove as linhas daquele job — o mesmo conjunto acima — mais
+  suas pastas em `processing/` e `error/`, a saída que ele registrou ter escrito, e sua entrada somente
+  se o job a colocou em stage e ela não mudou desde então. Um job que um worker está executando não pode
+  ser excluído. **Todo evento operacional permanece**, e um evento `JobDeleted` é acrescentado,
+  resumindo o que foi removido, o que foi mantido e as aprovações que o job carregava.
+
+Ambas são irreversíveis. **Faça antes um [backup do banco de dados](#disciplina-de-backup)** se a
+trilha de auditoria que elas removem ainda importa — o backup é a única cópia da trilha que sobrevive a
+elas.
 
 ## A única exceção: detalhe de linhas do CNAB240
 
@@ -141,8 +172,9 @@ Duas razões, e a primeira é por que isso não contradiz a postura acima:
 1. **É redundante quando o job é terminal, não meramente antigo.** Todo o resto na tabela de retenção é
    a *única* cópia do que registra — apague uma linha de histórico e a trilha de auditoria fica com um
    buraco. O detalhe de linhas é um cache do que já está no arquivo, e o arquivo sobrevive a todo desfecho
-   terminal: `output/` quando o job conclui, `error/` quando ele falha ou é rejeitado. O job também
-   mantém seu SHA-256 de conteúdo, então o artefato sobrevivente pode ser provado como sendo o que foi
+   terminal: `output/` quando o job conclui, `output/` de novo — sob um nome `.reject` — quando um
+   aprovador o vetou, e `error/` quando ele falha, quando um orçamento de espera se esgota, ou quando um operador
+   o cancela. O job também mantém seu SHA-256 de conteúdo, então o artefato sobrevivente pode ser provado como sendo o que foi
    interpretado. Nada se torna incognoscível.
 2. **É a maior concentração de dados pessoais que o produto detém** — cada beneficiário de cada folha de
    pagamento, acumulando-se para sempre, sem consumidor remanescente depois de o job terminar. Uma
@@ -242,8 +274,9 @@ de configuração, e ambas são recusadas no boot: um caminho dentro de uma **pa
 ### Independente da retenção, e daquela funcionalidade
 
 - **Faça backup da base operacional antes de toda atualização de serviço.** As migrações de schema rodam
-  automaticamente na inicialização e são de mão única. Sob `SqlServer`, uma atualização para a 2.0.0
-  acrescenta migrações nos dois históricos, aplicadas no boot.
+  automaticamente na inicialização e são de mão única, nos dois providers — a maioria das versões desde a
+  2.0.0 acrescenta uma. Faça um também antes de um **Clear Jobs**: ele é a única cópia da trilha de
+  auditoria que sobrevive a ele.
 - **Faça snapshot do `output/` se ele carregar artefatos com significado de auditoria.** Especialmente
   quando a criptografia está habilitada — perder um arquivo criptografado é duplamente irrecuperável (sem
   senha = sem texto claro).

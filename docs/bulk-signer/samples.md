@@ -934,8 +934,9 @@ empresariais → Usuários e grupos.
 Install-Module Microsoft.Graph.Applications -Scope CurrentUser
 ```
 
-mais uma conta capaz de consentir com o escopo delegado `Application.ReadWrite.All` (Application
-Administrator ou Global Administrator).
+mais uma conta capaz de consentir com o escopo delegado `Application.ReadWrite.All` — Cloud
+Application Administrator é a função de menor privilégio que consegue; Application Administrator e
+Global Administrator também conseguem.
 
 ```bash
 pwsh ./New-BulkSignerEntraApp.ps1 -BaseUrl https://signer.example.com

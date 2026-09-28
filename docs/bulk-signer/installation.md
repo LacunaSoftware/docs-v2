@@ -88,8 +88,8 @@ que você digitou o nome errado.
 **Fixe a `<versão>`.** Uma tag `latest` se move, e em um host de containers isso significa que um restart
 pode subir uma versão que você não escolheu instalar.
 
-Nada é construído localmente: a imagem que a Lacuna publica é a imagem que roda, baseada em Debian-slim
-pelo motivo que está em [Docker / Compose](#docker--compose) abaixo.
+Nada é construído localmente: a imagem que a Lacuna publica é a imagem que roda, baseada em Ubuntu
+24.04 LTS pelo motivo que está em [Docker / Compose](#docker--compose) abaixo.
 
 ### Os binários publicados
 
@@ -141,7 +141,13 @@ confirmação de que a URL, ou a tag, entregou o que você esperava.
      SHA-1 do certificado de assinatura no token, mais o PIN fornecido por variável de ambiente.
    - **Repositório de certificados do Windows** — apenas em alvos Windows, mais o thumbprint SHA-1.
 
-   Veja [Certificados](certificates.md) para os detalhes.
+   Veja [Certificados](certificates.md) para os detalhes. O certificado que você configura semeia o
+   primeiro **perfil de assinatura** no primeiro boot; daí em diante os perfis — certificado incluído —
+   vivem na base operacional e são gerenciados pelo dashboard (veja
+   [Configuração](configuration.md#signingprofiles--perfis-de-assinatura-por-pasta)). Se o certificado
+   de um perfil carrega um segredo — uma senha de PFX, um segredo de aplicativo do Azure Key Vault, uma
+   credencial de blob — defina também o `Signing:ProfileSecretsKey` **antes** do primeiro boot, e faça
+   backup dele: a importação se recusa sem ele, e perdê-lo depois significa redigitar esses segredos.
 3. **Decisão sobre criptografia.** Deixe desabilitada (padrão) ou habilite o BSENC v1. Se habilitar a
    criptografia, decida onde a senha e o salt vão viver antes do primeiro boot. Veja
    [Criptografia](encryption.md).
@@ -152,7 +158,10 @@ confirmação de que a URL, ou a tag, entregou o que você esperava.
 5. **Pastas de entrada monitoradas.** Decida se você precisa de uma pasta de entrada (padrão) ou de
    várias. Com uma única pasta, omita `Storage:Inputs[]` por completo — o serviço cria uma chamada
    `default` em `{Root}/input`. Para múltiplas pastas, preencha `Storage:Inputs[]` com uma entrada
-   por pasta; veja [Configuração](configuration.md#storage).
+   por pasta; veja [Configuração](configuration.md#storage). Sob qual perfil de assinatura os arquivos
+   de cada pasta são assinados é **escolhido na página do perfil depois do primeiro boot**, uma pasta
+   por perfil; a chave `Profile` de uma pasta só semeia essa escolha no primeiro boot (veja
+   [Configuração](configuration.md#storageinputsprofile--roteamento-por-pasta)).
 
 Toda instalação semeia uma configuração de produção editável a partir do
 `appsettings.Production.json.sample` fornecido. O exemplo vem anotado com marcadores `REQUIRED` e
@@ -306,8 +315,11 @@ linha que você edita no momento da atualização. Um pull que falha se parece c
 inicia e um log de aplicação vazio — porque ainda não há aplicação — então confira o `docker login` antes
 de tirar conclusões do silêncio.
 
-A Lacuna constrói a imagem sobre Debian-slim — **não** sobre Alpine. Bibliotecas `.so` de HSM geralmente não são
-compatíveis com musl, então o Alpine está fora de questão. A imagem já traz ferramental PKCS#11
+A Lacuna constrói a imagem sobre Ubuntu 24.04 LTS — **não** sobre Alpine. Bibliotecas `.so` de HSM
+geralmente não são compatíveis com musl, então o Alpine está fora de questão; o requisito é glibc, e o
+.NET 10 não publica imagem Debian, e é por isso que ela é Ubuntu em vez da base Debian-slim que versões
+anteriores usavam. Nada do que você configura muda com isso: os mesmos nomes de pacote, o mesmo UID 1654
+sem privilégios, os mesmos caminhos. A imagem já traz ferramental PKCS#11
 genérico (`libpcsclite1` + `opensc`); drivers de HSM dos fabricantes (SafeNet, Thales, Entrust,
 Yubico) são montados pelo operador em tempo de execução via `volumes:` no arquivo do compose. Veja os
 exemplos comentados em `deploy/docker/docker-compose.yml`.
@@ -322,6 +334,11 @@ Bind mounts e caminhos no host:
 | `/app/appsettings.Production.json` | `./config/appsettings.Production.json` (somente leitura) | Configuração editada pelo operador |
 | `/var/lib/bulksigner` | `./data` | Árvore de dados operacionais (input / processing / output / db) |
 | `/var/log/bulksigner` | `./logs` | Arquivos de log duráveis |
+
+Um [logotipo do cliente](configuration.md#branding--o-logotipo-do-cliente-nas-páginas-de-login-e-de-aprovação)
+para as páginas de login e de aprovação é montado da mesma forma quando você usa um — somente leitura,
+com `Branding:CustomerLogo:Path` nomeando o caminho *dentro* do container. O arquivo compose traz o
+exemplo comentado.
 
 ## Console em primeiro plano (pontual / teste)
 
@@ -391,9 +408,10 @@ nomeiam um arquivo podem, em vez disso, nomear um blob — veja
 instalação:
 
 - A identidade precisa de **Storage Blob Data Reader** no container, e de nada mais amplo.
-- **Um blob inalcançável impede o host de iniciar**, diferentemente de um compartilhamento de trabalho
-  ou de uma base operacional inalcançáveis. Um perfil sem material de assinatura não consegue assinar
-  de jeito nenhum, então não há estado degradado útil.
+- **Um blob inalcançável deixa aquele perfil degradado, e o host rodando.** Ele é nomeado no banner de
+  inicialização, no log e no `/api/ready`, jobs roteados para ele falham com `profile.degraded`, e todos
+  os outros perfis continuam assinando. Corrija o acesso e reinicie. (Até a 2.0.x um blob inalcançável
+  impedia o host de iniciar.)
 
 ## Escolhendo onde a base operacional vive
 
@@ -501,8 +519,9 @@ Duas linhas são as que exigem ação:
   e **nunca a altera** — o comando precisa de acesso exclusivo a um banco de dados que é seu. Um
   `ALTER DATABASE` por um DBA, e então reinicie.
 
-Depois, `curl http://localhost:8080/api/ready` — sua verificação `database` nomeia a base que de fato
-foi verificada.
+Depois, `curl -H "X-API-Key: …" http://localhost:8080/api/ready/details` — sua verificação `database`
+nomeia a base que de fato foi verificada. (O `/api/ready` sozinho diz que a verificação está verde; o
+nome da base fica na rota de detalhes, atrás da chave.)
 
 ## Login pelo Microsoft Entra ID (opcional)
 
@@ -615,7 +634,8 @@ enxerga. Cada uma é deliberada; a primeira é a que se deve checar *antes* de e
   [Diagnóstico de problemas](troubleshooting.md#uma-implantação-que-antes-subia-agora-recusa-nomeando-uma-pasta-de-entrada-monitorada).
 - **O Clear Jobs apaga apenas registros finalizados.** O `DELETE /api/jobs` agora reporta `skipped` ao
   lado de `deleted`, e um script que limpa a tabela e depois espera que ela esteja vazia precisa antes
-  drenar ou cancelar os jobs não finalizados. Veja [Operação](operations.md#clear-jobs).
+  drenar ou cancelar os jobs não finalizados. Veja [Operação](operations.md#clear-jobs). *Revertido na
+  2.9.0 — veja [abaixo](#atualizando-dentro-da-2x).*
 - **Um arquivo cujo caminho excede 850 caracteres é recusado no momento da entrada**, com o novo código
   de problema `job.path-too-long`, em vez de ser aceito e falhar depois.
 - **O card "Vazão máxima/s" do dashboard foi aposentado.** O histograma
@@ -633,6 +653,76 @@ então ative o modo. É uma preocupação única, no momento da atualização. V
 [Azure App Service](azure.md#6-primeiro-boot-em-uma-instância).
 :::
 
+### Atualizando dentro da 2.x
+
+Toda versão 2.x atualiza no lugar com os passos acima, e você pode ir de qualquer 2.x direto para a mais
+recente — as migrações das versões intermediárias são aplicadas em ordem no primeiro boot. As versões
+2.1.0, 2.2.0, 2.4.3, 2.5.0, 2.7.0, 2.13.0, 2.14.0 e 2.15.0 adicionam migrações; faça o backup acima antes
+de qualquer uma delas. As versões abaixo também pedem algo de você, e estão listadas na ordem em que você
+as atravessaria:
+
+- **2.1.0 — os perfis de assinatura vão para a base operacional.** O primeiro boot na 2.1.0 ou posterior
+  importa sua seção `Signing:Profiles[]` (ou deriva um perfil `default` do `Signing:Certificate`) **uma
+  única vez**; depois disso a seção é ignorada, o log de inicialização diz isso a cada boot até você
+  removê-la, e os perfis são criados e editados pelo dashboard. **Se algum perfil carrega um segredo** —
+  uma senha de PFX, um segredo de aplicativo do Key Vault, uma credencial de blob — defina
+  `Signing__ProfileSecretsKey` antes desse boot, ou a importação se recusa, nomeando a chave; faça backup
+  da chave junto com seus outros segredos. Veja
+  [Configuração](configuration.md#signingprofilesecretskey--sob-o-que-os-segredos-dos-perfis-armazenados-são-criptografados).
+  Mais três mudanças chegam na mesma versão:
+  - Um **bloco `Signer:` escrito pela metade agora recusa o boot** mesmo quando nenhum perfil usa o
+    Lacuna Signer — complete-o ou remova-o.
+  - Um **certificado que não abre não impede mais o host de iniciar**: aquele perfil fica degradado, sua
+    linha no `/api/ready` reporta `ok: false` sem transformar a resposta em `503`, e seus jobs falham com
+    `profile.degraded`. Um alerta que lê só o `ready` de nível superior não o enxerga — leia o
+    `checks[]`.
+  - Um arquivo que um aprovador **rejeita** é devolvido ao `output/` com `.reject` no nome, e o original
+    é removido da pasta monitorada. Qualquer coisa que trate todo arquivo do `output/` como uma assinatura
+    precisa agora ler o nome. Se você ligou o segundo fator do aprovador definindo só o
+    `ApproverSecondFactor:SeedSecret`, defina também `ApproverSecondFactor__Enabled=true` explicitamente
+    — o padrão distribuído é desligado.
+- **2.2.0 — o perfil escolhe sua pasta monitorada.** O vínculo da pasta sai do
+  `Storage:Inputs[].Profile` e vai para o perfil. Atualizando a partir da 2.0.x, a importação do primeiro
+  boot vincula cada pasta a partir daquela chave, como antes. Atualizando a partir da **2.1.x**, os
+  perfis já foram importados sem vínculo, então **toda pasta monitorada sobe sem atribuição** e seus
+  arquivos esperam, sem assinatura: escolha cada pasta na página do perfil dela (*Editar comportamento* →
+  **Pasta de entrada**) logo depois da atualização.
+- **2.2.1 — saia e entre de novo uma vez.** O dashboard agora leva a identidade do operador conectado
+  para dentro de cada página, e uma sessão aberta durante a atualização mantém o ticket antigo até ser
+  renovada. Sob o Entra ID, os eventos de auditoria dos operadores passam a ser registrados sob o UPN
+  deles em vez de `(anonymous)`.
+- **2.3.1 — o `Auth:ApiKey` precisa ser o seu.** O `appsettings.json` distribuído não traz mais uma
+  chave de exemplo, perfis de exemplo nem um bloco `Signer`, e o seu `Pipeline:MaxConcurrency` voltou ao
+  padrão do produto, `1`. Uma implantação que nunca definiu `Auth__ApiKey` agora se recusa a iniciar,
+  nomeando a chave; uma que dependia da concorrência antiga define ela mesma o
+  `Pipeline__MaxConcurrency`. Um primeiro boot que se recusava nomeando perfis que você nunca declarou
+  era esse defeito — use a 2.3.1 ou posterior.
+- **2.4.1 — Docker: pule as imagens 2.3.2 e 2.4.0.** Essas duas imagens de container não traziam o
+  script cliente do dashboard: as páginas renderizavam mas nenhum controle fazia nada, enquanto o
+  `/api/ready` continuava verde. Faça o pull da 2.4.1 ou posterior. Instalações como serviço nunca foram
+  afetadas.
+- **2.4.3 — pausar e retomar no SQL Server.** Uma base SQL Server criada antes desta versão nunca recebeu
+  a linha que guarda a flag de pausa, então pausar respondia `pipeline.state-missing`; a migração a
+  acrescenta.
+- **2.5.0 — reimplantações de cluster no App Service.** Um container novo agora desloca aquele que ele
+  substitui, em vez de ser recusado. As atualizações continuam parando o mundo; veja
+  [Azure App Service](azure.md#8-atualizações-param-o-mundo).
+- **2.6.0 — o `/api/ready` perde o detalhe.** A sondagem anônima agora traz só o nome e o veredito de
+  cada verificação; uma monitoração que interpretava o `detail` passa para o `/api/ready/details` e envia
+  `X-API-Key`. O código de status não muda. Veja [Configuração](configuration.md#readiness).
+- **2.7.0 — uma métrica muda de identidade.** A `bulksigner_approver_signatures_total` ganha um label
+  `means` (`browser` / `cloud`), então a identidade das suas séries muda para qualquer coisa que a colete.
+- **2.9.0 e 2.10.0 — o Clear Jobs leva tudo.** Ele agora apaga todo job, qualquer que seja o status, os
+  arquivos que esses jobs deixaram e (desde a 2.10.0) todo evento operacional registrado antes da
+  limpeza, escrevendo um evento `JobsCleared` como registro dela. Sua resposta perde o `skipped` e ganha
+  `filesDeleted`, `foldersDeleted`, `itemsFailed` e `eventsDeleted`. Um script escrito contra o
+  comportamento da 2.0.0 acima precisa mudar. Veja [Operação](operations.md#clear-jobs).
+- **2.13.0 — um nome de arquivo já processado é recusado.** Um arquivo que chega com um nome que um job
+  concluído ou ainda ativo carrega agora falha como `file.already-processed` em vez de ser assinado de
+  novo. Um produtor que reutiliza um mesmo nome de arquivo fixo todo dia precisa de
+  `Pipeline__RejectAlreadyProcessedFileNames=false` **antes** da atualização. Veja
+  [Configuração](configuration.md#pipeline).
+
 ## Verificações rápidas de saúde
 
 Depois de instalar em qualquer alvo:
@@ -640,13 +730,15 @@ Depois de instalar em qualquer alvo:
 | URL | O que ela informa |
 |-----|-------------------|
 | `http://localhost:8080/api/health` | Liveness — anônimo, retorna `200 OK` se o processo do host está no ar. |
-| `http://localhost:8080/api/ready` | Readiness — anônimo, retorna um corpo listando cada sondagem (base operacional, cada pasta de entrada, licença, mais as linhas `storage-share:` e `work-share-owner` em um compartilhamento de trabalho remoto). `503` se qualquer sondagem falhou. |
+| `http://localhost:8080/api/ready` | Readiness — anônimo por padrão, retorna um corpo nomeando cada sondagem (base operacional, cada pasta de entrada, licença, mais as linhas `storage-share:` e `work-share-owner` em um compartilhamento de trabalho remoto) com seu veredito e sem detalhe. `503` se qualquer sondagem que conta para o veredito falhou. |
+| `http://localhost:8080/api/ready/details` | O mesmo relatório com o detalhe de cada sondagem. Exige a chave de API. |
 | `http://localhost:8080/` | O dashboard do operador. Entre com a chave de API de `Auth:ApiKey` — ou com a Microsoft, quando o [login pelo Entra ID](#login-pelo-microsoft-entra-id-opcional) estiver configurado. |
 | `http://localhost:8080/scalar/v1` | A UI de referência OpenAPI ao vivo para a superfície REST. |
 
 O `/api/health` é sempre anônimo, para que verificadores de saúde externos não precisem de
-credenciais. O `/api/ready` também é anônimo e retorna um corpo estruturado. O `/api/metrics` é
-protegido por chave de API por padrão — veja [Segurança](security.md).
+credenciais. O `/api/ready` é anônimo por padrão pelo mesmo motivo e não traz detalhe; o
+`Readiness:RequireApiKey` o protege onde o sondador consegue enviar um cabeçalho. O `/api/ready/details`
+e o `/api/metrics` são protegidos por chave de API — veja [Segurança](security.md).
 
 ---
 

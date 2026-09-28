@@ -6,14 +6,34 @@ sidebar_position: 1
 # Lacuna Bulk Signer
 
 Lacuna Bulk Signer is an **on-premises bulk digital-signing service** for ICP-Brasil-compatible
-scenarios. It receives files from automated sources (watched folders or a REST upload), processes
-them through a controlled signing pipeline, and produces verified signed outputs — with a full
-operational history, an operator dashboard, and automatic recovery on restart.
+scenarios. It receives files from automated sources (watched folders or a REST upload) and from
+operators (an upload on the dashboard), processes them through a controlled signing pipeline — with an
+optional human approval step, in which the approvers can co-sign with their own certificates — and
+produces verified signed outputs, with a full operational history and event log, an operator dashboard,
+and automatic recovery on restart.
 
 Bulk Signer is designed to run inside your own infrastructure: a single service that watches folders
 (or accepts uploads), signs, verifies, and promotes the results to an output folder. There is no
 auto-update, and a default install makes no outbound connections — remote signing, Azure Key Vault,
-and telemetry are each opt-in.
+cloud certificates for approvers, and telemetry are each opt-in.
+
+:::tip What is new since 2.0
+This documentation describes version **2.15.0**. The main additions since 2.0:
+
+- **Signing profiles live in the operational store** and are created, edited, re-certified and retired
+  from the dashboard; each profile chooses the watched folder it feeds from (2.1–2.2).
+- **Approvers can sign**: an approval rule can require the approvers' own certificates, from the
+  browser or — through Lacuna CloudHub — from a cloud provider, one file or a whole selection at a time;
+  a profile can even be keyless, signed by its approvers alone (2.1, 2.7, 2.14).
+- **Uploads from the dashboard**, which a host can turn off (2.4, 2.10); a file name that was already
+  signed is refused rather than signed twice (2.13).
+- **The operational event log is readable** on the dashboard and over REST, and a single job can be
+  deleted from the Jobs page (2.13); the Jobs page also exports to Excel and downloads many signed files
+  as one ZIP (2.7, 2.11).
+- **Clear Jobs empties the system**: every job, its files and the operational events (2.9–2.10).
+- **Cluster redeploys on App Service** displace the old container instead of failing to start (2.5).
+- The CNAB240 payment-date guard can be turned off per profile (2.15).
+:::
 
 ## Features
 
@@ -22,18 +42,33 @@ and telemetry are each opt-in.
   (`remessa.signed.rem`) or writes PEM-armored CAdES where a downstream system requires it.
 - **Certificate sources.** PKCS#12 files (`.pfx` / `.p12`), PKCS#11 HSMs and smart cards, the
   Windows certificate store, and **Azure Key Vault** (the key stays in the vault and signs remotely).
-  The `.pfx` or `.cer` can be read from **Azure Blob Storage** instead of local disk. The source is
-  chosen entirely through configuration, globally or per signing profile.
-- **Two ingestion paths.** A watched input folder (with a stability detector so half-written files
-  are not picked up early) and a `POST /api/files` endpoint for programmatic clients.
+  The `.pfx` or `.cer` can be read from **Azure Blob Storage** instead of local disk, or a PKCS#12 can be
+  **uploaded through the dashboard**, which keeps it encrypted in the operational store.
+- **Signing profiles, managed in the dashboard.** A named profile bundles format, certificate source,
+  verification, encryption, output naming, CNAB240 checking and the approval rule. Profiles are rows in
+  the operational store: create, edit, re-certify and retire them from the dashboard — a behaviour change
+  reaches the next job with no restart — and each profile chooses the one watched folder it feeds from.
+  `Signing:Profiles[]` in configuration is a one-time seed for the first boot.
+- **Three ingestion paths.** Watched input folders (with a stability detector so half-written files
+  are not picked up early), a `POST /api/files` endpoint for programmatic clients, and an **Upload
+  files** button on the dashboard's Jobs page. `Upload:Enabled = false` turns both upload paths off. A
+  file arriving under a name that a completed or active job already carries is refused, not signed
+  twice.
 - **CNAB240 payment files.** Opt-in per profile: parse a Banco do Brasil remessa, refuse to sign one
-  that is not compliant or whose payment dates have passed, and show an operator the total, the
-  payer and every individual payment.
+  that is not compliant or whose payment dates have passed — unless the profile turns that date guard
+  off for a bank that processes past-dated payments — and show an operator the total, the payer and
+  every individual payment.
 - **Approval gate.** Park a payment file on a quorum of named approvers before any signature exists.
-  One rejection is a veto; approvals are bound to the file's bytes, and the rule is frozen onto the
-  job so editing configuration can never release a parked file. Approvers get their own queue, with
-  batch approval and an Excel export — and an optional **TOTP second factor** that asks an approver to
-  prove they are present before a decision.
+  One rejection is a veto, and the rejected file is handed back to the output folder marked `.reject`;
+  approvals are bound to the file's bytes, and the rule is frozen onto the job so editing a profile can
+  never release a parked file. Approvers get their own queue, with batch approval and an Excel export —
+  and an optional **TOTP second factor** that asks an approver to prove they are present before a
+  decision.
+- **Approvers who sign.** An approval rule can require the approvers to approve by **co-signing the
+  file with their own ICP-Brasil certificate** — alongside the profile's key, or instead of it, for a
+  keyless profile signed by its approvers alone. The certificate can be in the approver's browser
+  (Lacuna Web PKI) or held by a cloud provider through **Lacuna CloudHub**, and a whole selection can be
+  approved and signed in one go.
 - **Recoverable pipeline.** Jobs flow through a durable queue with pause/resume that survives a
   restart. If the service is stopped mid-flight, a startup recovery sweep moves any interrupted job
   aside so nothing is silently lost.
@@ -46,8 +81,11 @@ and telemetry are each opt-in.
   Entra ID** sign-in with `Administrator` and `Approver` app roles, leaving the REST API key
   untouched.
 - **Operator dashboard, in English or Brazilian Portuguese.** A web console with live status, job
-  history, retry/cancel/rescan actions, a recent-exception viewer, and an audit trail. The language
-  is the reader's per-browser choice, not a server setting.
+  history, retry/cancel/rescan and single-job delete actions, uploads, an Excel export of the job list, a
+  ZIP download of many signed files, the signing-profile pages, a recent-exception viewer, and the
+  **operational event log** (who paused the pipeline, changed a profile, decided an approval, cleared
+  the jobs). The sign-in and approver pages can carry the customer's logo. The language is the reader's
+  per-browser choice, not a server setting.
 - **Storage and store, local or in Azure.** The work tree can stay on local disk or live in an
   **Azure Files** share; the operational store can stay in SQLite or move to **SQL Server / Azure
   SQL** under your own backup and DR regime. The two choices are independent.
@@ -62,7 +100,8 @@ and telemetry are each opt-in.
   with throughput and a Local vs Remote split — held in the operational store, so it survives restarts
   and describes a whole cluster — plus optional Azure Application Insights export.
 - **Observability.** Structured logs with automatic secret redaction and an optional **Azure Table**
-  sink for hosts whose disk does not survive a restart, a Prometheus metrics endpoint, and an RFC 9457
+  sink for hosts whose disk does not survive a restart, a Prometheus metrics endpoint, a readiness probe
+  whose anonymous answer is a verdict only (the detail sits behind the API key), and an RFC 9457
   `ProblemDetails` error envelope with stable machine-readable codes.
 - **Per-IP rate limiting.** Configurable fixed-window limits on the upload, action, approval and
   export endpoints, with optional forwarded-header support so the real client is counted behind a proxy
@@ -73,19 +112,21 @@ and telemetry are each opt-in.
 ## How it works
 
 ```
-  input/ folder ──┐
-                  ├──▶ Queue ──▶ Claim ──▶ [gates] ──▶ Sign ──▶ Verify ──┬──▶ output/
-  POST /api/files ┘                                                      │    (output/*.enc
-                                                            on failure   │     when encryption
-                                                                         └──▶ error/    is on)
+  input/ folder ────┐
+  POST /api/files ──┼──▶ Queue ──▶ Claim ──▶ [gates] ──▶ Sign ──▶ Verify ──┬──▶ output/
+  dashboard upload ─┘                                                      │    (output/*.enc
+                                                              on failure   │     when encryption
+                                                                           └──▶ error/    is on)
 
   [gates], both opt-in per signing profile and skipped entirely when unconfigured:
       CNAB240 parse   — refuse a non-compliant remessa, or one whose payment dates have passed
       Approval gate   — park in AwaitingApproval until a quorum of named people approves
+                        (and, where the rule says so, co-signs with their own certificates)
 ```
 
-Every step is recorded in the operational store (job history + system events) and in the structured
-log file. The dashboard and the REST API read the same data and trigger the same actions.
+Every step is recorded in the operational store (job history + operational events) and in the
+structured log file; the events are readable on the dashboard's Events page. The dashboard and the REST
+API read the same data and trigger the same actions.
 
 ## Quickstart — Docker
 
@@ -147,6 +188,9 @@ When the service is running, a live OpenAPI reference is served at `/scalar/v1`.
 | Installing the service for the first time | [Installation](installation.md) → [Configuration](configuration.md) → [Certificates](certificates.md) |
 | Wiring an automated system to the REST API | [REST API](rest-api.md) → [Security](security.md) → [Troubleshooting](troubleshooting.md) |
 | Operating an existing install | [Operations](operations.md) → [Dashboard](dashboard.md) → [Troubleshooting](troubleshooting.md) |
+| Routing a watched folder to a signing profile, or finding out why a folder's files are not moving | [Operations](operations.md#routing-a-watched-folder-to-a-signing-profile) → [Dashboard](dashboard.md) → [Configuration](configuration.md#storageinputsprofile--per-folder-routing) |
+| Finding out who paused the pipeline, changed a profile, decided an approval or cleared the jobs | [Dashboard](dashboard.md) → [REST API](rest-api.md) → [Retention](retention.md) |
+| Clearing jobs, or deleting one | [Operations](operations.md#clear-jobs) → [Retention](retention.md) |
 | Diagnosing slow throughput | [Job statistics](statistics.md) → [Certificates](certificates.md) → [Telemetry](telemetry.md) |
 | Keeping the signing key off the host | [Certificates](certificates.md#source--azurekeyvault) → [Samples](samples.md) → [Security](security.md) |
 | Enabling encryption | [Encryption](encryption.md) → [Security](security.md) → [Samples](samples.md) |

@@ -130,10 +130,29 @@ The encrypted envelope name simply appends `.enc` to the cleartext signed name:
 | PAdES | `report.signed.pdf` | `report.signed.pdf.enc` |
 | CAdES | `data.bin.p7m` | `data.bin.p7m.enc` |
 | XAdES | `contract.signed.xml` | `contract.signed.xml.enc` |
+| *(none — a rejected file)* | `folha.reject.rem` | `folha.reject.rem.enc` |
 
 `GET /api/jobs/{id}/output` switches its response to `Content-Type: application/octet-stream` and the
 `.enc` filename when the job's output is encrypted. The dashboard's Job detail page shows an "Output
 is encrypted" chip on the same condition.
+
+### A rejected file is encrypted too, and that has a consequence
+
+When an approver **rejects** a payment file, it is returned to `output/` under a `.reject` name — the
+last row above — and if the profile encrypts, so is that file. `output/` keeps its property that
+everything in it is opaque, which matters most here: an unsigned remessa is the largest concentration of
+personal data the product handles, and it is the one file nobody approved.
+
+**The consequence, stated plainly:** the hand-back also removes the original from its watched folder,
+so with encryption on **the BSENC password is the only way back to those bytes.** In practice this asks
+nothing new of you — a deployment collecting signed output from `output/` already needs the password and
+one of the [sample decrypters](samples.md) to read anything at all. But if your automation only ever
+consumed `.enc` files it recognised as signatures, it now has to handle `.reject` names too, and losing
+the password loses rejected files exactly as it loses signed ones.
+
+Tell a rejected file by its **name**, not by the job page: the *Output is encrypted* chip and
+`GET /api/jobs/{id}/output` describe signed output only — the download does not serve a rejected file —
+so the chip does not appear on a rejected job even when its hand-back is an `.enc` envelope.
 
 ## The decrypt recipe
 

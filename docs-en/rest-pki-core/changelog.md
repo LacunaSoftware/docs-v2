@@ -7,6 +7,29 @@ sidebar_position: 5
 # Rest PKI Core changelog
 {/* <a name="vnext" /> */}
 
+### 5.0.4 (2026-09-28) {#v5-0-4}
+
+Updates database model: no
+
+* Bug fixes
+
+  * [RPNG-930] The CAdES AD-RT without CRLs policy was not registered (`SignaturePolicyNotFound`)
+  * [RPNG-933] XML renotarization and inspection returned HTTP 500 instead of `InvalidXml` for documents inconsistent with their own signature
+
+
+### 5.0.3 (2026-09-25) {#v5-0-3}
+
+Updates database model: no
+
+* Improvements
+
+  * [RPNG-935] New `archiveTimestamps` field on the signature open and inspection responses
+
+* Bug fixes
+
+  * [RPNG-935] XML signatures reported `timestamps` as null on open and inspection
+
+
 ### 5.0.2 (2026-09-21) {#v5-0-2}
 
 Updates database model: no

@@ -1,8 +1,14 @@
 # PKI SDK changelog
 
-### 2.22.6 (2026-09-11) {#v2-22-5}
+### 2.22.7 (2026-09-28) {#v2-22-7}
 
-- \[PKI-159\] Update Lacuna.T8 package v1.22.8.
+- \[PKI-160\] Update Lacuna.T8 package v1.2.29.
+- \[PKI-160\] Fix infinite loop (high CPU usage) when reading PDFs with a cyclic form field `/Parent` reference.
+
+
+### 2.22.6 (2026-09-11) {#v2-22-6}
+
+- \[PKI-159\] Update Lacuna.T8 package v1.2.28.
 - \[PKI-159\] Fix signature visual representation being lost on PDFs with non-conformant metadata.
 
 
@@ -13,7 +19,7 @@
 
 ### 2.22.4 (2026-07-06) {#v2-22-4}
 
-- Update Lacuna.T8 package v1.22.7.
+- Update Lacuna.T8 package v1.2.27.
 - Fix PDF signature detection for revisioned signature dictionary object numbers.
 - Fix null AcroForm PDF object loading.
 

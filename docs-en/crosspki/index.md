@@ -1,11 +1,15 @@
-# CrossPKI for CEF - Integration Guide
+# CrossPKI for CEF — Integration Guide
 
 CrossPKI gives your Chromium application access to the digital certificates and
-private keys held in the user's Windows certificate store, from JavaScript.
+private keys held in the user's Windows certificate store or macOS keychain, from
+JavaScript.
 
-This guide assumes a working CEF host on Windows with your own `CefApp` and
-`CefClient`. Integration is six forwarded callbacks, one source file compiled into
-your host, one npm package, and one DLL deployed beside your executable.
+This guide assumes a working CEF host with your own `CefApp` and `CefClient`, on
+Windows, macOS, or both. Integration is six forwarded callbacks, one source file
+compiled into your host, one npm package, and one native library deployed with your
+application — `crosspki.dll` beside your executable on Windows, `libcrosspki.dylib`
+in your app bundle on macOS. The source you compile and the JavaScript you call are
+the same on both.
 
 ---
 
@@ -13,13 +17,14 @@ your host, one npm package, and one DLL deployed beside your executable.
 
 | Artifact | From | How you consume it |
 |---|---|---|
-| `crosspki.dll` | ZIP | deployed next to your executable, loaded at runtime |
+| `crosspki.dll` | ZIP, `bin/x64/` and `bin/x86/` | Windows: deployed next to your executable, loaded at runtime |
+| `libcrosspki.dylib` | ZIP, `bin/macos/` | macOS: deployed in `Contents/Frameworks/`, loaded at runtime |
 | `crosspki_cef_bridge.h` / `.cpp` | ZIP | **compiled into your application** |
 | `crosspki-cef` | npm, or `js/` in the ZIP | imported by your web code |
 | `crosspki.h` | ZIP | optional — only to call the C API directly |
 
 The bridge ships as source because it must compile against your own CEF SDK and
-toolset. Nothing is linked at build time — it loads the DLL at runtime.
+toolset. Nothing is linked at build time — it loads the native library at runtime.
 
 ---
 
@@ -28,6 +33,9 @@ toolset. Nothing is linked at build time — it loads the DLL at runtime.
 - **Windows**, **x64 or x86**. CrossPKI uses the Windows certificate store and CNG.
   The ZIP carries a DLL for each architecture; deploy the one matching your host
   process, since a process can only load a DLL of its own bitness.
+- **macOS 10.15 or later on Intel, 11 or later on Apple Silicon.** CrossPKI uses the
+  user's keychain through Security.framework. `libcrosspki.dylib` is one universal
+  file for both architectures, so there is nothing to choose.
 - **CEF.** The bridge is compiled as part of your application, so what matters is
   that it builds against your SDK. Verified with MSVC v143 against the current
   stable build of each line:
@@ -50,6 +58,11 @@ toolset. Nothing is linked at build time — it loads the DLL at runtime.
   outside this table are likely to work — a mismatch surfaces as a compile error
   during integration, never as a failure in production.
 
+  On macOS the bridge is verified with Xcode 26 against CEF 111.2.7, arm64 and
+  x86_64, under CEF's own compiler flags (`-Werror -Wextra`, no exceptions, no
+  RTTI). CEF 111's headers themselves need `-Wno-deprecated-builtins` with that
+  Xcode; that affects any CEF 111 host, not only CrossPKI.
+
   The bridge also needs `libcef_dll_wrapper`, which your application almost
   certainly already links.
 - **Node.js and npm**, for your web build.
@@ -59,16 +72,18 @@ toolset. Nothing is linked at build time — it loads the DLL at runtime.
 ## 3. Download
 
 ```
-https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.0.1.zip
-https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.0.1.zip.sha256
+https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.1.0.zip
+https://cdn.lacunasoftware.com/crosspki/crosspki-cef-1.1.0.zip.sha256.txt
 ```
 
-SHA-256: `23c2cc58391cb167f757657d5234e0edc45009cb45a128737f9f5c7d4d1b136d`
+SHA-256: `4553a3edf683e3c8025e4971b692a66b030a5f47d5231894f18845075a6a1e6e`
 
-Every release has an immutable URL, so a given version always resolves to the same
-bytes. `crosspki.dll` is Authenticode-signed by Lacuna Software — verify both the
-checksum and the signature before deploying. If your environment enforces WDAC or
-AppLocker, the Authenticode signature is what those policies evaluate.
+One ZIP serves both systems. Every release has an immutable URL, so a given version
+always resolves to the same bytes. `crosspki.dll` is Authenticode-signed by Lacuna
+Software, and `libcrosspki.dylib` is signed with Lacuna Software's Developer ID —
+verify the checksum and the signature before deploying. If your environment
+enforces WDAC or AppLocker, the Authenticode signature is what those policies
+evaluate.
 
 ---
 
@@ -164,6 +179,7 @@ class MyClient : public CefClient,
     crosspki_->OnBeforeClose(browser);
   }
 
+  // Before CEF 124 this callback takes only (browser, status).
   void OnRenderProcessTerminated(CefRefPtr<CefBrowser> browser,
                                  TerminationStatus status,
                                  int error_code,
@@ -181,7 +197,7 @@ class MyClient : public CefClient,
 Each call runs on a CEF background thread, so a slow certificate store read or a
 smartcard provider's dialog cannot block your UI.
 
-`BrowserBridge::IsAvailable()` reports whether `crosspki.dll` was found and loaded.
+`BrowserBridge::IsAvailable()` reports whether the native library was found and loaded.
 Check it at startup to surface a clear message instead of letting the first PKI call
 fail.
 
@@ -214,13 +230,34 @@ optimization bailouts. Either add `node-forge` to `allowedCommonJsDependencies` 
 
 ## 8. Deploy
 
-Ship `crosspki.dll` next to your host executable, alongside `libcef.dll` and the
-rest of your CEF binaries — `bin/x64/` for a 64-bit host, `bin/x86/` for a 32-bit
-one. The bridge looks there first and only then falls back to the standard search
-path, which is what stops a stray copy elsewhere on the machine from being picked up
-instead.
+**Windows.** Ship `crosspki.dll` next to your host executable, alongside `libcef.dll`
+and the rest of your CEF binaries — `bin/x64/` for a 64-bit host, `bin/x86/` for a
+32-bit one. The bridge looks there first and only then falls back to the standard
+search path, which is what stops a stray copy elsewhere on the machine from being
+picked up instead.
 
-There is nothing to register, no COM component, and no installer step.
+**macOS.** Copy `bin/macos/libcrosspki.dylib` into your app bundle's
+`Contents/Frameworks/`, beside `Chromium Embedded Framework.framework`. Only the main
+application needs it — the helper apps never load it, because CrossPKI runs in the
+browser process. The bridge looks in `Contents/Frameworks/` first, then beside the
+executable in `Contents/MacOS/`, then through your executable's rpath; it never loads
+the library by bare name, which would let the working directory supply one.
+
+Then **re-sign it with your own identity**, as part of signing your bundle, and
+notarise the app as you already do:
+
+```bash
+codesign --force --sign "Developer ID Application: <you>" --options runtime \
+  --timestamp "MyApp.app/Contents/Frameworks/libcrosspki.dylib"
+```
+
+A hardened-runtime app only loads libraries signed by its own team (library
+validation), so our signature is there to let you verify what you received, not to
+be shipped as is. Tools that sign a whole bundle — Xcode, `electron-osx-sign`-style
+scripts, `codesign --deep` — do this for you.
+
+There is nothing to register, no COM component, no entitlement, and no installer
+step, on either system.
 
 ---
 
@@ -265,11 +302,18 @@ fields — see https://docs.lacunasoftware.com/articles/crosspki.
 
 ## 10. Sandbox
 
-CrossPKI works with the Chromium sandbox **enabled or disabled**.
+CrossPKI works with the Chromium sandbox **enabled or disabled**, and does not ask
+you to change your process model either way. The native library loads in the browser
+process, never in a renderer, so a sandboxed renderer is fully compatible — and so is
+a host that runs with `no_sandbox = true`, which is how CrossPKI's own test harness
+runs, on both systems.
 
-The DLL loads in the browser process,
-never in a renderer, so a sandboxed renderer is fully compatible.
-And so is a host that runs with `no_sandbox = true`, which is how CrossPKI's own test harness runs.
+This is about Chromium's sandbox. On macOS, running the whole application under the
+App Sandbox (`com.apple.security.app-sandbox`, required for the Mac App Store) is a
+different thing and has not been tested: it restricts keychain access.
+
+If your application keeps the sandbox on, nothing here requires relaxing it. If it
+runs without one, nothing here requires adding it.
 
 ---
 
@@ -279,11 +323,13 @@ And so is a host that runs with `no_sandbox = true`, which is how CrossPKI's own
 |---|---|---|
 | Every call rejects with `platformNotSupported`, "native bridge not found" | The renderer half is not installed | Forward `OnContextCreated` to `RendererBridge` (section 5) |
 | Calls never settle — the promise neither resolves nor rejects | A message is being dropped in one direction | Forward `OnProcessMessageReceived` in **both** the renderer handler and the browser client, and confirm a `BrowserBridge` was actually constructed |
-| Calls reject with `internal`, "native bridge failure (1)" | `crosspki.dll` was not found or could not be loaded | Place the DLL next to your executable; confirm it is the x64 build and that `IsAvailable()` returns true |
+| Calls reject with `internal`, "native bridge failure (1)" | The native library was not found or could not be loaded | Windows: place the DLL next to your executable and confirm its bitness matches the host. macOS: place the dylib in `Contents/Frameworks/` and confirm it is signed by your team (below). Check that `IsAvailable()` returns true |
+| macOS: the library is present but does not load; Console shows `code signature … not valid for use in process` or `different Team IDs` | Library validation: a hardened-runtime app refused a library signed by another team | Re-sign `libcrosspki.dylib` with your identity (section 8) |
+| macOS: a dialog asks whether your app may use a key in the keychain | The key belongs to another application — installed with Keychain Access, or by another program | Expected on macOS; "Always Allow" remembers the answer. Keys your application imported or generated itself do not ask |
 | `TypeError: window.crossPkiQuery is not a function` | Your web code ran before the renderer bridge installed the entry point | Call CrossPKI after page load, not during early script evaluation |
-| A certificate visible in Windows does not appear in the list | Its private key is missing or unreachable — an orphaned entry, or a token that is not connected | Expected. Only certificates with a usable key are listed |
+| A certificate visible in Windows or Keychain Access does not appear in the list | Its private key is missing or unreachable — an orphaned entry, or a token that is not connected. On macOS, identities in the System keychain are also excluded | Expected. Only the user's certificates with a usable key are listed |
 | Signing appears to hang | The provider's smartcard PIN dialog opened behind your application window | Bring it forward from the taskbar. It has no owner window, so it can be painted behind the app |
-| `algorithmNotSupported` when using SHA-224 | Windows CNG has no SHA-224 implementation | Use SHA-256 or stronger |
+| `algorithmNotSupported` when using SHA-224 | Windows CNG has no SHA-224 implementation, and macOS matches Windows | Use SHA-256 or stronger |
 | `certificateNotFound` for a thumbprint that exists | The thumbprint is Base64 of the SHA-256 of the DER bytes, not a hex SHA-1 fingerprint | Use the `thumbprint` value from `listCertificatesWithKey()` verbatim |
 | `wrongPassword` importing a valid PKCS#12 | The content is not valid PKCS#12, or the password is wrong | Confirm the file is a `.pfx`/`.p12` and that it is Base64-encoded before being passed in |
 | `ERR_MODULE_NOT_FOUND` importing the package | An ESM loader that does not follow the `exports` map | Import `crosspki-cef/standalone`, or use the `<script>` bundle |
@@ -294,4 +340,4 @@ And so is a host that runs with `no_sandbox = true`, which is how CrossPKI's own
 ## Support
 
 Include your CrossPKI version (`CrossPki.getVersion()`), your CEF version, and your
-Windows version when reporting an issue.
+Windows or macOS version when reporting an issue.

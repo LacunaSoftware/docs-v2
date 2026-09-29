@@ -5,72 +5,73 @@ sidebar_position: 2.6
 
 # Alta disponibilidade e seus limites
 
-O modo cluster executa mais de uma instância ativa sobre uma base operacional e um compartilhamento de
-trabalho. O que ele compra são as três coisas que foram pedidas da funcionalidade: um job nunca é
-processado por duas instâncias ao mesmo tempo, uma instância morrendo não deixa trabalho travado
-permanentemente, e o pipeline continua assinando enquanto um host está fora.
+O modo cluster executa mais de uma instância ativa sobre um mesmo banco de dados operacional e um mesmo
+compartilhamento de trabalho. O que ele oferece são as três coisas que se esperavam da funcionalidade:
+um job nunca é processado por duas instâncias ao mesmo tempo, a morte de uma instância não deixa
+trabalho travado para sempre, e o pipeline continua assinando enquanto um host está fora do ar.
 
-Esta página é a outra metade daquela frase — **o que ele não compra**, dito de antemão em vez de
-descoberto numa janela de mudança. Tudo aqui se aplica somente onde `Cluster:Enabled` é verdadeiro.
-Desligado, que é toda implantação que não o ligou deliberadamente, nada disso está em vigor e o produto
-é o de instância única que ele sempre foi.
+Esta página é a outra metade dessa história — **o que ele não oferece**, dito de antemão, em vez de
+descoberto durante uma janela de mudança. Tudo aqui se aplica somente quando `Cluster:Enabled` é
+verdadeiro. Com o modo desligado — caso de toda implantação que não o ligou deliberadamente —, nada
+disso está em vigor, e o produto continua sendo o de instância única que sempre foi.
 
-O passo a passo de implantação é [Azure App Service (modo cluster)](azure.md); a visão do operador no
-dia a dia é [Operação](operations.md#quais-instâncias-estão-vivas-somente-no-modo-cluster); o catálogo
-de falhas é [Diagnóstico de problemas](troubleshooting.md#modo-cluster).
+O passo a passo de implantação está em [Azure App Service (modo cluster)](azure.md); a visão do operador
+no dia a dia, em [Operação](operations.md#quais-instâncias-estão-vivas-somente-no-modo-cluster); o
+catálogo de falhas, em [Diagnóstico de problemas](troubleshooting.md#modo-cluster).
 
 ---
 
 ## Uma única topologia suportada
 
 Um **Azure Web App, container Linux, a imagem existente, com escala horizontal em um App Service
-Plan.** É isso, e nada mais.
+Plan.** Só isso.
 
-Os mecanismos não sabem disso. Tudo se coordena através da base operacional e do compartilhamento de
-trabalho, e nada é específico do App Service exceto a derivação de identidade e esta documentação — de
-modo que duas VMs *on premises* contra um SQL Server rodariam o mesmo código. Elas são **não
-documentadas, não testadas e não suportadas**, e três subdesenhos que existem apenas para aquele
-formato deliberadamente não foram construídos: impressões digitais de configuração, nomes de instância
+Os mecanismos não sabem disso. Toda a coordenação passa pelo banco operacional e pelo compartilhamento
+de trabalho, e nada é específico do App Service além da derivação de identidade e desta documentação —
+de modo que duas VMs on-premises apontando para um SQL Server rodariam o mesmo código. Essa variação é
+**não documentada, não testada e não suportada**, e três mecanismos que só existiriam para esse formato
+deliberadamente não foram construídos: impressões digitais de configuração, nomes de instância
 atribuídos pelo operador e indireção de nome de certificado por host.
 
-Um fato sobre o App Service faz boa parte do trabalho e é o motivo de a lista ter um único item: **os
-app settings são por app, não por instância**, então cada instância é idêntica por construção. Os
-riscos de divergência de configuração entre instâncias — uma senha de criptografia diferente entre
-hosts, um perfil de assinatura de que uma instância nunca ouviu falar — não podem ocorrer aqui. Em uma
-topologia onde podem, eles não são tratados.
+Uma característica do App Service resolve boa parte do problema e é o motivo de a lista ter um único
+item: **os app settings são por app, não por instância**, então todas as instâncias são idênticas por
+construção. Os riscos de divergência de configuração entre instâncias — uma senha de criptografia
+diferente entre hosts, um perfil de assinatura que uma instância desconhece — não podem ocorrer aqui.
+Em uma topologia em que podem ocorrer, eles não são tratados.
 
-## Atualizações param o mundo
+## Atualizações exigem parada total
 
-Pare o app, implante, inicie. Não há restart rolante, não há caminho sem indisponibilidade, e **não há
-deployment slots**.
+Pare o app, implante, inicie. Não há reinício gradual (rolling restart), não há caminho sem
+indisponibilidade e **não há deployment slots**.
 
-Um slot de staging carregando a connection string de produção não é um ambiente de staging — é um
-segundo conjunto de instâncias entrando no cluster em uma versão diferente da aplicação, dividindo a
-fila de jobs, a tabela de heartbeat e o compartilhamento de trabalho com a versão que você ainda está
-rodando. A troca não introduz a condição; o primeiro boot do slot introduz.
+Um slot de staging com a connection string de produção não é um ambiente de staging — é um segundo
+conjunto de instâncias entrando no cluster com outra versão da aplicação e compartilhando a fila de
+jobs, a tabela de heartbeat e o compartilhamento de trabalho com a versão que você ainda está rodando. O
+swap não cria a condição; o primeiro boot do slot já a cria.
 
-A marca de versão no heartbeat é o **fio de alarme, não a guarda**: uma instância subindo que encontre
-heartbeats vivos de uma versão diferente registra um Critical e segue em frente. Isso é deliberado. Uma
-recusa dura bloquearia instâncias de subir por todo o tempo que um heartbeat *morto* da versão antiga
-levasse para ficar obsoleto — que é exatamente o momento em que um operador precisa que elas subam,
-porque é o momento seguinte a uma implantação que falhou.
+A versão registrada no heartbeat é o **alarme, e não uma verificação que bloqueia**: uma instância que
+sobe e encontra heartbeats ativos de outra versão registra um Critical e segue em frente. Isso é
+deliberado. Uma recusa rígida impediria as instâncias de subir por todo o tempo que um heartbeat *morto*
+da versão antiga levasse para ficar sem sinal — que é exatamente o momento em que um operador precisa
+que elas subam, porque é o momento seguinte a uma implantação que falhou.
 
-Portanto versões mistas são detectadas e reportadas, nunca impedidas. Trate o Critical como o alarme que
-ele é.
+Portanto, versões mistas são detectadas e informadas, mas nunca impedidas. Trate o Critical como o
+alarme que ele é.
 
-**Trocar a imagem no lugar é sobrevivível, mas não é a receita.** Desde a 2.5.0, trocar a imagem de um
-app em execução (`az webapp config container set`) não custa mais uma inicialização recusada. O App
-Service inicia o novo container ao lado do antigo, sob o mesmo id de instância, e mantém o antigo
-servindo até que o novo esteja aquecido; o novo container **desloca** o antigo, que se retira — termina o
-que detém e não reivindica nada novo — e diz isso no seu log, como um evento `InstanceStoodDown` e na sua
-página Sistema. Veja
-[Operação](operations.md#quando-um-boot-encontra-a-própria-identidade-ainda-viva). Uma instância que
-desliga de forma limpa aposenta a sua linha de heartbeat (desde a 2.4.3), então depois de *parar, trocar,
-iniciar* não há nada a deslocar, e é por isso que essa continua sendo a implantação mais limpa.
+**Trocar a imagem in-place é tolerado, mas não é o procedimento recomendado.** Desde a 2.5.0, trocar a
+imagem de um app em execução (`az webapp config container set`) não resulta mais em uma inicialização
+recusada. O App Service inicia o novo container ao lado do antigo, sob o mesmo id de instância, e mantém
+o antigo atendendo até que o novo esteja aquecido; o novo container **desloca** o antigo, que se
+retira — termina o que detém e não reivindica nada novo — e informa isso no próprio log, com um evento
+`InstanceStoodDown` e na própria página Sistema. Veja
+[Operação](operations.md#quando-um-boot-encontra-a-própria-identidade-ainda-viva). Uma instância que é
+desligada de forma limpa aposenta a própria linha de heartbeat (desde a 2.4.3); então, depois de
+*parar, trocar, iniciar*, não há nada a deslocar, e é por isso que esse continua sendo o procedimento
+de implantação mais limpo.
 
-**Uma implantação que falha derruba o site, e reapontar a tag anterior é a recuperação.** Se o novo
-container falha no aquecimento depois de deslocar o antigo, o App Service não continua roteando para o
-container antigo: ele para o **site inteiro**, inclusive o container que se retirou, e continua
+**Uma implantação que falha derruba o site, e voltar para a tag anterior é a forma de recuperação.** Se
+o novo container falha no aquecimento depois de deslocar o antigo, o App Service não continua roteando
+para o container antigo: ele para o **site inteiro**, inclusive o container que se retirou, e continua
 reiniciando-o com a imagem nova. Nada que o produto faça consegue impedir isso. Aponte o app de volta
 para a tag de imagem anterior com `az webapp config container set`; ele fica pronto de novo em cerca de
 dois minutos.
@@ -78,299 +79,309 @@ dois minutos.
 ## A afinidade de sessão é obrigatória
 
 O dashboard é Blazor Server, e um circuito é uma conexão SignalR com estado que precisa continuar
-caindo na instância que o detém. O App Service entrega a afinidade ARR ligada por padrão, e ela precisa
-continuar ligada. Isso é documentado como requisito em vez de contornado por engenharia.
+chegando à instância que o detém. O App Service vem com a afinidade ARR ligada por padrão, e ela precisa
+continuar ligada. Isso é documentado como requisito, em vez de ser contornado no código.
 
-O que a afinidade **não** está fazendo é manter as pessoas autenticadas. Ambos os cookies de sessão são
-payloads de Data Protection, e no modo cluster o key ring migra para a base operacional precisamente
-para que um cookie criado por uma instância seja validado por todas as outras. A afinidade é para o
-circuito; o ring compartilhado é para o cookie. Desligar o ring produziria desconexões intermitentes que
-configuração de afinidade nenhuma resolve.
+O que a afinidade **não** faz é manter as pessoas autenticadas. Os dois cookies de sessão são payloads
+de Data Protection, e no modo cluster o key ring passa para o banco operacional justamente para que um
+cookie criado por uma instância seja validado por todas as outras. A afinidade serve ao circuito; o ring
+compartilhado serve ao cookie. Desligar o ring compartilhado provocaria encerramentos de sessão
+intermitentes que nenhuma configuração de afinidade resolve.
 
-## Os orçamentos de limitação de taxa são por instância, então o limite efetivo é ×N
+## As cotas do limite de requisições são por instância, então o limite efetivo é ×N
 
-Toda política de limitação de taxa do produto é um limitador por processo. Duas instâncias significam o
-dobro de permissões; N instâncias significam N vezes.
+Toda política de limite de requisições (rate limiting) do produto é um limitador por processo. Duas
+instâncias significam o dobro de permissões; N instâncias, N vezes mais.
 
 Isso é documentado em vez de corrigido. Um limitador distribuído seria a primeira dependência de
-runtime em infraestrutura compartilhada deste produto *on premises*, para um controle que é grosseiro
-por design, e a aritmética que mais importa — o argumento de controle compensatório para a rota de
-aprovação anônima — foi relida com o fator ×N e sobrevive no N pequeno em que esta topologia roda. Se
-você escalar além de um punhado de instâncias, releia-a você mesmo em vez de presumir que ela continua
-válida.
+runtime em infraestrutura compartilhada deste produto on-premises, para um controle que é grosseiro por
+design, e a conta que mais importa — o argumento do controle compensatório para a rota de aprovação
+anônima — foi refeita com o fator ×N e continua válida para o N pequeno com que esta topologia roda. Se
+você escalar para além de um punhado de instâncias, refaça essa conta você mesmo em vez de presumir que
+ela continua valendo.
 
-Dimensionar um orçamento para um cluster significa dividir pela contagem de instâncias que você de fato
-roda — e lembrar que a contagem de instâncias muda quando você escala.
+Dimensionar uma cota para um cluster significa dividi-la pelo número de instâncias que você de fato
+roda — e lembrar que esse número muda quando você escala.
 
-O `Pipeline:MaxConcurrency` se multiplica da mesma forma, e esse é uma funcionalidade em vez de uma
-limitação: ele é por instância, então uma frota de duas com concorrência quatro assina até oito
-arquivos ao mesmo tempo. Dimensione a origem do certificado para esse número, não para o configurado.
+O `Pipeline:MaxConcurrency` se multiplica da mesma forma, e nesse caso isso é uma vantagem, e não uma
+limitação: ele é por instância, então uma frota de duas instâncias com concorrência quatro assina até
+oito arquivos ao mesmo tempo. Dimensione a origem do certificado para esse número, e não para o valor
+configurado.
 
 ## A coleta de métricas alcança uma instância arbitrária
 
-O `/api/metrics` é por processo, e o front door do App Service não consegue mirar uma instância. Uma
-coleta do Prometheus, portanto, cai em qualquer instância que o balanceador de carga tenha escolhido, e
-a série que ela coleta pula entre instâncias de uma coleta para outra. **A continuidade da coleta
-quebra**, e configuração nenhuma a recupera.
+O `/api/metrics` é por processo, e o front-end do App Service não consegue direcionar a requisição para
+uma instância específica. Uma coleta do Prometheus, portanto, cai na instância que o balanceador de
+carga tiver escolhido, e a série coletada pula entre instâncias de uma coleta para outra. **A
+continuidade da coleta se perde**, e nenhuma configuração a recupera.
 
-O caminho de observabilidade recomendado para cluster é a distro do Application Insights — opcional,
-nativamente ciente de instâncias. Veja [Telemetria](telemetry.md).
+O caminho de observabilidade recomendado para o cluster é a distro do Application Insights — opcional
+e nativamente ciente das instâncias. Veja [Telemetria](telemetry.md).
 
-Se você mantiver o Prometheus mesmo assim, dois gauges têm significados decididos em vez de inferidos, e
-lê-los errado subestima:
+Se você mantiver o Prometheus mesmo assim, dois gauges têm significados definidos por decisão, e não
+por dedução, e lê-los de forma errada leva a números subestimados:
 
-- `bulksigner_jobs_awaiting_signer` conta as linhas que **esta instância** consulta. `sum()` sobre a
-  frota é o total do cluster sem nada contado em dobro, já que um job tem exatamente um dono. Ler a
-  série de uma única instância como o total é o erro a se esperar.
-- O mesmo formato vale para todo contador por instância da página. Os números de uma instância são de
-  uma instância.
+- `bulksigner_jobs_awaiting_signer` conta as linhas em que **esta instância** faz polling. A `sum()` na
+  frota é o total do cluster, sem contagem dupla, já que um job tem exatamente um dono. Ler a série de
+  uma única instância como se fosse o total é o erro previsível.
+- O mesmo raciocínio vale para todos os contadores por instância da página. Os números de uma instância
+  são apenas daquela instância.
 
-O `GET /api/folders` carrega um campo `instance` pelo mesmo motivo, para que um cliente de máquina
-consiga ao menos distinguir "a pasta mudou" de "a resposta veio de outro lugar".
+O `GET /api/folders` tem um campo `instance` pelo mesmo motivo, para que um cliente automatizado consiga
+ao menos distinguir "a pasta mudou" de "a resposta veio de outra instância".
 
 ## Os logs são efêmeros a menos que você os torne duráveis
 
-O disco de um container Linux desaparece na reciclagem, e os arquivos de log rotacionados junto com ele.
-O diretório `logs/` de `Storage:Root` fica dentro do container.
+O disco de um container Linux desaparece na reciclagem, e os arquivos de log rotacionados vão junto. O
+diretório `logs/` de `Storage:Root` fica dentro do container.
 
 O modo cluster **avisa e sobe** quando `Logging:AzureTable:Enabled` é falso: um Critical na
-inicialização nomeando a perda. Ele não recusa, seguindo o próprio gradiente de severidade do produto —
-um compartilhamento de trabalho inalcançável e uma base inalcançável também avisam e sobem, e uma recusa
-de boot por causa de um fluxo de diagnóstico inverteria isso. A regra de nunca-um-único-destino
-permanece intocada, então o destino de arquivo continua ligado de qualquer forma, em disco efêmero, onde
-o streaming de logs do App Service o lê ao vivo.
+inicialização aponta a perda. Ele não recusa o boot, seguindo a própria escala de severidade do
+produto — um compartilhamento de trabalho inacessível e um banco inacessível também geram aviso e
+deixam subir, e recusar o boot por causa de um fluxo de diagnóstico inverteria essa escala. A regra de
+nunca ter um único destino de log permanece intacta, então o destino de arquivo continua ligado de
+qualquer forma, em disco efêmero, onde o streaming de logs do App Service o lê ao vivo.
 
-:::warning Ligar o destino de tabela tem seu próprio custo, e é uma decisão a tomar *antes* de habilitá-lo
-**Nada poda aquela tabela** e nenhum mecanismo do Azure consegue. Veja
-[Retenção](retention.md#logs-em-uma-tabela--nada-os-poda) e agende o script de poda.
+:::warning Ligar o destino de tabela tem um custo próprio, e é uma decisão a tomar *antes* de habilitá-lo
+**Nada faz a limpeza dessa tabela**, e nenhum mecanismo do Azure consegue fazer. Veja
+[Retenção](retention.md#logs-em-uma-tabela--nada-os-poda) e agende o script de limpeza.
 :::
 
-## Uma morte presumida é uma aposta
+## Uma morte presumida é uma suposição
 
-A vivacidade são heartbeats na base operacional. Uma instância que está **viva mas não consegue
-escrevê-los** — particionada da base, ou travada além de `Cluster:StaleAfterSeconds` — pode ter seu
-trabalho assumido enquanto ainda o está fazendo. O caso perdedor é nomeado em vez de escondido.
+A detecção de instâncias vivas se baseia em heartbeats no banco operacional. Uma instância que está
+**viva, mas não consegue gravá-los** — isolada do banco por uma partição de rede, ou travada além de
+`Cluster:StaleAfterSeconds` — pode ter o trabalho assumido enquanto ainda o está executando. O caso
+desfavorável é declarado, e não escondido.
 
-O que limita o dano não mudou em relação à operação de instância única, e os três mecanismos são
+O que limita o dano não mudou em relação à operação com uma única instância, e os três mecanismos são
 anteriores ao modo cluster:
 
-- Os bytes em stage são **re-hasheados imediatamente antes de qualquer assinatura existir**.
-- Uma promoção sobre um destino ocupado é **recusada** — uma conclusão duplicada vira um job
+- O hash dos bytes da cópia preparada é **recalculado imediatamente antes de qualquer assinatura ser gerada**.
+- Uma promoção para um destino já ocupado é **recusada** — uma conclusão duplicada vira um job
   `Completed` e um `Failed`, nunca dois artefatos entregues.
-- Uma entrada é **comparada contra sua impressão digital de staging** antes de ser apagada.
+- Uma entrada é **comparada com a impressão digital registrada no stage** antes de ser apagada.
 
-Aumente `Cluster:StaleAfterSeconds` onde uma implantação encontre isso rotineiramente. O piso são três
-cadências, recusado no boot abaixo disso, porque um limiar tão curto presume morte a uma ou duas batidas
-perdidas, e uma batida se perde por motivos que não são morte.
+Aumente `Cluster:StaleAfterSeconds` quando uma implantação enfrentar isso com frequência. O mínimo é
+três vezes a cadência de heartbeat, e valores abaixo disso são recusados no boot, porque um limite tão
+curto presume a morte depois de um ou dois heartbeats perdidos, e um heartbeat se perde por motivos que
+não são a morte da instância.
 
-A imagem espelhada também é declarada: uma instância que fica obsoleta para suas irmãs **continua
+O caso inverso também está declarado: uma instância que fica sem sinal para as irmãs **continua
 assinando**. Ela não é parada, porque a regra permanente deste produto é que um job em andamento roda
-até sua conclusão natural. Ela nunca assume seus próprios jobs, diga a tabela o que disser.
+até a conclusão natural. Ela nunca assume os próprios jobs, diga a tabela o que disser.
 
-**A mesma janela dá o ritmo da pergunta sobre uma instância deslocada.** Depois da sobreposição de uma
-reimplantação, a varredura do novo container pergunta à base, passada a janela, pelos jobs que a
-encarnação deslocada deixou para trás. Depois que essa pergunta volta vazia, ela é feita de novo uma vez
-por `Cluster:StaleAfterSeconds`, e não a cada consulta (desde a 2.8.0) — no App Service toda troca se
-sobrepõe, então o registro de deslocamento nunca se limpa. O custo é que um processo deslocado que nunca
-se retirou e reivindica um job tardiamente o tem assumido em uma janela mais uma consulta, em vez de em
-uma consulta, o que é a aposta acima, e não uma nova.
+**A mesma janela define a frequência da pergunta sobre uma instância deslocada.** Depois da sobreposição
+de uma reimplantação, passada a janela, a varredura do novo container pergunta ao banco pelos jobs que a
+encarnação deslocada deixou para trás. Depois que essa pergunta volta vazia, ela é repetida uma vez a
+cada `Cluster:StaleAfterSeconds`, e não a cada ciclo de polling (desde a 2.8.0) — no App Service, toda
+troca de versão tem sobreposição, então o registro de deslocamento nunca é limpo. O custo é que, se um
+processo deslocado nunca se retirou e reivindica um job tardiamente, esse job é assumido em até uma
+janela mais um ciclo de polling, e não em um ciclo de polling — a mesma suposição descrita acima, e não
+uma nova.
 
 ## Linhas que ninguém possui não são reconciliadas por ninguém
 
-Uma linha de job sem **nenhum dono** — deixada por uma build anterior à coluna de propriedade, ou por
-uma execução com o modo desligado — é uma linha que o modo cluster jamais varrerá. A recuperação de boot
-pega apenas a identidade da própria instância, a de uma irmã pega a dela, e a assunção segue o heartbeat
-de um dono, do qual não há nenhum.
+Uma linha de job **sem dono** — deixada por uma build anterior à coluna de dono, ou por uma execução com
+o modo desligado — é uma linha que o modo cluster jamais varrerá. A recuperação no boot só considera a
+identidade da própria instância, a de uma irmã só considera a dela, e a assunção se baseia no heartbeat
+de um dono, que nesse caso não existe.
 
-Isso é reportado em vez de adotado. Adotar significaria um filtro casando com nulo, que casa em *toda*
-instância simultaneamente — o defeito que a funcionalidade remove, chegando pelo código que o remove.
+Isso é informado em vez de adotado. Adotar significaria um filtro que casa com nulo, e esse filtro
+casaria em *todas* as instâncias ao mesmo tempo — o defeito que a funcionalidade elimina, voltando pelo
+próprio código que o elimina.
 
-:::note O remédio é real, e é nomeado em toda superfície que encontra uma dessas
-**Suba uma vez com `Cluster:Enabled = false`**, o que varre toda linha em andamento seja quem for o
-dono, e então religue o modo. Faça isso uma vez na atualização, antes do primeiro boot em cluster, e
-deixa de ser uma preocupação — o dono é registrado em toda reivindicação, esteja o modo ligado ou não, e
-apenas *lido* sob ele.
+:::note A solução existe, e é indicada em todos os lugares que encontram uma dessas linhas
+**Suba uma vez com `Cluster:Enabled = false`**, o que varre todas as linhas em andamento, seja quem for
+o dono, e então religue o modo. Faça isso uma vez na atualização, antes do primeiro boot em cluster, e
+a questão deixa de existir — o dono é registrado em toda reivindicação, com o modo ligado ou não, e só é
+*lido* com o modo ligado.
 :::
 
-Dois pontos específicos valem estar por escrito porque são piores do que parecem:
+Dois pontos específicos merecem ficar por escrito, porque são piores do que parecem:
 
-- **Um job despachado ao Lacuna Signer sem dono não é consultado por ninguém e não expira mais.** O
-  `Signer:TimeoutHours` é imposto enquanto uma linha está sendo consultada, então uma linha que nada
-  consulta é uma linha que nada limita. Restringir a consulta às linhas com dono removeu o último
-  caminho terminal que um job assim tinha. O worker de consulta avisa isso uma vez por processo e nomeia
-  a contagem.
+- **Um job despachado ao Lacuna Signer sem dono não recebe polling de ninguém e não expira mais.** O
+  `Signer:TimeoutHours` é aplicado enquanto uma linha recebe polling; então, uma linha que ninguém
+  consulta é uma linha sem limite algum. Restringir o polling às linhas com dono eliminou o último
+  caminho que levava um job assim a um estado terminal. O worker de polling avisa isso uma vez por
+  processo e informa a quantidade.
 - **Uma linha detida por uma instância *nomeada* que não tem linha de heartbeat nenhuma** fica órfã do
-  mesmo jeito e exige o mesmo remédio. Ausência de heartbeat não é evidência de morte — um dono sem
-  linha é reportado uma vez e deixado em paz, em vez de lido como licença para reprovar o trabalho vivo
-  de alguém.
+  mesmo jeito e exige a mesma solução. A ausência de heartbeat não é prova de morte — um dono sem linha
+  é informado uma vez e deixado como está, em vez de ser interpretado como permissão para fazer falhar o
+  trabalho vivo de alguém.
 
 ## Não existe drenagem por instância
 
 Você não pode pedir à instância B que termine o que tem e pare de pegar trabalho novo. O
-`POST /api/pipeline/pause` retém o worker de **toda** instância — a flag de pausa vive na única linha
-que todo worker lê a cada iteração de consulta, então "todo o cluster" é o que o controle existente
-passa a significar, e é o que um operador pausando "o pipeline" pretende.
+`POST /api/pipeline/pause` retém o worker de **todas** as instâncias — a flag de pausa fica na única
+linha que todo worker lê a cada iteração de polling, então o controle existente passa a valer para o
+cluster inteiro, e é isso que um operador que pausa "o pipeline" pretende.
 
-A resposta a "aplicar patch na instância B" é pará-la e deixar a assunção fazer seu trabalho. A
+A resposta para "aplicar um patch na instância B" é pará-la e deixar a assunção fazer o seu trabalho. A
 drenagem por instância deliberadamente não foi construída.
 
-Uma consequência de a pausa ser de cluster inteiro vale ser conhecida: **a assunção fica atrás do gate
-de pausa.** Um operador pausando um cluster para investigar uma base que ficou lenta é exatamente a
-pessoa que não pode ter toda instância declarando toda irmã morta. A varredura de expiração de
-aprovações fica, em vez disso, à frente do gate, porque um orçamento de espera é um prazo de relógio de
-parede que pausar não estende.
+Uma consequência de a pausa valer para o cluster inteiro merece ser conhecida: **a assunção fica sujeita
+à pausa.** Um operador que pausa um cluster para investigar um banco que ficou lento é exatamente a
+pessoa que não pode ver todas as instâncias declarando mortas todas as irmãs. Já a varredura de
+expiração de aprovações não é afetada pela pausa, porque um prazo de espera é contado em tempo de
+relógio, e pausar não o estende.
 
-## A latência entre instâncias é o intervalo de consulta
+## A latência entre instâncias é o intervalo de polling
 
-O sinal de acordar é local ao processo. Um enfileiramento na instância A não acorda o worker da
-instância B; B pega o job na sua próxima consulta. O `Pipeline:PollIntervalSeconds` é, portanto, o
-limite de latência entre instâncias do cluster — aceito e documentado, não contornado por engenharia.
+O sinal de despertar é local ao processo. Um enfileiramento na instância A não acorda o worker da
+instância B; B pega o job no próximo ciclo de polling. O `Pipeline:PollIntervalSeconds` é, portanto, o
+limite de latência entre as instâncias do cluster — aceito e documentado, e não contornado no código.
 
-**A edição de um perfil de assinatura segue o mesmo limite, por desenho.** Os perfis de assinatura vivem
-na base operacional e são editados pelo dashboard; uma escrita de perfil incrementa um contador na base,
-dentro da sua própria transação, e toda instância lê esse contador na consulta que já executa — então
-uma mudança feita na instância A chega à instância B em um intervalo de consulta, sem nenhum caminho de
-mensagens entre elas para configurar, proteger ou depurar. O que se propaga é o *comportamento*: formato,
-verificação, criptografia, checagem CNAB240 e toda a regra de aprovação. Uma mudança de **certificado**
-não se propaga, em nenhuma instância: cada host abre o seu certificado uma vez na inicialização e mantém
-o handle da chave, então trocar um certificado é um reinício — nesta topologia, o reinício que para o
-mundo descrito acima.
+**A edição de um perfil de assinatura segue o mesmo limite, por projeto.** Os perfis de assinatura ficam
+no banco operacional e são editados pelo dashboard; uma gravação de perfil incrementa um contador no
+banco, dentro da própria transação, e todas as instâncias leem esse contador no polling que já fazem —
+então, uma mudança feita na instância A chega à instância B em um intervalo de polling, sem nenhum canal
+de mensagens entre elas para configurar, proteger ou depurar. O que se propaga é o *comportamento*:
+formato, verificação, criptografia, verificação CNAB240 e toda a regra de aprovação. Uma mudança de
+**certificado** não se propaga, em nenhuma instância: cada host abre o seu certificado uma vez na
+inicialização e mantém o handle da chave, então trocar um certificado exige um reinício — nesta
+topologia, o reinício com parada total descrito acima.
 
 Duas consequências a esperar:
 
-- **Entre a edição de um certificado e o reinício, duas instâncias podem honestamente reportar origens
-  diferentes para o mesmo perfil** — cada uma nomeando a chave com que assinaria, que é também a origem
-  que ela carimba nos jobs que assina. Uma coleta ou uma requisição ao dashboard cai em uma instância
-  arbitrária, então leia a resposta como "o que assinaria aqui", e não "o que a linha diz".
-- **O marcador de reinício pendente que uma edição de certificado levanta é por instância, e é fiel.**
-  Uma instância que já reiniciou não mostra nada e uma que não reiniciou mostra o marcador — ambas
-  corretas sobre si mesmas —, o que torna legível uma reciclagem parcial. No reinício que para o mundo,
-  toda instância perde o marcador junto.
+- **Entre a edição de um certificado e o reinício, duas instâncias podem legitimamente informar origens
+  diferentes para o mesmo perfil** — cada uma indicando a chave com que assinaria, que é também a origem
+  que ela registra nos jobs que assina. Uma coleta ou uma requisição ao dashboard cai em uma instância
+  arbitrária, então leia a resposta como "o que assinaria aqui", e não como "o que a linha diz".
+- **O indicador de reinício pendente que uma edição de certificado aciona é por instância, e é fiel.**
+  Uma instância que já reiniciou não mostra nada, e uma que não reiniciou mostra o indicador — ambas
+  corretas sobre si mesmas —, o que torna legível uma reciclagem parcial. No reinício com parada total,
+  todas as instâncias perdem o indicador ao mesmo tempo.
 
 **Duas origens de certificado não podem ser escolhidas nesta topologia.** Um token PKCS#11 e o
-repositório de certificados do Windows do próprio host vivem em uma única máquina, e estas instâncias são
-criadas e destruídas por operações de escala — então criar um perfil com qualquer uma dessas origens, ou
-reapontar um para elas, é recusado no formulário enquanto `Cluster:Enabled` estiver ligado. Uma
-configuração que declare uma delas continua sendo uma recusa de boot. Um perfil **salvo antes de a chave
-ser ligada** é o único caso que nenhuma das duas pega: nada revalida um perfil armazenado, então ele vira
-um aviso de inicialização, nomeando o perfil e a sua origem. Espere que isso pareça assimétrico na frota:
-a instância que tem o token assina e avisa, enquanto toda instância sem ele reporta o perfil como
-degradado e reprova os jobs roteados para ele.
+repositório de certificados do Windows do próprio host ficam em uma única máquina, e estas instâncias
+são criadas e destruídas por operações de escala — então criar um perfil com qualquer uma dessas
+origens, ou mudar um perfil para elas, é recusado no formulário enquanto `Cluster:Enabled` estiver
+ligado. Uma configuração que declare uma delas continua sendo recusada no boot. Um perfil **salvo antes
+de a chave ser ligada** é o único caso que nenhuma das duas verificações pega: nada revalida um perfil
+armazenado, então ele gera um aviso na inicialização, com o nome do perfil e a origem. Espere que isso
+pareça assimétrico na frota: a instância que tem o token assina e avisa, enquanto todas as instâncias
+sem ele informam o perfil como degradado e fazem falhar os jobs roteados para ele.
 
-A mesma localidade é o que faz a reingestão continuar funcionando de graça: sob o esquema em que todas
-monitoram tudo, a instância que termina um job sempre monitora a pasta de onde ele veio, então o sinal
-local ao processo ainda alcança um observador que possui aquele caminho.
+A mesma localidade é o que faz a reingestão continuar funcionando sem custo extra: no esquema em que
+todas as instâncias monitoram todas as pastas, a instância que termina um job sempre monitora a pasta de
+onde ele veio, então o sinal local ao processo ainda chega a um observador responsável por aquele
+caminho.
 
-## O gate do compartilhamento de trabalho é mais estreito que a catástrofe que lhe dá nome
+## A verificação do compartilhamento de trabalho cobre menos do que a catástrofe que motivou sua criação
 
-O marcador vincula um compartilhamento de trabalho a uma base operacional, e uma instância subindo cuja
-base não corresponde se recusa a iniciar, nomeando ambas. Isso pega o formato para o qual ele existe:
-uma segunda implantação encontrando um compartilhamento que um cluster estabelecido já marcou.
+O marcador vincula um compartilhamento de trabalho a um banco operacional, e uma instância que sobe com
+um banco que não corresponde ao marcador se recusa a iniciar, indicando os dois. Isso pega o cenário para
+o qual ele existe: uma segunda implantação encontrando um compartilhamento que um cluster já
+estabelecido marcou.
 
-O que ele não pega é qualquer momento em que o marcador esteja **ilegível**, porque ele recusa sobre
-evidência e nunca sobre a ausência dela. Existem dois desses momentos — um compartilhamento que ainda
-não carrega marcador, e o instante de uma escrita de nomeação no Azure Files, em que o arquivo fica
-brevemente todo em zeros. Ambos são estreitados por uma olhada extra quando um lease é detido, não
-fechados. Uma verificação que roda uma vez no boot também não consegue enxergar um cluster rival que
-chegue depois.
+O que ele não pega é qualquer momento em que o marcador esteja **ilegível**, porque ele só recusa diante
+de evidência, e nunca diante da falta dela. Existem dois desses momentos — um compartilhamento que ainda
+não tem marcador, e o instante de uma gravação de identificação no Azure Files, em que o arquivo fica
+brevemente preenchido com zeros. Os dois são reduzidos, mas não eliminados, por uma verificação extra
+quando um lease está detido. Uma verificação que roda uma única vez no boot também não consegue
+enxergar um cluster rival que apareça depois.
 
-E o gate **não** é o que impede duas instâncias de assinarem um arquivo. Quem faz isso são o lease por
-arquivo e a reivindicação no banco. O marcador é para a única catástrofe que banco de dados nenhum
-consegue enxergar: duas bases, um compartilhamento.
+E essa verificação **não** é o que impede duas instâncias de assinarem o mesmo arquivo. Isso é feito
+pelo lease por arquivo e pela reivindicação no banco. O marcador existe para a única catástrofe que
+banco de dados nenhum consegue enxergar: dois bancos, um compartilhamento.
 
-## O backup de banco de dados é inalcançável aqui
+## O backup de banco de dados não está disponível aqui
 
-`Backup:Enabled = true` sob `Database:Provider = SqlServer` é uma recusa de boot nomeando ambas as
-chaves — e o modo cluster exige `SqlServer`. A combinação é, portanto, inalcançável por construção, o
-que é uma consequência agradável em vez de uma lacuna: o gate de backup por processo não precisa de
-substituto distribuído.
+`Backup:Enabled = true` com `Database:Provider = SqlServer` é recusado no boot, com uma mensagem que
+cita as duas chaves — e o modo cluster exige `SqlServer`. Portanto, essa combinação é impossível por
+construção, o que é uma consequência conveniente, e não uma lacuna: a trava de backup por processo não
+precisa de um substituto distribuído.
 
-Fazer backup da base operacional nesta topologia é trabalho do regime do seu SGBD. O point-in-time
-restore do próprio Azure SQL é a resposta, não uma funcionalidade deste produto. Veja
+Nesta topologia, fazer backup do banco operacional cabe à rotina do seu SGBD. O point-in-time restore
+do próprio Azure SQL é a resposta, e não uma funcionalidade deste produto. Veja
 [Retenção](retention.md#disciplina-de-backup).
 
-## O key ring de sessão fica em texto claro na base
+## O key ring de sessão fica em texto claro no banco
 
 No modo cluster, o ring de Data Protection são linhas em `SessionProtectionKeys`, em texto claro,
-guardadas pelo controle de acesso do próprio banco de dados — coerente com um modelo de segurança em
-que a connection string **é** a credencial e o acesso de leitura a `keys/` já está documentado como "uma
-sessão como qualquer pessoa".
+protegidas pelo controle de acesso do próprio banco de dados — coerente com um modelo de segurança em
+que a connection string **é** a credencial e em que o acesso de leitura a `keys/` já está documentado
+como "uma sessão como qualquer pessoa".
 
-Duas coisas decorrem disso, e a segunda é a fácil de deixar passar:
+Duas coisas decorrem disso, e a segunda é a que passa despercebida com facilidade:
 
-- **O encriptador DPAPI do Windows é descartado sob a chave.** O DPAPI com escopo de máquina é
-  precisamente a propriedade que torna uma cópia de `keys/` inútil em outro host — e precisamente a
+- **O encriptador DPAPI do Windows é descartado com a chave ligada.** O DPAPI com escopo de máquina é
+  justamente a propriedade que torna uma cópia de `keys/` inútil em outro host — e justamente a
   propriedade que torna um ring ilegível para uma irmã, de modo que mantê-lo seria manter o defeito. No
-  Windows isso é mais fraco em repouso. Não custa nada na topologia suportada, cujo container Linux
-  também não tem criptografia em repouso para o ring em disco, e é o único lugar em que ligar o modo
-  troca um controle em vez de acrescentar um.
-- **Uma base inalcançável reprova a requisição, sem plano B.** Um host que não conseguisse alcançar a
-  base e silenciosamente criasse sessões a partir de um ring por instância emitiria cookies que suas
-  irmãs rejeitam — a desconexão intermitente que o ring compartilhado remove, chegando pelo código que a
-  remove. Essa falha se parece com a exceção do próprio provider no caminho da requisição, não com uma
-  recusa diagnosticada nomeando o ring. A condição é reportada onde é diagnosticada: na verificação de
-  boot e na linha `database` por instância do `/api/ready`.
+  Windows, isso deixa o ring mais fraco em repouso. Não custa nada na topologia suportada, cujo
+  container Linux também não tem criptografia em repouso para o ring em disco, e é o único ponto em que
+  ligar o modo troca um controle por outro, em vez de acrescentar um.
+- **Um banco inacessível faz a requisição falhar, sem alternativa.** Um host que não conseguisse chegar
+  ao banco e criasse sessões silenciosamente a partir de um ring por instância emitiria cookies que as
+  irmãs rejeitam — o encerramento de sessão intermitente que o ring compartilhado elimina, voltando pelo
+  próprio código que o elimina. Essa falha aparece como a exceção do próprio provider no caminho da
+  requisição, e não como uma recusa diagnosticada que cita o ring. A condição é informada onde é
+  diagnosticada: na verificação de boot e na linha `database` por instância do `/api/ready`.
 
-Uma observação de primeiro boot, dita para que não seja lida como falha: instâncias que iniciam juntas
-encontram todas um ring vazio, então várias podem criar um elemento antes que qualquer uma tenha lido o
-da outra, e a tabela pode carregar mais elementos do que houve rotações de chave. Não há nada de errado
-com isso.
+Uma observação sobre o primeiro boot, registrada para que não seja interpretada como falha: instâncias
+que iniciam juntas encontram todas um ring vazio, então várias podem criar um elemento antes que
+qualquer uma tenha lido o da outra, e a tabela pode ter mais elementos do que houve rotações de chave.
+Não há nada de errado nisso.
 
 ## A contenção tem um custo, e ele é pequeno
 
-Duas instâncias reivindicando de uma fila entram em conflito rotineiramente, e a reivindicação em lote
-recai para uma de cada vez, com a corrida perdida registrada em log. No modo cluster essa linha é
-rebaixada ao nível de desfecho esperado, sob seu próprio id de evento — "uma irmã chegou primeiro" e
-"outra coisa nesta instância chegou" são fatos diferentes para um leitor.
+Duas instâncias que reivindicam jobs da mesma fila entram em conflito com frequência, e a reivindicação
+em lote passa a reivindicar um job por vez, com a disputa perdida registrada no log. No modo cluster,
+essa linha de log é rebaixada ao nível de desfecho esperado, com um id de evento próprio — "uma irmã
+chegou primeiro" e "outro componente desta instância chegou primeiro" são fatos diferentes para quem lê.
 
-Relacionado, e deliberadamente **não** uma falha: um conflito de lease em uma entrada e um desfecho de
-enfileiramento `AlreadyActive`. Toda instância monitora toda pasta, então perder uma corrida é rotina —
-nenhum dos dois conta para o disjuntor de falhas consecutivas de uma pasta, e um desfecho de já-ativo
-zera o contador exatamente como um enfileiramento bem-sucedido faz. Veja
+Relacionados, e deliberadamente **não** tratados como falha: um conflito de lease em uma entrada e um
+desfecho de enfileiramento `AlreadyActive`. Todas as instâncias monitoram todas as pastas, então perder
+uma disputa é rotina — nenhum dos dois conta para o disjuntor de falhas consecutivas de uma pasta, e um
+desfecho `AlreadyActive` zera o contador exatamente como um enfileiramento bem-sucedido. Veja
 [Operação](operations.md#contenção-entre-instâncias-não-é-uma-falha).
 
 ## O que o modo cluster não muda
 
-Listado porque cada item é uma regra que alguém razoavelmente espera que uma funcionalidade de cluster
-tenha relaxado, e nenhuma delas foi:
+Esta lista existe porque cada item é uma regra que alguém poderia razoavelmente esperar que uma
+funcionalidade de cluster tivesse flexibilizado, e nenhuma delas foi flexibilizada:
 
-- **Sem repetição automática de assinaturas.** Uma assinatura nunca é retentada sem um humano decidir
-  isso. A política de assunção percorre essa borda deliberadamente: um job que nunca chegou à chamada de
-  assinatura é reenfileirado porque *nada foi tentado*; um job além dela falha. `Failed` é um desfecho
-  terminal honesto, não "travado", e a repetição manual do operador continua sendo a repetição.
-- **Jobs em andamento são sagrados.** O `POST /api/jobs/{id}/cancel` é válido apenas para jobs que
-  nenhum worker está executando — `Queued`, `AwaitingSigner` e `AwaitingApproval` —, em toda instância.
-- **As pastas monitoradas continuam na configuração; os perfis de assinatura, não mais.** Mover os perfis
-  para o banco de dados foi considerado como pré-requisito aqui e descartado quando a topologia se
-  assentou, porque o App Service fornece consistência entre instâncias por construção. Depois isso
-  chegou por mérito próprio: os perfis são linhas na base operacional, editadas pelo dashboard, o que
-  move a edição dos pools de aprovadores do acesso a arquivos do host para a autorização do dashboard. O
-  que isso acrescenta aqui é o limite de propagação acima e nada mais — nenhuma topologia nova e nenhuma
-  coordenação entre instâncias. As pastas monitoradas continuam sendo configuração, e toda instância
-  continua monitorando toda pasta.
-- **A etapa de aprovação não mudou.** A regra continua congelada no job no momento da retenção, uma
-  rejeição continua sendo um veto, e os bytes em stage continuam sendo re-hasheados antes de qualquer
-  assinatura existir.
-- **O Clear Jobs leva todo job, inclusive o de uma irmã — por decisão, não por omissão.** Da 2.0.0 à
-  2.8.x ele era somente-terminal para todo mundo, porque apagar a linha sob o job de uma irmã em execução
-  era o risco de ação de operador mais afiado do inventário. Desde a 2.9.0 ele apaga todo job, qualquer
-  que seja o status: um operador que apaga o sistema pela zona de perigo apagou um sistema com um job
-  dentro, de propósito, e o diálogo diz isso. O worker do job abandonado o reprova, não encontra linha, e
-  registra as duas coisas — e é o lease por arquivo, e não esta ação, que continua impedindo duas
-  instâncias de assinarem o mesmo arquivo. Veja [Clear Jobs](operations.md#clear-jobs).
+- **Sem repetição automática de assinaturas.** Uma assinatura nunca é tentada de novo sem que uma pessoa
+  decida isso. A política de assunção segue essa fronteira deliberadamente: um job que nunca chegou à
+  chamada de assinatura é reenfileirado porque *nada foi tentado*; um job que passou dela falha.
+  `Failed` é um desfecho terminal honesto, não "travado", e a nova tentativa manual do operador continua
+  sendo a forma de repetir.
+- **Jobs em andamento são intocáveis.** O `POST /api/jobs/{id}/cancel` só é válido para jobs que nenhum
+  worker está executando — `Queued`, `AwaitingSigner` e `AwaitingApproval` —, em todas as instâncias.
+- **As pastas monitoradas continuam na configuração; os perfis de assinatura, não mais.** Mover os
+  perfis para o banco de dados chegou a ser considerado como pré-requisito para o cluster e foi
+  descartado quando a topologia se definiu, porque o App Service garante consistência entre instâncias
+  por construção. Depois, a mudança veio por mérito próprio: os perfis são linhas no banco operacional,
+  editadas pelo dashboard, o que transfere a edição dos pools de aprovadores do acesso a arquivos do host
+  para a autorização do dashboard. O que isso acrescenta aqui é o limite de propagação descrito acima e
+  nada mais — nenhuma topologia nova e nenhuma coordenação entre instâncias. As pastas monitoradas
+  continuam sendo configuração, e todas as instâncias continuam monitorando todas as pastas.
+- **A etapa de aprovação não mudou.** A regra continua sendo fixada no job no momento em que ele fica
+  retido, uma rejeição continua sendo um veto, e o hash dos bytes da cópia preparada continua sendo recalculado
+  antes de qualquer assinatura ser gerada.
+- **O Limpar Jobs remove todos os jobs, inclusive os de uma irmã — por decisão, e não por omissão.** Da
+  2.0.0 à 2.8.x, ele só removia jobs em estado terminal, para todo mundo, porque apagar a linha de um
+  job que uma irmã estava executando era a ação de operador mais arriscada do inventário. Desde a 2.9.0,
+  ele apaga todos os jobs, qualquer que seja o status: um operador que limpa o sistema pela zona de
+  perigo limpou, de propósito, um sistema com um job dentro, e o diálogo avisa isso. O worker do job
+  abandonado o marca como falho, não encontra a linha e registra as duas coisas no log — e é o lease por
+  arquivo, e não esta ação, que continua impedindo duas instâncias de assinarem o mesmo arquivo. Veja
+  [Limpar Jobs](operations.md#limpar-jobs).
 
 ## O que não é uma limitação, apesar de parecer
 
-- **A pausa é de cluster inteiro.** Uma chamada retém toda instância, que é o que um operador pausando
-  "o pipeline" quer dizer.
-- **As estatísticas são de cluster inteiro.** Elas migraram para a base operacional e são computadas na
-  leitura, então o painel descreve a frota em vez de qualquer instância que tenha respondido. O que era
-  excluído antes continua excluído: as esperas por assinador e por aprovação, e `QueuedAt` em vez de
-  `CreatedAt` como âncora da espera na fila. Veja [Estatísticas de jobs](statistics.md).
-- **Links de aprovador, segundos fatores e sessões atravessam instâncias.** A janela de verificação vive
-  na base operacional, chaveada por um identificador carregado dentro do cookie, o que é inteiramente
-  anterior ao cluster — de modo que uma janela aberta por uma instância é honrada por outra sem nada
-  acrescentado.
+- **A pausa vale para o cluster inteiro.** Uma chamada retém todas as instâncias, que é o que um
+  operador quer dizer ao pausar "o pipeline".
+- **As estatísticas valem para o cluster inteiro.** Elas passaram para o banco operacional e são
+  calculadas na leitura, então o painel descreve a frota, e não a instância que por acaso respondeu. O
+  que era excluído antes continua excluído: as esperas pelo assinante e pela aprovação, e o uso de
+  `QueuedAt`, e não de `CreatedAt`, como referência da espera na fila. Veja
+  [Estatísticas de jobs](statistics.md).
+- **Links de aprovador, segundos fatores e sessões funcionam entre instâncias.** A janela de verificação
+  fica no banco operacional, indexada por um identificador que vai dentro do cookie, algo que é
+  inteiramente anterior ao cluster — de modo que uma janela aberta por uma instância é respeitada por
+  outra sem nada a acrescentar.
 
 ---
 

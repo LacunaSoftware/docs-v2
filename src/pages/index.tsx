@@ -109,7 +109,7 @@ const SECTIONS: Section[] = [
       {
         id: 'bulk-signer',
         name: 'Bulk Signer',
-        description: 'Solução para assinatura digital em massa de documentos, com suporte a filas e processamento assíncrono.',
+        description: 'Solução para assinatura digital de documentos em lote, com filas e processamento assíncrono.',
         href: '/articles/bulk-signer',
       },
       {

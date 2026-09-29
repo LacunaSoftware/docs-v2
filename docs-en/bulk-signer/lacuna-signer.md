@@ -89,24 +89,69 @@ profile that uses `Method = LacunaSigner`.
 
 | Key | Type | Default | Env override | Required when |
 |-----|------|---------|--------------|---------------|
-| `Signer:Endpoint` | string | `""` | `Signer__Endpoint` | At least one profile has `Method = LacunaSigner`. Cloud default: `https://signer.lacunasoftware.com`. |
+| `Signer:Endpoint` | string | `""` | `Signer__Endpoint` | Any part of `Signer:*` is set. Cloud default: `https://signer.lacunasoftware.com`. |
 | `Signer:ApiKey` | string | `""` | `Signer__ApiKey` | **REQUIRED, SECRET**, same condition. Format: `application-id\|secret`. |
 | `Signer:PollIntervalSeconds` | int | `30` | `Signer__PollIntervalSeconds` | optional |
 | `Signer:TimeoutHours` | int | `168` (7 days) | `Signer__TimeoutHours` | optional |
 | `Signer:MaxConsecutiveApiFailures` | int | `5` | `Signer__MaxConsecutiveApiFailures` | optional |
 
-The validator is **self-gating** — it only enforces `Endpoint` + `ApiKey` when at least one profile
-has `Method = LacunaSigner`. Pure Local deployments don't need to set anything under `Signer:*`.
+The validator is **self-gating on this section** — omit `Signer:*` entirely and nothing here is
+enforced, which is what a pure Local deployment does. Write any part of it and the whole block is
+validated.
+
+:::warning Changed in 2.1.0 — the `Signer:*` block is judged on its own
+Up to 2.0.x the block was validated only when some profile selected `Method = LacunaSigner`. Profiles now
+live in the operational store and can be switched to Lacuna Signer from the dashboard with no restart, so
+the rule is stated the other way round:
+
+- **A half-written `Signer:` block refuses the boot** even if no profile uses it — an endpoint with no
+  API key, say, left behind for later. The message names both keys and offers removing the section as
+  the remedy.
+- **Selecting `Method = LacunaSigner` is refused when the host has no `Signer:*` settings** — at boot
+  for a profile still being seeded from configuration, and on the profile page for one being saved.
+- **Whether the host has `Signer:*` settings is what starts the remote-signer gateway and the poll
+  worker**, so a profile switched over to Lacuna Signer after boot starts dispatching without a restart.
+  On a host with the whole block set and no profile using it, the poll worker runs and finds nothing to
+  do each interval — remove the section if this host signs everything locally.
+:::
 
 :::warning The API key is a secret.
 Set it as `Signer__ApiKey` in `bulksigner.env` (Linux) / a Machine env var (Windows) / `.env`
 (Docker). The literal value is scrubbed from logs.
 :::
 
+### Choosing the method from the dashboard
+
+**This is where you pick the method on a running deployment.** `Signing:Profiles[]` is a one-time seed
+imported on the first boot (see [Configuration](configuration.md#signingprofiles--per-folder-signing-profiles)),
+so the next section describes what a seed looks like rather than where you go to change one.
+
+The **Certificate** panel on `/profiles/{name}` carries the method, and so does the form at
+`/profiles/_new`. It sits on that panel rather than the Behaviour one because the method decides whether
+the profile has a local key at all: pick **Lacuna Signer** and the certificate source and its
+coordinates are replaced by the three participant fields — name, email, identifier — which is the whole
+of where such a profile's signature comes from.
+
+The two directions differ, and the form says which before you save:
+
+| Switching | When it takes effect | What happens to the other block |
+|---|---|---|
+| Local → **Lacuna Signer** | The next job claimed. **No restart** — the gateway runs on every host that has `Signer:*` settings, not only for the profiles that existed at boot. | The certificate coordinates are cleared, password included: a credential at rest for a key that lives at the service is one nothing will ever open. |
+| **Lacuna Signer** → Local | The next **restart**, because a private key has to be opened and no save opens one. Until then the profile is reported as **degraded** on its own page, and jobs routed to it fail with `profile.degraded`. | The participant is cleared. |
+
+Refusals happen at the save, in your display language: a participant missing any of its three fields,
+an email with no `@`, and **selecting Lacuna Signer on a host with no `Signer:*` settings** — the one
+refusal whose remedy is a configuration change and a restart rather than a form field, which is why its
+wording names the keys.
+
+The participant's identifier is **not** check-digit validated. Unlike an approver's CPF — which this
+product writes into its own audit records — this one is handed to the remote service, and the service is
+the authority on whether it knows the participant.
+
 ### `Signing:Profiles[].Method` + `Signer` block
 
-Per-profile method selection. The default is `Method = Local`, so pre-existing profiles need no
-change.
+Per-profile method selection **as a seed**, imported on the first boot against an empty profile table.
+The default is `Method = Local`, so pre-existing profiles need no change.
 
 ```json
 "Signing": {
@@ -136,8 +181,12 @@ Profile-level validation:
 - `Method = LacunaSigner` **forbids** `ValidateCertificate = true` (there's no local cert to
   validate).
 - `Method = Local` rules are unchanged: cert block required, `Signer` block ignored if present.
+- `Method = LacunaSigner` cannot be combined with an approval rule whose signer set is
+  `ProfileKeyAndApprovers` — the remote signer would be handed an envelope of approver signatures
+  rather than the payment file. See [Approvals](approvals.md#the-signer-set).
 
-The synthesised `default` profile (when `Signing:Profiles[]` is omitted) is always `Method = Local`.
+The same rules refuse a save on the profile page. The derived `default` profile (seeded when
+`Signing:Profiles[]` is omitted) is always `Method = Local`.
 
 ## Operator flow
 
@@ -173,6 +222,16 @@ When an operator cancels an `AwaitingSigner` job:
    Warning but do **not** roll back the local cancel.
 3. If the remote cancel failed, the participant may still see the document in their Signer inbox. The
    local job is correctly `Canceled` regardless.
+
+The **Cancel** button on the job page asks first: its confirmation dialog names the file and says what
+the cancel does from the job's current status — for a job waiting on Lacuna Signer, that its remote
+document is canceled best-effort. `POST /api/jobs/{id}/cancel` asks nothing.
+
+:::warning Clear Jobs does not cancel remote documents
+**Clear Jobs** deletes every job record whatever its status, `AwaitingSigner` included, but it makes no
+call to Lacuna Signer: a document already dispatched stays in the participant's inbox. Cancel those jobs
+first if the participant should not sign them. See [Operations](operations.md#clear-jobs).
+:::
 
 :::note Best-effort cancel is a deliberate trade-off.
 Rolling back the local cancel because a network round-trip failed would leave the operator in limbo
@@ -232,6 +291,14 @@ Signer-specific Prometheus instruments are exposed at `/api/metrics`:
 | `bulksigner_jobs_awaiting_signer` | Gauge | Live count of `AwaitingSigner` rows. |
 | `bulksigner_signer_poll_duration_seconds` | Histogram | Per-tick duration for one full pass over `AwaitingSigner` rows. |
 | `bulksigner_signer_api_errors_total{op}` | Counter | Signer API failures, labeled by operation. |
+
+## Under cluster mode
+
+With cluster mode on, **each instance polls Lacuna Signer only about the documents it dispatched**, so
+two instances never download the same signed bytes. Two consequences for dashboards and alerts:
+`bulksigner_jobs_awaiting_signer` is per instance — sum it across the fleet — and a job an instance
+dispatched before it died is reassigned to a survivor by the takeover sweep. A row carrying no owner
+at all is polled by nobody. See [High availability](high-availability.md) for the details and the remedy.
 
 ## Troubleshooting cross-links
 

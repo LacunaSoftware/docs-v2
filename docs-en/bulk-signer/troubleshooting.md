@@ -20,6 +20,21 @@ reaching it. Look at the per-target log location for the bootstrap exception:
 
 ## Service won't start
 
+:::warning Changed in 2.1.0 — a certificate that will not open no longer stops the host
+Signing profiles live in the operational store, and the place a broken certificate is fixed is the
+profile's own page on the dashboard. A host that refused to start could not serve that page, so a
+profile whose certificate cannot be opened — a missing file, a wrong password, a thumbprint that matches
+nothing, an unreachable or unauthorised Key Vault, an unreadable blob — is now reported as **`DEGRADED`**
+and the host starts. That profile alone cannot sign; its jobs fail with `profile.degraded` (see
+[A job fails with `profile.degraded`](#a-job-fails-with-profiledegraded)) and every other profile keeps
+working.
+
+What still refuses the boot is configuration *validation*: the rules below that are checked against the
+configuration file or environment — the PKI licence, the `Blob` block's shape, a PKCS#11 PIN written into
+a file, a Windows store source on a non-Windows host, and the checks on a `Signing:Profiles[]` section
+that is being imported on a first boot. The same rules refuse a save on the profile's page.
+:::
+
 ### `Signing:PkiSdkLicense is required`
 
 **Symptom.** The bootstrap throws a validation exception complaining about `Signing:PkiSdkLicense`.
@@ -35,6 +50,24 @@ value.
 | Windows | `[Environment]::SetEnvironmentVariable("Signing__PkiSdkLicense", "<base64>", "Machine"); Restart-Service LacunaBulkSigner` |
 | Docker | Add `Signing__PkiSdkLicense=<base64>` to `deploy/docker/.env`, then `docker compose up -d`. |
 
+### `Signing:TrustLacunaTestRoot is true while the environment is 'Production'`
+
+**Symptom.** Boot refused with that sentence, ending "unset the key, or run the homologation host as
+Staging (ASPNETCORE_ENVIRONMENT=Staging)".
+
+**Root cause.** The host was told to trust the Lacuna **test** PKI root — the issuer of the Turing /
+Fermat test certificates (see [Certificates](certificates.md#test-certificates-and-the-trust-set)) — and also calls itself production. The
+two are refused together, deliberately: a production host is never trusted with a root that is not a
+certification authority. On Azure App Service the environment name defaults to `Production` when nothing
+sets it, so a homologation host that copied a production settings block and added the key hits this.
+
+**Fix.** One of two, depending on what the host is:
+
+- A production host: remove `Signing__TrustLacunaTestRoot` (or set it `false`). Real certificates need
+  nothing.
+- A homologation host: set `ASPNETCORE_ENVIRONMENT=Staging` beside the key. Any name but `Production` is
+  accepted; the banner's `environment` and `trust set` rows then say what the host is.
+
 ### `Auth:ApiKey is required`
 
 **Symptom.** Bootstrap throws complaining about `Auth:ApiKey`.
@@ -44,14 +77,22 @@ value.
 **Fix.** Generate a strong key (see [Security](security.md#api-key-rotation)) and set the matching
 env var.
 
+:::note After upgrading to 2.3.1 or later
+Images before 2.3.1 shipped a placeholder API key inside their own default settings file. A deployment
+that never set `Auth:ApiKey` was silently running on that placeholder, and refuses to start after the
+upgrade, naming the key. Set `Auth__ApiKey` as every install path documents.
+:::
+
 ### `Pkcs11 PIN env var <name> is empty`
 
-**Symptom.** Bootstrap fails with a message referencing the configured `PinEnvVar`.
+**Symptom.** The service starts, but the profile is reported `DEGRADED` — on the startup banner, on
+`/profiles` and in `/api/ready/details` — with the reason
+`PKCS#11 PIN environment variable '<name>' is empty`. Before 2.1.0 this stopped the boot.
 
 **Root cause.** `Signing:Certificate:Source = Pkcs11` but the configured env var is unset or empty.
 
 **Fix.** Set the env var named by `Signing:Certificate:Pkcs11:PinEnvVar` (default
-`BULK_SIGNER_PKCS11_PIN`). See [Certificates](certificates.md#pin-handling).
+`BULK_SIGNER_PKCS11_PIN`) and restart. See [Certificates](certificates.md#pin-handling).
 
 ### `WindowsStore source is not supported on this OS`
 
@@ -74,14 +115,18 @@ name would otherwise fail deep inside the Azure client with a far less helpful m
 
 ### `Certificate '<path>' does not match Azure Key Vault key '<name>'`
 
-**Symptom.** Bootstrap fails reporting that the `.cer`'s public key differs from the vault key's.
+**Symptom.** The startup banner reports the profile as `DEGRADED`, with a reason saying that the
+certificate's public key differs from the vault key's, and the profile's jobs fail with
+`profile.degraded`. (Before 2.1.0 this stopped the boot.)
 
-**Root cause.** `CerPath` and `KeyName` refer to different key pairs. Usually the certificate was
-renewed against a **new** vault key while `KeyName` still points at the old one, or `CerPath` was left
-pointing at an unrelated certificate after a config edit.
+**Root cause.** `CerPath` — or `Blob:Url`, when the certificate is read
+[from a blob](certificates.md#reading-the-file-from-a-blob) — and `KeyName` refer to different key pairs.
+Usually the certificate was renewed against a **new** vault key while `KeyName` still points at the old
+one, or the certificate location was left pointing at an unrelated certificate after an edit. The message
+names whichever location the profile uses, as `file '<path>'` or `blob '<account>/<container>/<blob>'`.
 
-This check exists because the alternative is worse: without it the service starts happily and
-produces signatures that no verifier accepts, and the failure surfaces only per job — and only for
+This check exists because the alternative is worse: without it the profile would sign happily and
+produce signatures that no verifier accepts, and the failure would surface only per job — and only for
 profiles with `Verify = true`.
 
 **Fix.** Confirm which side is stale by comparing the two public keys directly:
@@ -91,13 +136,15 @@ openssl x509 -in signer.cer -noout -pubkey
 az keyvault key download --vault-name my-vault --name bulk-signer-signing-key --encoding PEM --file -
 ```
 
-The two PEM blocks must be byte-identical. Then update whichever side is wrong.
+The two PEM blocks must be byte-identical. Then update whichever side is wrong — the certificate
+location or the key name is corrected on the profile's page with **Edit certificate** — and restart.
 
 ### Azure Key Vault authentication or authorization failure at startup
 
-**Symptom.** Bootstrap fails while loading the certificate, with an Azure error such as
-`AADSTS7000215` (invalid client secret), `AADSTS700016` (application not found), or a `Forbidden` on
-the key operation.
+**Symptom.** The startup banner reports the profile as `DEGRADED` while loading its certificate, with an
+Azure error such as `AADSTS7000215` (invalid client secret), `AADSTS700016` (application not found), or a
+`Forbidden` on the key operation. The host starts; the profile's jobs fail with `profile.degraded`.
+(Before 2.1.0 this stopped the boot.)
 
 **Possible causes.**
 
@@ -111,8 +158,109 @@ the key operation.
 - **No network path.** The host must reach `*.vault.azure.net` and `login.microsoftonline.com`. Check
   egress rules and proxy configuration.
 
-Failures are reported per profile and aggregated, so a multi-profile deployment sees every
-misconfigured profile in one boot error rather than one per restart.
+Failures are reported per profile, and every failing profile is named on the same banner, so a
+multi-profile deployment sees every misconfigured profile in one boot rather than one per restart. After
+correcting the secret or the role assignment, **restart** — a certificate is opened once at startup.
+
+### A signing material blob cannot be read at startup
+
+**Symptom.** The startup banner reports a profile as `DEGRADED`, quoting a blob as
+`<account>/<container>/<blob>`. **The host starts.** The profile cannot sign until the blob is readable
+and the service is restarted; every other profile is unaffected, and jobs routed to this one fail with
+`profile.degraded`.
+
+:::warning Changed in 2.1.0
+Before 2.1.0 an unreadable blob stopped the boot. It now degrades the one profile, for the reason given at
+the top of this section.
+:::
+
+Three distinct messages, because they have three distinct fixes:
+
+| Message | Root cause | Fix |
+|---|---|---|
+| `… does not exist` | The container or the blob name is wrong. Both are case-sensitive, and the URL is read exactly as written. | Correct `Blob:Url`. Confirm with `az storage blob exists --account-name <a> --container-name <c> --name <b>`. |
+| `… credential was refused (HTTP 403)` | The credential authenticated but may not read the blob. | For `ManagedIdentity` / `ServicePrincipal`, grant **Storage Blob Data Reader** on the container or the account — nothing wider is ever needed. For `AccountKey`, the key is wrong or was rotated. |
+| `… the <mode> credential could not be obtained` | The credential could not be acquired at all, before any request was made. | `ManagedIdentity`: the host needs a **system-assigned** identity, and a host outside Azure has none. `ServicePrincipal`: check `TenantId` / `AppId` / `AppSecret` — an expired secret reports identically. |
+
+Anything else (a 5xx, a transport fault) is reported with the status the service returned and points at
+reachability: the host needs outbound HTTPS to the blob endpoint. The read was already retried three
+times with exponential backoff, so a single hiccup does not reach this message.
+
+**Renewal does not fix itself.** The blob is read once, at boot, so replacing its contents requires a
+restart exactly as replacing a local file does — and fixing the blob does not un-degrade a running host.
+
+### The customer logo is not showing on the login or approver pages
+
+The service is up and the pages render the product mark alone. This is by design: a configured logo
+(`Branding:CustomerLogo`, see [Configuration](configuration.md#branding--the-customers-logo-on-the-sign-in-and-approver-pages)) whose **bytes** could not be used does
+not stop the service. Read the reason in any of three places:
+
+- the ready-summary banner's `customer logo` row — `not loaded from file '…': <reason>`;
+- the startup log, a Warning reading `Customer logo not loaded from …`;
+- the **System** page, an alert at the top of the storage panel.
+
+The reason is one of: the file or blob is missing or cannot be read (check the path, the mount on Docker,
+the blob's role assignment); the file is empty or over **256 KiB** (export a smaller one — it is rendered
+at most 80 px tall); or the bytes are not what the extension says (a JPEG renamed to `.png`, an HTML page
+saved as `.svg` — rename or re-export). Fix it and **restart**: the logo is read once at boot.
+
+If the service did *not* start, the message names `Branding:CustomerLogo:…` and one of the shape rules:
+both `Path` and `Blob` set, an extension outside `.png` / `.jpg` / `.jpeg` / `.webp` / `.svg`, or a blob
+block missing its `Url` or `Credential`. Those are refused at boot like every other configuration mistake.
+
+### Startup is refused because `Signing:ProfileSecretsKey` is not set
+
+**Symptom.** One of two refusals, and which one tells you where the deployment is:
+
+```
+Refusing to start: this deployment's operational store holds signing profile secrets that were
+encrypted under Signing:ProfileSecretsKey, and that key is not set. …
+```
+
+```
+Refusing to start: signing profiles are being imported into the operational store for the first
+time, and some of them carry a secret — 'folha', 'nfe' — while Signing:ProfileSecretsKey is not set. …
+```
+
+The first is a host that already holds encrypted profile data. The second is the **first boot** after an
+upgrade, refusing at the moment the data would come into existence — so the store never comes to hold a
+value nothing can open. The second names the profiles.
+
+**Root cause.** Signing profiles are rows in the operational store, and a PKCS#12 password, a Key Vault
+application secret, a signing material blob credential and **uploaded PKCS#12 bytes** are encrypted at
+rest under a key held *outside* the database. The refusal is the **pair** — data that was encrypted, and
+nothing to decrypt it with — never either half alone. A deployment whose profiles carry no secret is never
+asked for a key, which is why most installs upgrade without meeting this at all.
+
+**Why this refuses when a bad certificate merely degrades.** The fix here is an environment variable, not
+something on a dashboard page, so refusing creates no deadlock — and a missing key would disable every
+secret-bearing profile at once, a host that reports itself healthy while unable to sign for anybody.
+
+**Fix.** Set the key and start again:
+
+```bash
+Signing__ProfileSecretsKey='<the value the secrets were saved under>'
+```
+
+It must be the **same value** the secrets were saved under — see
+[A profile is degraded saying a stored secret could not be decrypted](#a-profile-is-degraded-saying-a-stored-secret-could-not-be-decrypted)
+if you no longer have it. Keep it out of source control, off the same backup as the database, and
+wherever the other irrecoverable secrets live (see [Security](security.md#the-signing-profile-secrets-key-signingprofilesecretskey)).
+
+**If the second refusal names a profile you never declared** — or names yours beside one you did not —
+the host is reading a `Signing:Profiles[]` array from a settings file *underneath* yours. Configuration
+merges arrays by index and can override a key but never remove one: your `Signing__Profiles__0__*`
+settings merge over whatever that file declares at index 0 and inherit every key they did not name, a PFX
+password included. Images before 2.3.1 shipped developer sample profiles in their own default settings
+file this way. Upgrade the image, or remove the file that declares them. **Do not answer by setting the
+key**: the import is one-time and nothing deletes a profile, so that would import the stray profiles
+permanently. Nothing was written — the refusal fires before the import — so the next boot imports
+cleanly.
+
+**A related warning that is not this refusal.** If the operational store did not answer at startup *and*
+the key is unset, the host **starts** and warns that it could not check whether any profile secrets
+exist, and that the next boot which reaches the store may refuse. Treat it as a prompt to set the key
+before the store comes back.
 
 ### `Encryption.Salt must decode to at least 16 bytes`
 
@@ -134,22 +282,50 @@ misconfigured profile in one boot error rather than one per restart.
 
 **Symptom.** `Get-Service` shows Started / `systemctl` shows active, but `/api/ready` returns 503.
 
-**Root cause.** A readiness probe is failing. The response body lists each probe — DB, input folder,
-license.
+**Root cause.** A readiness probe is failing. The response body lists each probe by name, with `ok`
+true or false — DB, input folder, license.
 
-**Fix.** Inspect the body, then:
+:::warning Changed in 2.6.0 — the detail moved to `/api/ready/details`
+The anonymous `/api/ready` now carries only the verdict: `ready`, and each check's `name` and `ok`. The
+per-check `detail` — which named the SQL Server host, every input share and a degraded certificate's
+location — is on `GET /api/ready/details`, behind the API key (`X-API-Key`) or an operator session, with
+the same 200 / 503 rule. A monitor that parsed `detail` off the anonymous route moves to the details route
+and adds the header. `Readiness:RequireApiKey = true` puts `/api/ready` itself behind the key too — leave
+it off where the prober cannot send the header (the App Service health check cannot).
+:::
+
+**If it has already cleared** by the time you look, the durable log has it: every change of a check's
+verdict is written once, as `Readiness check <name> went red: <detail>` at Warning and
+`Readiness check <name> recovered` at Information. A steady red is written once, not per poll, so search
+for the check's name rather than reading the latest lines.
+
+**Fix.** Inspect `/api/ready/details`, then:
 
 | Failed probe | Where to look |
 |--------------|---------------|
-| `database` | Under `Sqlite`: is the path under `Storage:Root` writable by the service account? Under `SqlServer`: is the server reachable, and did the boot probe answer? The check's detail names the store it checked. |
+| `database` | The detail names the store it checked — `SQLite (…)` or `SQL Server (server/database)`. Under `Sqlite`: is the path under `Storage:Root` writable by the service account? Under `SqlServer`: is the server reachable, and does the login still authenticate? When the detail reads `unreachable` with an exception type after the store's name, the durable log carries that exception, message included, at Warning — one line per failed probe, so read the first. |
 | `input-folder:<name>` | Does the folder exist? Is the service account allowed to enumerate it? Strict semantics — any missing or `Stopped` folder fails the whole response. |
 | `storage-share:<account>/<share>` | Remote work share only. Credential, network reach, or the role assignment's scope string — see [Security](security.md#azure-files-storage-credentials). |
 | `work-share-owner` | Remote work share only. Another instance held the marker at startup, or the claim could not be made. See below. |
 | `license` | Was the PKI license loaded? The fingerprint is in the ready-summary banner; missing means the license string was rejected at boot. |
 
+Some rows report `ok: false` **without** making the response a 503, deliberately, because a 503 would pull
+the instance out of its load balancer while the dashboard needed to fix the problem is served by that very
+instance: `signing-profile:<name>` (a degraded profile — see
+[A job fails with `profile.degraded`](#a-job-fails-with-profiledegraded)), `profile-input-folder:<name>`
+(a profile bound to a folder this host does not configure) and, in cluster mode, `cluster-instance` (a
+displaced instance standing down). A `signing-profile-keyless:<name>` row is `ok: true` by design, and an
+input folder no profile has chosen is reported green. **Alert on the individual `checks[]` entries, not
+only on the top-level `ready` boolean.**
+
 ### Startup fails with `Signing:Profiles[N].Approval …`
 
 **Symptom.** The host refuses to start with a message naming an approval key.
+
+**When this can happen.** Since profiles moved into the operational store (2.1.0), `Signing:Profiles[]`
+is imported only on the **first boot against an empty profile table**, and these rules are checked then.
+After that, the same rules refuse a save of the profile's `Edit approval` form on the dashboard, with the
+same wording; editing the configuration file no longer changes a profile at all.
 
 **Root causes**, all refused before the first job runs:
 
@@ -170,9 +346,11 @@ out than intended.
 **Root cause.** The TimeSpan spelling. A three-component value is `hh:mm:ss` only while the first
 number is 23 or less; at 24 and above .NET reads it as **days**, so `"48:00:00"` is forty-eight *days*.
 
-**Fix.** Write the days component: `"2.00:00:00"`. Boot is the only moment this is catchable — every
-other surface shows the deadline once a job has already parked under it, and the budget is frozen onto
-those jobs. Cancel and re-run anything already parked under the wrong window.
+**Fix.** Write the days component: `"2.00:00:00"` — in the profile's `Edit approval` form on the
+dashboard, since after the first boot the configuration file no longer changes a stored profile. Boot is
+the only moment this is flagged — every other surface shows the deadline once a job has already parked
+under it, and the budget is frozen onto those jobs. The correction applies to **new** jobs only: cancel and
+re-run anything already parked under the wrong window.
 
 ### Startup is refused because both a path and a blob are configured
 
@@ -223,7 +401,8 @@ Azure Files `Directory` prefix are the usual cause, since the prefix counts towa
 ### The share probe reports a share as unreachable at startup
 
 **Symptom.** The banner reads `azure shares = 1 of 2 reachable`, `/api/ready` is red on a
-`storage-share:` row, and the host started anyway.
+`storage-share:` row (whose detail, on `/api/ready/details`, is the storage service's own sentence), and
+the host started anyway.
 
 **Root cause.** Credential, network reach, or role scope. The most common is the **scope string**: an
 assignment built with the management-plane spelling `shares` instead of the data-plane `fileshares`
@@ -292,6 +471,33 @@ presence regardless of tenant configuration.
 **Fix.** Assign `Administrator` or `Approver` (or both) in the enterprise application. The role values
 in the manifest must match those strings exactly. There is no security-group mapping, deliberately.
 
+### An Entra operator's audit events say `(anonymous)`, and so does the user menu
+
+**Symptom.** A signed-in `Administrator` creates or edits a profile, pauses the pipeline or runs a backup,
+and the operational event names `(anonymous)`. The user menu reads *Signed in as (anonymous)*, and a
+manual backup run on the Backup page reads *manual · (anonymous)*.
+
+**Root cause.** Since 2.2.1 the operator's recorded name is the token's `preferred_username` claim (the
+UPN), and the session this operator holds was not named by it. Before 2.2.1 every Entra operator's events
+read this way regardless of the token, and **those rows cannot be repaired** — only events written by a
+session signed in after the upgrade carry the actor.
+
+**Possible causes, in order of likelihood:**
+
+- **A session that predates the upgrade.** The name lives in the session cookie, and the cookie slides for
+  eight hours, so an operator who stayed signed in across the upgrade keeps the old session. **Sign out
+  and back in once.** No log line accompanies this case.
+- **The token carried no `preferred_username`.** Bulk Signer always requests the `profile` scope, which
+  carries the claim, so the tenant withheld it — user consent to `profile` refused or restricted, or a
+  token customisation on the app registration. This case is announced: the sign-in writes a warning to the
+  log naming the claim types it did receive (never their values), so search the log for
+  `preferred_username`. A guest `Administrator` is recorded under the `#EXT#` form of the UPN, which is
+  correct.
+- **The host predates 2.2.1.** Upgrade; then sign out and back in.
+
+The display name is deliberately not used as a fallback, so the events stay `(anonymous)` rather than
+being recorded under a name two people may share.
+
 ### An Entra `Approver` signs in but the portal is empty
 
 **Root cause.** The role opens the door; the **frozen pool** still decides which jobs the person sees,
@@ -311,13 +517,156 @@ sign-everyone-out. REST clients using `X-API-Key` are unaffected.
 ### Signing out and back in happens instantly, without a password prompt
 
 **Not a fault.** Sign-out is local-only: it clears Bulk Signer's session and deliberately does not end
-the person's Microsoft session. That is normal SSO behaviour.
+the person's Microsoft session. That is normal SSO behaviour. Since 2.2.1 signing out does end an
+approver's second-factor verification window, so a colleague's silent re-sign-in on a shared workstation
+is asked for the code again.
 
 ## Signing fails
 
+### A job fails with `profile.degraded`
+
+**Symptom.** Jobs go `Queued → Failed` with the error `profile.degraded`. The job history says the
+profile is degraded and quotes the reason. Jobs on other profiles keep completing normally. The startup
+banner reported the same profile as `DEGRADED`, and `/api/ready` carries a `signing-profile:<name>` row
+with `ok: false` — the reason is on `/api/ready/details`, with the API key.
+
+**Root cause.** That profile's certificate could not be opened when the host started — a missing PKCS#12
+file, a wrong password, a thumbprint that matches nothing on the token or in the store, an unreachable Key
+Vault, or an unreadable signing material blob. The reason names which. Three wordings worth knowing:
+
+- **A wrong PKCS#12 password** reads *did not open with the PKCS#12 password given — check the PKCS#12
+  password on the profile, and if it is right, supply the file again*, followed by the PKI SDK's own
+  sentence, which speaks of an incorrect **PIN**: the SDK uses one word for a PKCS#12 password and a token
+  PIN, and the profile has no PIN to correct. The second half is there because the check behind it is the
+  file's integrity tag, which a damaged file fails with the right password just the same.
+- **A PKCS#12 with the modern envelope** reads *is encrypted with PBES2, which the signing library does
+  not open*. The signing library opens the classic envelope only, and both OpenSSL 3 by default and a
+  Windows export set to AES256-SHA256 write PBES2 / AES-256. On Windows, re-export from the certificate
+  store with the TripleDES-SHA1 option. From the `.pfx` you have, re-export through OpenSSL and supply the
+  new file:
+
+  ```bash
+  openssl pkcs12 -in modern.pfx -nodes -passin pass:<password> -out tmp.pem
+  openssl pkcs12 -export -legacy -in tmp.pem -passout pass:<password> -out signing.pfx
+  shred -u tmp.pem   # the private key is in clear in tmp.pem
+  ```
+
+  (`-legacy` needs OpenSSL 3's legacy provider; on a build without it,
+  `-keypbe PBE-SHA1-3DES -certpbe PBE-SHA1-3DES` produces a classic envelope the library also opens.) The
+  same sentence comes back on a wrong password too, deliberately — the envelope is the blocker whatever the
+  password is.
+- **An empty file, blob or upload** is refused before anything decodes it, as
+  *Certificate file '…' is empty (0 bytes)* naming the location — usually a placeholder created while
+  waiting for the real file, or a copy that never finished.
+
+**This is not a bad file.** `profile.degraded` and `cnab240.invalid` are the two failures most easily
+confused, and the remedies have nothing in common: a degraded profile means every file routed to it will
+fail until the deployment is fixed, whereas a refused file means that one file needs re-exporting.
+Retrying the job before fixing the certificate fails identically.
+
+**Nor is it a keyless profile.** A profile whose approval rule has the **approvers** sign
+(`Approval.Signers = Approvers`) holds no certificate of its own by design: the banner prefixes its row
+`KEYLESS` rather than `DEGRADED`, `/api/ready` reports it on a `signing-profile-keyless:<name>` row with
+`ok: true`, and no job on it fails with `profile.degraded`. What fails there by name is a missing approver
+signature envelope (`approval.signatures-missing`) or a frozen signer set the pipeline cannot honour
+(`approval.signer-set-unsupported`). One more code belongs to this case: a job that parked **before** the
+rule moved to `Approvers` was frozen onto the profile key, and on an instance that booted after the move —
+and so never opened a key — it fails with `profile.key-unavailable`. Moving the rule back to a keyed set
+and restarting is a remedy; so is a retry on an instance that still holds the key.
+
+**Fix.**
+
+1. Read the reason. It is on the startup banner, in the log at `Critical`, on
+   `/api/ready/details`, on the profile's own page at `/profiles/<name>`, and in the failed job's
+   history — all five say the same thing.
+2. Fix the certificate. If the coordinates are wrong — a mistyped path, a thumbprint that matches
+   nothing, the wrong vault — correct them on that page with **Edit certificate**; the save stores them
+   and marks the profile as waiting for a restart. If the coordinates are right and the material is not,
+   the failure modes are the ordinary ones: see
+   [Boot succeeds but every job fails with "Certificate not found by thumbprint"](#boot-succeeds-but-every-job-fails-with-certificate-not-found-by-thumbprint),
+   [Azure Key Vault authentication or authorization failure at startup](#azure-key-vault-authentication-or-authorization-failure-at-startup)
+   and [A signing material blob cannot be read at startup](#a-signing-material-blob-cannot-be-read-at-startup).
+3. **Restart the service.** A certificate is opened once at startup and never reloaded, so neither fixing
+   the file nor saving new coordinates changes anything underneath a running host — the marker on the
+   profile says exactly that.
+4. Retry the failed jobs, or drop the files back into their watched folder. Their inputs were left in
+   place: nothing was signed, so nothing earned the right to delete them.
+
+**Not a reason to take the instance out of service.** The `/api/ready` row reports `ok: false` but does
+**not** make the response a 503 — see
+[Service starts but `/api/ready` 503s persistently](#service-starts-but-apiready-503s-persistently).
+
+### A profile is degraded saying a stored secret could not be decrypted
+
+**Symptom.** The startup banner reports one or more profiles as `DEGRADED` with a reason naming
+`Signing:ProfileSecretsKey` — *"A stored signing profile secret (Pkcs12Password) could not be
+decrypted"* — and `/api/ready` carries a `signing-profile:<name>` row with `ok: false`. Jobs routed to
+those profiles fail with `profile.degraded`. **The host started**, and every profile that carries no secret
+keeps signing normally. On the profile's page the certificate panel shows the coordinates — the path, the
+thumbprint, the vault endpoint — and no secret rows at all.
+
+**Root cause.** `Signing:ProfileSecretsKey` is set, but it is not the value those profiles' secrets were
+saved under. Four things do it, and they are deliberately indistinguishable — the decryption is
+authenticated, so a wrong key and a tampered row look identical:
+
+- the key was **rotated** and the stored material was not re-entered afterwards;
+- the operational store was **restored** from, or copied out of, a deployment with a different key;
+- the key is **mistyped**, most often via `Signing__ProfileSecretsKey`, where the double underscore is easy
+  to get wrong;
+- somebody **edited a protected column** directly, or a restore moved bytes between columns.
+
+**This is not the missing-key refusal**
+([Startup is refused because `Signing:ProfileSecretsKey` is not set](#startup-is-refused-because-signingprofilesecretskey-is-not-set)).
+Here the key *is* set, and setting a different one will not help: the stored values were written under
+the old one.
+
+**Fix, if you still have the original key.**
+
+1. Put it back — `Signing__ProfileSecretsKey`, exactly as it was. Check for trailing whitespace and for a
+   single underscore where two are needed.
+2. **Restart the service.** A certificate is opened once at startup and never reloaded.
+
+**Fix, if the key is lost or was deliberately rotated.** There is no recovery of the values themselves; that
+is by construction, not a gap. For each profile the banner named:
+
+1. Open the profile's page on the dashboard and press **Edit certificate**.
+2. Type the PKCS#12 password, the Key Vault application secret or the blob credential again, or upload the
+   PKCS#12 again. A blank field *keeps* the stored value, which is not what you want here — type it.
+3. Save. The profile is marked as waiting for a restart.
+4. **Restart the service** once every affected profile has been re-entered.
+5. Retry the failed jobs, or drop the files back into their watched folder. Nothing was signed, so the
+   inputs are still in `input/`.
+
+A profile with no secret — a passwordless PFX, a PKCS#11 token, a Windows store certificate — is unaffected
+and needs nothing done to it.
+
+:::tip Treat key rotation as a scheduled operation
+Rotating `Signing:ProfileSecretsKey` invalidates every stored profile secret at once. Rotate by re-entering
+each profile's material under the new key *while the old key still works*, and retire the old value only
+once nothing is protected under it.
+:::
+
+### Lacuna test certificates (Turing / Fermat) are refused
+
+**Symptom.** With Lacuna's test certificates, every job under the profile fails with a chain or trust error,
+or every approver's **Sign and approve** is refused as `approval.certificate-invalid` naming an untrusted
+root. The banner's `trust set` row reads `production`.
+
+**Root cause.** Not a fault. The published product holds every signature to the ICP-Brasil roots alone; the
+Lacuna test root is trusted only under `Signing:TrustLacunaTestRoot = true` (available from 2.3.0). One
+trust set applies to the whole host: the profile key at signing time, the verifier afterwards, and an
+approver's certificate.
+
+**Fix.** On a homologation host, set `Signing__TrustLacunaTestRoot=true` **and**
+`ASPNETCORE_ENVIRONMENT=Staging` — the key alone is refused under the name `Production` (see
+[the entry under *Service won't start*](#signingtrustlacunatestroot-is-true-while-the-environment-is-production)).
+On anything that signs real documents, use real certificates; the key is not for that.
+
 ### Boot succeeds but every job fails with "Certificate not found by thumbprint"
 
-**Symptom.** Every job goes `Queued → Failed`. The error message mentions a thumbprint mismatch.
+**Symptom.** Every job goes `Queued → Failed`. The error message mentions a thumbprint mismatch. Since
+2.1.0 this is caught when the profile's certificate is opened at startup: the banner reports the profile
+as `DEGRADED` with the thumbprint in its reason, and its jobs fail with `profile.degraded`.
 
 **Root cause.** The configured thumbprint doesn't match any certificate visible to the configured
 source.
@@ -399,6 +748,16 @@ is unknown or the chain is incomplete.
 - The worker is unhealthy. The log shows the worker's iteration lines; if they stopped, the worker
   may have crashed (rare; check for a logged exception).
 
+### Pause answers `pipeline.state-missing` (SQL Server)
+
+**Symptom.** On a `Database:Provider = SqlServer` deployment, `POST /api/pipeline/pause` answers
+`pipeline.state-missing`, the log carries `PipelineState singleton row is missing` at Critical, and the
+pipeline keeps running whatever an operator asks.
+
+**Root cause.** SQL Server stores created before 2.4.3 never received the pipeline-state row that pause
+and resume act on. **Fix.** Upgrade to 2.4.3 or later: the row is inserted by a migration applied at the
+next boot.
+
 ### Jobs deadlock when `MaxConcurrency > 1` with a PKCS#11 token or Windows CSP
 
 **Symptom.** With `Pipeline:MaxConcurrency > 1` and `Signing:Certificate:Source = Pkcs11` (or
@@ -439,10 +798,88 @@ very low — seeing it dozens of times per day suggests a client retry-spamming 
 - File name prefix is in the effective prefix list (global default: `.`, `~$`).
 - File is still being written by the producer. The stability detector requires
   `WatchedFolder:StabilityRequiredSamples` consecutive identical samples before enqueue. Wait, or
-  `POST /api/rescan` after the writer finishes.
+  `POST /api/rescan` (or `POST /api/rescan?folder=<name>` for just one folder) after the writer finishes.
 - **The folder's watcher is in `Status: Stopped`.** See below.
+- **No signing profile has chosen the folder.** Its card shows a grey `unassigned` chip where the
+  profile's would be. See [Files sit in a folder whose card says `unassigned`](#files-sit-in-a-folder-whose-card-says-unassigned).
+- **The folder's signing profile is disabled.** See
+  [Files are refused with `profile.disabled`](#files-are-refused-with-profiledisabled).
+- **The file's most recent job ended `Failed` or `Canceled`.** The watcher does not offer such a file
+  again on its own (since 2.11.0 for `Failed`: before, a polling folder produced a new `Failed` job every
+  tick for as long as the cause stood). Run it again with Retry, Rescan or Upload — this applies to a
+  corrected file dropped under the same name, too.
+- **The name is already taken by a completed job.** The file does become a job, but one that fails at once —
+  see [A file fails at once with `file.already-processed`](#a-file-fails-at-once-with-filealready-processed).
 - (Docker) Bind-mount permission issue — the container UID (1654) must be able to read files dropped
   by the host process. `chown -R 1654:1654 ./data` on the host.
+
+### Files sit in a folder whose card says `unassigned`
+
+**Symptom.** Files pile up in a configured folder and no jobs are created. The Input page shows the folder
+with a grey chip reading `unassigned — no profile has chosen this folder`; `/api/folders` returns
+`profileName: null` and, once the watcher has noticed, `"status": "Unassigned"`; `/api/ready` is **green**
+for that folder; a rescan reports the folder as `unassigned: true` with every count at zero; and the log
+carries one Warning, `Watched folder '<name>' is unassigned — no signing profile has chosen it`.
+
+**Root cause.** Since 2.2.0 a watched folder is signed under the profile that chose it, one folder per
+profile, and none has. Either the first boot's import left it so — the folder named a profile
+`Signing:Profiles[]` did not declare, or an earlier folder had already taken the profile it named, and the
+startup banner said which — or a profile has since let the folder go from its page, or the profile table
+was imported by a version before 2.2.0, which recorded no folder bindings. An unassigned folder does
+**not** fall back to `default`.
+
+**Why the folder is not reported as broken.** It is not broken: the storage answers, the watcher is
+waiting rather than failed, and a red readiness row would tell an orchestrator to pull an instance for a
+folder nobody has asked it to watch yet. The files are where the producer left them and are listed the
+moment a profile chooses the folder.
+
+**Fix.** Open a profile on the dashboard's signing-profiles page, click **Edit behaviour**, choose the folder
+under **Input folder** and save; or create a profile with the folder chosen. The watcher starts within a
+poll interval or two and lists everything sitting there — no restart and no rescan. Editing
+`Storage:Inputs[].Profile` does **not** fix it after the first boot: that key is only read by the first
+import, and the boot says it is being ignored. See
+[Operations](operations.md#routing-a-watched-folder-to-a-signing-profile).
+
+### Files are refused with `profile.disabled`
+
+**Symptom.** Files pile up in a configured folder and no jobs are created, but the folder is *not*
+stopped: its card is green, `/api/ready` is happy, and the console carried one line reading
+`files are not being enqueued — signing profile '<name>' is disabled`. An upload to that profile answers
+`409` with `code = "profile.disabled"`; so does a retry of a job that named it.
+
+**Root cause.** Somebody turned the profile's **accept new work** switch off on its page. That stops new
+work being routed there and nothing else: jobs already queued on the profile ran to completion, and no file
+has been modified — each one is sitting where the producer left it.
+
+**Fix.** Either re-enable the profile on its page — the folder's next pass ingests everything sitting in
+it, including files refused while it was off — or choose the folder on another profile's page. (The save
+refuses to disable a profile that feeds from a folder, naming it, so this state arises only from a folder
+binding made *after* the profile was disabled.)
+
+### A file fails at once with `file.already-processed`
+
+**Symptom.** A file dropped into a watched folder becomes a job that is `Failed` from the start with
+`file.already-processed`, naming the job that holds the name, and the file is moved into the new job's
+`error/<jobid>/` folder. An upload answers `409` with the same code and stores nothing. A rescan counts
+these under `alreadyProcessed`.
+
+**Root cause.** Since 2.13.0 a file arriving under a name a `Completed` or still-active job already
+carries is **never signed**. The comparison is host-wide — every watched folder, profile and upload — and
+ignores case, because they all write into the one `output/` folder. A `Failed` or `Canceled` job reserves
+no name.
+
+**Fix.** Retry is refused for this failure (a retry is exempt from the rule, so it would sign the file the
+rule refused). To accept the name again, **delete the job that holds it** from the Jobs page. For a
+producer that legitimately reuses one fixed file name every day, turn the rule off with
+`Pipeline:RejectAlreadyProcessedFileNames = false`. See
+[Operations](operations.md#already-processed-file-names).
+
+### Uploads are refused with `upload.disabled`, or there is no Upload files button
+
+**Not a fault.** `Upload:Enabled = false` (available from 2.10.0) turns the upload surface off on both
+sides at once: `POST /api/files` answers `409` with `upload.disabled`, and the Jobs page renders no
+**Upload files** button. The host takes files from its watched folders alone; Rescan and Retry are
+unaffected. The key is read once at boot, so turning uploads back on is a restart.
 
 ### A folder watcher is in `Status: Stopped`
 
@@ -506,24 +943,64 @@ process it on a date nobody intended, and a signature would make the wrong date 
 **Fix.** Re-export from the originating system with current dates. **Retrying the same file fails the
 same way** — the dates inside it have not changed.
 
+If your bank processes a past-dated payment on the next business day, the profile can turn the guard off
+instead (from 2.15.0): `CheckCnab240PaymentDates = false` on the profile's behaviour (or
+`Signing:Profiles[].CheckCnab240PaymentDates` for a profile being imported on a first boot). The file is
+then let through and the decision is recorded — in the job history, a `Cnab240PaymentDateCheckSkipped`
+operational event, the `bulksigner_cnab240_payment_date_checks_skipped_total` counter and a Warning log
+line. The setting is read at signing time, so a change reaches the next job without a restart. See
+[CNAB240](cnab240.md#turning-the-guard-off).
+
 :::tip Check the host timezone first
 "Today" is the host's local date. On a host running in UTC while the payer sits in
 `America/Sao_Paulo`, the boundary rolls over three hours early and a file due today starts being
 refused at 21:00 local. Set `TZ=America/Sao_Paulo` on the container or systemd unit.
 :::
 
+### An approver is told the approval record is incomplete
+
+**Symptom.** An approver's click or signature is refused with *cannot be decided — its approval record is
+incomplete. Contact whoever operates the service.* Over REST the code is `approval.job-incomplete`. The
+job stays `AwaitingApproval`.
+
+**Diagnosis.** Before accepting a decision, Bulk Signer checks the record the decision is bound to, and
+something it needs is missing or no longer agrees: the frozen rule, the job's content hash, the staged copy
+in `processing/<jobid>/` or its bytes, the approver signature envelope beside it, or an approved row's
+certificate thumbprint. Open the job page as an operator: since 2.8.0 its **Approval record** section runs
+the same checks and marks the one that failed, with the value it found and the processing folder's path.
+
+Which check failed says what happened. **A missing content hash** most likely means the job parked under a
+profile whose `CheckCNAB240` was off — the CNAB240 parse is the only thing that records it. The profile's
+history will show the check being turned off (`Changed: CheckCNAB240 on → off`) while the approval rule
+stood. Since 2.9.0 the profile page refuses that save, and the gate fails such a job by name instead of
+parking it (see [the entry below](#a-job-failed-with-approvalcontent-unmeasured-instead-of-parking)), so a
+job in this state parked before either refusal existed. **Every other check** failing means the row or the
+folder was modified outside the application — a restored backup, an antivirus quarantine-and-restore, a
+sync client, a manual edit.
+
+**Fix.** Cancel the job (the Cancel button, or `POST /api/jobs/{id}/cancel`). For the content hash, turn
+`CheckCNAB240` back on from the profile's **Edit behaviour** first — or remove the approval rule, if the
+profile is not meant to gate — and then re-run the file through Rescan or Upload, so it is parsed,
+totalled and approved afresh; the original is still in `input/`. Nothing repairs the record in place, by
+design. For the other checks, find what has write access to the operational store or to `processing/`
+outside the application and stop it, or the next parked job will follow.
+
 ### A job sits in `AwaitingApproval` and nothing happens
 
 **Not a fault by itself** — the job is waiting on a person, and it will wait indefinitely unless the
 profile sets `Approval.ExpiresAfter`. Things to check:
 
-- **Did the link reach anybody?** The product sends no mail. The approval link is on the job page while
-  the job is parked; the durable per-approver links are on the System page.
-- **Is the pool right?** The job page shows the pool **frozen at park time**, not the one in your
-  configuration file. If the people listed are wrong, cancel the job, fix the profile, and re-run the
-  file — editing configuration never changes what a parked job requires.
-- **Watch `bulksigner_approvals_expired_total`.** A climbing expiry rate is the signal that links are
-  not reaching people.
+- **Does anybody know?** The product sends no mail. Approvers reach a parked file from their own queue at
+  `/approvals` — through their durable portal link (listed per approver on the System page) or an Entra
+  sign-in. Since 2.9.0 the job page no longer shows a per-job approval link to copy; the anonymous page at
+  `/approve/<jobId>` still exists for a deployment that relies on it, and everything in
+  [Security](security.md#the-per-job-approval-page-is-not-authenticated) about handing it out applies.
+- **Is the pool right?** The job page shows the pool **frozen at park time**, not the profile's current
+  rule. If the people listed are wrong, cancel the job, fix the profile, and re-run the file — editing a
+  profile never changes what a parked job requires. The Jobs page's **Approvals** column (from 2.12.0)
+  shows how many approvals each parked job still needs.
+- **Watch `bulksigner_approvals_expired_total`.** A climbing expiry rate is the signal that approvers are
+  not looking at their queue.
 
 ### An approver gets "That address is not in this job's approver pool"
 
@@ -544,6 +1021,24 @@ pre-sign hash check refused to produce a signature over bytes nobody approved.
 **Fix.** Do **not** re-sign it. Find out what wrote to `processing/`, then re-run the original file
 from `input/` so it is parsed, totalled and approved afresh. This counter should be flat at zero
 forever; anything else is worth investigating rather than retrying past.
+
+### A job failed with `approval.content-unmeasured` instead of parking
+
+**Symptom.** A file routed at an approval-gated profile goes to `Failed` rather than `AwaitingApproval`.
+The history says it was refused before parking because the profile's CNAB240 check is off, the folder is
+under `error/<jobid>/`, and the log carries `Job … was refused before parking for approval: profile …
+requires approval but its CNAB240 check is off`. Every file on that profile fails the same way.
+
+**Diagnosis.** The profile carries an approval rule and `CheckCNAB240 = false`. The parse is the only thing
+that records the content hash a decision is bound to, so without it the job has nothing to park under —
+and a job parked without one could never be decided. Since 2.9.0 the gate refuses it by name instead, and
+the profile page refuses saving that pairing from either side, so a profile in this state was edited
+before that refusal existed, or its row was edited outside the application.
+
+**Fix.** On the profile's page, turn `CheckCNAB240` back on from **Edit behaviour**, or remove the approval
+rule from **Edit approval** if the profile is not meant to gate. No restart: the next job claimed runs
+under the corrected rule. Then re-run the failed files through Rescan or Upload; the originals are still
+in `input/`.
 
 ### A job failed with `approval.rejected` instead of being cancelled
 
@@ -579,10 +1074,24 @@ path), and a folder whose watcher is not running. See
 
 **Root cause.** On an Azure Files work share, a live job's staged copy carries an infinite lease that
 refuses writes and deletes from everything, including your own storage tooling. That is the point while
-the job is in flight.
+the job is in flight. The hold normally ends when the job does; if the job is terminal and the lease is
+still held, ending the hold failed — the share was unreachable, the credential had been rotated, or the
+relocation was refused — and the log said so when the job finished (for example
+`Cancel of job … could not end the hold on its staged copy`, or `Recovery: failed to relocate
+processing/…`).
 
-**Fix.** If the job is terminal and the lease is still held, that is a fault — restart the service,
-which releases leases it holds, and report it.
+**Fix.** The lease lives on the storage account, not in this process, so **restarting Bulk Signer does not
+clear it.** Confirm from the job page that the job is terminal, then break the lease and delete or move
+the file as normal:
+
+```bash
+az storage file lease break --account-name <account> --share-name <share> --path 'processing/<jobid>/<filename>'
+```
+
+or, in the portal, select the file and use **Break lease**. Never break the lease on a *live* job's staged
+copy: that removes the protection the pre-signature re-hash then has to catch, and the job will fail with
+`approval.content-changed` rather than sign the wrong bytes. A local work tree has no such lease — its
+hold is gone the moment the service restarts.
 
 ### `/api/ready` is 503 with `work-share-owner` red
 
@@ -599,10 +1108,53 @@ System page and this check all name the prior holder's **host and process id**.
   not supported. Stop one, then decide which store is authoritative. **Approval state is the one to act
   on quickly**: a parked job exists in one instance's store only.
 
-If the row instead reads `not claimed cleanly at startup: …`, the marker could not be reached at all —
-an unreachable share or a rotated credential. Whether another instance holds it is then simply unknown,
-and unknown is not reported as the reassuring answer. The share's own `storage-share:` row usually says
-why.
+If the row's detail on `/api/ready/details` instead reads `not claimed cleanly at startup: …`, the
+marker could not be reached at all — an unreachable share or a rotated credential. Whether another
+instance holds it is then simply unknown, and unknown is not reported as the reassuring answer. The
+share's own `storage-share:` row usually says why. The claim is retried on the next boot, not in the
+background.
+
+### A rejected file was not returned to `output/`
+
+**Symptom.** An approver rejected a file. The job is `Canceled`, but `output/` has no
+`<name>.reject<ext>` and the job page says *"The file could not be returned to the output folder, so the
+staged copy is in the error folder and the original is still in its input folder."* The console carries a
+warning and the log a `RejectionHandbackFailed` entry naming the reason.
+
+**Overwhelmingly the most likely cause: the name was already taken.** A vetoed file is one finance corrects
+and resubmits under the same name, so a second rejection of it tries to write `folha.reject.rem` where the
+first one already sits. Bulk Signer refuses rather than overwriting — those are somebody's bytes — and
+falls back to leaving the staged copy in `error/`. The log message names the destination.
+
+**What is true when this happens**, and it is the reassuring part: the veto stands, nothing was signed,
+the earlier file in `output/` is untouched, this rejection's bytes are intact in `error/<jobid>/`, and **the
+input is still in its watched folder** — its deletion is only ever earned by a successful hand-back.
+
+**What to do.** Collect or archive the older `output/<name>.reject<ext>`, then either leave the current
+copy in `error/` (the audit trail points at it) or move it to `output/` yourself under a name you choose.
+Nothing needs restarting.
+
+**Other causes**, all rarer and all naming themselves in the log: the work share stopped answering between
+the write and the move; the process lacks write permission on `output/`; on a share, a lease somebody
+else holds on the destination. If instead you see `RejectionHandbackFallbackFailed`, neither destination
+worked — the job is still terminal and correct, and `processing/<jobid>/` needs clearing by hand. A
+`RejectionHandbackUnavailable` at Error is a product defect rather than an operational failure: report it
+to Lacuna Software support.
+
+## Dashboard
+
+### Every page renders but no button does anything, and the browser console shows `_framework/blazor.web.js` 404
+
+**Symptom.** On a Docker deployment the dashboard loads and the tables fill, but *Upload files*, *Retry*,
+*Cancel*, the filters and every other control are inert. The browser console has exactly one error: a 404
+for `/_framework/blazor.web.js`. `/api/ready` is green and the server log records nothing.
+
+**Cause.** Container images before 2.4.1 built on .NET 10 — 2.3.2 and 2.4.0 among them — were
+published without the dashboard's client script, so the pages rendered but never became interactive. Windows Service, systemd and foreground installs were never
+affected.
+
+**Fix.** Pull image 2.4.1 or later and redeploy. To check an image before deploying it:
+`docker run --rm --entrypoint ls <image> /app/wwwroot/_framework` must list `blazor.web.js`.
 
 ## Encryption
 
@@ -652,13 +1204,29 @@ are the failure modes specific to that path.
 
 **Symptom.** Bootstrap fails with a validation exception against `Signer:Endpoint` or `Signer:ApiKey`.
 
-**Root cause.** At least one `Signing:Profiles[]` entry has `Method = LacunaSigner` but the top-level
-`Signer:*` block is empty. The validator is self-gating: it only enforces those keys when a profile
-actually needs them.
+**Root cause.** Part of the `Signer:*` block is set and the rest is not. The validator self-gates on the
+section: omit it entirely and nothing is enforced; write any of it and the whole block is validated,
+because a half-configured connection is one that would fail at its first handoff rather than at boot.
 
-**Fix.** Either set `Signer__Endpoint` + `Signer__ApiKey` (env vars) or remove the
-`Method = LacunaSigner` profile if it was added by mistake. The API key format is
-`application-id|secret`.
+:::warning Changed in 2.1.0
+This check no longer looks at which profiles exist — profiles live in the operational store and can be
+switched to Lacuna Signer from the dashboard at any moment. The requirement moved onto the profile: see the
+next entry.
+:::
+
+**Fix.** Set both `Signer__Endpoint` and `Signer__ApiKey` (env vars), or remove the section if this host
+signs everything locally. The API key format is `application-id|secret`.
+
+### `Method = LacunaSigner, but this host has no Signer: settings`
+
+**Symptom.** A boot refusal naming a profile's `Method`, or the same sentence in the profile form when a
+save is refused.
+
+**Root cause.** A signing profile selects the remote service and this host has never been told where it
+is. The refusal is the same wherever the profile comes from — a `Signing:Profiles[]` entry being imported
+on a first boot, or a save from the dashboard's profile pages.
+
+**Fix.** Set `Signer__Endpoint` + `Signer__ApiKey` and restart, or give the profile `Method = Local`.
 
 ### Every dispatched document fails with `signer.unreachable`
 
@@ -685,9 +1253,11 @@ actually needs them.
 1. **The participant has not signed.** Open the Lacuna Signer admin and check the document status for
    the matching id. If it is `Pending` past `Signer:TimeoutHours`, the poll worker will fail the local
    job with `signer.timeout` on its next tick — that is the contract.
-2. **The poll worker is not running.** Check the log for `SignerPollWorker started`. If absent, no
-   profile has `Method = LacunaSigner`, so the worker is not registered — fix the profile config and
-   restart.
+2. **The poll worker is not running.** Check the log for `SignerPollWorker started`. If absent, the host
+   has no `Signer:*` settings, so neither the gateway nor the poll worker is registered — set
+   `Signer__Endpoint` + `Signer__ApiKey` and restart. (Since 2.1.0 registration follows those settings,
+   not the profiles, so a host that has them is ready for a profile switched to Lacuna Signer after it
+   booted.)
 3. **The pipeline is paused.** `GET /api/pipeline/state` returns `{ paused: true }`. The poll worker
    honors the pause flag. `POST /api/pipeline/resume` to unblock.
 
@@ -708,11 +1278,15 @@ log carries a `Warning` line about the best-effort cancel failure.
 **Symptom.** A profile is configured with `Method = LacunaSigner` but the Dashboard does not show the
 Awaiting signer tile and the System page does not show the Lacuna Signer panel.
 
-**Root cause.** The profile set is read once at boot. If you edited `appsettings.Production.json` after
-the service started, the page sees the pre-edit set of profiles.
+**Root cause.** Since 2.1.0 profiles live in the operational store, and `Signing:Profiles[]` is only
+imported on the first boot against an empty profile table. If you added or changed the profile in
+`appsettings.Production.json` after that first boot, the edit had no effect — the startup banner says the
+section is being ignored — and no stored profile has `Method = LacunaSigner`.
 
-**Fix.** Restart the service. Watch the banner — the new LacunaSigner profile should appear in the
-**Signing profiles** panel.
+**Fix.** Check the dashboard's [signing-profiles page](dashboard.md#profiles--signing-profiles), which shows what the store actually holds. Create
+the profile there, or switch an existing one to Lacuna Signer (the host needs `Signer:*` settings — see
+above). A saved profile reaches the running host within a poll interval, with no restart; reload the
+Dashboard or System page to see the tile and the panel.
 
 ### Transient-error counter climbs but no jobs fail
 
@@ -780,7 +1354,8 @@ confirm the banner no longer reports the row — when it is on, nothing is repor
 ### The store row says `UNREACHABLE` and the service started anyway
 
 **Not a fault.** A database down during a maintenance window must not turn a restart into an outage, so
-the host comes up, the migration is **skipped**, and `/api/ready` stays red.
+the host comes up, the migration is **skipped**, and `/api/ready` stays red (the `database` check's detail,
+on `/api/ready/details`, names the store).
 
 **Fix.** Fix the store, then **restart**. The readiness verdict is taken per request, but it also stays
 red for the life of an instance whose boot skipped the migration — that clears on the next boot, not
@@ -809,6 +1384,29 @@ there is deliberately no configuration key: a retry budget an operator can tune 
 gets tuned to zero during an incident.
 
 If retries are exhausting, look at the network path rather than the budget.
+
+### Store commands time out at 35 s a few seconds after App Service replaced the container
+
+**Symptom.** On Azure App Service with `Database:Provider = SqlServer`, one to three commands fail with
+`Execution Timeout Expired` a few seconds after the platform stops the *previous* container on the same
+worker — each measuring 35 s, never 30 — and nothing fails after that. The victims are whatever asked
+next: `Takeover sweep failed`, `Pipeline worker iteration failed`, a heartbeat tick, or one page load.
+`/api/ready` stays green and the next poll succeeds.
+
+**Cause.** Not the store. When the platform removes the old container, connections the new container
+pooled during its warm-up can go dead on the wire without being closed, and still look alive to the
+connection pool. The first command on one waits the full 30 s command timeout, then 5 s for the server to
+acknowledge a cancel it never receives — 35 s is the signature of a connection that has stopped answering,
+where a query the server is actually blocking fails at 30 s. The dead connection then leaves the pool,
+which is why the episode ends by itself; a timeout is not retried, so each dead connection costs exactly
+one failure.
+
+**Fix.** None in the product: the sweep re-asks on its next poll, a lost heartbeat tick is 15 s from the
+next, and a page load succeeds on reload. When the window matters, deploy with a stop — stopped first, the
+old container is gone before the new one opens a connection (see
+[High availability](high-availability.md#upgrades-are-stop-the-world)). Do not raise the command timeout
+or add a retry for this — the one lengthens the wait and the other repeats it. A real store stall looks
+different: failures at 30 s, and DTU, deadlock or `blocked_by_firewall` signal in Azure Monitor.
 
 ### Startup is refused because the connection string does not match the provider
 
@@ -862,6 +1460,17 @@ this in next time.
 `db/bulksigner-archive-YYYYMM.db`, start the service. A fresh DB is initialized; the archive is
 read-only. Open the archive in a SQLite client for historical queries.
 
+Under `Database:Provider = SqlServer` the growth is the same and the recipe is not: there is no file to
+move, and starting a fresh store by hand would discard the recorded approvals along with everything else.
+Archive rows with your own DBMS tooling.
+
+:::warning Clear Jobs is not an archive
+**Clear Jobs** on the System page (or `DELETE /api/jobs`) deletes **every** job record whatever its status
+(since 2.9.0), the files those jobs left behind — inputs, staged copies, error folders and signed outputs —
+and (since 2.10.0) every operational event recorded before it. Nothing is kept to query later. See
+[Operations](operations.md#clear-jobs).
+:::
+
 ## Cluster mode
 
 Everything in this section requires `Cluster:Enabled = true`. Off the switch none of it applies — see
@@ -886,25 +1495,66 @@ The message names **every** failing key at once rather than one per attempt, so 
 **Fix.** Correct the named keys, or turn `Cluster:Enabled` off — off is the single-instance product
 unchanged. An NFS Azure Files share is refused by name; the work share must be SMB.
 
-### Boot refused naming an instance identity that is already beating
+### Boot refused: an instance identity `could not be registered in 3 attempts`
 
-**Symptom.** The host exits naming its own derived instance identity, and says that identity already has
-a live heartbeat.
+**Symptom.** The host exits naming its own derived instance identity, the log carries the same at
+`Critical`, and the message says the identity could not be registered — every write of this boot's
+heartbeat row lost a race to another incarnation — giving the last beat and version of whatever won.
 
-**Diagnosis.** Two processes are answering to one name. Identity is what recovery, takeover and every
-per-instance surface are built on, so there is no degraded mode to offer. The usual causes, in order of
-likelihood:
+:::warning Changed in 2.5.0 — a live identity is displaced, not refused
+Up to 2.4.x a boot that found its own identity with a live heartbeat refused to start (2.4.3 waited first).
+Since 2.5.0 it **displaces** the holder instead — see the next entry. The refusal above is the only one
+left.
+:::
 
-1. **A deployment slot carrying production's connection string.** The swap does not introduce this — the
-   slot's first boot does. Slots are not supported on this topology at all; see
-   [High availability](high-availability.md#upgrades-are-stop-the-world).
-2. A second deployment pointed at the same database.
-3. Two hosts genuinely presenting the same name (outside App Service, where identity falls back to the
-   machine name).
+**Diagnosis.** Something is rewriting this identity's row faster than a boot can take it: two hosts
+presenting the same name **and booting at the same moment** against one database, or a store fault.
+Identity is the App Service instance id where the platform sets one, and the machine name where it does
+not. The refusal is fatal on purpose: a boot that cannot get its row written cannot be told apart from
+anything else by recovery, takeover or the Instances view.
 
-**Fix.** If the holder is genuinely gone, its row goes stale on its own — **waiting out
-`Cluster:StaleAfterSeconds` is the supported fix**, not deleting rows by hand. Otherwise stop whichever
-deployment should not be there.
+**Fix.** Read the Instances view on the System page of an instance that *is* running, find the row holding
+that identity, and either stop whatever else is presenting it or point it at its own database. Do **not**
+delete the row to get past the refusal while the holder is still running — that removes the report, not
+the condition.
+
+### After a redeploy, the old instance logs `has been displaced` and stands down
+
+**Symptom.** Changing the image of a running app (`az webapp config container set`) produces, in the log,
+a Warning `displaced the previous incarnation … which was still live` and, about three seconds later, a
+Critical `has been displaced`. One container's `/api/ready` carries a red `cluster-instance` row (and
+stays 200), its System page shows a banner, and an `InstanceStoodDown` operational event is recorded.
+
+**Diagnosis. This is a normal in-place redeploy on App Service (since 2.5.0).** The platform starts the new
+container **beside** the old one on the same instance — both derive the same identity — and keeps the old
+one serving until the new one passes its warm-up probe. The new container takes the identity at once and
+records which incarnation it displaced; the old one finds out on its next beat and **stands down**: it
+claims no new job, runs no takeover, polls Lacuna Signer for nothing, finishes what it holds, and serves
+the web until the platform stops it. Whatever it leaves unfinished is taken over one
+`Cluster:StaleAfterSeconds` after the displacement, under the ordinary takeover policy. No failed start
+and no `ContainerStartupFailure`; the Instances view shows the displaced incarnation under the
+successor's row. See [Operations](operations.md#when-a-boot-finds-its-own-identity-already-live).
+
+**Reading the overlap log.** While both containers run, App Service writes both processes' output into one
+log with nothing saying which container a line came from, so the old container's Critical sits between
+the new one's boot lines and reads as if the *new* container had stood down. It has not: the Critical in
+an overlap log is always the old container's — the newcomer logs a Warning naming the incarnation it
+displaced.
+
+**If the new container then fails its warm-up** — a bad image, a configuration error caught after
+registration — App Service stops the **whole site**, the stood-down old container included, and restarts
+it with the *new* image in a loop of 503s. On App Service the remedy is yours: point the app back at the
+previous tag with `az webapp config container set`, and it is ready again within about two minutes.
+Stopping the app before changing the image and starting it after (see
+[High availability](high-availability.md#upgrades-are-stop-the-world)) avoids the overlap altogether and
+is still the tidier deploy.
+
+**A genuine duplicate — two hosts presenting one name, or a deployment slot carrying production's
+connection string — is no longer refused either.** The later boot displaces the earlier, and a restart of
+the displaced host takes the identity back, so the two ping-pong loudly: a Warning on each newcomer, a
+Critical on each process standing down, and a displaced incarnation on the Instances view that keeps
+changing. At every moment exactly one of them claims work. Find the host that should not be presenting
+this identity, and rename it or point it at its own database. Slots are not supported on this topology.
 
 ### Boot refused naming two operational stores
 
@@ -954,7 +1604,8 @@ old-version heartbeat took to go stale, which is exactly the moment after a fail
 
 **Fix.** Finish the deploy — stop every instance, deploy, start. If nothing is deploying, look for a
 slot or a second deployment on this database. Treat the Critical as the alarm it is; nothing else will
-stop this.
+stop this. (An old container being displaced during an in-place redeploy does not trigger it: that is the
+identity's own previous life, not a sibling.)
 
 ### A job is stuck and no instance will touch it
 
@@ -1031,6 +1682,21 @@ authoritative version of the check command.
 directories must be owned by UID 1654.
 
 **Fix.** Before first start: `sudo chown -R 1654:1654 ./data ./logs`.
+
+### Uploads fail with `Access to the path '/app/entrada' is denied`
+
+**Symptom.** A dashboard or `POST /api/files` upload fails with `System.UnauthorizedAccessException:
+Access to the path '/app/<first segment of Storage:Inputs[0].Path>' is denied`, on a container whose first
+watched folder is on an Azure Files share. Files dropped into the share are picked up normally.
+
+**Root cause.** Before 2.4.2 the upload landing folder was derived as a *local* path from the first
+folder's `Path`, whatever provider the folder was on, so `entrada/remessas` on the share became
+`/app/entrada/remessas` on the container's disk — the working directory, owned by root. On a Windows
+Service or systemd install the same fault was quieter: the upload was accepted into a local folder no
+watcher reads.
+
+**Fix.** Upgrade to 2.4.2 or later and restart. No configuration change: uploads land in the first
+watched folder, on its own provider.
 
 ## Windows-specific
 
@@ -1121,7 +1787,11 @@ When the above doesn't help:
    cert source vs. encryption).
 3. **Bisect by environment.** Run the same binary in the foreground in `Development` mode — the
    terminal shows full exception detail (the Production error envelope strips it).
-4. **Inspect the database.** `sqlite3 db/bulksigner.db` and queries like
+4. **Read the operational event log.** Since 2.13.0 the dashboard's [**Events** page](dashboard.md#events--operational-events) (and
+   `GET /api/events`) lists every operational event — pause and resume, profile edits, approval decisions,
+   takeovers, service starts and stops — newest first, with filters by type, date range and text. A trail
+   that begins with a `JobsCleared` event begins there because Clear Jobs deleted what came before.
+5. **Inspect the database.** `sqlite3 db/bulksigner.db` and queries like
    `SELECT * FROM Jobs ORDER BY CreatedAt DESC LIMIT 20;` give a full picture of recent activity.
 
 If after all that the symptom remains unexplained, contact Lacuna Software support with the bootstrap

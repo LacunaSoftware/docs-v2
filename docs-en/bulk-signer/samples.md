@@ -927,8 +927,9 @@ and groups.
 Install-Module Microsoft.Graph.Applications -Scope CurrentUser
 ```
 
-plus an account able to consent to the `Application.ReadWrite.All` delegated scope (Application
-Administrator or Global Administrator).
+plus an account able to consent to the `Application.ReadWrite.All` delegated scope — Cloud
+Application Administrator is the least-privileged role that can; Application Administrator and Global
+Administrator also can.
 
 ```bash
 pwsh ./New-BulkSignerEntraApp.ps1 -BaseUrl https://signer.example.com

@@ -84,8 +84,8 @@ usual reply for a repository your credentials cannot see, and not a sign that yo
 **Pin `<version>`.** A `latest` tag moves, and on a container host that means a restart can bring up a
 release you did not choose to install.
 
-Nothing is built locally: the image Lacuna publishes is the image that runs, Debian-slim based for the
-reason in [Docker / Compose](#docker--compose) below.
+Nothing is built locally: the image Lacuna publishes is the image that runs, based on Ubuntu 24.04 LTS
+for the reason in [Docker / Compose](#docker--compose) below.
 
 ### The published binaries
 
@@ -134,7 +134,13 @@ served what you expected.
      the signing certificate on the token, plus the PIN supplied through an environment variable.
    - **Windows certificate store** — Windows targets only, plus the SHA-1 thumbprint.
 
-   See [Certificates](certificates.md) for details.
+   See [Certificates](certificates.md) for details. The certificate you configure seeds the first
+   **signing profile** on the first boot; from then on profiles — their certificate included — live in
+   the operational store and are managed from the dashboard (see
+   [Configuration](configuration.md#signingprofiles--per-folder-signing-profiles)). If a profile's
+   certificate carries a secret — a PFX password, an Azure Key Vault application secret, a blob
+   credential — also set `Signing:ProfileSecretsKey` **before** the first boot, and back it up: the
+   import refuses without it, and losing it later means re-entering those secrets.
 3. **Encryption decision.** Leave disabled (default) or enable BSENC v1. If you enable encryption,
    decide where the password and salt will live before first boot. See [Encryption](encryption.md).
 4. **TLS termination.** The service listens on plain HTTP by default. The recommended deployment
@@ -144,7 +150,10 @@ served what you expected.
 5. **Watched input folders.** Decide whether you need one input folder (default) or several. With a
    single folder, omit `Storage:Inputs[]` entirely — the service creates one named `default` at
    `{Root}/input`. For multiple folders, populate `Storage:Inputs[]` with one entry per folder; see
-   [Configuration](configuration.md#storage).
+   [Configuration](configuration.md#storage). Which signing profile each folder's files are signed
+   under is **chosen on the profile's page after the first boot**, one folder per profile; a folder's
+   `Profile` key only seeds that choice on the first boot (see
+   [Configuration](configuration.md#storageinputsprofile--per-folder-routing)).
 
 Every install seeds an editable production config from the provided
 `appsettings.Production.json.sample`. The sample is annotated with `REQUIRED` and `SECRET` markers;
@@ -297,8 +306,11 @@ line you edit at upgrade time. A pull that fails looks like a container that nev
 application log — because there is no application yet — so check `docker login` before reading anything
 into the silence.
 
-Lacuna builds the image on Debian-slim — **not** Alpine. HSM `.so` libraries are generally not
-musl-compatible, so Alpine is off the table. The image ships generic PKCS#11 tooling
+Lacuna builds the image on Ubuntu 24.04 LTS — **not** Alpine. HSM `.so` libraries are generally not
+musl-compatible, so Alpine is off the table; the requirement is glibc, and .NET 10 publishes no Debian
+image, which is why this is Ubuntu rather than the Debian-slim base earlier versions used. Nothing you
+configure changes with it: the same package names, the same non-root UID 1654, the same paths. The
+image ships generic PKCS#11 tooling
 (`libpcsclite1` + `opensc`); vendor HSM drivers (SafeNet, Thales, Entrust, Yubico) are
 operator-mounted at runtime via `volumes:` in the compose file. See the commented examples in
 `deploy/docker/docker-compose.yml`.
@@ -313,6 +325,11 @@ Bind mounts and host paths:
 | `/app/appsettings.Production.json` | `./config/appsettings.Production.json` (read-only) | Operator-edited config |
 | `/var/lib/bulksigner` | `./data` | Operational data tree (input / processing / output / db) |
 | `/var/log/bulksigner` | `./logs` | Durable log files |
+
+A [customer logo](configuration.md#branding--the-customers-logo-on-the-sign-in-and-approver-pages) for
+the sign-in and approver pages is mounted the same way when you use one — read-only, with
+`Branding:CustomerLogo:Path` naming the path *inside* the container. The compose file carries the
+commented example.
 
 ## Foreground console (one-off / test)
 
@@ -378,9 +395,10 @@ a file can name a blob instead — see
 [Certificates](certificates.md#reading-the-file-from-a-blob). Two things to plan for at install time:
 
 - The identity needs **Storage Blob Data Reader** on the container, and nothing wider.
-- **An unreachable blob stops the host from starting**, unlike an unreachable work share or
-  operational store. A profile with no signing material cannot sign at all, so there is no useful
-  degraded state.
+- **An unreachable blob leaves that profile degraded, and the host running.** It is named on the
+  startup banner, in the log and on `/api/ready`, jobs routed to it fail with `profile.degraded`, and
+  every other profile keeps signing. Fix the access and restart. (Up to 2.0.x an unreachable blob
+  stopped the host from starting.)
 
 ## Choosing where the operational store lives
 
@@ -483,7 +501,9 @@ Two rows are the ones to act on:
   changes it** — the statement needs exclusive access to a database that is yours. One `ALTER DATABASE`
   by a DBA, then restart.
 
-Then `curl http://localhost:8080/api/ready` — its `database` check names the store it actually checked.
+Then `curl -H "X-API-Key: …" http://localhost:8080/api/ready/details` — its `database` check names the
+store it actually checked. (`/api/ready` alone tells you the check is green; the name of the store is on
+the details route, behind the key.)
 
 ## Microsoft Entra ID sign-in (optional)
 
@@ -590,7 +610,8 @@ deliberate; the first is the one to check *before* editing anything.
   see [Troubleshooting](troubleshooting.md#a-deployment-that-used-to-start-now-refuses-naming-a-watched-input-folder).
 - **Clear Jobs deletes finished records only.** `DELETE /api/jobs` now reports `skipped` alongside
   `deleted`, and a script that clears the table and then expects it empty has to drain or cancel the
-  unfinished jobs first. See [Operations](operations.md#clear-jobs).
+  unfinished jobs first. See [Operations](operations.md#clear-jobs). *Reversed in 2.9.0 — see
+  [below](#upgrading-within-2x).*
 - **A file whose path exceeds 850 characters is refused when it is taken in**, with the new problem code
   `job.path-too-long`, rather than being accepted and failed later.
 - **The dashboard's "Max throughput/sec" card is retired.** The
@@ -607,6 +628,70 @@ by an older build carries **no owner** — so nothing under the switch will ever
 upgrade. See [Azure App Service](azure.md#6-first-boot-on-one-instance).
 :::
 
+### Upgrading within 2.x
+
+Every 2.x release upgrades in place with the steps above, and you can go from any 2.x straight to the
+latest — the migrations of the releases in between are applied in order at the first boot. Releases
+2.1.0, 2.2.0, 2.4.3, 2.5.0, 2.7.0, 2.13.0, 2.14.0 and 2.15.0 add migrations; take the backup above
+before any of them. The releases below also ask something of you, and are listed in the order you would
+cross them:
+
+- **2.1.0 — signing profiles move into the operational store.** The first boot on 2.1.0 or later
+  imports your `Signing:Profiles[]` section (or derives a `default` profile from `Signing:Certificate`)
+  **once**; after that the section is ignored, the startup log says so on every boot until you remove
+  it, and profiles are created and edited from the dashboard. **If any profile carries a secret** — a
+  PFX password, a Key Vault application secret, a blob credential — set `Signing__ProfileSecretsKey`
+  before that boot, or the import refuses, naming the key; back the key up with your other secrets. See
+  [Configuration](configuration.md#signingprofilesecretskey--what-stored-profile-secrets-are-encrypted-under).
+  Three more changes land in the same release:
+  - A **half-written `Signer:` block now refuses the boot** even when no profile uses Lacuna Signer —
+    complete it or remove it.
+  - A **certificate that will not open no longer stops the host**: that profile is degraded, its row
+    on `/api/ready` reports `ok: false` without turning the response into a `503`, and its jobs fail
+    with `profile.degraded`. Alerting that reads only the top-level `ready` will not see it — read
+    `checks[]`.
+  - A file an approver **rejects** is returned to `output/` with `.reject` in its name, and its original
+    is removed from the watched folder. Anything that treats every file in `output/` as a signature must
+    now read the name. If you turned the approver second factor on by setting only
+    `ApproverSecondFactor:SeedSecret`, also set `ApproverSecondFactor__Enabled=true` explicitly — the
+    shipped default is off.
+- **2.2.0 — the profile chooses its watched folder.** The folder binding moves from
+  `Storage:Inputs[].Profile` onto the profile. Upgrading from 2.0.x, the first boot's import binds each
+  folder from that key, as before. Upgrading from **2.1.x**, the profiles were already imported with no
+  binding, so **every watched folder comes up unassigned** and its files wait, unsigned: choose each
+  folder from its profile's page (*Edit behaviour* → **Input folder**) right after the upgrade.
+- **2.2.1 — sign out and back in once.** The dashboard now carries the signed-in operator's identity
+  into every page, and a session open across the upgrade keeps its old ticket until it is renewed. Under
+  Entra ID, operators' audit events are now recorded under their UPN instead of `(anonymous)`.
+- **2.3.1 — `Auth:ApiKey` must be your own.** The shipped `appsettings.json` no longer carries a
+  placeholder key, sample profiles or a `Signer` block, and its `Pipeline:MaxConcurrency` is back to the
+  product default of `1`. A deployment that never set `Auth__ApiKey` now refuses to start, naming the
+  key; one that relied on the old concurrency sets `Pipeline__MaxConcurrency` itself. A first boot that
+  refused naming profiles you never declared was this defect — use 2.3.1 or later.
+- **2.4.1 — Docker: skip the 2.3.2 and 2.4.0 images.** Those two container images lacked the
+  dashboard's client script: the pages rendered but no control did anything, while `/api/ready` stayed
+  green. Pull 2.4.1 or later. Service installs were never affected.
+- **2.4.3 — pause and resume on SQL Server.** A SQL Server store created before this release never got
+  the row that holds the pause flag, so pausing answered `pipeline.state-missing`; the migration adds it.
+- **2.5.0 — cluster redeploys on App Service.** A new container now displaces the one it replaces
+  instead of being refused. Upgrades stay stop-the-world; see
+  [Azure App Service](azure.md#8-upgrades-are-stop-the-world).
+- **2.6.0 — `/api/ready` loses its detail.** The anonymous probe now carries only each check's name and
+  verdict; a monitor that parsed `detail` moves to `/api/ready/details` and sends `X-API-Key`. The
+  status code is unchanged. See [Configuration](configuration.md#readiness).
+- **2.7.0 — one metric changes identity.** `bulksigner_approver_signatures_total` gains a `means` label
+  (`browser` / `cloud`), so its series identity changes for anything that scrapes it.
+- **2.9.0 and 2.10.0 — Clear Jobs takes everything.** It now deletes every job whatever its status,
+  the files those jobs left behind and (since 2.10.0) every operational event recorded before the clear,
+  writing one `JobsCleared` event as the record of it. Its response drops `skipped` and gains
+  `filesDeleted`, `foldersDeleted`, `itemsFailed` and `eventsDeleted`. A script written against the 2.0.0
+  behaviour above has to change. See [Operations](operations.md#clear-jobs).
+- **2.13.0 — an already-processed file name is refused.** A file arriving under a name a completed or
+  still-active job carries now fails as `file.already-processed` instead of being signed again. A
+  producer that reuses one fixed file name every day needs
+  `Pipeline__RejectAlreadyProcessedFileNames=false` **before** the upgrade. See
+  [Configuration](configuration.md#pipeline).
+
 ## Quick health checks
 
 After installing on any target:
@@ -614,12 +699,14 @@ After installing on any target:
 | URL | What it tells you |
 |-----|-------------------|
 | `http://localhost:8080/api/health` | Liveness — anonymous, returns `200 OK` if the host process is up. |
-| `http://localhost:8080/api/ready` | Readiness — anonymous, returns a body listing each probe (operational store, per input folder, license, plus `storage-share:` and `work-share-owner` rows on a remote work share). `503` if any probe failed. |
+| `http://localhost:8080/api/ready` | Readiness — anonymous by default, returns a body naming each probe (operational store, per input folder, license, plus `storage-share:` and `work-share-owner` rows on a remote work share) with its verdict and no detail. `503` if any gating probe failed. |
+| `http://localhost:8080/api/ready/details` | The same report with each probe's detail. Needs the API key. |
 | `http://localhost:8080/` | The operator dashboard. Sign in with the API key from `Auth:ApiKey` — or with Microsoft, when [Entra ID sign-in](#microsoft-entra-id-sign-in-optional) is configured. |
 | `http://localhost:8080/scalar/v1` | The live OpenAPI reference UI for the REST surface. |
 
 `/api/health` is always anonymous so external health checkers do not need credentials. `/api/ready`
-is anonymous too and returns a structured body. `/api/metrics` is API-key-gated by default — see
+is anonymous by default for the same reason and carries no detail; `Readiness:RequireApiKey` gates it
+where the prober can send a header. `/api/ready/details` and `/api/metrics` are API-key-gated — see
 [Security](security.md).
 
 ---

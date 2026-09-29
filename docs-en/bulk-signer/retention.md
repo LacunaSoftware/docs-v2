@@ -14,10 +14,10 @@ What ages out automatically, what does not, and how to plan disk capacity.
 | Log files (`/var/log/bulksigner/bulksigner-*.log`) | **Yes** | The file sink rotates daily and retains 14 files (`Logging:File:RetainedFileCountLimit`). |
 | `data/input/` files | No | Removed only after a successful sign-verify-promote, or by operator action. |
 | `data/processing/` directories | No | Created and removed by the worker per job. Lingering directories belong to failed/crashed jobs and are moved to `error/` by the startup recovery sweep. |
-| `data/output/` files (signed or `.enc` envelopes) | **No** | The cleanup action is currently a no-op stub. |
+| `data/output/` files (signed or `.enc` envelopes, and a rejected file's `.reject` hand-back) | **No** | The cleanup action is currently a no-op stub. Files leave only by operator order — [Clear Jobs, or deleting a job](#what-an-operator-can-delete-clear-jobs-and-job-deletion). |
 | `data/error/` directories | **No** | Same. |
-| Job / history / event rows in the operational store | **No** | Same. |
-| Frozen approval rules and recorded approvals | **No — never** | Who authorised a payment, and under what rule, is exactly what an audit asks for after the fact. Retained even once the job is terminal. |
+| Job / history / event rows in the operational store | **No** | Same — except by operator order: **Clear Jobs** deletes every job row and every operational event recorded before the clear started, leaving the `JobsCleared` event; **deleting a job** removes that job's rows and keeps every event. |
+| Frozen approval rules and recorded approvals | **No** | Never pruned. Who authorised a payment, and under what rule, is exactly what an audit asks for after the fact, so they are retained once the job is terminal — until an operator clears or deletes the job, when they go with it. |
 | **CNAB240 line detail** (one row per payment) | **Yes** | Deleted at the transition into `Completed`, `Failed` or `Canceled`. The one exception — see [below](#the-one-exception-cnab240-line-detail). |
 
 ## What is retained is unchanged; where it is retained can differ
@@ -111,10 +111,39 @@ Default behavior:
 - Signed outputs accumulate in `output/`. Operators or downstream automation move them out.
 - Error directories accumulate in `error/`. Operators inspect, then delete with normal filesystem
   commands.
-- Job rows accumulate in the operational store, which grows linearly with throughput. The one built-in
-  tool for reclaiming that space is [Clear Jobs](operations.md#clear-jobs), which deletes every
-  **finished** job record and leaves unfinished ones in place. There is no age-based or selective pruning
-  of job history in this version.
+- Job rows accumulate in the operational store, which grows linearly with throughput — the SQLite file
+  under `Sqlite`, your own database under `SqlServer`. There is no age-based pruning of job history in
+  this version; the two operator actions below are the only things that remove it.
+
+### What an operator can delete: Clear Jobs and job deletion
+
+Nothing ages out, but two deliberate operator actions do delete — and both take files as well as rows.
+
+:::warning Changed in 2.9.0 and 2.10.0 — Clear Jobs takes everything
+Clear Jobs used to delete only **finished** job records and leave every file and every operational
+event in place. Since 2.9.0 it deletes **every** job record, whatever its status, and every file those
+jobs left behind; since 2.10.0 it deletes the operational events too.
+:::
+
+- **[Clear Jobs](operations.md#clear-jobs)** (System → Danger zone, or `DELETE /api/jobs`) deletes
+  every job in every status — with its history, its frozen approval rule and recorded approvals, its
+  CNAB240 line detail and its stage timings — and each job's files: the input, its `processing/` and
+  `error/` folders, the signed output (or `.enc` envelope) and a rejected file's `.reject` hand-back.
+  **Every operational event recorded before the clear started goes with them**, and one `JobsCleared`
+  event is written as the record of the cut, naming who cleared and how many jobs, files, folders and
+  events went. Pipeline state, signing profiles, configuration and log files are untouched. The
+  response carries the counts (`deleted`, `filesDeleted`, `foldersDeleted`, `eventsDeleted`,
+  `itemsFailed`); a file somebody else holds, or a folder the storage refuses, is left in place,
+  counted and named in the log.
+- **Deleting a job** (the row's delete button on `/jobs`, one job at a time, behind a confirmation
+  with an optional reason; there is no REST route) removes that job's rows — the same set as above —
+  plus its `processing/` and `error/` folders, the output it recorded writing, and its input only if the
+  job staged it and it is unchanged since. A job a worker is running cannot be deleted. **Every
+  operational event stays**, and a `JobDeleted` event is added summarising what was removed, what was
+  kept and any approvals the job carried.
+
+Both are irreversible. **Take a [database backup](#backup-discipline) first** if the audit trail they
+remove still matters — the backup is the only copy of the trail that survives them.
 
 ## The one exception: CNAB240 line detail
 
@@ -137,8 +166,9 @@ Two reasons, and the first is why this does not contradict the stance above:
 1. **It is redundant once the job is terminal, not merely old.** Everything else in the retention table
    is the *only* copy of what it records — delete a history row and the audit trail has a hole. The
    line detail is a cache of what is already in the file, and the file survives every terminal outcome:
-   `output/` when the job completes, `error/` when it fails or is rejected. The job also keeps its
-   content SHA-256, so the surviving artifact can be proved to be the one that was parsed. Nothing
+   `output/` when the job completes, `output/` again — under a `.reject` name — when an approver vetoed
+   it, and `error/` when it fails, when a wait budget expires, or when an operator cancels it. The job
+   also keeps its content SHA-256, so the surviving artifact can be proved to be the one that was parsed. Nothing
    becomes unknowable.
 2. **It is the largest concentration of personal data the product holds** — every beneficiary in every
    payroll, accumulating forever, with no remaining consumer once the job is done. An LGPD exposure
@@ -236,8 +266,8 @@ rather than configuration ones, and both are refused at boot: a path inside a **
 ### Independent of retention, and of that feature
 
 - **Back up the operational store before every service upgrade.** Schema migrations run automatically at
-  startup and are one-way. Under `SqlServer` a 2.0.0 upgrade adds migrations in both histories, applied
-  at boot.
+  startup and are one-way, on both providers — most releases since 2.0.0 add one. Take one before a
+  **Clear Jobs** too: it is the only copy of the audit trail that survives it.
 - **Snapshot `output/` if it carries audit-significant artifacts.** Especially when encryption is
   enabled — losing an encrypted file is doubly irrecoverable (no password = no plaintext).
 - **Treat `data/` as a unit when backing up.** `input/`, `processing/`, `output/`, `error/`, `db/`,

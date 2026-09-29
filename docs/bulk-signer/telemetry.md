@@ -6,7 +6,7 @@ sidebar_position: 9
 # Telemetria com o Application Insights
 
 Telemetria opcional do Azure Application Insights sobre o pipeline de assinatura — como habilitá-la, o
-que é coletado, o que é intencionalmente excluído, e as consultas KQL para encontrar gargalos.
+que é coletado, o que é intencionalmente excluído e as consultas KQL para encontrar gargalos.
 
 :::note
 A telemetria vem **desligada por padrão**. Com ela desabilitada, o serviço não tem dependência do
@@ -18,22 +18,22 @@ funcionalidade opcional.
 
 | Pergunta | Resposta |
 |----------|----------|
-| Como eu ligo isso? | Defina `Telemetry:Enabled = true` **e** forneça uma connection string (`Telemetry:ConnectionString` ou a variável de ambiente `APPLICATIONINSIGHTS_CONNECTION_STRING`). |
+| Como habilitar? | Defina `Telemetry:Enabled = true` **e** forneça uma connection string (`Telemetry:ConnectionString` ou a variável de ambiente `APPLICATIONINSIGHTS_CONNECTION_STRING`). |
 | Estado padrão? | **Desligado.** |
 | Qual é o SDK? | A **distro do Azure Monitor OpenTelemetry** — activities e meters padrão do OpenTelemetry, não o SDK clássico do Application Insights. |
-| O que é coletado? | Um trace correlacionado por job, os passos do ciclo de vida como eventos de span, chamadas do PKI SDK como dependências, métricas de duração de assinatura e de processamento total, e exceções de processamento. |
-| O que é excluído? | Logs (logs estruturados não são encaminhados), segredos (mascarados), conteúdo de arquivos, material de certificado, e o caminho remoto do Lacuna Signer. |
+| O que é coletado? | Um trace correlacionado por job, os passos do ciclo de vida como span events, chamadas do PKI SDK como dependências, métricas de duração de assinatura e de processamento total, e exceções de processamento. |
+| O que é excluído? | Logs (logs estruturados não são encaminhados), segredos (mascarados), conteúdo de arquivos, material de certificado e o caminho remoto do Lacuna Signer. |
 | Quais tabelas do Application Insights? | Spans → `dependencies`; métricas → `customMetrics`; exceções → `exceptions`; requisições web coletadas automaticamente → `requests`. **Não há `customEvents`** — veja [abaixo](#por-que-não-há-customevents). |
 
-Nota de escopo: isto cobre a **assinatura local**. O fluxo remoto do Lacuna Signer é apenas parcialmente
+Escopo: esta página cobre a **assinatura local**. O fluxo remoto do Lacuna Signer é apenas parcialmente
 rastreado — veja [O que é intencionalmente excluído](#o-que-é-intencionalmente-excluído).
 
 ## Habilitando o Application Insights
 
 ### 1. Crie o recurso e copie a connection string
 
-Crie um recurso do Application Insights no portal do Azure e copie sua **connection string** (painel de
-Visão geral → *Connection String*). Ela se parece com:
+Crie um recurso do Application Insights no portal do Azure e copie sua **connection string** (painel
+*Overview* → *Connection String*). Ela tem este formato:
 
 ```
 InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://<region>.in.applicationinsights.azure.com/;LiveEndpoint=https://<region>.livediagnostics.monitor.azure.com/
@@ -41,7 +41,7 @@ InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https:
 
 ### 2. Configure o Bulk Signer
 
-A connection string carrega a instrumentation key e é tratada como um **segredo** — nunca a versione.
+A connection string carrega a instrumentation key e é tratada como um **segredo** — nunca faça commit dela.
 Prefira a variável de ambiente.
 
 **Opção A — variável de ambiente (recomendada):**
@@ -74,43 +74,44 @@ export APPLICATIONINSIGHTS_CONNECTION_STRING="InstrumentationKey=...;IngestionEn
 |-------|------|--------|------------------|-------------|
 | `Telemetry:Enabled` | bool | `false` | `Telemetry__Enabled` | Chave mestra. Quando `true`, uma connection string é **obrigatória** — o serviço se recusa a iniciar sem ela. |
 | `Telemetry:ConnectionString` | string | `""` | `Telemetry__ConnectionString` | **SECRET.** Deixe vazia para usar a variável de ambiente padrão abaixo. |
-| _(variável de ambiente padrão)_ | string | _(não definida)_ | `APPLICATIONINSIGHTS_CONNECTION_STRING` | Lida diretamente pela distro e honrada pelo validador de inicialização. Use esta para manter o segredo fora dos arquivos de configuração. |
-| `Telemetry:RoleName` | string | `Lacuna.BulkSigner` | `Telemetry__RoleName` | Reportado como `cloud_RoleName`, de modo que vários serviços em um mesmo recurso continuem distinguíveis. |
+| _(variável de ambiente padrão)_ | string | _(não definida)_ | `APPLICATIONINSIGHTS_CONNECTION_STRING` | Lida diretamente pela distro e respeitada pelo validador de inicialização. Use-a para manter o segredo fora dos arquivos de configuração. |
+| `Telemetry:RoleName` | string | `Lacuna.BulkSigner` | `Telemetry__RoleName` | Informado como `cloud_RoleName`, para que vários serviços no mesmo recurso continuem distinguíveis. |
 
 ### 3. Reinicie e verifique
 
-Reinicie o serviço. Dentro de um ou dois minutos após processar um job, você deve ver entradas no recurso
-do Application Insights: uma linha em `dependencies` chamada `signing.job` por job, dependências filhas
-`Lacuna.Pki …`, e linhas em `customMetrics` para `bulksigner.signing.duration` e
+Reinicie o serviço. Um ou dois minutos depois de processar um job, você deve ver entradas no recurso do
+Application Insights: uma linha em `dependencies` chamada `signing.job` por job, dependências filhas
+`Lacuna.Pki …` e linhas em `customMetrics` para `bulksigner.signing.duration` e
 `bulksigner.job.duration`.
 
 ## O que é coletado
 
 ### Traces — span por job mais eventos de ciclo de vida
 
-Cada job abre um span raiz (`signing.job`, tipo `Internal`, aparecendo no Application Insights como
-`dependencies`) na captura, marcado com `job.id`, `signing.profile`, `signing.method` e
-`signing.format`. Cada passo abaixo é registrado como um **evento de span** naquele span, de modo que
-todos compartilham seu `operation_Id` para correlação:
+Cada job abre um span raiz (`signing.job`, tipo `Internal`, que aparece no Application Insights como
+`dependencies`) no momento da captura, com as tags `job.id`, `signing.profile`, `signing.method` e
+`signing.format`. Cada passo abaixo é registrado como um **span event** nesse span, de modo que todos
+compartilham o mesmo `operation_Id` para correlação:
 
 | Evento | Quando |
 |--------|--------|
-| `JobCreated` | No enfileiramento (um trace `signing.job.created` autônomo — o span do worker ainda não existe) |
+| `JobCreated` | No enfileiramento (um trace `signing.job.created` independente — o span do worker ainda não existe) |
 | `JobPickedForProcessing` | O worker reivindica o job |
 | `SigningStarted` / `SigningCompleted` | Em torno da chamada de assinatura local |
 | `VerificationStarted` / `VerificationCompleted` | Em torno da chamada de verificação (somente quando o perfil tem `Verify = true`) |
 | `OutputFileCreated` | Artefato assinado promovido para `output/` |
 | `JobCompleted` | Sucesso terminal (status do span `Ok`) |
 | `JobFailed` | Falha terminal (status do span `Error`) |
-| `JobCanceled` | Cancelamento pelo operador (um trace `signing.job.canceled` autônomo) |
+| `JobCanceled` | Cancelamento pelo operador (um trace `signing.job.canceled` independente) |
 | `DispatchedToSigner` | Job entregue ao Lacuna Signer (caminho remoto — cobertura parcial) |
+| `Cnab240PaymentDateCheckSkipped` | Uma remessa CNAB240 cuja data de pagamento mais antiga já havia passado foi liberada em vez de recusada, porque a verificação da data de pagamento do perfil (ou a verificação de CNAB240) está desligada — uma decisão, não uma assinatura |
 
 ### Dependências — chamadas do PKI SDK
 
-As chamadas de assinatura e verificação do Lacuna PKI SDK são envolvidas em spans filhos do tipo
-`Client`, chamados `Lacuna.Pki SignAsync` e `Lacuna.Pki VerifyAsync`, aparecendo como `dependencies`.
-Cada um carrega sua própria duração e uma flag de sucesso; uma chamada falha é marcada como `Error` com
-uma mensagem mascarada, de modo que chamadas externas quebradas fiquem visíveis com contexto de
+As chamadas de assinatura e verificação do Lacuna PKI SDK são encapsuladas em spans filhos do tipo
+`Client`, chamados `Lacuna.Pki SignAsync` e `Lacuna.Pki VerifyAsync`, que aparecem como `dependencies`.
+Cada um tem sua própria duração e uma flag de sucesso; uma chamada que falhou é marcada como `Error`,
+com uma mensagem mascarada, para que chamadas externas com problema fiquem visíveis com contexto de
 diagnóstico.
 
 ### Métricas — `customMetrics`
@@ -126,28 +127,28 @@ O `bulksigner.signing.duration` é o tempo decorrido da própria operação de a
 ### Exceções — `exceptions`
 
 Exceções de processamento tratadas e não tratadas são registradas no span do job com o id do job, o
-perfil, o método de assinatura, e o **passo de processamento** em que o erro ocorreu. Mensagens e stack
+perfil, o método de assinatura e o **passo de processamento** em que o erro ocorreu. Mensagens e stack
 traces são mascarados antes de deixarem o processo.
 
 ## O que é intencionalmente excluído
 
 - **Segredos.** A licença do PKI, senhas de certificado e de PFX, o PIN do PKCS#11, o client secret do
-  Azure Key Vault, chaves de API, a senha de criptografia e connection strings são mascarados de todo
+  Azure Key Vault, chaves de API, a senha de criptografia e connection strings são mascarados em todo
   valor anexado à telemetria — inclusive mensagens de exceção e stack traces. Veja
   [Segurança](security.md#mascaramento-de-logs--duas-camadas).
-- **Conteúdo de arquivos e material de certificado.** Nunca anexados a span, evento ou métrica alguma.
+- **Conteúdo de arquivos e material de certificado.** Nunca são anexados a nenhum span, evento ou métrica.
 - **Logs da aplicação.** Logs estruturados **não** são encaminhados ao Application Insights. Somente
   spans, métricas e exceções explicitamente registradas são enviados; os logs permanecem nos destinos de
   arquivo e de console.
 - **O id do job como dimensão de métrica.** Mantido fora dos histogramas para limitar a cardinalidade; a
-  cronometragem por job vive nos spans correlacionados.
+  medição de tempo por job fica nos spans correlacionados.
 - **O caminho remoto do Lacuna Signer.** A cobertura prioriza a assinatura local. Um job remoto emite
-  apenas um span da captura até o despacho; a espera pelo assinador e a conclusão remota não são
+  apenas um span da captura até o despacho; a espera pelo assinante e a conclusão remota não são
   rastreadas.
 
 ## Consultas de exemplo (KQL)
 
-Rode estas no recurso do Application Insights (painel *Logs*). Ajuste o intervalo de tempo conforme
+Execute estas consultas no recurso do Application Insights (painel *Logs*). Ajuste o intervalo de tempo conforme
 necessário.
 
 **Tempo médio de assinatura (local), últimas 24 h:**
@@ -211,16 +212,16 @@ exceptions
 ## Por que não há `customEvents`
 
 O Bulk Signer usa a **distro do Azure Monitor OpenTelemetry**, que não tem equivalente ao `TrackEvent` —
-o OpenTelemetry não tem uma primitiva de "evento customizado". Os passos do ciclo de vida são, portanto,
-modelados como **eventos de span** no span por job e consultados pela tabela `dependencies` e seu
-`customDimensions`, e não por `customEvents`. Consultas escritas contra uma aplicação com o SDK clássico
-precisarão de adaptação.
+o OpenTelemetry não tem uma primitiva de "evento personalizado". Por isso, os passos do ciclo de vida são
+modelados como **span events** no span por job e consultados pela tabela `dependencies` e seu
+`customDimensions`, e não por `customEvents`. Consultas escritas para uma aplicação com o SDK clássico
+precisarão ser adaptadas.
 
 ## Relacionados
 
-- [Estatísticas de jobs](statistics.md) — os tempos por etapa do dashboard, mantidos na base operacional
-  e lidos no escopo da implantação.
-- [API REST](rest-api.md) — o endpoint Prometheus `/api/metrics`, o registro durável baseado em coleta.
+- [Estatísticas de jobs](statistics.md) — os tempos por etapa do dashboard, mantidos no banco de dados
+  operacional e lidos no escopo de toda a implantação.
+- [API REST](rest-api.md) — o endpoint Prometheus `/api/metrics`, o registro durável, baseado em coleta (scrape).
 - [Configuração](configuration.md) — cada chave de configuração.
 - [Segurança](security.md) — tratamento de segredos e o mascaramento de logs em duas camadas.
 

@@ -103,6 +103,7 @@ its `operation_Id` for correlation:
 | `JobFailed` | Terminal failure (span status `Error`) |
 | `JobCanceled` | Operator cancel (a standalone `signing.job.canceled` trace) |
 | `DispatchedToSigner` | Lacuna Signer job handed off (remote path — partial coverage) |
+| `Cnab240PaymentDateCheckSkipped` | A CNAB240 remessa whose earliest payment date had passed was let through rather than refused, because the profile's payment-date check (or CNAB240 checking) is off — a decision, not a signature |
 
 ### Dependencies — PKI SDK calls
 

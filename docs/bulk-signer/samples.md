@@ -14,23 +14,23 @@ sidebar_position: 17
 
 ## Descriptografando envelopes BSENC
 
-Os dois primeiros scripts são implementações de referência da receita de descriptografia do BSENC v1
-(veja [Criptografia](encryption.md)). Ambos aceitam a senha, o salt e a contagem de iterações por flags
-de linha de comando, leem o envelope `.enc` de um caminho, e escrevem o artefato assinado
-descriptografado (em texto claro) em um caminho.
+Os dois primeiros scripts são implementações de referência do procedimento de descriptografia do BSENC
+v1 (veja [Criptografia](encryption.md)). Os dois recebem a senha, o salt e o número de iterações por
+flags de linha de comando, leem o envelope `.enc` de um caminho e gravam o artefato assinado
+descriptografado (em texto claro) em outro caminho.
 
-Eles são implementações de referência — adapte-os, ou escreva o seu próprio em qualquer linguagem com
-primitivas de PBKDF2-HMAC-SHA256 e AES-256-GCM. Ambos usam estes códigos de saída:
+São implementações de referência — adapte-as ou escreva a sua própria em qualquer linguagem que ofereça
+primitivas de PBKDF2-HMAC-SHA256 e AES-256-GCM. Os dois usam estes códigos de saída:
 
 | Código de saída | Significado |
 |-----------------|-------------|
 | `0` | sucesso |
-| `1` | erro de formato irrecuperável (magic inválido, versão não suportada, arquivo truncado) |
+| `1` | erro de formato irrecuperável (magic number inválido, versão sem suporte, arquivo truncado) |
 | `2` | a descriptografia falhou (senha / salt / iterações errados, ou arquivo corrompido) |
 | `3` | erro de linha de comando / E/S |
 
-:::note Os scripts abaixo são reproduzidos exatamente como são entregues
-O código, seus comentários e o texto que eles imprimem permanecem em inglês, para que o que você lê aqui
+:::note Os scripts abaixo são reproduzidos exatamente como são distribuídos
+O código, seus comentários e o texto que eles exibem permanecem em inglês, para que o que você lê aqui
 seja idêntico, byte a byte, aos arquivos do pacote de implantação.
 :::
 
@@ -233,7 +233,7 @@ if __name__ == "__main__":
 
 ## PowerShell 7+ — `Decrypt-Bsenc.ps1`
 
-Somente biblioteca padrão — o PowerShell 7+ é necessário para o
+Usa somente a biblioteca padrão — o PowerShell 7+ é necessário para o
 `System.Security.Cryptography.AesGcm` e para a sobrecarga estática `Rfc2898DeriveBytes.Pbkdf2`.
 
 ```powershell
@@ -436,35 +436,35 @@ exit 0
 ## PowerShell 7+ — `Import-PfxToKeyVault.ps1`
 
 Provisiona um PFX existente para uso com a origem de certificado `AzureKeyVault` (veja
-[Certificados](certificates.md#origem--azurekeyvault)). Em uma passada, ele importa a chave privada
-para o cofre como uma **chave não exportável**, grava o certificado público como um `.cer`, registra uma
-aplicação do Microsoft Entra ID, concede a ela permissão para assinar com aquela chave, verifica o par, e
-imprime um bloco de configuração pronto para colar.
+[Certificados](certificates.md#origem--azurekeyvault)). Em uma única execução, ele importa a chave
+privada para o cofre como uma **chave não exportável**, grava o certificado público como um `.cer`,
+registra um aplicativo no Microsoft Entra ID, concede a ele permissão para assinar com essa chave,
+verifica o par e exibe um bloco de configuração pronto para colar.
 
-Requer PowerShell 7+ e os módulos `Az.Accounts`, `Az.KeyVault` e `Az.Resources`. Autentique-se antes com
-`Connect-AzAccount`. Suporta `-WhatIf` — rode-o assim uma vez para ver o que ele faria.
+Requer o PowerShell 7+ e os módulos `Az.Accounts`, `Az.KeyVault` e `Az.Resources`. Autentique-se antes
+com `Connect-AzAccount`. Aceita `-WhatIf` — execute-o assim uma vez para ver o que ele faria.
 
 O script **não** cria o cofre; aponte-o para um que já exista.
 
 :::warning Por que um objeto key e não um objeto certificate
-O Key Vault pode guardar um PFX das duas formas, e apenas uma delas é genuinamente não exportável.
-Importada como **key**, o material privado nunca pode ser recuperado — a assinatura acontece dentro do
-cofre. Importada como **certificate**, ela é marcada como exportável e o PFX inteiro pode ser baixado do
-segredo que o respalda, então qualquer um com `secrets/get` pode ir embora com a chave. Este script
-importa uma chave, e é por isso que o Bulk Signer precisa que o certificado público seja fornecido
-separadamente, como um `.cer` local.
+O Key Vault pode guardar um PFX das duas formas, e apenas uma delas é realmente não exportável. Quando
+o PFX é importado como **key**, o material privado nunca pode ser recuperado — a assinatura acontece
+dentro do cofre. Quando é importado como **certificate**, ele é marcado como exportável, e o PFX inteiro
+pode ser baixado do segredo associado a ele, então qualquer pessoa com `secrets/get` pode levar a chave
+embora. Este script importa uma chave, e é por isso que o Bulk Signer precisa que o certificado público
+seja fornecido separadamente, como um `.cer` local.
 :::
 
 :::warning Guarde o PFX
-O PFX continua existindo em disco depois que isto roda. Uma vez confirmado que a assinatura funciona,
-mova-o para backup offline e remova-o do host — deixá-lo no lugar derruba o propósito de colocar a chave
-em um cofre. **Não destrua sua única cópia:** o Key Vault não devolverá a chave, então o PFX (ou um blob
-de `Backup-AzKeyVaultKey`) é seu único artefato de recuperação de desastre.
+O PFX continua no disco depois que o script é executado. Depois de confirmar que a assinatura funciona,
+mova-o para um backup offline e remova-o do host — deixá-lo lá anula o propósito de colocar a chave em um
+cofre. **Não destrua sua única cópia:** o Key Vault não devolve a chave, então o PFX (ou um blob de
+`Backup-AzKeyVaultKey`) é o seu único artefato de recuperação de desastres.
 :::
 
-O operador que o executa precisa de: **Key Vault Crypto Officer** no cofre (para importar uma chave),
-**Application Developer** ou superior no Entra ID (para registrar uma aplicação), e **User Access
-Administrator** ou **Owner** no cofre (para criar a atribuição de role — não necessário em um cofre com
+O operador que executa o script precisa de: **Key Vault Crypto Officer** no cofre (para importar uma
+chave), **Application Developer** ou superior no Entra ID (para registrar um aplicativo) e **User Access
+Administrator** ou **Owner** no cofre (para criar a atribuição de role — desnecessário em um cofre com
 políticas de acesso).
 
 ```powershell
@@ -922,11 +922,11 @@ exit 0
 
 ## PowerShell 7+ — `New-BulkSignerEntraApp.ps1`
 
-Acompanha o pacote de implantação, ao lado dos dois acima. Ele automatiza os passos 1, 2 e 4 do
-[passo a passo do Microsoft Entra ID](installation.md#login-pelo-microsoft-entra-id-opcional) através do
-Microsoft Graph, cria o client secret, e imprime um bloco de configuração pronto para colar. **O passo 3
-— atribuir pessoas às roles — permanece manual**, no centro de administração do Entra, em Aplicativos
-empresariais → Usuários e grupos.
+Vem no pacote de implantação, junto com os dois acima. Ele automatiza os passos 1, 2 e 4 do
+[passo a passo do Microsoft Entra ID](installation.md#login-pelo-microsoft-entra-id-opcional) por meio do
+Microsoft Graph, cria o client secret e exibe um bloco de configuração pronto para colar. **O passo 3
+— atribuir pessoas às roles — continua manual**, no centro de administração do Entra, em Enterprise
+applications → Users and groups.
 
 **Pré-requisitos:**
 
@@ -934,8 +934,9 @@ empresariais → Usuários e grupos.
 Install-Module Microsoft.Graph.Applications -Scope CurrentUser
 ```
 
-mais uma conta capaz de consentir com o escopo delegado `Application.ReadWrite.All` (Application
-Administrator ou Global Administrator).
+além de uma conta capaz de dar consentimento ao escopo delegado `Application.ReadWrite.All` — Cloud
+Application Administrator é a role de menor privilégio que consegue fazer isso; Application
+Administrator e Global Administrator também conseguem.
 
 ```bash
 pwsh ./New-BulkSignerEntraApp.ps1 -BaseUrl https://signer.example.com
@@ -945,29 +946,30 @@ pwsh ./New-BulkSignerEntraApp.ps1 -BaseUrl https://signer.example.com
 |-----------|-------------|--------|-------------|
 | `-BaseUrl` | sim | — | A origem pública a partir da qual o dashboard é servido. A URI de redirecionamento é derivada dela como `<BaseUrl>/signin-oidc`. Precisa ser uma origem `http(s)` absoluta. |
 | `-DisplayName` | não | `Lacuna Bulk Signer` | Nome de exibição do registro de aplicativo. |
-| `-SecretValidityMonths` | não | `12` | Tempo de vida do client secret, 1–24. |
+| `-SecretValidityMonths` | não | `12` | Validade do client secret, de 1 a 24 meses. |
 
 O que ele cria:
 
-- Uma aplicação de **tenant único**, com as permissões delegadas `openid` / `profile` / `email` que o
-  handler OIDC requisita. A claim `email` também é declarada como claim opcional do ID token, porque o
-  casamento com o pool de aprovadores vincula por ela e não há alternativa por UPN.
-- As **duas app roles** com os valores exatos com que o host faz o casamento — `Administrator` e
+- Um aplicativo de **tenant único**, com as permissões delegadas `openid` / `profile` / `email` que o
+  handler OIDC solicita. A claim `email` também é declarada como claim opcional do ID token, porque a
+  correspondência com o pool de aprovadores é feita por ela e não há alternativa por UPN.
+- As **duas app roles**, com os valores exatos que o host usa na correspondência — `Administrator` e
   `Approver`.
-- A **aplicação empresarial** com *Atribuição necessária = Sim*, para que contas não atribuídas falhem já
-  na porta da Microsoft. O host impõe a presença da role de qualquer forma.
+- O **aplicativo empresarial** (enterprise application) com *Assignment required = Yes*, para que contas
+  não atribuídas sejam barradas já no login da Microsoft. O host exige a presença da role de qualquer
+  forma.
 
-Ele **se recusa a criar uma duplicata**: um segundo registro com o mesmo nome de exibição é quase sempre
-uma reexecução, e dois aplicativos carregando as mesmas roles são uma armadilha de gestão, e não
-redundância. Passe um `-DisplayName` diferente, ou apague o registro existente primeiro.
+Ele **se recusa a criar uma duplicata**: um segundo registro com o mesmo nome de exibição quase sempre é
+uma reexecução, e dois aplicativos com as mesmas roles são uma armadilha de gestão, e não redundância.
+Informe um `-DisplayName` diferente ou exclua antes o registro existente.
 
 :::danger O client secret é exibido uma única vez, por este script
 Guarde-o como a variável de ambiente `Auth__EntraId__ClientSecret` (recomendado) ou em um
 `appsettings.Production.json` não versionado — nunca no controle de versão. Veja
-[Segurança](security.md#authentraidclientsecret) para onde cada alvo de implantação deve guardá-lo.
+[Segurança](security.md#authentraidclientsecret) para saber onde cada alvo de implantação deve guardá-lo.
 
-Um segredo expirado falha no momento do login com um erro `AADSTS`, e não no boot. Rotacione-o antes de
-ele expirar.
+Um segredo expirado provoca falha no login, com um erro `AADSTS`, e não no boot. Faça a rotação antes
+que ele expire.
 :::
 
 ---

@@ -56,6 +56,13 @@ new folders (e.g. `signer/on-premises/configuracao/`) carry a `slug:` in their
 front matter pinning them to their classic URL. There is no automatic language
 detection or redirect — language switching is manual via the navbar.
 
+## Writing Portuguese pages
+
+Terminology and style decisions for `docs/` — which technical terms stay in English, how product
+concepts are translated, and the calques to avoid — are in
+[`translation/glossario-pt-br.md`](translation/glossario-pt-br.md). The folder is outside the docs
+trees, so it is not published.
+
 ## Deployed Site
 
 The production site is published via GitHub Pages / GitHub Actions (see

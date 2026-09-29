@@ -26,6 +26,16 @@ Environment-variable mapping follows the ASP.NET Core rule: a JSON key like
 `Signing:Certificate:Pfx:Password` maps to `Signing__Certificate__Pfx__Password` (double underscore
 is the separator).
 
+:::warning Changed in 2.3.1 — the shipped `appsettings.json` is production-neutral
+The `appsettings.json` inside the binaries and the image declares **no signing profiles, no `Signer`
+block and no secret of any kind** — not even a placeholder `Auth:ApiKey`. It matters because it is read
+under every environment name, and configuration can override a key but never remove one: before 2.3.1,
+sample profiles in that file merged underneath profiles declared as environment variables. The one
+consequence at the upgrade: a deployment that never set `Auth:ApiKey` itself was running on the old
+placeholder and now **refuses to start, naming the key**. Set `Auth__ApiKey` as every install path
+describes.
+:::
+
 ## Markers used in the tables
 
 | Marker | Meaning |
@@ -41,7 +51,7 @@ Standard `Microsoft.Extensions.Logging` knobs (`Logging:LogLevel:*`) work as usu
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
 | `Logging:LogLevel:Default` | string | `Information` | `Logging__LogLevel__Default` | Standard logging level. |
-| `Logging:LogLevel:Microsoft.AspNetCore` | string | `Warning` | `Logging__LogLevel__Microsoft.AspNetCore` | Lowers framework chatter. |
+| `Logging:LogLevel:Microsoft.AspNetCore` | string | `Warning` | `Logging__LogLevel__Microsoft.AspNetCore` | Lowers framework chatter. The same `Warning` floor is applied in code to `Microsoft.AspNetCore` and to Entity Framework Core's database-command category, so neither the request pipeline nor every executed SQL statement reaches the log at `Information`. Failed commands still log. |
 | `Logging:File:Path` | string | `data/logs/bulksigner-.log` | `Logging__File__Path` | **REQUIRED.** File-sink path template. The trailing `-` before `.log` plus daily rolling produces `bulksigner-yyyyMMdd.log`. |
 | `Logging:File:RollingInterval` | string | `Day` | `Logging__File__RollingInterval` | One of `Day`, `Hour`, `Minute`, `Infinite`. |
 | `Logging:File:FileSizeLimitBytes` | long | `50000000` | `Logging__File__FileSizeLimitBytes` | Per-file cap; the sink rolls to `…_001.log` past this. Bounds: 64 KB to 10 GB. |
@@ -278,7 +288,76 @@ Validation fails fast at startup if any required key is missing or invalid.
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
 | `Signing:PkiSdkLicense` | string | `""` | `Signing__PkiSdkLicense` | **REQUIRED, SECRET.** Lacuna PKI SDK license string (base64). Environment-variable form preferred. |
+| `Signing:ProfileSecretsKey` | string | `""` | `Signing__ProfileSecretsKey` | **SECRET.** The key every secret held by a *stored* signing profile is encrypted under. Leave it unset unless the deployment's profiles carry a secret — see [below](#signingprofilesecretskey--what-stored-profile-secrets-are-encrypted-under). |
+| `Signing:TrustLacunaTestRoot` | bool | `false` | `Signing__TrustLacunaTestRoot` | Also trust the **Lacuna test PKI root** — the issuer of the Turing / Fermat test certificates — for a homologation environment. **Refused at boot when `ASPNETCORE_ENVIRONMENT` is `Production`.** Not a secret. See [below](#signingtrustlacunatestroot--test-certificates-for-a-homologation). |
 | `Signing:Certificate:Source` | enum | `Pfx` | `Signing__Certificate__Source` | **REQUIRED.** One of `Pfx`, `Pkcs11`, `WindowsStore`, `AzureKeyVault`. Only the matching subtree below is consulted. |
+
+### `Signing:ProfileSecretsKey` — what stored profile secrets are encrypted under
+
+Signing profiles live in the operational store (see
+[`Signing:Profiles[]`](#signingprofiles--per-folder-signing-profiles)), so this key is **required by any
+deployment whose profiles carry a secret** — a PKCS#12 password, an Azure Key Vault application secret,
+a signing material blob credential, or a PKCS#12 file uploaded through the dashboard. Each is encrypted
+under it, and the store never holds any of them in the clear.
+
+**Set it before the first boot that imports profiles**, and before anyone creates a profile carrying a
+secret from the dashboard. The import refuses rather than writing a secret it cannot protect, naming this
+key, its environment variable and the profiles that carry a secret; the dashboard's create and edit forms
+refuse the same way. A deployment whose profiles carry no secret at all — a passwordless PFX, a PKCS#11
+token whose PIN is an environment variable, a Windows store certificate, a profile whose approvers sign —
+needs no key and is never asked for one.
+
+It is deliberately **not** in the database: a key stored beside its ciphertext protects against nothing
+that matters. That is also why the session key ring is not reused for it — under `Cluster:Enabled` that
+ring is itself rows in the same store (see
+[The session key ring](#the-session-key-ring-has-no-key-of-its-own-and-needs-none)).
+
+Three cases, decided differently on purpose:
+
+- **Protected profile data in the store and no key to read it with** stops the boot. The fix is an
+  environment variable, not a row in a database you would need the service running to reach.
+- **An import or a save that would create protected data with no key** is refused at that moment, so a
+  store never ends up holding a value nothing can open.
+- **A key that is set but *wrong*** — rotated, restored from elsewhere, mistyped — is **not** a refusal.
+  The service starts, the profiles it cannot read come up **degraded** (named on the startup banner and on
+  `/api/ready`), and every profile without a secret keeps signing. Setting an environment variable fixes a
+  missing key; it fixes nothing about a rotated one, so refusing would be permanent.
+
+:::danger Losing this key means re-entering every affected profile's certificate secret
+There is no escrow and no recovery path, and rotating it has the same effect as losing it. Back it up
+wherever the encryption password, `ApproverPortal:LinkSecret` and `ApproverSecondFactor:SeedSecret` are
+backed up. The recovery, if it happens, is to re-enter each named profile's password or credential from
+its page on the dashboard and restart.
+:::
+
+The **PKCS#11 PIN is not one of the values this protects** and never becomes one: it stays read from the
+environment variable named by `Pkcs11:PinEnvVar`, and a PIN written anywhere it could be read back is
+refused at boot.
+
+### `Signing:TrustLacunaTestRoot` — test certificates for a homologation
+
+The service holds every signature to **the ICP-Brasil roots alone** — the profile key when it signs, the
+verifier afterwards, and an approver's certificate before the token is asked for a PIN — with nothing
+from the operating system's store. Lacuna's public **test PKI** (the Turing / Fermat test certificates)
+is not under them, so by default a job signed with one fails and an approver presenting one is refused as
+`approval.certificate-invalid`.
+
+`Signing:TrustLacunaTestRoot = true` widens the trust set to ICP-Brasil, the PKI SDK's Windows trust set
+(the machine store on Windows) and the Lacuna test root, for a homologation environment that wants to run
+the released product with the test certificates instead of buying a real e-CPF for every approver. Three
+things to know:
+
+- **It is refused under the environment name `Production`.** The boot fails naming the key, the
+  environment and the remedy: a homologation host says `ASPNETCORE_ENVIRONMENT=Staging` (or any name
+  other than `Production`). Azure App Service defaults the name to `Production` when nothing sets it, so
+  there the two settings go together.
+- **It is one trust set for the whole host.** Every profile's key, every verification and every
+  approver's certificate are held to the same roots; there is no per-profile form. The startup banner's
+  `trust set` row names the Lacuna test root when it is on, and the console and the durable log carry a
+  warning at every boot.
+- **It is not a secret.** A root certificate is public material and the key is a boolean.
+
+Leave it unset on every deployment that signs anything real.
 
 ### `Signing:Certificate:Pfx` — when `Source = Pfx`
 
@@ -350,8 +429,18 @@ a PKCS#12 file, so **a leaked account key is your signing key.** Prefer `Managed
 :::
 
 The file is read **once, at boot** — a renewed blob needs a restart, exactly as a renewed local file
-does — and an unreachable blob **stops the host from starting**, because a profile with no signing
-material cannot sign at all. See [Certificates](certificates.md#reading-the-file-from-a-blob).
+does. The shape rules above (both or neither, a missing `Url` or `Credential`, a query string) are
+refused at boot, but an **unreachable or unreadable blob leaves that profile degraded** and the host
+running: it is named on the startup banner, in the durable log and on `/api/ready`, jobs routed to it
+fail with `profile.degraded`, and every other profile keeps signing. See
+[Certificates](certificates.md#reading-the-file-from-a-blob).
+
+:::warning Changed in 2.1.0 — a certificate that will not open no longer stops the host
+Up to 2.0.x, one profile whose certificate failed to load — a mistyped path, a wrong password, an
+unreachable blob or vault — refused the whole boot. Profiles are now edited from the dashboard, and a
+page served by a host that refuses to start is no recovery path, so that profile alone is **degraded**
+instead. Fix the certificate and **restart**: a key is opened once at startup and never reloaded.
+:::
 
 See [Certificates](certificates.md) for thumbprint discovery commands, the Azure setup walkthrough,
 and a deeper look at each source.
@@ -359,30 +448,69 @@ and a deeper look at each source.
 ## `Signing:Profiles[]` — per-folder signing profiles
 
 A **signing profile** bundles every per-folder decision (format, certificate, verify, encrypt,
-certificate validation) under a name. Watched folders reference the profile by name via
-`Storage:Inputs[].Profile`. Two configuration modes are supported:
+certificate validation, approval) under a name. A profile chooses the watched folder it feeds from,
+**one folder per profile**; `Storage:Inputs[].Profile` is only the seed's input for that choice (see
+[below](#storageinputsprofile--per-folder-routing)).
 
-- **Legacy mode** (default — `Signing:Profiles[]` omitted or empty). The service synthesises one
-  profile named `default` from the existing `Signing:Certificate` block. No config changes are
-  needed for a simple single-certificate install.
+:::warning Changed in 2.1.0 — this section is a one-time seed, not the source of truth
+Signing profiles live in the **operational store**. On the **first boot against an empty profile
+table** the keys below are imported as rows; from then on the store is authoritative and **this section
+is ignored**. Nothing is merged, and editing it after that first boot has no effect — the startup log
+says so, naming the section, on every boot that finds it still populated. Keep it if you want a fresh
+deployment to come up configured; remove it once the profiles are in the store.
+
+From then on a profile is read, **created** and edited on the dashboard's **Signing profiles** page —
+its behaviour (the format and the on/off stances below), its input folder, its approval rule and its
+certificate — and it is **disabled** there rather than deleted. The same page is where to look after the
+first boot to confirm what the seed imported. See [Dashboard](dashboard.md).
+:::
+
+**A change to a stored profile takes effect without a restart — except its certificate.** Every
+profile write is noticed by the pipeline on the poll it already runs, so an edited profile governs the
+next job claimed — format, `Verify`, `Encrypt`, `CheckCNAB240`, `CheckCnab240PaymentDates`, the input
+folder and the whole approval rule — within one `Pipeline:PollIntervalSeconds` on every instance. A
+**certificate** change is stored at once but takes a **restart**: a profile holds an open private-key
+handle, and swapping a key under a job that is mid-signature is not a risk worth taking for a field that
+changes about once a year. Until the restart the profile is marked as waiting for one, and the profile
+list, the banner and each job's recorded source keep naming the certificate actually in force — which is
+what keeps a job's audit record honest about what signed it.
+
+Two configuration modes are supported, and both describe what gets **seeded**:
+
+- **Legacy mode** (default — `Signing:Profiles[]` omitted or empty). One profile named `default` is
+  derived from the existing `Signing:Certificate` block plus `Encryption:Enabled` and written as a real
+  row. No config changes are needed for a simple single-certificate install.
 - **Profile mode** (declare `Signing:Profiles[]`). Each entry is a named profile with its own
   certificate and posture. `Signing:Certificate` is ignored. Every entry validates as if it were
   the global certificate block — the same `Pfx` / `Pkcs11` / `WindowsStore` / `AzureKeyVault` rules
   apply per profile.
 
+**A profile carrying a secret needs
+[`Signing:ProfileSecretsKey`](#signingprofilesecretskey--what-stored-profile-secrets-are-encrypted-under)
+set before that first boot.** A PKCS#12 password, an Azure Key Vault application secret or a signing
+material blob credential is encrypted at rest, and the import refuses rather than writing one in the
+clear.
+
+The rules in the table below are enforced **wherever a profile changes**: at the seed for an entry
+declared here, and on the dashboard's forms for a profile created or edited there. A profile already in
+the store is never re-validated at boot, so a rule tightened by an upgrade shows up as a warning or a
+degraded profile rather than as a host that will not start.
+
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
-| `Signing:Profiles[].Name` | string | n/a | `Signing__Profiles__0__Name` | **REQUIRED.** Same regex as folder names: `^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$`. Unique across the list. The name is referenced from `Storage:Inputs[].Profile` and surfaces in metric labels, dashboard chips, and audit messages. |
-| `Signing:Profiles[].Format` | enum | n/a | `Signing__Profiles__0__Format` | **REQUIRED** for every operator-declared profile: `Pades`, `Cades`, `Xades`, or `XmlNFe`. Only the synthesised legacy default may leave this unset — in which case the format is detected per file by extension. |
-| `Signing:Profiles[].Method` | enum | `Local` | `Signing__Profiles__0__Method` | `Local` (sign with the configured local certificate) or `LacunaSigner` (dispatch to Lacuna Signer for a human participant). See [Lacuna Signer integration](lacuna-signer.md). |
-| `Signing:Profiles[].Verify` | bool | `true` | `Signing__Profiles__0__Verify` | When false, the worker skips the post-sign verification round-trip. The startup banner emits a warning so the low-trust posture is operator-visible. |
+| `Signing:Profiles[].Name` | string | n/a | `Signing__Profiles__0__Name` | **REQUIRED.** Same regex as folder names: `^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$`. Unique across the list. The name is what the seed's `Storage:Inputs[].Profile` and a REST upload's `?profile=` refer to, and it surfaces in metric labels, dashboard chips, and audit messages. |
+| `Signing:Profiles[].Enabled` | bool | `true` | `Signing__Profiles__0__Enabled` | Whether new files may be routed at this profile. A profile is **disabled, never deleted**, so historical jobs keep resolving to a real rule and jobs already queued against a disabled one run to completion. Enforced where files enter: a watched folder, an upload, a rescan and a retry are all refused with `profile.disabled`. Set from the profile's page after the first boot; disabling there is **refused while the profile feeds from a watched folder**, naming it — clear the folder in the same save, or give it to another profile first. `default` cannot be disabled at all — `Enabled: false` on it is a boot refusal, since that is where an upload that names no profile lands. |
+| `Signing:Profiles[].Format` | enum | n/a | `Signing__Profiles__0__Format` | **REQUIRED** for every profile except `default`: `Pades`, `Cades` or `Xades`. Only `default` — the profile an upload that names no profile lands on — may leave it unset, in which case the format is detected per file by extension. |
+| `Signing:Profiles[].Method` | enum | `Local` | `Signing__Profiles__0__Method` | `Local` (sign with the configured local certificate) or `LacunaSigner` (dispatch to Lacuna Signer for a human participant). A `LacunaSigner` profile is refused on a host with no [`Signer`](#signer--lacuna-signer-connection) section. See [Lacuna Signer integration](lacuna-signer.md). |
+| `Signing:Profiles[].Verify` | bool | `true` | `Signing__Profiles__0__Verify` | When false, the worker skips the post-sign verification round-trip. The startup banner emits a warning so the low-trust posture is operator-visible, and turning it off from the dashboard asks for confirmation first. |
 | `Signing:Profiles[].Encrypt` | bool | `false` | `Signing__Profiles__0__Encrypt` | When true, the worker AES-256-GCM-encrypts the signed output. Requires `Encryption:Enabled = true` (the validator refuses the broken combination at startup). |
-| `Signing:Profiles[].ValidateCertificate` | bool | `true` | `Signing__Profiles__0__ValidateCertificate` | When false, the worker skips the pre-sign certificate chain / revocation check. The startup banner emits a warning. **Must be `false` when `Method = LacunaSigner`** — there is no local cert to validate. |
+| `Signing:Profiles[].ValidateCertificate` | bool | `true` | `Signing__Profiles__0__ValidateCertificate` | When false, the worker skips the pre-sign certificate chain / revocation check. The startup banner emits a warning. The `default` profile derived in legacy mode carries `false`, preserving the behaviour of installs that predate profiles. **Must be `false` when `Method = LacunaSigner`** — there is no local cert to validate. |
 | `Signing:Profiles[].PreserveFileExtension` | bool | `false` | `Signing__Profiles__0__PreserveFileExtension` | When true, the signed output keeps the original file's extension using the PAdES-style `.signed` infix: CAdES writes `remessa.signed.rem` instead of `remessa.rem.p7m`; XAdES writes `nota.signed.nfe` instead of `nota.signed.xml`. **Only valid when `Format = Cades` or `Xades`** — PAdES output already preserves `.pdf`, so the validator refuses the flag there. Use when a downstream system (a bank ingesting signed remessas, say) requires the original extension. |
 | `Signing:Profiles[].SaveAsPem` | bool | `false` | `Signing__Profiles__0__SaveAsPem` | When true, the CAdES signature is written PEM-encoded (`-----BEGIN PKCS7-----` armor) instead of raw DER, and the output name becomes `<name>.pem` instead of `<name>.p7m`. **Only valid when `Format = Cades`.** Verification always runs on the DER bytes before the PEM encoding; with `Encrypt = true` the BSENC envelope wraps the PEM text. May be combined with `PreserveFileExtension`, in which case the name follows that flag and only the content is PEM. |
-| `Signing:Profiles[].CheckCNAB240` | bool | `false` | `Signing__Profiles__0__CheckCNAB240` | When true, every file routed through this profile is parsed and validated as a Banco do Brasil CNAB240 **remessa** before it is signed. A non-compliant file never reaches the signer: the job goes to `Failed` with `ErrorMessage = cnab240.invalid`, the staged copy is relocated to the error folder, and the violations are recorded on the job history. Applies to both `Local` and `LacunaSigner`. Validation is structural only — see [CNAB240 payment files](cnab240.md). Key matching is case-insensitive, so `CheckCnab240` also binds. |
-| `Signing:Profiles[].Approval` | nested | absent | `Signing__Profiles__0__Approval__…` | Optional. Present means jobs on this profile park in `AwaitingApproval` before any signature exists. **Only valid alongside `CheckCNAB240 = true`.** See below. |
-| `Signing:Profiles[].Certificate.*` | nested | n/a | `Signing__Profiles__0__Certificate__…` | **REQUIRED when `Method = Local`.** Same shape as the global `Signing:Certificate` block. Each profile loads its own certificate at boot; misconfiguration on any profile fails startup with an aggregated error. **Refused when `Method = LacunaSigner`.** |
+| `Signing:Profiles[].CheckCNAB240` | bool | `false` | `Signing__Profiles__0__CheckCNAB240` | When true, every file routed through this profile is parsed and validated as a Banco do Brasil CNAB240 **remessa** before it is signed. A non-compliant file never reaches the signer: the job goes to `Failed` with `ErrorMessage = cnab240.invalid`, the staged copy is relocated to the error folder, and the violations are recorded on the job history and as a `Cnab240ValidationFailed` operational event. Applies to both `Local` and `LacunaSigner`. Validation is structural only — see [CNAB240 payment files](cnab240.md). Key matching is case-insensitive, so `CheckCnab240` also binds. |
+| `Signing:Profiles[].CheckCnab240PaymentDates` | bool | `true` | `Signing__Profiles__0__CheckCnab240PaymentDates` | *New in 2.15.0.* Read only when `CheckCNAB240` is true. When true (the default), a remessa whose earliest *Data do Pagamento* has passed is refused at the sign call with `ErrorMessage = cnab240.payment-date-passed`. When false, such a file signs, and the job history and a `Cnab240PaymentDateCheckSkipped` operational event record that it was stale — for a bank that processes past-dated payments on the next business day. Structural validation is unaffected. Read at the signature, never frozen onto a job, so a change reaches the next signature without a restart, a parked job included. See [CNAB240 payment files](cnab240.md#payment-dates-that-have-passed). |
+| `Signing:Profiles[].Approval` | nested | absent | `Signing__Profiles__0__Approval__…` | Optional. Present means jobs on this profile park in `AwaitingApproval` before any signature exists. **Only valid alongside `CheckCNAB240 = true`** — refused at the seed, and refused from either side on the profile's page afterwards (an approval rule cannot be added while the check is off, and the check cannot be turned off while a rule stands). A job that nonetheless reaches the gate without the parse fails as `approval.content-unmeasured` rather than parking. See below. |
+| `Signing:Profiles[].Certificate.*` | nested | n/a | `Signing__Profiles__0__Certificate__…` | **REQUIRED when `Method = Local`**, unless the profile is keyless (`Approval.Signers = Approvers`, below). Same shape as the global `Signing:Certificate` block. A shape mistake in any entry — a missing key, both a path and a blob — fails startup with an aggregated error; a certificate that is well-formed but **will not open** leaves that profile degraded and the host running. **Refused when `Method = LacunaSigner`.** |
 | `Signing:Profiles[].Signer.Name` | string | n/a | `Signing__Profiles__0__Signer__Name` | **REQUIRED when `Method = LacunaSigner`.** Display name of the participant Lacuna Signer will send the document to. |
 | `Signing:Profiles[].Signer.Email` | string | n/a | `Signing__Profiles__0__Signer__Email` | **REQUIRED when `Method = LacunaSigner`.** Participant's email address — must contain `@`. |
 | `Signing:Profiles[].Signer.Identifier` | string | n/a | `Signing__Profiles__0__Signer__Identifier` | **REQUIRED when `Method = LacunaSigner`.** Participant's national identifier (CPF in Brazil). |
@@ -394,10 +522,17 @@ alongside `CheckCNAB240 = true` — an approver who cannot be shown the amount i
 meaningful, and the validator refuses the combination at startup. Applies to both `Local` and
 `LacunaSigner`. Full walkthrough: [Approvals](approvals.md).
 
+Like the rest of the profile, the block below is seed input: after the first boot the pool, the quorum,
+the wait budget and the signer set are edited from the profile's page, and the change reaches the next
+job that parks. A job already parked keeps the rule frozen onto it when it parked, so editing a pool
+never retroactively authorises anything. Removing somebody from a pool revokes their approver link
+immediately.
+
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
 | `…Approval.MinimumApprovers` | int | `1` | `Signing__Profiles__0__Approval__MinimumApprovers` | The **quorum**: how many distinct members of the pool must approve. At least 1 and no larger than the pool — a quorum bigger than the pool can never be reached, so every job would park forever, and the validator refuses it. |
-| `…Approval.ExpiresAfter` | TimeSpan | absent | `Signing__Profiles__0__Approval__ExpiresAfter` | Optional wait budget in the `d.hh:mm:ss` form — `"2.00:00:00"` is forty-eight hours. Must be positive. A job parked longer is **canceled** with the reason `Approval window expired.` and its staged copy moved to `error/`. Absent (the default) means a parked job waits indefinitely. The window is measured against the budget frozen onto the job at park time. |
+| `…Approval.ExpiresAfter` | TimeSpan | absent | `Signing__Profiles__0__Approval__ExpiresAfter` | Optional wait budget in the `d.hh:mm:ss` form — `"2.00:00:00"` is forty-eight hours. Must be positive. A job parked longer is **canceled** with the reason `Approval window expired.` and its staged copy moved to `error/`. Absent (the default) means a parked job waits indefinitely. The window is measured against the budget frozen onto the job at park time. It is a housekeeping timer, not a control on stale payments — the payment-date guard is what refuses a remessa whose dates have passed. |
+| `…Approval.Signers` | string | `ProfileKey` | `Signing__Profiles__0__Approval__Signers` | The **signer set**: whose signatures the output of a job on this profile carries — `ProfileKey` (the profile's own certificate, as before), `Approvers` (each approving person co-signs with a certificate of their own) or `ProfileKeyAndApprovers` (both). A typo is refused naming the three values. Frozen onto the job with the rest of the rule when it parks. The two sets with approvers in them need a **signature means** on this host — a [`WebPki:License`](#webpki--lacuna-web-pki-in-the-approvers-browser) for a certificate in the approver's browser, or [`CloudHub`](#cloudhub--lacuna-cloudhub-for-cloud-certificates) for one held by a cloud provider, either being enough — and a way to identify the approver (`ApproverPortal:Enabled`, or an `Auth:EntraId` section); they are refused when either is missing, and also under any `Format` other than `Cades`, since an approver's signature is a CAdES co-signature. `ProfileKeyAndApprovers` is additionally refused alongside `Method = LacunaSigner`. Under `Approvers` the profile is **keyless**: its `Certificate` block is neither required nor validated, nothing is opened for it at startup, and it is not degraded for lacking one. See [Approvals](approvals.md). |
 | `…Approval.Approvers[]` | array | `[]` | `Signing__Profiles__0__Approval__Approvers__0__…` | **REQUIRED and non-empty** when `Approval` is present. The **pool** of people permitted to approve — *not* a list of people who must all approve. With three entries and `MinimumApprovers: 1`, no individual is required. |
 | `…Approval.Approvers[].Name` | string | n/a | `…__Approvers__0__Name` | **REQUIRED.** Display name. It is what the audit record shows for this approver. |
 | `…Approval.Approvers[].Email` | string | n/a | `…__Approvers__0__Email` | **REQUIRED**, must contain `@`, and must be unique within the pool (case-insensitively). A duplicate would let one human occupy two pool slots and satisfy a quorum of two alone. Masked in console narration and durable logs; stored in full on the job's approval snapshot. |
@@ -435,9 +570,11 @@ the only moment this is catchable.
 }
 ```
 
-Startup refuses, before the first job runs: an `Approval` block without `CheckCNAB240`; an empty pool;
-a `MinimumApprovers` below 1 or larger than the pool; a malformed email, or the same email twice; a CPF
-whose check digits do not match; a non-positive `ExpiresAfter`.
+The seed refuses, before the first job runs — and the profile's page refuses on save afterwards: an
+`Approval` block without `CheckCNAB240`; an empty pool; a `MinimumApprovers` below 1 or larger than the
+pool; a malformed email, or the same email twice; a CPF whose check digits do not match; a non-positive
+`ExpiresAfter`; a signer set with approvers in it on a host with no signature means or no way to
+identify an approver.
 
 :::danger The per-job approval page is anonymous
 The gate is real — a job genuinely does not sign until enough people approve — but `/approve/{jobId}`
@@ -452,9 +589,35 @@ approvers' browsers can reach.
 
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
-| `Storage:Inputs[].Profile` | string? | `null` (→ "default") | `Storage__Inputs__0__Profile` | Optional. References a `Signing:Profiles[].Name`. Null or empty falls back to the `default` profile. Unknown names fail validation at startup. |
+| `Storage:Inputs[].Profile` | string? | `null` (→ "default") | `Storage__Inputs__0__Profile` | Optional, and **seed input**: read once, on the first boot against an empty profile table, onto the profile it names — the profile's row then carries the folder, one folder per profile, and the key is ignored on later boots. Null or empty binds the `default` profile. A folder the seed cannot bind — its profile is not in `Signing:Profiles[]`, or an earlier folder already bound that profile — is left **unassigned**, reported at startup, and shown as such on the Input page and `/api/ready`; its files wait until a profile chooses it. The host starts either way. |
+
+:::warning Changed in 2.2.0 — the profile chooses its folder
+Up to 2.1.x this key was how a folder was routed, read on every boot. Now the binding lives on the profile's row in the operational store. After the first boot a folder is
+routed, moved or unassigned from the profile's page (**Input folder**, under *Edit behaviour*) and
+**only there**: editing this key changes nothing, and the startup log says so with one warning line
+counting the folder keys it ignores. A move takes effect on the next file, on every instance, with no
+restart. Keep the key if you want a fresh deployment to come up routed; delete it once the profiles are
+in the store and that line goes away.
+:::
+
+**Nothing else under `Storage:Inputs[]` moved.** `Name`, `Path`, `Provider`, `AzureFiles`,
+`PollIntervalSeconds` and the two ignore lists are host configuration: read on every boot, validated by
+the rules under [`Storage:Inputs[]`](#storageinputs--validation-rules-enforced-at-startup) exactly as
+before, and edited nowhere on the web. The one key that left was never a fact about the folder — it said
+which signing rule the folder's files get, which is the profile's to state.
+
+A folder no profile has chosen is **unassigned**: its watcher enqueues nothing, a rescan skips it and
+says so, and its files wait. A profile bound to a folder this host no longer configures is reported on
+the startup banner, as a `profile-input-folder:` row on `/api/ready` that does not fail the probe, and
+as an alert on the dashboard's profiles page.
 
 ### Example: three profiles routed by folder, one per certificate source
+
+Profiles are independent, so a single deployment can mix key-custody models — an HSM for NF-e, a PFX on
+disk for contracts, and a vault-held key for invoices — with each watched folder feeding the one it
+needs. Which folder that is becomes each profile's choice on its page after the first boot; the
+`Profile` key on each `Storage:Inputs[]` entry seeds the choice once, on the same boot that imports these
+three.
 
 ```json
 "Signing": {
@@ -518,23 +681,43 @@ instead. Array elements are bound by **positional index**, so the secret for the
 export Signing__Profiles__2__Certificate__AzureKeyVault__AppSecret='…'
 ```
 
+Because that profile carries a secret, the first boot also needs `Signing__ProfileSecretsKey` set — the
+import encrypts the application secret under it and refuses without it. The other two carry none.
+
 :::warning
 That index is positional, not name-based. Inserting a new profile *above* `invoices` shifts it to
-index `3`, the index-`2` variable stops reaching it, and startup fails with
+index `3`, the index-`2` variable stops reaching it, and the seed fails with
 `Signing:Profiles[3].Certificate.AzureKeyVault.AppSecret is required`. Re-check every indexed
-environment variable after reordering the list.
+environment variable after reordering the list. This only matters until the seed has run: after the
+first boot the secret lives, encrypted, on the stored profile, and changing it — a rotated client
+secret, say — is done from the profile's page (*Edit certificate*) followed by a restart, not by
+changing the variable.
 :::
 
 The startup banner lists every resolved profile with its format, certificate source, and
 verify/encrypt/validate-cert flags. Profiles with `Verify=false` or `ValidateCertificate=false`
-emit additional warnings so the low-trust posture is captured in durable logs.
+emit additional warnings so the low-trust posture is captured in durable logs. A profile whose
+certificate did not open is listed with a `DEGRADED · ` prefix and the reason beside it.
 
 ## `Signer` — Lacuna Signer connection
 
 One Lacuna Signer tenant per host — the endpoint and API key are global, not per-profile. The
-validator is **self-gating**: it only enforces `Endpoint` + `ApiKey` when at least one
-`Signing:Profiles[]` entry has `Method = LacunaSigner`. Local-only deployments don't need to
-configure any of this. See [Lacuna Signer integration](lacuna-signer.md).
+validator is **self-gating on this section**: leave it out entirely and nothing here is enforced, which
+is what a local-only deployment does. Set any part of it and the whole block is validated, because a
+half-configured one is a deployment that would discover the gap at its first handoff. See
+[Lacuna Signer integration](lacuna-signer.md).
+
+:::warning Changed in 2.1.0 — the section is judged on its own, not by which profiles exist
+Until 2.0.x these keys were enforced only when some `Signing:Profiles[]` entry had
+`Method = LacunaSigner` — a question configuration can no longer answer once profiles live in the store.
+Now the requirement sits on the profile: **a profile that selects `Method = LacunaSigner` is refused —
+at the seed, or on the profile's page — when this section is absent.** The same fact decides whether the
+remote-signer poll worker runs at all, so a host with these settings is ready for a profile pointed at
+Lacuna Signer after it booted, with no restart. Two consequences at the upgrade: a **half-written
+`Signer:` block now refuses the boot** even if nothing uses it (the message names both keys and offers
+removing the section), and a host with the whole block set but no profile using it now runs the poll
+worker idle. Remove the section if this host signs everything locally.
+:::
 
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
@@ -543,6 +726,89 @@ configure any of this. See [Lacuna Signer integration](lacuna-signer.md).
 | `Signer:PollIntervalSeconds` | int | `30` | `Signer__PollIntervalSeconds` | How often the poll worker walks every `AwaitingSigner` row. Bounds: 1–3600. |
 | `Signer:TimeoutHours` | int | `168` (7 days) | `Signer__TimeoutHours` | How long a job may sit in `AwaitingSigner` before it is failed with `code = signer.timeout`. Bounds: 1–8760. |
 | `Signer:MaxConsecutiveApiFailures` | int | `5` | `Signer__MaxConsecutiveApiFailures` | Per-document consecutive transient-error budget before the poll worker gives up on that document. In-memory counter — restart resets it. |
+
+## `WebPki` — Lacuna Web PKI in the approver's browser
+
+An approver who co-signs a payment file (a profile whose
+[signer set](#signingprofilesapproval--the-approval-gate) is `Approvers` or `ProfileKeyAndApprovers`)
+can do so with a certificate on their own token or in their own certificate store, through the Lacuna
+Web PKI browser extension. The library that reaches it ships with the product and is never loaded from a
+CDN, so an approver on a LAN with no internet access still gets the page. What Web PKI needs from the
+host is a **licence bound to the deployment's domains**, and this section is where it goes.
+
+**The licence is not a secret.** It is sent to every approver's browser in clear, which is where Web PKI
+checks it against the page's domain, so it is deliberately not masked in the logs. Every surface that
+reports it says configured-or-not rather than showing it: the startup banner's `web pki license` row and
+the System page.
+
+**It is not a boot refusal either.** The rule lives where every profile rule lives — at the seed and on
+the profile's page: a profile whose signer set has approvers in it is refused, naming this key and
+`CloudHub:ApiKey`, while **neither** is configured. A licence (a certificate in the browser) or
+[`CloudHub`](#cloudhub--lacuna-cloudhub-for-cloud-certificates) (a certificate in the cloud) is a
+*signature means*, and one of the two is enough. A deployment whose signer sets are all `ProfileKey`
+needs no `WebPki` section at all. On `localhost` Web PKI works with no licence.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `WebPki:License` | string | `""` | `WebPki__License` | Required for a profile whose approvers sign, unless `CloudHub` is configured instead. Either of the two forms Lacuna issues — the binary (base64) string or the JSON document — passed to the browser as given. Bound to the deployment's domains: obtain it from Lacuna for the host names approvers will open the page on. Deliberately **not** marked SECRET. |
+
+```json
+{
+  "WebPki": {
+    "License": "<the licence Lacuna issued for this deployment's domains>"
+  }
+}
+```
+
+## `CloudHub` — Lacuna CloudHub for cloud certificates
+
+An approver whose ICP-Brasil certificate was issued into a provider's HSM — a *certificado em nuvem* —
+has nothing a browser can reach, so Web PKI cannot sign for them. Lacuna CloudHub fronts those providers
+behind one API: the product opens a session for the approver's CPF, sends their browser to the provider
+they pick, receives it back at this deployment's own address, and signs the file server-to-server with
+the certificate the provider authenticated. This section is what makes that signature means exist on a
+host; with no key, no page offers it and its callback route is unreachable.
+
+**It serves a batch as well as a file.** Since 2.14.0 the approver portal's *Approve N selected* offers
+the cloud beside the browser — and alone, on a host with no Web PKI licence — with one provider login for
+the whole batch. Nothing here configures that separately.
+
+**The key is the switch, and it is a secret.** Unlike the Web PKI licence, `CloudHub:ApiKey` is a bearer
+credential for every session this host opens, so it is masked in every log. Set it through the
+environment variable. The validator is **self-gating on the key**: leave it out and nothing here is
+enforced; set it and the whole section is validated.
+
+**`PublicBaseUrl` is required beside the key, and it is configured rather than derived.** CloudHub needs
+an absolute address to send the browser back to, and this product renders every other link relative to
+the request. Deriving the address from forwarded headers was rejected: a derived address that is wrong is
+discovered by an approver stranded at their provider, while a configured one that is wrong is refused at
+boot. Give it the scheme, host and any path prefix approvers open the portal on, with no query and no
+fragment.
+
+**It is not a boot refusal for a profile.** A profile whose approvers sign needs this section or a Web
+PKI licence, either being enough, and that rule is checked at the seed and on the profile's page. A host
+with CloudHub and no Web PKI licence is a legitimate deployment in which every approver signs in the
+cloud. Nothing probes CloudHub at boot or on `/api/ready`: the startup banner's `cloudhub` row, the
+System page and `/api/ready/details` say configured-or-not, naming the endpoint, and an outage on
+Lacuna's side never changes this host's readiness.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `CloudHub:ApiKey` | string | `""` | `CloudHub__ApiKey` | **SECRET.** The CloudHub API key Lacuna issued for this deployment. Setting it is what offers the cloud signature means. |
+| `CloudHub:Endpoint` | string | `https://cloudhub.lacunasoftware.com/` | `CloudHub__Endpoint` | Where CloudHub is. Leave it out to reach Lacuna's public instance. Must be an absolute `http(s)` URL when the key is set. |
+| `CloudHub:PublicBaseUrl` | string | `""` | `CloudHub__PublicBaseUrl` | **REQUIRED when `ApiKey` is set.** The absolute address approvers reach this deployment on — scheme, host and path prefix, no query, no fragment — which CloudHub sends the browser back to. Refused at boot when relative or malformed. |
+
+```json
+{
+  "CloudHub": {
+    "ApiKey": "<set via CloudHub__ApiKey; never in this file>",
+    "PublicBaseUrl": "https://bulksigner.example.com"
+  }
+}
+```
+
+The deployment package's env-file samples (`deploy/linux/bulksigner.env.sample`,
+`deploy/docker/.env.sample`) carry a commented `CloudHub__ApiKey=` line for exactly this.
 
 ## `Encryption`
 
@@ -565,7 +831,7 @@ Password loss is **unrecoverable** — there is no server-side decrypt endpoint 
 
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
-| `Auth:ApiKey` | string | `""` | `Auth__ApiKey` | **REQUIRED, SECRET.** Static API key, minimum 16 characters. Sent in the `X-API-Key` header by programmatic clients; pasted at `/login` by operators to receive a cookie. |
+| `Auth:ApiKey` | string | `""` | `Auth__ApiKey` | **REQUIRED, SECRET.** Static API key, minimum 16 characters. Sent in the `X-API-Key` header by programmatic clients; pasted at `/login` by operators to receive a cookie. Since 2.3.1 the shipped `appsettings.json` carries no value for it, so every deployment must set its own. |
 | `Auth:CookieName` | string | `lbs-auth` | `Auth__CookieName` | Cookie name issued by `/api/auth/login`. `SameSite=Strict`, `HttpOnly`, secure when the request was HTTPS. |
 | `Auth:ApiKeyHeader` | string | `X-API-Key` | `Auth__ApiKeyHeader` | HTTP header the API-key scheme reads. Rename only if a reverse-proxy convention forces it. |
 
@@ -616,6 +882,33 @@ authorization change. Values in the app-registration manifest must match these s
 
 A validated `returnUrl` always wins over the role-based landing, so deep links keep working.
 
+#### How a signed-in person is named
+
+**The operator's recorded name is the UPN.** Every audit event a signed-in `Administrator` writes — a
+profile created or edited, the pipeline paused, jobs cleared, a backup run — names the token's
+`preferred_username` claim, and the user menu shows the same value. The UPN rather than the display name,
+because it is unique within the tenant at any moment, where the display name is free text two people may
+share. It is the name at the time of the act, not a durable key. A token that carries no
+`preferred_username` still signs in and its events read `(anonymous)`, and the sign-in logs a warning
+naming the claim types it received. This is the operator's name only — approvers are still matched to
+pools by email, as above.
+
+**An Entra approver is greeted by the display name.** The portal's greeting shows the token's `name`
+claim, falling back to the address when the tenant withholds it — never the UPN, which for a guest is the
+`#EXT#` form. The decision is recorded against the email either way.
+
+**The second factor's window rides the tenant session.** When
+[`ApproverSecondFactor:Enabled`](#approversecondfactor) is on, an Entra approver's verification window is
+keyed to the token's `sid` claim, a default ID-token claim that needs no registration change; when a
+token carries none, the sign-in mints an identifier and logs why. **Signing out deletes the session's
+window**, because the tenant session outlives the product's local sign-out and a colleague's silent
+re-sign-in on the same workstation would otherwise inherit it.
+
+:::note Upgrading from before 2.2.1
+A dashboard session open across the upgrade to 2.2.1 or later keeps its old ticket, which does not carry
+the operator's identity into the page. **Sign out and back in once** after upgrading.
+:::
+
 #### Example — minimal configuration
 
 ```json
@@ -646,7 +939,7 @@ unit. The app-registration walkthrough is in
 |-----|------|---------|--------------|-------|
 | `Storage:Root` | string | `data` | `Storage__Root` | **REQUIRED.** Root under which `processing/`, `output/`, `error/`, `db/`, `logs/` are created. Override per target — `/var/lib/bulksigner` on Linux, `C:\ProgramData\Lacuna\BulkSigner\data` on Windows, `/var/lib/bulksigner` in Docker. |
 | `Storage:Provider` | enum | `LocalFileSystem` | `Storage__Provider` | `LocalFileSystem` or `AzureFiles`. Chooses where the **work share** — `processing/`, `output/`, `error/` — lives. `logs/` and `db/` always stay local. See below. |
-| `Storage:Inputs[]` | array of `{Name, Path, Provider?, AzureFiles?, PollIntervalSeconds?, IgnoredExtensions?, IgnoredPrefixes?, Profile?}` | `[{Name="default", Path="{Root}/input"}]` | `Storage__Inputs__0__Name`, `Storage__Inputs__0__Path`, … | One or more watched input folders. Jobs are tagged with the folder's `Name` and resolved `Profile`. See below for validation rules. |
+| `Storage:Inputs[]` | array of `{Name, Path, Provider?, AzureFiles?, PollIntervalSeconds?, IgnoredExtensions?, IgnoredPrefixes?, Profile?}` | `[{Name="default", Path="{Root}/input"}]` | `Storage__Inputs__0__Name`, `Storage__Inputs__0__Path`, … | One or more watched input folders. Jobs are tagged with the folder's `Name` and with the signing profile that chose the folder; a folder no profile has chosen is *unassigned* and enqueues nothing. See below for validation rules, and [`Storage:Inputs[].Profile`](#storageinputsprofile--per-folder-routing) for what the seed does with the one routing key. |
 
 ### `Storage:Inputs[]` — validation rules (enforced at startup)
 
@@ -829,6 +1122,7 @@ folder declaring `IgnoredExtensions: [".bak"]` filters `.bak` *and* `.tmp` etc.
 |-----|------|---------|--------------|-------|
 | `Pipeline:PollIntervalSeconds` | int | `2` | `Pipeline__PollIntervalSeconds` | How often the worker polls the queue when idle. Lower = faster pickup, more SQLite reads. Bounds: 1–3600. |
 | `Pipeline:MaxConcurrency` | int | `1` | `Pipeline__MaxConcurrency` | Upper bound on concurrent in-flight jobs. Default `1` is sequential. Increase for throughput on PFX-backed deployments. Bounds: 1–32. **PKCS#11 / WindowsStore: keep at 1 unless the token / CSP allows concurrent sessions — see [Certificates](certificates.md).** |
+| `Pipeline:RejectAlreadyProcessedFileNames` | bool | `true` | `Pipeline__RejectAlreadyProcessedFileNames` | *New in 2.13.0, on by default.* Refuses a file whose **name** a `Completed` or still-active job already carries — compared across the whole host (every watched folder, every profile, every upload) and ignoring case, because `output/` is one folder. From a watched folder or a rescan the file becomes a job that is `Failed` from the start with `file.already-processed`, moved into that job's `error/` folder unsigned; an upload is refused with `409` and the same code. `Failed` and `Canceled` jobs reserve no name, and a retry is exempt. Deleting the job that holds the name (from `/jobs`) accepts it again. **Turn it off for a producer that reuses one fixed file name every day.** |
 
 ## `WatchedFolder`
 
@@ -850,13 +1144,71 @@ polls.
 
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
-| `Upload:MaxBytes` | long | `104857600` (100 MiB) | `Upload__MaxBytes` | Hard cap on the `POST /api/files` request body. Raise for scan-heavy PDFs. Minimum 1024. |
+| `Upload:Enabled` | bool | `true` | `Upload__Enabled` | *New in 2.10.0.* Whether this host takes files by upload at all. `false` turns the surface off on both sides at once: `POST /api/files` answers `409` with `upload.disabled` — before the profile is resolved, so a refused request learns nothing about which profiles exist — and the Jobs page shows no **Upload files** button. Watched folders, rescan and retry are untouched, so a deployment fed by its folders alone loses nothing. Read once at boot; turning it back on is a restart. |
+| `Upload:MaxBytes` | long | `104857600` (100 MiB) | `Upload__MaxBytes` | Hard cap on the upload request body — `POST /api/files` and the dashboard's **Upload files** dialog alike. Raise for scan-heavy PDFs. Minimum 1024. |
 
 ## `Dashboard`
 
 | Key | Type | Default | Env override | Notes |
 |-----|------|---------|--------------|-------|
 | `Dashboard:PollIntervalSeconds` | int | `5` | `Dashboard__PollIntervalSeconds` | Server-side refresh tick for live dashboard pages. Bounds: 1–60. |
+
+## `Branding` — the customer's logo on the sign-in and approver pages
+
+*New in 2.10.0.* The sign-in page and the approver pages (`/approve/{id}`, `/approvals` and the
+link-required page) show the product mark. Name a **customer logo** here and those pages show it too:
+above a reduced product mark on the sign-in card, beside one in the approver headers. One logo per
+deployment, on white — every one of those cards is white, so a mark that only works on a dark background
+is a file to re-export. Nothing else changes: the app bar, the page titles and the favicon stay the
+product's.
+
+The logo is read **once, at startup**, from a file on the host or from an Azure blob — the same two
+places a certificate's material can be, and for the same reason: an Azure App Service host has no file
+an operator can place. Name **one** of the two. Naming neither is legal and means no logo; naming both is
+refused at boot.
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `Branding:CustomerLogo:Path` | string | — | `Branding__CustomerLogo__Path` | Path to the image file on the host — write it absolute. The extension decides the content type and must be `.png`, `.jpg`/`.jpeg`, `.webp` or `.svg`; anything else is refused at boot. On Docker, a read-only bind mount (the compose file in the deployment package has a commented example). Allowed under `Cluster:Enabled`, but the file must then be identical on every instance; nothing checks that. |
+| `Branding:CustomerLogo:Blob:Url` | string | `""` | `Branding__CustomerLogo__Blob__Url` | Full `https://` URL of the blob. A query string is refused (no SAS). The blob name's extension follows the same rule as the path's. Same block shape as a certificate's [`…:Blob`](#blob--reading-the-file-from-azure-blob-storage); nothing inherits from that block or from `Storage:AzureFiles`. |
+| `Branding:CustomerLogo:Blob:Credential` | string | — | `Branding__CustomerLogo__Blob__Credential` | `ManagedIdentity`, `ServicePrincipal` or `AccountKey`. Never defaulted. A token credential needs **Storage Blob Data Reader** on the container. |
+| `Branding:CustomerLogo:Blob:TenantId` / `AppId` / `AppSecret` | string | — | `Branding__CustomerLogo__Blob__…` | `ServicePrincipal` mode only, all three required. `AppSecret` is **SECRET** — set it via the environment. |
+| `Branding:CustomerLogo:Blob:AccountKey` | string | — | `Branding__CustomerLogo__Blob__AccountKey` | `AccountKey` mode only. **SECRET**, and it grants the whole storage account — prefer a token credential. |
+
+**Refused at boot, naming the key:** both `Path` and `Blob` set; an extension outside the five; a blob
+block missing its `Url` or `Credential`, a credential mode missing its values, or a URL with a query
+string. Each is a setting that could not have worked whatever the file holds.
+
+**Reported and survived:** the file or blob is missing, unreadable or unreachable; the file is empty or
+over **256 KiB**; the bytes are not what the extension says. The service starts, signs and serves; the
+pages show the product mark alone; and the reason is on the startup banner's `customer logo` row, in
+the startup log as a warning, and on the **System** page as an alert until the next restart.
+`/api/ready` carries no row for it — an image must not decide whether a signing service is ready. Fix
+the file or the setting and restart.
+
+**How it reaches the browser.** `GET /branding/customer-logo` serves the bytes anonymously, because the
+pages that show it are shown before sign-in. The URL carries a hash of the bytes and is cached as
+immutable, so a restart with a new file changes it everywhere at once and nobody needs to clear a cache.
+An SVG is served under a policy that stops any script it carries from running. With no logo loaded the
+route answers `404` with `branding.customer-logo-not-available`.
+
+```jsonc
+{
+  "Branding": {
+    "CustomerLogo": {
+      // A file on this host. Absolute; .png, .jpg, .jpeg, .webp or .svg; 256 KiB at most.
+      "Path": "/etc/bulksigner/customer-logo.png"
+
+      // OR, for a host with no disk to place it on (App Service): an Azure blob, read once at boot.
+      // Remove Path above if you use this — both set is refused.
+      // ,"Blob": {
+      //   "Url": "https://contoso.blob.core.windows.net/branding/customer-logo.svg",
+      //   "Credential": "ManagedIdentity"
+      // }
+    }
+  }
+}
+```
 
 ## `ApproverPortal`
 
@@ -873,9 +1225,17 @@ same person routinely sits in the pools of several profiles.
 | `ApproverPortal:LinkSecret` | string | — | `ApproverPortal__LinkSecret` | **REQUIRED when enabled, SECRET — never commit it.** Every approver's link is `HMAC-SHA256(this, their email)`, so anyone who reads it can approve payment files as any configured approver. Minimum 32 characters, enforced at startup. Must be durable: generating one per boot would invalidate every approver's bookmark on every restart. **Changing it revokes every approver's link at once** — the intended blunt instrument for "the secret leaked". |
 | `ApproverPortal:DecidedLookback` | TimeSpan | `90.00:00:00` | `ApproverPortal__DecidedLookback` | How far back the portal's *Decided* tab reaches. Bounds what a stolen link is worth. The tab is also capped at 200 rows per load and says so when the cap bites. |
 | `ApproverPortal:SessionLifetime` | TimeSpan | `30.00:00:00` | `ApproverPortal__SessionLifetime` | Lifetime of the cookie issued by the link exchange. Sliding, so an approver working through a queue is not signed out mid-decision. |
+| `ApproverPortal:PollInterval` | TimeSpan | `00:00:10` | `ApproverPortal__PollInterval` | How often an open portal re-reads the queue, so a colleague's decision, a release and a lapsed wait budget arrive without the approver pressing anything. Its own key rather than a share of [`Dashboard:PollIntervalSeconds`](#dashboard), because this one multiplies across every approver with a tab open while that one is tuned by a handful of operators. Bounds `00:00:01` to `00:05:00`, checked only when `Enabled` is true. **There is no value that turns the poll off** — a long interval is how to shed the load, and the page carries a manual refresh either way. Beware that a bare `10` parses as ten *days* and is refused, naming the value it got. |
 
-The validator refuses `Enabled = true` when **no** signing profile declares an `Approval` block — a
-portal over no pools shows every approver an empty queue and looks broken.
+`Enabled = true` with **no** stored signing profile carrying an approval rule is a **startup warning**,
+not a refusal — a portal over no pools shows every approver an empty queue and looks broken, so the
+banner and the durable log say so.
+
+:::warning Changed in 2.1.0 — a warning, no longer a refusal
+Up to 2.0.x this refused the boot. Once profiles live in the store and `Signing:Profiles[]` is only a
+seed, the refusal would fire on exactly the state this page tells you to reach: pools in the store, the
+section deleted.
+:::
 
 ```json
 {
@@ -924,6 +1284,22 @@ startup — change them and restart.
 | `LogViewer:Levels` | string[] | `["Error","Fatal"]` | `LogViewer__Levels__0`, … | Log levels the store captures (case-insensitive). Valid names: `Verbose`, `Debug`, `Information`, `Warning`, `Error`, `Fatal`. Empty or unknown names fail startup. **`Logging:File:MinimumLevel` still applies first** — widening this below that minimum captures nothing, because those events never reach the sink. |
 
 See [Dashboard](dashboard.md#logs--recent-exceptions).
+
+## `Readiness`
+
+| Key | Type | Default | Env override | Notes |
+|-----|------|---------|--------------|-------|
+| `Readiness:RequireApiKey` | bool | `false` | `Readiness__RequireApiKey` | *New in 2.6.0.* When true, `GET /api/ready` requires API-key or cookie auth — the same gate `Metrics:RequireApiKey` puts on `/api/metrics`. Off by default, unlike that one, because the probe's main consumer is a platform health check that cannot carry the key: Azure App Service's must be answered anonymously, and a `401` on every instance makes every instance unhealthy at once. Turn it on where the prober can send `X-API-Key` (a Kubernetes probe's headers, a monitoring agent) or where nothing probes. Read once at startup; the banner's `ready` row says `(anonymous)` or `(API key)`. `/api/ready/details` is authenticated regardless, and `/api/ready` carries no detail regardless. |
+
+:::warning Changed in 2.6.0 — the anonymous probe answers with a verdict, not a description
+`/api/ready` now returns `ready` and each check's `name` and `ok` — the per-check `detail` field is
+absent. That detail used to name the SQL Server host, every input share and a degraded certificate's
+location: none of it a credential, but together a map of the deployment readable by anyone who could
+reach the port. The same report with every detail is on **`/api/ready/details`**, behind the API key or
+an operator session, with the same `200` / `503` rule. An orchestrator that reads the status code is
+unaffected; a monitor that parsed `detail` moves to the details route and adds the header. A check's
+change of verdict is written to the durable log once per change, so the history is still on record.
+:::
 
 ## `Metrics`
 
@@ -1047,6 +1423,12 @@ Every cluster configuration that could not have worked is a refusal naming the k
   store lives on one machine, and cluster instances are fungible. Use `Pfx` (ideally
   [read from a blob](#blob--reading-the-file-from-azure-blob-storage)) or `AzureKeyVault`. A stale
   `Certificate` block on a `Method = LacunaSigner` profile stays tolerated, as it is everywhere else.
+  This is a rule about a **profile**, so it is made wherever a certificate source is stated: at boot for
+  a `Signing:Profiles[]` entry or the legacy `Signing:Certificate` block, and on the dashboard's form
+  when a profile is created or its certificate re-pointed. A profile **saved before the switch was
+  turned on** is only a startup **warning** naming the profile and its source — a stored profile is
+  never re-validated, and refusing would take away the page that is the remedy. It signs on the
+  instance whose hardware it found and fails as a degraded profile on every other one.
 
 One refusal is **not** about configuration at all, and is listed here because it reads like one: with
 the mode on, the work share's own marker records which operational store the share belongs to, and an
@@ -1071,21 +1453,37 @@ operator typed would be a key nobody could keep truthful; the incarnation is wha
 Each instance keeps one row in the operational store — identity, incarnation, application version, when
 it started, when it last said it was alive — refreshed on `Cluster:HeartbeatSeconds` and presumed dead
 past `Cluster:StaleAfterSeconds`. The [System page](dashboard.md#system--system) renders that table as
-its **Instances** view. Two guards ride on it, deliberately different in kind:
+its **Instances** view. Two things ride on it at boot, deliberately different in kind — one takes the
+identity, the other only warns:
 
-- **A booting instance that finds its own identity already beating refuses to start**, naming the
-  identity on the console and in the log. Identity is what recovery, takeover and every per-instance
-  surface are built on, so two processes answering to one name makes all of them wrong at once and
-  there is no degraded mode to offer.
+- **A booting instance that finds its own identity already beating displaces it**, naming the
+  displaced incarnation on the console and in the log, and continues. That is a redeploy's overlap: App
+  Service runs the old and new containers under one instance id and keeps the old one beating until the
+  new one is warm. The displaced process **stands down** on its next beat — it claims no new job,
+  finishes what it holds, and shows a red `cluster-instance` row on its `/api/ready` that does not fail
+  the probe. A job's owner is the **incarnation** as well as the identity, so at every moment exactly one
+  process claims work under a name, and whatever the displaced one leaves unfinished is taken over
+  `Cluster:StaleAfterSeconds` after the displacement. A clean shutdown retires its heartbeat row, so a
+  successor has nothing to displace. Two hosts genuinely presenting one name are displaced in turn,
+  loudly on both sides, rather than refused; the one refusal left is a registration that lost every
+  write race for its row.
 - **Live instances on a different application version log a Critical and the boot continues.** Upgrades
   on the supported topology are stop-the-world, so this is a deployment slot swapped into a running
   cluster, or a deploy that did not stop every instance. It is a warning rather than a refusal on
   purpose: refusing would block instances from coming up for as long as a *dead* old-version heartbeat
   took to go stale, which is exactly when an operator needs them up.
 
-If the operational store is unreachable at boot the registration is skipped along with the migration,
-the host still starts, and the instance is simply absent from the Instances view until it is restarted
-with the store reachable.
+If the operational store is unreachable at boot the registration is skipped along with the migration
+and the host still starts. The heartbeat makes the registration on its first beat that reaches the
+store — displacing a live holder of the identity exactly as the boot would have — so the instance is
+absent from the Instances view only until then.
+
+:::warning Changed in 2.5.0 — displaced, no longer refused
+Up to 2.4.x a booting instance that found its own identity beating refused to start (2.4.3 made it
+wait instead), so an in-place image change on App Service cost at least one refused start. Upgrades are
+still stop-the-world, and *stop, deploy, start* remains the tidier recipe; see
+[Azure App Service](azure.md#8-upgrades-are-stop-the-world).
+:::
 
 ### The session key ring has no key of its own, and needs none
 
@@ -1127,7 +1525,7 @@ Per-IP fixed-window policies.
 | `RateLimiting:Actions:WindowSeconds` | int | `60` | `RateLimiting__Actions__WindowSeconds` | Window length for the actions policy. |
 | `RateLimiting:Actions:QueueLimit` | int | `0` | `RateLimiting__Actions__QueueLimit` | Queue depth for the actions policy. |
 | `RateLimiting:Approval:*` | same shape | `10` per `60` s | `RateLimiting__Approval__PermitsPerWindow`, … | Budget for the anonymous `POST /api/approvals/{id}` route, separate from the operator actions. Job ids are v4 GUIDs, and this policy is what keeps them unguessable against a machine rather than a person. |
-| `RateLimiting:Export:*` | same shape | — | `RateLimiting__Export__PermitsPerWindow`, … | Budget for the approver portal's Excel export. Bounds how fast copies of a queue can be made. |
+| `RateLimiting:Export:*` | same shape | `10` per `60` s | `RateLimiting__Export__PermitsPerWindow`, … | Budget for the Excel exports: the approver portal's queue export and, since 2.11.0, the Jobs page's `GET /api/jobs/export`. Bounds how fast copies of a queue can be made, and is kept separate from `Approval` so a burst of exports never spends the permits a colleague needs to record a decision. |
 
 Rate-limited responses carry `code = "rate-limited"` in the error envelope.
 
@@ -1214,7 +1612,7 @@ that silently, the eight-hour ceiling here turns it into a boot refusal that nam
 | `BULK_SIGNER_PKCS11_PIN` | The HSM/token PIN — read at the env-var name configured by `Signing:Certificate:Pkcs11:PinEnvVar`. |
 | `BULK_SIGNER_ENCRYPTION_PASSWORD` | PBKDF2 password — read at the env-var name configured by `Encryption:PasswordEnvVar`. |
 | `APPLICATIONINSIGHTS_CONNECTION_STRING` | Standard Azure Monitor variable. Read directly by the exporter and honoured by the startup validator, so `Telemetry:ConnectionString` can be left unset. See [Telemetry](telemetry.md). |
-| `ASPNETCORE_ENVIRONMENT` | Standard ASP.NET Core environment name (`Development`, `Production`). The install scripts set `Production`. |
+| `ASPNETCORE_ENVIRONMENT` | Standard ASP.NET Core environment name (`Development`, `Production`). The install scripts set `Production`. Under `Production`, [`Signing:TrustLacunaTestRoot`](#signingtrustlacunatestroot--test-certificates-for-a-homologation) is refused at boot — a homologation host that trusts the test root runs under another name, such as `Staging`. |
 | `ASPNETCORE_URLS` | Standard. The install scripts set `http://0.0.0.0:8080`. |
 | `ASPNETCORE_CONTENTROOT` | Standard. The Windows install sets it to `C:\ProgramData\Lacuna\BulkSigner` so file-path resolution lands on operator-writable disk. |
 
@@ -1224,7 +1622,13 @@ The ready-summary banner printed on startup lists the most decision-critical set
 environment, https redirect, content root, storage root, license fingerprint, cert source, signing
 policy, encryption status, poll interval, pipeline mode, and one `operational store` row naming the
 database provider). A mistyped key surfaces there as a default value rather than the value you
-intended.
+intended. Four more rows are always present and each answers one question: `trust set` (whether the
+Lacuna test root is trusted — see
+[`Signing:TrustLacunaTestRoot`](#signingtrustlacunatestroot--test-certificates-for-a-homologation)),
+`web pki license` and `cloudhub` (configured or not, never the value), and `customer logo` (`none`, the
+logo that loaded, or the reason it was not). The `ready` and `metrics` rows say `(anonymous)` or
+`(API key)`, so a `Readiness:RequireApiKey` or `Metrics:RequireApiKey` that did not bind is visible at
+boot.
 
 Rows that appear only when the matching feature is configured:
 
@@ -1234,11 +1638,20 @@ Rows that appear only when the matching feature is configured:
 | `work share`, `azure credential`, `azure shares`, `input providers`, `work share owner` | `Storage:Provider = AzureFiles`, or any input folder that names it |
 | `blob=…` on a profile row | that profile's certificate is read from Azure Blob Storage |
 | `cnab240=on`, `approval=N/M`, `expires=…` on a profile row | `CheckCNAB240` / `Approval` on that profile |
+| `DEGRADED · ` prefix on a profile row, with a `FAIL` line beside it | that profile's certificate did not open |
 
-`/api/ready` returns a JSON body describing each probe (operational store, per-folder, license, plus
-`storage-share:` and `work-share-owner` rows on a remote work share). A `503` with a body listing the
-failed probe is the fast feedback loop for config mistakes — see
+`/api/ready` returns a JSON body naming each probe — operational store, per input folder, license,
+`storage-share:` and `work-share-owner` rows on a remote work share, and one row per degraded signing
+profile — with its verdict and no detail; `/api/ready/details`, with the API key, adds each probe's
+detail. A `503` with a body listing the failed probe is the fast feedback loop for config mistakes — see
 [Troubleshooting](troubleshooting.md).
+
+Some rows report `ok: false` **without** making the response a `503`, because a `503` pulls the instance
+out of its load balancer and each of these has a remedy that the instance itself serves: the Azure table
+log sink's (a logging outage must not become an ingestion outage), a degraded signing profile's (the
+dashboard is where it is fixed), a `profile-input-folder:` row for a profile bound to a folder this host
+does not configure, and, in cluster mode, a stood-down instance's `cluster-instance` row. **Alerting
+should read `checks[]` rather than only the top-level `ready`.**
 
 ---
 

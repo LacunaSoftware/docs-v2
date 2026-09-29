@@ -103,22 +103,32 @@ em `dd/MM/yyyy` e o vocabulário da remessa são propriedades do arquivo, não d
 
 ## `/` — Dashboard
 
-Página inicial. Cards de estatística e os últimos jobs:
+Página inicial: cards de estatística, o painel de desempenho de processamento, os últimos cinco jobs e
+um resumo das últimas 24 horas. Quando algum perfil tem regra de aprovação, o cabeçalho da página
+também traz o botão **Portal do aprovador**, que leva a `/approvals`.
 
 | Card | Valor |
 |------|-------|
-| Na fila | Contagem de jobs em `Queued` |
-| Em andamento / Slots ocupados | Quando `Pipeline:MaxConcurrency = 1`: contagem de jobs em `Processing` + `Verifying`. Quando `MaxConcurrency > 1`: renderizado como `N / M slots ocupados`. |
+| Na fila | Contagem de jobs em `Queued`. |
+| Em andamento / Slots ocupados | Contagem de jobs em `Processing` + `Verifying`. Quando `Pipeline:MaxConcurrency > 1`, o card se chama *Slots ocupados* e mostra `N / M`, em que `M` é o `MaxConcurrency`. |
 | Em execução há / Há mais tempo em execução | O job em andamento que está há mais tempo com o pipeline, como um contador ao vivo que avança a cada segundo, com o nome do arquivo linkado para a página do job. Medido a partir da captura mais recente do job — ou, em um job que voltou do Lacuna Signer, a partir do download —, de modo que nem a deliberação de um aprovador nem os dias de espera por um signatário entram na conta. Exibido somente enquanto há algo em andamento; rotulado *Há mais tempo em execução* quando `MaxConcurrency > 1`. Não é uma estatística, então não depende de `Statistics:Enabled`. |
-| Concluídos (24 h) | Jobs cuja transição para um estado terminal ocorreu nas últimas 24 h |
-| Falhas (24 h) | Jobs que falharam nas últimas 24 h |
-| Cancelados (24 h) | Jobs cancelados pelo operador nas últimas 24 h |
-| Saída criptografada (24 h) | Subconjunto dos jobs concluídos cuja saída foi criptografada |
-| Estado do pipeline | "Em execução" ou "Pausado" (clicável, abre a página Sistema) |
+| Concluídos hoje | Jobs em `Completed` cuja última atualização foi desde as 00:00 **UTC** de hoje. |
+| Falhas hoje | Jobs em `Failed` cuja última atualização foi desde as 00:00 UTC de hoje. |
+| Aguardando assinatura | Jobs em `AwaitingSigner`. Aparece somente quando algum perfil de assinatura usa `Method = LacunaSigner`. |
+| Aguardando aprovação | Jobs em `AwaitingApproval`. Aparece somente quando algum perfil de assinatura tem regra de aprovação. |
+
+"Hoje" é o dia em UTC, e não o dia local do servidor: em um host no Brasil (UTC−3), os dois cards de
+*hoje* voltam a zero às 21h no horário local. Para uma janela móvel, consulte o painel **Últimas 24
+horas**, mais abaixo.
+
+A exibição dos cards *Aguardando assinatura* e *Aguardando aprovação* (e do botão *Portal do aprovador*)
+é decidida quando a página abre, com base nos perfis naquele momento. Um perfil que passe a usar o
+Lacuna Signer ou receba uma regra de aprovação com a página aberta só aparece quando a página é
+carregada de novo.
 
 Quando `Pipeline:MaxConcurrency > 1`, um pequeno painel **Em processamento por formato** detalha a
-contagem em andamento por `Pades` / `Cades` / `Xades`. No modo sequencial (o padrão), o painel fica
-oculto.
+contagem em andamento por PAdES / CAdES / XAdES (*Processando + Verificando combinados*). No modo
+sequencial (o padrão), o painel fica oculto.
 
 ### Painel de desempenho de processamento
 
@@ -138,8 +148,27 @@ O painel fica totalmente oculto quando `Statistics:Enabled = false`. Guia de lei
 como usar a divisão por etapa para localizar uma lentidão:
 [Estatísticas de jobs](statistics.md#o-que-cada-métrica-do-dashboard-significa).
 
-Abaixo disso: um gráfico de vazão das últimas 24 horas e uma tabela dos últimos cinco jobs. Esta página é
-uma visão somente leitura — para executar ações, vá para a página Jobs.
+### Últimos 5 jobs e Últimas 24 horas
+
+No fim da página, lado a lado:
+
+- **Últimos 5 jobs** — os cinco jobs atualizados mais recentemente, cada um com o nome do arquivo, há
+  quanto tempo mudou pela última vez, o formato de assinatura e o badge de status. Clicar em uma linha
+  abre a página do job, e **Ver todos** abre a página Jobs. Sem nenhum job ainda, o painel informa isso e
+  indica a pasta de entrada e o `POST /api/files`.
+- **Últimas 24 horas** — uma janela móvel, ao contrário dos cards de *hoje* acima:
+
+  | Número | Valor |
+  |--------|-------|
+  | Assinados | Jobs em `Completed` cuja última atualização foi nas últimas 24 horas. |
+  | Falhas | Jobs em `Failed` cuja última atualização foi nas últimas 24 horas. |
+  | Taxa de sucesso | Assinados ÷ (Assinados + Falhas), em porcentagem; `—` quando não houve nenhum dos dois. Jobs cancelados não entram em nenhum dos números, então não reduzem a taxa. |
+
+  Abaixo dos números, a linha **Motor de assinatura** informa os formatos que o produto assina (CAdES ·
+  XAdES · PAdES) e que as políticas ICP-Brasil ADR-Básica se aplicam quando cabível. É um texto fixo, e
+  não uma leitura do host.
+
+Esta página é uma visão somente leitura — para executar ações, vá para a página Jobs.
 
 ## `/jobs` — Jobs
 

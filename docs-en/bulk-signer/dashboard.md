@@ -98,21 +98,30 @@ not of the reader.
 
 ## `/` — Dashboard
 
-Landing page. Stat cards and the last few jobs:
+Landing page: stat cards, the processing performance panel, the last five jobs and a 24-hour summary.
+Where a profile carries an approval rule, the page header also has an **Approver portal** button to
+`/approvals`.
 
 | Card | Value |
 |------|-------|
-| Queued | Count of jobs in `Queued` |
-| In flight / Slots busy | When `Pipeline:MaxConcurrency = 1`: count of jobs in `Processing` + `Verifying`. When `MaxConcurrency > 1`: rendered as `N / M slots busy`. |
+| Queued | Count of jobs in `Queued`. |
+| In progress / Slots busy | Count of jobs in `Processing` + `Verifying`. When `Pipeline:MaxConcurrency > 1` the card is labelled *Slots busy* and reads `N / M`, where `M` is `MaxConcurrency`. |
 | Running for / Longest running | The in-flight job the pipeline has held the longest, as a live figure ticking once a second, with the file name linked to its page. Measured from the job's most recent pickup — or, on a job back from Lacuna Signer, from the download — so neither an approver's deliberation nor a signer's days are in it. Shown only while something is in flight; labelled *Longest running* when `MaxConcurrency > 1`. Not a statistic, so it does not depend on `Statistics:Enabled`. |
-| Completed (24 h) | Jobs whose terminal transition was in the last 24 h |
-| Failed (24 h) | Jobs that failed in the last 24 h |
-| Canceled (24 h) | Operator-canceled jobs in the last 24 h |
-| Encrypted output (24 h) | Subset of completed jobs whose output was encrypted |
-| Pipeline state | "Running" or "Paused" (clickable, opens the System page) |
+| Completed today | Jobs in `Completed` whose last update was since 00:00 **UTC** today. |
+| Failed today | Jobs in `Failed` whose last update was since 00:00 UTC today. |
+| Awaiting signer | Jobs in `AwaitingSigner`. Shown only when some signing profile uses `Method = LacunaSigner`. |
+| Awaiting approval | Jobs in `AwaitingApproval`. Shown only when some signing profile carries an approval rule. |
 
-When `Pipeline:MaxConcurrency > 1`, a small **In flight by format** panel breaks the in-flight count
-down by `Pades` / `Cades` / `Xades`. In sequential mode (the default) the panel is hidden.
+"Today" is the UTC day, not the server's local one: on a host in Brazil (UTC−3) both *today* cards
+start again from zero at 21:00 local time. For a rolling window, read the **Last 24 hours** panel below.
+
+Whether the *Awaiting signer* and *Awaiting approval* cards (and the *Approver portal* button) appear is
+decided when the page opens, from the profiles as they stand then. A profile switched to Lacuna Signer
+or given an approval rule while the page is open shows up on the next page load.
+
+When `Pipeline:MaxConcurrency > 1`, a small **In flight by format** panel breaks the in-progress count
+down by PAdES / CAdES / XAdES (*Processing + Verifying combined*). In sequential mode (the default) the
+panel is hidden.
 
 ### Processing performance panel
 
@@ -130,8 +139,26 @@ answers what it was mostly read for.
 Hidden entirely when `Statistics:Enabled = false`. Full reading guide, including how to use the stage
 split to localise a slowdown: [Job statistics](statistics.md#what-each-dashboard-metric-means).
 
-Below that: a throughput chart for the last 24 hours and a table of the last five jobs. This page is a
-read-only overview — for actions, go to Jobs.
+### Last 5 jobs and Last 24 hours
+
+At the bottom of the page, side by side:
+
+- **Last 5 jobs** — the five most recently updated jobs, each with its file name, how long ago it last
+  changed, its signature format and its status badge. A row opens the job's page, and **View all** opens
+  Jobs. With no jobs yet, the panel says so and points at the input folder and `POST /api/files`.
+- **Last 24 hours** — a rolling window, unlike the *today* cards above:
+
+  | Figure | Value |
+  |--------|-------|
+  | Signed | Jobs in `Completed` whose last update was in the last 24 hours. |
+  | Failed | Jobs in `Failed` whose last update was in the last 24 hours. |
+  | Success rate | Signed ÷ (Signed + Failed), as a percentage; `—` when neither happened. Canceled jobs are in neither figure, so they do not lower it. |
+
+  Under the figures, a **Signing engine** line states the formats the product signs (CAdES · XAdES ·
+  PAdES) and that ICP-Brasil ADR-Básica policies apply when applicable. It is fixed text, not a
+  reading of the host.
+
+This page is a read-only overview — for actions, go to Jobs.
 
 ## `/jobs` — Jobs
 

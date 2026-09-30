@@ -9,6 +9,42 @@ sidebar_position: 4
 
 {/* <a name="vnext" /> */}
 
+## 8.3.1 (2026-09-23) {#8.3.1}
+
+Atualiza modelo do banco de dados: não
+
+### Correções de bugs
+
+ARNG-1004 Corrigir possibilidade de prosseguir emissão com pedidos sem liveness
+
+
+
+## 8.3.0 (2026-09-17) {#8.3.0}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-1003 Permitir filtrar por agente de registro e exportar a listagem de equipamentos
+
+
+
+## 8.2.0 (2026-09-15) {#8.2.0}
+
+Atualiza modelo do banco de dados: não
+
+### Melhorias
+
+ARNG-999 Permitir download do relatório de auditoria de equipamento
+
+ARNG-1000 Adicionar data de habilitação e desabilitação no relatório da listagem de agente de registro
+
+ARNG-1001 Permitir selecionar mais de um status na listagem de agente de registro
+
+ARNG-1002 Traduzir o relatório da listagem de agentes de registro
+
+
+
 ## 8.1.0 (2026-09-10) {#8.1.0}
 
 Atualiza modelo do banco de dados: não

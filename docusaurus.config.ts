@@ -317,6 +317,7 @@ const config: Config = {
           position: 'left',
           items: [
             {docId: 'welcome',     label: 'Bem-vindo'},
+            {docId: 'welcome/licensing', label: 'Licenciamento'},
             {docId: 'pki-guide',   label: 'Certificação Digital'},
             {docId: 'bulk-signer', label: 'Bulk Signer'},
             {docId: 'amplia-reg',  label: 'Amplia Reg'},

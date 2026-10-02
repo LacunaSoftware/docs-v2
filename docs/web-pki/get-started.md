@@ -12,11 +12,11 @@ Pronto, você já pode começar.
 
 ## Codificando as primeiras linhas
 
-Primeiro, inclua na sua página o arquivo [lacuna-web-pki.js](https://cdn.lacunasoftware.com/libs/web-pki/lacuna-web-pki-2.16.5.min.js) mais recente:
+Primeiro, inclua na sua página o arquivo [lacuna-web-pki.js](https://cdn.lacunasoftware.com/libs/web-pki/lacuna-web-pki-2.18.0.min.js) mais recente:
 
 ```html
-<script type="text/javascript" src="https://cdn.lacunasoftware.com/libs/web-pki/lacuna-web-pki-2.16.5.min.js"
-  integrity="sha256-4CwnsE/1P/zm4eAcIIPTyPts1gFxG16ZCQDTMMxOtIE="
+<script type="text/javascript" src="https://cdn.lacunasoftware.com/libs/web-pki/lacuna-web-pki-2.18.0.min.js"
+  integrity="sha256-utM/CTsggW5QWTZgkLcAwVGkMBhYKTz3n0992V4r2y4="
   crossorigin="anonymous"></script>
 ```
 
